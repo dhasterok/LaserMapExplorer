@@ -18,7 +18,7 @@ from PyQt6.QtGui import QColor, QPalette, QFont, QFontDatabase
 from dataclasses import dataclass, field
 from typing import ClassVar, Dict, List, Any, Tuple
 from abc import ABC, abstractmethod
-from src.common.Observable import Observable
+from src.data.Observable import Observable
 
 
 from typing import Callable

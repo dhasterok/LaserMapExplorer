@@ -1,4 +1,4 @@
-from PyQt6.QtCore import ( Qt, QSize, QRect )
+from PyQt6.QtCore import ( Qt, QSize, QRect, pyqtSignal )
 from PyQt6.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QWidget,
     QGroupBox, QLabel, QSpinBox, QDoubleSpinBox, QSlider, QSpacerItem, QComboBox,
@@ -16,7 +16,7 @@ from sklearn.metrics import silhouette_score
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from src.common.Logger import log, auto_log_methods
+from src.control.Logger import log, auto_log_methods
 from lame_core.config import ICONPATH
 
 @auto_log_methods(logger_key="Analysis")
@@ -169,6 +169,8 @@ class ClusterPage(CustomPage, Clustering):
     Methods
     -------
     """
+    clusteringComputed = pyqtSignal(dict)
+
     def __init__(self, dock, page_index=None):
         super().__init__(obj_name="ClusteringPage", parent=dock)
 
@@ -602,6 +604,11 @@ class ClusterPage(CustomPage, Clustering):
                 self.dock.ui.mask_dock.cluster_tab.update_table_widget()
 
             self.dock.ui.statusbar.showMessage('Clustering successful')
+            self.clusteringComputed.emit({
+                'method': method,
+                'n_clusters': getattr(self.dock.ui.app_data, 'num_clusters', None),
+                'sample_id': getattr(self.dock.ui.app_data, 'sample_id', None),
+            })
 
 
 @auto_log_methods(logger_key="Analysis")
@@ -660,9 +667,22 @@ class DimensionalReduction():
             # 1/4 of the available components (rounded up).
             app_data.num_basis_for_precondition = math.ceil(pca_results.n_components_ / 4)
 
+        # compute_pca is shared by DimensionalReductionPage (UI, declares this signal)
+        # and LameBlockly's standalone DimensionalReduction() instance (no signal) -
+        # only emit when running as the page.
+        signal = getattr(self, 'dimRedComputed', None)
+        if signal is not None:
+            signal.emit({
+                'method': app_data.dim_red_method,
+                'n_components': pca_results.n_components_,
+                'sample_id': getattr(app_data, 'sample_id', None),
+            })
+
 
 @auto_log_methods(logger_key="Analysis")
 class DimensionalReductionPage(CustomPage, DimensionalReduction):
+    dimRedComputed = pyqtSignal(dict)
+
     def __init__(self, dock, page_index=None):
         super().__init__(obj_name="MultidimensionalPage", parent=dock)
 

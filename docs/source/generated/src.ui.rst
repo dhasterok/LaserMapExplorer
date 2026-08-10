@@ -14,7 +14,6 @@
    FieldSelectionDialog
    FileSelectorDialog
    IsotopeSelectionDialog
-   MainWindow
    MapImportDialog
    PlotViewer
    PreferencesWindow

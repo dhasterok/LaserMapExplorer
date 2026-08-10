@@ -11,7 +11,7 @@ import os
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.app.XRFProcessor import XRFProcessor, process_xrf_file
+from src.importers.XRFProcessor import XRFProcessor, process_xrf_file
 
 
 def main():

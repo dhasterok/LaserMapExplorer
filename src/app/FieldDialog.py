@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
 from lame_core.config import BASEDIR, ICONPATH, RESOURCE_PATH
 from lame_core.CustomWidgets import CustomToolButton
 from src.common.DualWidgetList import DualListWidget
-from src.common.SortAnalytes import sort_analytes
+from src.data.SortAnalytes import sort_analytes
 
 class FieldDialog(QDialog):
     """

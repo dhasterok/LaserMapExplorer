@@ -25,8 +25,8 @@ matplotlib.use('Qt5Agg')
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 from src.common.ChemPlot import plot_map_mpl, plot_small_histogram, plot_histogram, plot_correlation, get_scatter_data, plot_scatter, plot_ternary_map
-from src.common.plot_spider import plot_spider_norm
-from src.common.scalebar import scalebar
+from global_geochemistry.plotting.spider import plot_spider_norm
+from src.plotting.scalebar import scalebar
 from src.app.LameIO import LameIO
 #import src.radar_factory
 from src.ui.MainWindow import Ui_MainWindow
@@ -34,13 +34,13 @@ from src.ui.MainWindow import Ui_MainWindow
 from src.app.FieldSelectionWindow import FieldDialog
 from src.app.AnalyteSelectionWindow import AnalyteDialog
 from src.common.TableFunctions import TableFcn as TableFcn
-import src.common.CustomMplCanvas as mplc
+import src.plotting.CustomMplCanvas as mplc
 from src.app.Actions import Actions
-from src.common.DataHandling import SampleObj
-from src.app.PlotTree import PlotTree
-from src.app.CropImage import CropTool
-from src.app.ImageProcessing import ImageProcessing as ip
-from src.app.StyleToolbox import StylingDock
+from src.data.DataHandling import SampleObj
+from src.tree.PlotTree import PlotTree
+from src.plotting.CropImage import CropTool
+from src.control.ImageProcessing import ImageProcessing as ip
+from src.style.StyleToolbox import StylingDock
 from src.common.varfunc import ObservableDict
 from src.app.AppData import AppData
 

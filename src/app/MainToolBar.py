@@ -5,7 +5,7 @@ from lame_core.UITheme import default_font, PreferencesDialog
 from lame_core.CustomWidgets import CustomAction, CustomActionMenu
 from lame_core.config import ICONPATH
 from src.app.settings import prefs
-from src.common.Logger import log, no_log
+from src.control.Logger import log, no_log
 
 class MainActions(QObject):
     def __init__(self, ui):
@@ -18,15 +18,45 @@ class MainActions(QObject):
     def setupActions(self):
 
         # File Actions
-        self.OpenDirectory = CustomAction(
-            text="Open\nDirectory",
+        self.AddSampleDirectory = CustomAction(
+            text="Add Sample\nDirectory",
             light_icon_unchecked="icon-add-directory-64.svg",
             parent=self.ui,
         )
-        self.OpenDirectory.setMenuRole(QAction.MenuRole.TextHeuristicRole)
-        self.OpenDirectory.setObjectName("actionOpenDirectory")
-        self.OpenDirectory.setToolTip("Select a directory of samples")
-        self.OpenDirectory.setShortcut("Ctrl+O")
+        self.AddSampleDirectory.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.AddSampleDirectory.setObjectName("actionAddSampleDirectory")
+        self.AddSampleDirectory.setToolTip("Add all samples in a directory to the current project")
+        self.AddSampleDirectory.setShortcut("Ctrl+O")
+
+        self.NewProject = CustomAction(
+            text="New\nProject",
+            light_icon_unchecked="icon-add-list-64.svg",
+            dark_icon_unchecked="icon-add-list-dark-64.svg",
+            parent=self.ui,
+        )
+        self.NewProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.NewProject.setObjectName("actionNewProject")
+        self.NewProject.setToolTip("Start a new, empty project")
+
+        self.SaveProjectAs = CustomAction(
+            text="Save Project\nAs...",
+            light_icon_unchecked="icon-save-session-64.svg",
+            dark_icon_unchecked="icon-save-session-dark-64.svg",
+            parent=self.ui,
+        )
+        self.SaveProjectAs.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.SaveProjectAs.setObjectName("actionSaveProjectAs")
+        self.SaveProjectAs.setToolTip("Save the current project to a new location")
+
+        self.CloseProject = CustomAction(
+            text="Close\nProject",
+            light_icon_unchecked="icon-open-session-64.svg",
+            dark_icon_unchecked="icon-open-session-dark-64.svg",
+            parent=self.ui,
+        )
+        self.CloseProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.CloseProject.setObjectName("actionCloseProject")
+        self.CloseProject.setToolTip("Close the current project")
 
         self.SaveFigure = CustomAction(
             text = "Save\nFigure",
@@ -224,14 +254,15 @@ class MainActions(QObject):
         self.Reset.setObjectName("actionReset")
         self.Reset.setToolTip("Clear all changes and plots to start over")
 
-        self.OpenSample = CustomAction(
-            text="Open\nSample",
+        self.AddSampleFiles = CustomAction(
+            text="Add Sample\nFiles",
             light_icon_unchecked="icon-open-file-64.svg",
             dark_icon_unchecked="icon-open-file-dark-64.svg",
             parent=self.ui,
         )
-        self.OpenSample.setMenuRole(QAction.MenuRole.TextHeuristicRole)
-        self.OpenSample.setObjectName("actionOpenSample")
+        self.AddSampleFiles.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.AddSampleFiles.setObjectName("actionAddSampleFiles")
+        self.AddSampleFiles.setToolTip("Add one or more sample files to the current project")
 
         self.NoiseReduction = CustomAction(
             text="Noise\nReduction",
@@ -321,6 +352,7 @@ class MainActions(QObject):
         )
         self.SaveProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SaveProject.setObjectName("actionSaveProject")
+        self.SaveProject.setToolTip("Save the current project")
 
         self.OpenProject = CustomAction(
             text="Open\nProject",
@@ -330,6 +362,7 @@ class MainActions(QObject):
         )
         self.OpenProject.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.OpenProject.setObjectName("actionOpenProject")
+        self.OpenProject.setToolTip("Open an existing project")
 
         self.Help = CustomAction(
             text="Help",
@@ -361,6 +394,7 @@ class MainActions(QObject):
         self.ImportSpots.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ImportSpots.setObjectName("actionImportSpots")
         
+        # --- Workflow Actions ---
         self.WorkflowTool = CustomAction(
             text="Workflow",
             light_icon_unchecked="icon-workflow-design-64.svg",
@@ -369,6 +403,64 @@ class MainActions(QObject):
         self.WorkflowTool.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.WorkflowTool.setObjectName("actionWorkflowTool")
         self.WorkflowTool.setToolTip("Open, create, and record workflows using the workflow design tool")
+
+        self.CaptureToggle = CustomAction(
+            text="Capture",
+            light_icon_unchecked="icon-capture-off-64.svg",
+            light_icon_checked="icon-capture-on-64.svg",
+            dark_icon_unchecked="icon-capture-off-dark-64.svg",
+            dark_icon_checked="icon-capture-on-dark-64.svg",
+            parent=self.ui,
+        )
+        self.CaptureToggle.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.CaptureToggle.setObjectName("actionCaptureToggle")
+        self.CaptureToggle.setToolTip("Auto-capture actions into the project's active workflow file")
+
+        self.NewWorkflow = CustomAction(
+            text="New Workflow",
+            light_icon_unchecked="icon-workflow-design-64.svg",
+            parent=self.ui,
+        )
+        self.NewWorkflow.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.NewWorkflow.setObjectName("actionNewWorkflow")
+        self.NewWorkflow.setToolTip("Create a new workflow file and make it the project's active workflow")
+
+        self.OpenWorkflow = CustomAction(
+            text="Open Workflow",
+            light_icon_unchecked="icon-workflow-design-64.svg",
+            parent=self.ui,
+        )
+        self.OpenWorkflow.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.OpenWorkflow.setObjectName("actionOpenWorkflow")
+        self.OpenWorkflow.setToolTip("Open an existing workflow file")
+
+        self.SaveWorkflow = CustomAction(
+            text="Save Workflow",
+            light_icon_unchecked="icon-workflow-design-64.svg",
+            parent=self.ui,
+        )
+        self.SaveWorkflow.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.SaveWorkflow.setObjectName("actionSaveWorkflow")
+        self.SaveWorkflow.setToolTip("Save the current workflow file")
+
+        self.CloseWorkflow = CustomAction(
+            text="Close Workflow",
+            light_icon_unchecked="icon-workflow-design-64.svg",
+            parent=self.ui,
+        )
+        self.CloseWorkflow.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.CloseWorkflow.setObjectName("actionCloseWorkflow")
+        self.CloseWorkflow.setToolTip("Close the current workflow file")
+
+        self.Snapshot = CustomAction(
+            text="Snapshot",
+            light_icon_unchecked="icon-camera-64.svg",
+            dark_icon_unchecked="icon-camera-dark-64.svg",
+            parent=self.ui,
+        )
+        self.Snapshot.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Snapshot.setObjectName("actionSnapshot")
+        self.Snapshot.setToolTip("Capture the most recent plot's settings and data state into the active workflow file")
 
         self.Logger = CustomAction(
             text="Logger",
@@ -469,9 +561,48 @@ class MainActions(QObject):
         self.Regression.setObjectName("actionRegression")
         self.Regression.setToolTip("Fit lines/curves to data")
 
+        self.Geochron = CustomAction(
+            text="Geochronology",
+            light_icon_unchecked="icon-zoning-64.svg",
+            parent=self.ui,
+        )
+        self.Geochron.setCheckable(True)
+        self.Geochron.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Geochron.setObjectName("actionGeochron")
+        self.Geochron.setToolTip("Open geochronology (Lu-Hf dating) tools")
+
+        self.Diffusion = CustomAction(
+            text="Diffusion",
+            light_icon_unchecked="icon-zoning-64.svg",
+            parent=self.ui,
+        )
+        self.Diffusion.setCheckable(True)
+        self.Diffusion.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Diffusion.setObjectName("actionDiffusion")
+        self.Diffusion.setToolTip("Open 2-D multi-component diffusion modeling tools")
+
+        self.ProjectFiles = CustomAction(
+            text="Project\nFiles",
+            light_icon_unchecked="icon-bullet-list-64.svg",
+            dark_icon_unchecked="icon-bullet-list-dark-64.svg",
+            parent=self.ui,
+        )
+        self.ProjectFiles.setCheckable(True)
+        self.ProjectFiles.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.ProjectFiles.setObjectName("actionProjectFiles")
+        self.ProjectFiles.setToolTip("Show/hide the Project Files panel (samples in the current project)")
+
         self.connect_logger()
 
     def connect_actions(self):
+        self.NewProject.triggered.connect(lambda: self.ui.project_manager.new_project())
+        self.OpenProject.triggered.connect(lambda: self.ui.project_manager.open_project())
+        self.AddSampleFiles.triggered.connect(lambda: self.ui.project_manager.add_sample_files_dialog())
+        self.AddSampleDirectory.triggered.connect(lambda: self.ui.project_manager.add_sample_directory_dialog())
+        self.SaveProject.triggered.connect(lambda: self.ui.project_manager.save_project())
+        self.SaveProjectAs.triggered.connect(lambda: self.ui.project_manager.save_project_as())
+        self.CloseProject.triggered.connect(lambda: self.ui.project_manager.close_project())
+
         self.UpdatePlot.triggered.connect(lambda: setattr(self.ui,"plot_flag",True)) # hopefully solve issues when plot stops updating
         self.UpdatePlot.triggered.connect(lambda: self.ui.control_dock.update_plot_type(force=True))
         self.UpdatePlot.triggered.connect(lambda: self.ui.style_dock.update_plot_type(force=True))
@@ -485,6 +616,15 @@ class MainActions(QObject):
 
         self.Regression.setChecked(False)
         self.Regression.triggered.connect(self.ui.open_regression)
+
+        self.Geochron.setChecked(False)
+        self.Geochron.triggered.connect(self.ui.open_geochron_dock)
+
+        self.Diffusion.setChecked(False)
+        self.Diffusion.triggered.connect(self.ui.open_diffusion_dock)
+
+        self.ProjectFiles.setChecked(False)
+        self.ProjectFiles.triggered.connect(self.ui.open_project_files_dock)
 
         if self.ui.data:
             self.toggle_actions(True)
@@ -502,6 +642,12 @@ class MainActions(QObject):
         self.Notes.triggered.connect(lambda _: self.ui.open_notes())
         self.Logger.triggered.connect(lambda _: self.ui.open_logger())
         self.WorkflowTool.triggered.connect(lambda _: self.ui.open_workflow())
+        self.NewWorkflow.triggered.connect(lambda _: self.ui.new_workflow())
+        self.OpenWorkflow.triggered.connect(lambda _: self.ui.open_workflow_file())
+        self.SaveWorkflow.triggered.connect(lambda _: self.ui.save_workflow_file())
+        self.CloseWorkflow.triggered.connect(lambda _: self.ui.close_workflow_file())
+        self.Snapshot.triggered.connect(lambda _: self.ui.snapshot_workflow())
+        self.CaptureToggle.toggled.connect(self.ui.toggle_action_capture)
         self.Info.triggered.connect(lambda _: self.ui.open_info_dock())
 
         self.Quit_LaME.triggered.connect(self.ui.quit)
@@ -517,10 +663,14 @@ class MainActions(QObject):
     def connect_logger(self):
         """Connects user interactions with widgets to the logger"""        
         ## MainWindow toolbar
-        self.OpenSample.triggered.connect(lambda: log("lame_action.OpenSample", prefix="UI"))
-        self.OpenDirectory.triggered.connect(lambda: log("lame_action.OpenDirectory", prefix="UI"))
+        self.NewProject.triggered.connect(lambda: log("lame_action.NewProject", prefix="UI"))
+        self.AddSampleFiles.triggered.connect(lambda: log("lame_action.AddSampleFiles", prefix="UI"))
+        self.AddSampleDirectory.triggered.connect(lambda: log("lame_action.AddSampleDirectory", prefix="UI"))
         self.OpenProject.triggered.connect(lambda: log("lame_action.OpenProject", prefix="UI"))
         self.SaveProject.triggered.connect(lambda: log("lame_action.SaveProject", prefix="UI"))
+        self.SaveProjectAs.triggered.connect(lambda: log("lame_action.SaveProjectAs", prefix="UI"))
+        self.CloseProject.triggered.connect(lambda: log("lame_action.CloseProject", prefix="UI"))
+        self.ProjectFiles.triggered.connect(lambda: log("lame_action.ProjectFiles", prefix="UI"))
         self.SelectAnalytes.triggered.connect(lambda: log("lame_action.SelectAnalytes", prefix="UI"))
         self.WorkflowTool.triggered.connect(lambda: log("lame_action.WorkflowTool", prefix="UI"))
         self.FullMap.triggered.connect(lambda: log("lame_action.FullMap", prefix="UI"))
@@ -619,17 +769,45 @@ class MainMenubar(QMenuBar):
         self.menuFile.setObjectName("menuFile")
         self.menuFile.setTitle("File")
 
-        self.menuFile.addAction(lame_action.OpenSample)
-        self.menuFile.addAction(lame_action.OpenDirectory)
+        # Project group -- New/Open (+ Recent Projects)/Add Samples, then
+        # Save/Save As, then Close, each its own visually separated block.
+        self.menuFile.addAction(lame_action.NewProject)
         self.menuFile.addAction(lame_action.OpenProject)
-        self.menuFile.addAction(lame_action.SpotData)
+
+        self.menuRecentProjects = QMenu("Recent Projects", self.menuFile)
+        self.menuRecentProjects.setObjectName("menuRecentProjects")
+        self.menuRecentProjects.aboutToShow.connect(
+            lambda: self._refresh_recent_projects_menu(ui)
+        )
+        self.menuFile.addMenu(self.menuRecentProjects)
+
+        self.menuFile.addAction(lame_action.AddSampleFiles)
+        self.menuFile.addAction(lame_action.AddSampleDirectory)
         self.menuFile.addSeparator()
         self.menuFile.addAction(lame_action.SaveProject)
-        self.menuFile.addAction(lame_action.SaveFigure)
+        self.menuFile.addAction(lame_action.SaveProjectAs)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(lame_action.Reset)
+        self.menuFile.addAction(lame_action.ProjectFiles)
+        self.menuFile.addAction(lame_action.CloseProject)
+        self.menuFile.addSeparator()
+
+        # Workflow group -- kept together as its own block: workflow files
+        # are explicitly reusable across projects, not part of the
+        # project-open/close lifecycle.
+        self.menuFile.addAction(lame_action.NewWorkflow)
+        self.menuFile.addAction(lame_action.OpenWorkflow)
+        self.menuFile.addAction(lame_action.SaveWorkflow)
+        self.menuFile.addAction(lame_action.CloseWorkflow)
+        self.menuFile.addSeparator()
+
+        # Import group
+        self.menuFile.addAction(lame_action.SpotData)
         self.menuFile.addAction(lame_action.ImportFiles)
         self.menuFile.addAction(lame_action.ImportSpots)
+        self.menuFile.addSeparator()
+
+        self.menuFile.addAction(lame_action.SaveFigure)
+        self.menuFile.addAction(lame_action.Reset)
 
         # Plot Menu
         self.menuPlot = QMenu(parent=self)
@@ -673,6 +851,9 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.Profiles)
         self.menuTools.addAction(lame_action.SpecialTools)
         self.menuTools.addAction(lame_action.Regression)
+        self.menuTools.addAction(lame_action.Geochron)
+        self.menuTools.addAction(lame_action.Diffusion)
+        self.menuTools.addAction(lame_action.ProjectFiles)
         self.menuTools.addSeparator()
         self.menuTools.addAction(lame_action.Info)
         self.menuTools.addAction(lame_action.Logger)
@@ -698,6 +879,22 @@ class MainMenubar(QMenuBar):
         self.addMenu(self.menuTools)
         self.addMenu(self.menuHelp)
 
+    def _refresh_recent_projects_menu(self, ui):
+        """Rebuild the Recent Projects submenu just before it's shown, from
+        ``ProjectManager.recent_projects()`` -- refreshed on demand rather
+        than kept in sync incrementally, since it's cheap and only read
+        right before display.
+        """
+        self.menuRecentProjects.clear()
+        recents = ui.project_manager.recent_projects()
+        if not recents:
+            empty_action = self.menuRecentProjects.addAction("(No recent projects)")
+            empty_action.setEnabled(False)
+            return
+        for path in recents:
+            action = self.menuRecentProjects.addAction(path.stem)
+            action.triggered.connect(lambda checked=False, p=path: ui.project_manager.open_project(p))
+
 class MainToolbar(QToolBar):
     def __init__(self, ui, lame_action: MainActions):
         super().__init__(parent=ui)
@@ -720,13 +917,13 @@ class MainToolbar(QToolBar):
         sample_widget.setMaximumSize(QSize(16777215, 40))
         sample_widget.setObjectName("widgetSampleSelect")
 
-        sample_widget_layout = QVBoxLayout(self)
+        sample_widget_layout = QVBoxLayout(sample_widget)
         sample_widget_layout.setContentsMargins(0, 0, 0, 0)
 
-        select_sample_label = QLabel(parent=self)
+        select_sample_label = QLabel(parent=sample_widget)
         select_sample_label.setText("Select sample")
 
-        self.comboBoxSampleId = QComboBox(parent=self)
+        self.comboBoxSampleId = QComboBox(parent=sample_widget)
         self.comboBoxSampleId.setPlaceholderText("Load sample or directory...")
         self.comboBoxSampleId.setObjectName("comboBoxSampleId")
 
@@ -736,8 +933,8 @@ class MainToolbar(QToolBar):
         sample_widget.setLayout(sample_widget_layout)
 
 
-        self.addAction(lame_action.OpenSample)
-        self.addAction(lame_action.OpenDirectory)
+        self.addAction(lame_action.AddSampleFiles)
+        self.addAction(lame_action.AddSampleDirectory)
         self.addAction(lame_action.ImportFiles)
         self.addAction(lame_action.ImportSpots)
         self.addAction(lame_action.OpenProject)
@@ -747,6 +944,8 @@ class MainToolbar(QToolBar):
         self.addAction(lame_action.SelectAnalytes)
         self.insertWidget(lame_action.SelectAnalytes, sample_widget)
         self.addAction(lame_action.WorkflowTool)
+        self.addAction(lame_action.CaptureToggle)
+        self.addAction(lame_action.Snapshot)
         self.addSeparator()
         self.addAction(lame_action.FullMap)
         self.addAction(lame_action.Crop)
@@ -824,30 +1023,14 @@ class MainToolbar(QToolBar):
         # self.polygon.add_samples()
 
     def update_sample_id(self):
-        """Updates ``app_data.sample_id``"""
+        """Updates ``app_data.sample_id``
+
+        Dirty-tracking/save prompts are now project-scoped (``ProjectManager``),
+        not per-sample-switch -- switching samples within an open project no
+        longer itself prompts to save; only closing/exiting the project does.
+        """
         if self.ui.app_data.sample_id == self.comboBoxSampleId.currentText():
             return
 
-        # See if the user wants to really change samples and save or discard the current work
-        if self.ui.data and self.ui.app_data.sample_id != '':
-            # Create and configure the QMessageBox
-            response = QMessageBox.warning(self,
-                    "Save sample",
-                    "Do you want to save the current analysis?",
-                    QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Save)
-            #iconWarning = QIcon(":/resources/icons/icon-warning-64.svg")
-            #msgBox.setWindowIcon(iconWarning)  # Set custom icon
-
-            # If the user clicks discard, then no need to save, just change the sample
-            if response == QMessageBox.StandardButton.Save:
-                self.ui.io.save_project()
-            elif response == QMessageBox.StandardButton.Cancel:
-                # change the sample ID back to the current sample
-                self.comboBoxSampleId.setCurrentText(self.ui.app_data.sample_id)
-                return
-
-        # at this point, the user has decided to proceed with changing the sample
-        # update the current sample ID
         self.ui.app_data.sample_id = self.comboBoxSampleId.currentText()
-        # initiate the sample change
         self.ui.change_sample()

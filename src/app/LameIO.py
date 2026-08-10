@@ -1,5 +1,4 @@
 from pathlib import Path
-import pickle
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -9,14 +8,15 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import QSettings, QDir, Qt
-import src.app.SpotImporter as SpotImporter
-import src.app.MapImporter as MapImporter
+import src.importers.SpotImporter as SpotImporter
+import src.importers.MapImporter as MapImporter
 from lame_core.config import BASEDIR
 from src.app.config import get_top_parent
-from src.common.DataHandling import LaserSampleObj, XRFSampleObj
-from src.common.CustomMplCanvas import MplCanvas
+from src.data.DataHandling import LaserSampleObj, XRFSampleObj
+from src.plotting.CustomMplCanvas import MplCanvas
 from src.common.Status import StatusMessageManager
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.control.Logger import LoggerConfig, auto_log_methods, log
+from src.project.ProjectModel import load_calibration_sidecar, is_calibration_stale
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
@@ -38,97 +38,16 @@ class LameIO():
 
         self.connect_actions = connect_actions
         if self.connect_actions:
-            ui.lame_action.OpenSample.triggered.connect(lambda: self.open_sample())
-            ui.lame_action.OpenDirectory.triggered.connect(lambda: self.open_directory(path=None))
+            # OpenSample/OpenDirectory/OpenProject/SaveProject are now
+            # AddSampleFiles/AddSampleDirectory/OpenProject/SaveProject,
+            # wired directly to ProjectManager in MainActions.connect_actions()
+            # (see src/app/MainToolBar.py) rather than here.
             ui.lame_action.ImportSpots.triggered.connect(self.import_spots)
-            ui.lame_action.OpenProject.triggered.connect(lambda: self.open_project())
-            ui.lame_action.SaveProject.triggered.connect(lambda: self.save_project())
             ui.lame_action.ImportFiles.triggered.connect(lambda: self.import_files())
 
         self.ui = ui
 
         self.status_manager = StatusMessageManager(self.ui)
-
-    def open_sample(self, path=None):
-        """
-        Opens a single *.lame.csv file created by MapImporter.
-
-        Parameters
-        ----------
-        path : str or Path, optional
-            Path to datafile. If None, an open file dialog is shown. Default is None.
-        """
-        ui = self.ui
-
-        if path is None:
-            dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
-            dialog.setNameFilter("LaME CSV (*.csv)")
-            if dialog.exec():
-                file_list = dialog.selectedFiles()
-                file_list = [Path(f) for f in file_list]
-                ui.app_data.selected_directory = file_list[0].resolve().parent
-            else:
-                return
-        else:
-            path = Path(path).resolve()
-            ui.app_data.selected_directory = path.parent
-            file_list = [path]
-
-        # Collect just the filename (with extension)
-        ui.app_data.csv_files = [f.name for f in file_list if f.suffix == '.csv']
-        if not ui.app_data.csv_files:
-            self.status_manager.show_message("No valid csv file found.")
-            return
-
-        # Create a list of sample names (without .lame and .csv)
-        ui.app_data.sample_list = [
-            f.stem.replace('.lame', '') for f in map(Path, ui.app_data.csv_files)
-        ]
-
-    def open_directory(self, path=None):
-        """Open directory with samples in \\*.lame.csv files.
-
-        Executes on ``MainWindow.actionOpen`` and ``MainWindow.actionOpenDirectory``.  Opening a directory, enables
-        the toolboxes.
-
-        Alternatively, *open_directory* is called after ``MapImporter`` successfully completes an import and the tool
-        is closed.
-
-        Opens a dialog to select directory filled with samples.  Updates sample list in
-        ``MainWindow.comboBoxSampleID`` and comboBoxes associated with analyte lists.  The first sample
-        in list is loaded by default.
-
-        Parameters
-        ----------
-        path : str or Path
-            Path to datafiles, if ``None``, an open directory dialog is opened, by default ``None``
-        """
-        ui = self.ui
-
-        if path is None:
-            dialog = QFileDialog()
-            dialog.setFileMode(QFileDialog.FileMode.Directory)
-            dialog.setDirectory(str(BASEDIR))  # QFileDialog expects a str
-            if dialog.exec():
-                selected_dir = Path(dialog.selectedFiles()[0])
-                ui.app_data.selected_directory = selected_dir
-            else:
-                self.status_manager.show_message("Open directory canceled.")
-                return
-        else:
-            ui.app_data.selected_directory = Path(path)
-
-        selected_dir = ui.app_data.selected_directory
-        file_list = list(selected_dir.iterdir())
-        ui.app_data.csv_files = [f.name for f in file_list if f.is_file() and f.suffix == '.csv' and f.name.endswith('.lame.csv')]
-
-        if not ui.app_data.csv_files:
-            self.status_manager.show_message("No valid csv files found.")
-            return
-
-        ui.app_data.sample_list = [f.stem.replace('.lame', '') for f in map(Path, ui.app_data.csv_files)]
-        self.status_manager.show_message("Sample list updated.")    
 
     def import_spots(self):
         """Import a data file with spot data."""
@@ -162,148 +81,17 @@ class LameIO():
             for col_index, value in enumerate(row):
                 ui.tableWidgetSpots.setItem(row_index, col_index, QTableWidgetItem(str(value)))
 
-    def save_project(self):
-        """Save a project session
-
-        Saves the active sample/style/color-field state plus per-sample profiles
-        and polygons, so it can be restored later. Raw sample data is *not*
-        duplicated -- it's re-read from the original data directory on open,
-        the same way the app already reloads samples from disk on every
-        selection (see ``initialize_sample_object``).
-        """
-        ui = self.ui
-        projects_dir = BASEDIR / "projects"
-
-        # Ensure the projects directory exists
-        projects_dir.mkdir(parents=True, exist_ok=True)
-
-        # Open QFileDialog to enter a new project name
-        file_dialog = QFileDialog(ui, "Save Project", str(projects_dir))
-        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
-        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
-        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
-
-        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
-            return
-
-        selected_dir = Path(file_dialog.selectedFiles()[0])
-        if not selected_dir:
-            return
-
-        project_name = selected_dir.name
-        project_dir = projects_dir / project_name
-        project_dir.mkdir(parents=True, exist_ok=True)
-
-        session_dict = {
-            'selected_directory': str(ui.app_data.selected_directory),
-            'csv_files': ui.app_data.csv_files,
-            'sample_list': ui.app_data.sample_list,
-            'sample_id': ui.app_data.sample_id,
-            'style_dict': ui.style_data.style_dict,
-            'c_field_type': ui.app_data.c_field_type if ui.app_data.sample_id else None,
-            'c_field': ui.app_data.c_field if ui.app_data.sample_id else None,
-        }
-
-        # Save the main session dictionary as a pickle file
-        pickle_path = project_dir / f'{project_name}.pkl'
-        with open(pickle_path, 'wb') as file:
-            pickle.dump(session_dict, file)
-
-        for sample_id in ui.data.keys():
-            if hasattr(ui, 'profile_dock'):
-                ui.profile_dock.profiling.save_profiles(project_dir, sample_id)
-                ui.profile_dock.profiling.project_dir = project_dir
-            if hasattr(ui, 'mask_dock'):
-                ui.mask_dock.polygon_tab.polygon_manager.save_polygons(project_dir, sample_id)
-
-        self.status_manager.show_message("Project saved successfully")
-
-    def open_project(self):
-        """Open a project session.
-
-        Restores a project session: sample list/selection, style settings,
-        color-by field, profiles, and polygons. Sample data is re-read fresh
-        from the original data directory, not from the saved session.
-        """
-        ui = self.ui
-
-        if ui.data:
-            QMessageBox.information(
-                ui,
-                "Restart required",
-                "A session is already loaded. Please restart LaME before opening a different project."
-            )
-            return
-
-        projects_dir = BASEDIR / "projects"
-
-        # QFileDialog to select project folder
-        file_dialog = QFileDialog(ui, "Open Project", str(projects_dir))
-        file_dialog.setFileMode(QFileDialog.FileMode.Directory)
-        file_dialog.setOption(QFileDialog.Option.ShowDirsOnly, True)
-
-        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
-            return
-
-        selected_dir = Path(file_dialog.selectedFiles()[0])
-        if not selected_dir:
-            return
-
-        project_name = selected_dir.name
-        project_dir = projects_dir / project_name
-
-        pickle_path = project_dir / f'{project_name}.pkl'
-        if not pickle_path.exists():
-            self.status_manager.show_message(f"No saved project found in {project_dir}")
-            return
-
-        with open(pickle_path, 'rb') as file:
-            session_dict = pickle.load(file)
-        if not session_dict:
-            return
-
-        ui.app_data.selected_directory = Path(session_dict['selected_directory'])
-        ui.app_data.csv_files = session_dict['csv_files']
-        ui.app_data.sample_list = session_dict['sample_list']
-
-        if session_dict.get('style_dict'):
-            ui.style_data.style_dict.update(session_dict['style_dict'])
-
-        # ensure the profile/mask docks exist before seeding per-sample state
-        ui.open_profile()
-        ui.open_mask_dock()
-        ui.profile_dock.profiling.add_samples()
-        ui.profile_dock.profiling.project_dir = project_dir
-        ui.mask_dock.polygon_tab.polygon_manager.add_samples()
-
-        # setting sample_id triggers the normal change_sample() cascade: it loads
-        # the sample fresh from selected_directory and refreshes tabs, field
-        # comboboxes, the mask dock, and cluster/PCA flags.
-        ui.app_data.sample_id = session_dict['sample_id']
-
-        for sample_id in ui.data.keys():
-            ui.profile_dock.profiling.load_profiles(project_dir, sample_id)
-            ui.mask_dock.polygon_tab.polygon_manager.load_polygons(project_dir, sample_id)
-
-        if session_dict.get('c_field_type'):
-            ui.app_data.c_field_type = session_dict['c_field_type']
-        if session_dict.get('c_field'):
-            ui.app_data.c_field = session_dict['c_field']
-
-        self.status_manager.show_message("Project loaded successfully")
-
     def import_files(self):
-        """Opens an import dialog from ``MapImporter`` to open selected data directories."""
-        # import data dialog
+        """Opens an import dialog from ``MapImporter`` to open selected data directories.
+
+        ``MapImporter`` is non-modal (``.show()``, not ``.exec()``); it adds
+        the imported sample(s) to the current project itself, on success,
+        via ``self.parent.project_manager.add_samples(...)`` (see
+        ``MapImporter.import_data`` / its post-import handler) -- there's
+        nothing further to chain here once the dialog is shown.
+        """
         self.importDialog = MapImporter.MapImporter(self.ui)
         self.importDialog.show()
-
-        # read directory
-        #if self.importDialog.ok:
-        #    self.open_directory(path=self.importDialog.root_path)
-
-        # change sample
-
 
     def initialize_sample_object(self, outlier_method, negative_method):
         """
@@ -323,12 +111,39 @@ class LameIO():
         """
         # Add sample to sample dictionary
         if self.ui.app_data.sample_id and self.ui.app_data.sample_id not in self.ui.data:
-            # Obtain index of current sample
-            index = self.ui.app_data.sample_list.index(self.ui.app_data.sample_id)
+            # Prefer the project's own record of this sample's absolute path
+            # (set by ProjectManager.add_samples()) so a project spanning
+            # multiple directories still resolves correctly -- AppData's
+            # selected_directory/csv_files can only reflect one directory at
+            # a time. Falls back to the old directory/csv_files[index]
+            # lookup when there's no project entry (e.g. samples staged
+            # without going through ProjectManager).
+            project = self.ui.project_manager.current_project
+            entry = project.samples.get(self.ui.app_data.sample_id) if project else None
+            if entry is not None:
+                file_path = entry.sample_path
 
-            # Load sample's *.lame file using pathlib
-            directory = self.ui.app_data.selected_directory
-            file_path = directory / self.ui.app_data.csv_files[index]
+                # Tier 1 calibration: auto-load the `.calib.json` sidecar next
+                # to the sample's raw data the first time this project entry
+                # sees it (a previous project save may already have cached
+                # it). Staleness is deliberately recomputed here rather than
+                # cached on the entry -- one source of truth (source_hash vs.
+                # the file's current fingerprint), same as `is_calibration_stale`
+                # will be called again by the Project Files dock for display.
+                # No UI exists yet to surface this -- log only for now.
+                if entry.calibration is None:
+                    entry.calibration = load_calibration_sidecar(file_path)
+                if entry.calibration is not None and is_calibration_stale(entry.calibration, file_path):
+                    log(
+                        f"initialize_sample_object: calibration for '{self.ui.app_data.sample_id}' "
+                        f"is stale (source file changed since calibrated_at="
+                        f"{entry.calibration.calibrated_at.isoformat()})",
+                        prefix='IO',
+                    )
+            else:
+                index = self.ui.app_data.sample_list.index(self.ui.app_data.sample_id)
+                directory = self.ui.app_data.selected_directory
+                file_path = directory / self.ui.app_data.csv_files[index]
 
             self.ui.data[self.ui.app_data.sample_id] = LaserSampleObj(
                 sample_id=self.ui.app_data.sample_id,
@@ -338,6 +153,34 @@ class LameIO():
                 ref_chem=self.ui.app_data.ref_chem,
                 ui=self.ui,
             )
+
+            # Tier 2: replay this project's saved filters/masks/computed
+            # fields onto the freshly (re)loaded sample. field_calculator is
+            # optional -- omitted rather than crashing if the Calculator
+            # dock hasn't been created yet (e.g. in a lighter-weight test
+            # harness).
+            if entry is not None:
+                field_calculator = getattr(getattr(self.ui, 'calculator', None), 'cfc', None)
+                self.ui.data[self.ui.app_data.sample_id].apply_processing_state(
+                    entry.processing,
+                    ref_chem=self.ui.app_data.ref_chem,
+                    field_calculator=field_calculator,
+                )
+
+                # Profile/polygon geometry lives in its own per-sample
+                # sidecar files, not the processing-state JSON -- load this
+                # sample's on first touch, same as calibration/processing
+                # state above. Both are tolerant of a missing directory
+                # (nothing saved yet for this sample). project_dir is None
+                # for an unsaved project, in which case there's nothing on
+                # disk to load yet either.
+                project_dir = self.ui.project_manager.project_dir
+                if project_dir is not None:
+                    if hasattr(self.ui, 'profile_dock'):
+                        self.ui.profile_dock.profiling.load_profiles(project_dir, self.ui.app_data.sample_id)
+                        self.ui.profile_dock.profiling.project_dir = project_dir
+                    if hasattr(self.ui, 'mask_dock'):
+                        self.ui.mask_dock.polygon_tab.polygon_manager.load_polygons(project_dir, self.ui.app_data.sample_id)
 
             # Connect data observers if required
             if self.connect_actions:

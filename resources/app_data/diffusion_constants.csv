@@ -1,0 +1,5 @@
+mineral,element,D0_m2_s,D0_uncertainty,Ea_kJ_mol,Ea_uncertainty,T_min_K,T_max_K,P_reference_GPa,orientation,reference,notes
+Garnet,Fe,1e-06,,270,,873,1473,1,isotropic,PLACEHOLDER,PLACEHOLDER row -- schema/order-of-magnitude only. Verify against primary garnet-diffusion literature (e.g. Chakraborty & Ganguly-style divalent cation interdiffusion studies) before any quantitative use.
+Garnet,Mg,1e-06,,280,,873,1473,1,isotropic,PLACEHOLDER,PLACEHOLDER row -- schema/order-of-magnitude only. Verify against primary garnet-diffusion literature before any quantitative use.
+Garnet,Mn,1e-06,,260,,873,1473,1,isotropic,PLACEHOLDER,PLACEHOLDER row -- schema/order-of-magnitude only. Verify against primary garnet-diffusion literature before any quantitative use.
+Garnet,Ca,1e-06,,300,,873,1473,1,isotropic,PLACEHOLDER,PLACEHOLDER row -- schema/order-of-magnitude only. Verify against primary garnet-diffusion literature before any quantitative use.

@@ -3,7 +3,7 @@ from pytestqt.qtbot import QtBot
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QAction, QDialog, QTableWidgetItem, QComboBox, QFileDialog
 from tests.conftest import import_sample, MainWindow
-from src.ui.AnalyteSelectionDialog import Ui_Dialog  # type: ignore # Import the UI class
+from src.data.AnalyteSelectionDialog import Ui_Dialog  # type: ignore # Import the UI class
 
 
 def test_import_directory(qtbot, main_window, mocker):

@@ -8,14 +8,11 @@
 import os
 import sys
 
+# Project root only -- every module in this codebase is imported as
+# src.app.X / src.common.X / src.ui.X (matching how the app itself imports
+# internally, e.g. main.py's `from src.app.MainWindow import MainWindow`),
+# so that's all autodoc/autosummary need on the path.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../../src/'))
-sys.path.insert(0, os.path.abspath('../../src/app/'))
-sys.path.insert(0, os.path.abspath('../../src/common/'))
-sys.path.insert(0, os.path.abspath('../../src/ui/'))
-
-print("sys.path:", sys.path)
 
 project = 'Laser Map Explorer'
 copyright = '2025, Shavin Kaluthantri, Derrick Hasterok, and Maggie Li'
@@ -42,6 +39,17 @@ extensions = [
     #]
 
 napoleon_custom_sections = [('Signals', 'params_style')]
+
+# numpydoc auto-inserts a "Methods" autosummary table into every class
+# docstring, including every inherited member -- for PyQt6-derived classes
+# that's hundreds of stdlib Qt methods (accept, acceptDrops, ...) per class,
+# each linked to a stub page that autosummary_generate never creates (it only
+# generates stubs for what documentation.rst's autosummary directive actually
+# lists: modules, not every individual inherited method). That mismatch is
+# what produced ~24k "stub file not found" warnings. Disabling the toctree
+# links keeps the summary table but stops it trying to link to pages that
+# were never going to exist.
+numpydoc_class_members_toctree = False
 
 autosummary_generate = True
 autosummary_imported_members = False  # Include members imported in modules
@@ -75,12 +83,34 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org/stable/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-    'python': ('https://docs.python.org/3/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/', None),
-    'scikit-learn': ('https://scikit-learn.org/stable/api/', None),
+    'scikit-learn': ('https://scikit-learn.org/stable/', None),
     'pyqt5': ('https://www.riverbankcomputing.com/static/Docs/PyQt5', None),
-    'darkdetect': ('https://pypi.org/project/darkdetect/', None),
-    'rst2pdf': ('https://github.com/rst2pdf/rst2pdf/tree/main/doc', None)
+    # darkdetect and rst2pdf removed: neither actually publishes a Sphinx
+    # inventory. darkdetect's PyPI project page returns its HTML page (not a
+    # real objects.inv) for any URL ending in objects.inv, which crashes the
+    # build with "invalid inventory header: <!DOCTYPE html>" -- confirmed via
+    # `curl https://pypi.org/project/darkdetect/objects.inv`, real content is
+    # an HTML page, not the "# Sphinx inventory version" file PyQt5 returns.
+    # rst2pdf's repo doc path 404s (no Sphinx docs at that path either).
+    # local sibling repos, checked out alongside this one (../../../lame-core,
+    # ../../../siesta-rest-editor, ../../../blueberry-colortools) -- relative
+    # paths so they stay valid regardless of the absolute checkout location, as
+    # long as the sibling repos stay siblings. Each requires that sibling's own
+    # docs to have been built first (its docs/build/html/objects.inv).
+    # NOTE: the two elements are relative to *different* directories -- the
+    # inventory location (2nd element) is resolved relative to confdir
+    # (docs/source/), while the link target (1st element) is what actually
+    # gets written into built page hrefs, which live one level deeper
+    # (docs/build/html/) than confdir. Using the same relative string for both
+    # (as intersphinx normally expects when they're both `None`-derived from
+    # one URL) produces correct inventory loading but a broken href, off by
+    # exactly the docs/source vs docs/build/html depth difference -- verified
+    # empirically against the actual built output.
+    'lame_core': ('../../../../lame-core/docs/build/html', '../../../lame-core/docs/build/html/objects.inv'),
+    'siesta': ('../../../../siesta-rest-editor/docs/build/html', '../../../siesta-rest-editor/docs/build/html/objects.inv'),
+    'blueberry': ('../../../../blueberry-colortools/docs/build/html', '../../../blueberry-colortools/docs/build/html/objects.inv'),
+    'global_geochemistry': ('../../../../global_geochemistry/docs/build/html', '../../../global_geochemistry/docs/build/html/objects.inv'),
 }
 
 html_theme_options = {

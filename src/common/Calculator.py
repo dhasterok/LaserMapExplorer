@@ -13,8 +13,8 @@ from PyQt6.QtWidgets import (
     )
 
 from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction, CustomToolButton
-from src.app.FieldLogic import FieldLogicUI
-from src.common.Logger import LoggerConfig, auto_log_methods
+from src.control.FieldLogic import FieldLogicUI
+from src.control.Logger import LoggerConfig, auto_log_methods, log
 
 def calc_error(parent, func, err, addinfo):
     """Raise a calculator-related error
@@ -27,7 +27,14 @@ def calc_error(parent, func, err, addinfo):
         Error string
     addinfo : str
         Additional info (generally exception raised)
-    """        
+    """
+    # `parent` is normally a live CalculatorDock, but CustomFieldCalculator
+    # is also used headless (e.g. SampleObj.apply_processing_state()'s
+    # injected field_calculator, replaying a saved formula with no dock
+    # open) -- fall back to a log line instead of assuming a UI is present.
+    if parent is None or not hasattr(parent, 'message_label'):
+        log(f"({func}) {err} {addinfo}", prefix='Calculator')
+        return
     parent.message_label.setText(f"Error: {err}")
     QMessageBox.warning(parent,"Calculation Error",f"Error: {err}\n\n({func}) {addinfo}",QMessageBox.StandardButton.Ok)
 
@@ -507,9 +514,18 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         formula = self.calc_text_edit.toPlainText()
 
         # Use CustomFieldCalculator to compute new field
-        success = self.cfc.calculate_new_field(self.ui.app_data.data[self.ui.app_data.sample_id], self.ui.app_data.ref_chem, new_field, formula)
+        data = self.ui.app_data.data[self.ui.app_data.sample_id]
+        success = self.cfc.calculate_new_field(data, self.ui.app_data.ref_chem, new_field, formula)
         if not success:
             return
+
+        # Record the formula as a column attribute so SampleObj.export_processing_state()
+        # can recover it later (recompute-on-load, per the project migration's
+        # ComputedFieldSpec design -- raw values are never persisted for
+        # 'Calculated' columns, only the formula that produces them).
+        data.processed.set_attribute(new_field, 'formula', formula)
+        if hasattr(self.ui, 'project_manager'):
+            self.ui.project_manager.mark_dirty('computed field added')
 
         # update formula_combobox
         self.comboBoxFormula.addItem(new_field)
@@ -780,7 +796,8 @@ class CustomFieldCalculator():
                 result = ne.evaluate(expr)
             else:
                 result = ne.evaluate(expr, local_dict=val_dict)
-            self.parent.message_label.setText("Success")
+            if self.parent is not None and hasattr(self.parent, 'message_label'):
+                self.parent.message_label.setText("Success")
             if keep is None or result.ndim == 0:
                 return result
             else:

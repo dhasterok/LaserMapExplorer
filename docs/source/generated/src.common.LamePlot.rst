@@ -21,6 +21,7 @@ src.common.LamePlot
       plot_clusters
       plot_correlation
       plot_histogram
+      plot_isochron
       plot_map_mpl
       plot_map_pg
       plot_ndim

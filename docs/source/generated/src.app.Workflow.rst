@@ -1,4 +1,4 @@
-﻿src.app.Workflow
+src.app.Workflow
 ================
 
 .. automodule:: src.app.Workflow

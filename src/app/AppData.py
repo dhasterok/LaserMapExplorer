@@ -6,13 +6,13 @@ import pandas as pd
 import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
 from lame_core.config import APPDATA_PATH
-from src.common.Logger import auto_log_methods, log
-from src.common.SortAnalytes import resolve_element_tokens
+from src.control.Logger import auto_log_methods, log
+from src.data.SortAnalytes import resolve_element_tokens
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from .MainWindow import MainWindow
-    from .BlocklyModules import LameBlockly
+    from ..workflow.BlocklyModules import LameBlockly
 
 @auto_log_methods(logger_key='Data')
 class AppData(QObject):
@@ -188,6 +188,7 @@ class AppData(QObject):
     sampleListChanged = pyqtSignal(list)
     fieldTypeChanged = pyqtSignal(str, str)
     fieldChanged = pyqtSignal(str, str)
+    fieldSelectionChanged = pyqtSignal(list, list, list)  # fields, norms, use_normalized
     normReferenceChanged = pyqtSignal(str)
     normIndexChanged = pyqtSignal(int)
 
@@ -255,6 +256,11 @@ class AppData(QObject):
         # in future will be set from preference ui
         self.preferences = copy.deepcopy(self.default_preferences)
         self.selected_directory = Path()
+
+        # path to the workflow file that captured actions are recorded into for
+        # this project (see MainWindow.ensure_active_workflow_file); None until
+        # the user creates/opens one, either via CaptureToggle or New Workflow
+        self.active_workflow_file = None
 
         self._sort_method = 'mass'
 
@@ -597,7 +603,7 @@ class AppData(QObject):
         
         # update sample list and id of current sample
         self._sample_list = new_list
-        self._sample_id = new_list[0]
+        self._sample_id = new_list[0] if new_list else ''
 
         # notify observers to update widgets
         self.sampleListChanged.emit(new_list)
@@ -1403,6 +1409,8 @@ class AppData(QObject):
             for field, normalized in zip(fields, use_normalized):
                 if field in self.current_data.processed.columns:
                     self.current_data.processed.set_attribute(field, 'use_normalized', bool(normalized))
+
+        self.fieldSelectionChanged.emit(list(fields), list(norms), list(use_normalized or []))
 
     def update_hist_bin_width(self):
         """Updates the bin width for histograms

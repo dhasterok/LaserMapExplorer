@@ -14,10 +14,10 @@ from PyQt6.QtGui import QDoubleValidator
 
 from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomAction
 from blueberry.ColorButton import ColorButton
-from src.app.FieldLogic import FieldLogicUI
+from src.control.FieldLogic import FieldLogicUI
 
 from lame_core.UITheme import default_font
-from src.common.CustomMplCanvas import MplCanvas
+from src.plotting.CustomMplCanvas import MplCanvas
 
 PRECISION = 5
 

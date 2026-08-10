@@ -10,6 +10,7 @@
    :toctree:
    :recursive:
 
+   ActionRecorder
    AnalyteDialog
    AppData
    BlocklyModules
@@ -33,7 +34,7 @@
    PlotViewerWindow
    Preprocessing
    Profile
-   ProfileMatplotlib
+   ReportWriter
    SpecialTools
    SpotImporter
    SpotTools
@@ -42,6 +43,8 @@
    StylingUI
    UITheme
    Workflow
+   WorkflowFile
+   XRFProcessor
    base_dialog
    config
    help_mapping

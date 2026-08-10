@@ -8,6 +8,7 @@ src.common.Polygon
 
    .. autosummary::
    
-      Polygon
+      InteractivePolygon
       PolygonManager
+      SerializablePolygon
    

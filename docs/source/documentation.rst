@@ -23,12 +23,6 @@ If the UI is altered by QtCreator, then you will need to alter the UI files usin
 
     compile_ui
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Contents:
-
-    modules
-
 *LaME* (python) API
 ===================
 

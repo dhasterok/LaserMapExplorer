@@ -15,10 +15,17 @@ implemented (as opposed to stubbed) in the source MATLAB code.
 import numpy as np
 import cv2
 
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import Qt, QRect, QSize
+from PyQt6.QtWidgets import (
+        QMessageBox, QWidget, QGroupBox, QVBoxLayout, QScrollArea, QFormLayout,
+        QComboBox, QLabel, QGridLayout, QPushButton, QPlainTextEdit, QSpacerItem,
+        QSizePolicy,
+    )
 
-from src.common import RegressionModel as rm
-from src.common.Logger import log, auto_log_methods
+from lame_core.CustomWidgets import CustomDockWidget, CustomLineEdit
+from src.control.FieldLogic import FieldLogicUI
+from src.data import RegressionModel as rm
+from src.control.Logger import log, auto_log_methods
 
 # 176Lu decay constant and CHUR intercept, Sonderlund et al., EPSL, 2004,
 # https://doi.org/10.1016/S0012-821X(04)00012-3
@@ -387,7 +394,7 @@ def smooth_isotope_field(array, array_size, order, sigma_spatial, sigma_intensit
 
 @auto_log_methods(logger_key="Geochron")
 class Geochronology():
-    """Lu-Hf geochronology engine, driving the Dating tab in ``SpecialTools.py``.
+    """Lu-Hf geochronology engine, driving ``GeochronDock``.
 
     Single-pixel date maps are written directly as new 'Calculated' fields
     (viewable via the existing Field Map/Histogram plot types); the
@@ -402,22 +409,20 @@ class Geochronology():
 
     @property
     def dating_tab(self):
-        """The DatingTab widget, if the Special Tools page is currently open."""
-        control_dock = getattr(self.ui, 'control_dock', None)
-        special_tools = getattr(control_dock, 'special_tools', None)
-        return getattr(special_tools, 'dating', None)
+        """The GeochronDock widget, if currently open."""
+        return getattr(self.ui, 'geochron_dock', None)
 
     def _set_isotope_default(self, dt, index, field_type, field, available):
         """Populates isotope combobox pair ``index`` and selects ``field`` if present."""
         type_box = dt.comboBoxIsotopeAgeFieldType[index]
         field_box = dt.comboBoxIsotopeAgeField[index]
 
-        dt.parent.update_field_type_combobox(type_box)
+        dt.update_field_type_combobox(type_box)
         items = [type_box.itemText(i) for i in range(type_box.count())]
         if field_type in items:
             type_box.setCurrentText(field_type)
 
-        dt.parent.update_field_combobox(type_box, field_box)
+        dt.update_field_combobox(type_box, field_box)
         if field in available:
             field_box.setCurrentText(field)
 
@@ -682,3 +687,200 @@ class Geochronology():
         ree_df['REE'] = sample_df[ree_cols].sum(axis=1)
 
         return ree_df
+
+
+@auto_log_methods(logger_key='Geochron')
+class GeochronDock(CustomDockWidget, FieldLogicUI):
+    """Lu-Hf (and, in future, other isotope-system) dating controls.
+
+    Isotope ratio fields 1-4 are the four pre-reduced Lu-Hf ratio columns
+    (176Hf/177Hf, 176Lu/177Hf, 177Hf/176Hf, 176Lu/176Hf) LaME's imported data
+    already provides -- no ratio computation happens here, matching how the
+    source data is actually delivered.
+
+    Opens as a floating panel (following ``RegressionDock``, the closest
+    sibling analysis tool) rather than registering into a ``QMainWindow``
+    dock area -- toggled from Tools > Geochronology.
+    """
+    ISOTOPE_LABELS = ['176Hf/177Hf', '176Lu/177Hf', '177Hf/176Hf', '176Lu/176Hf']
+
+    def __init__(self, ui=None):
+        self.ui = ui
+        self.logger_key = 'Geochron'
+
+        super().__init__(ui)
+
+        if ui is None:
+            return
+
+        self.geochron = Geochronology(self.ui)
+
+        self.setWindowTitle("Geochronology")
+        self.setObjectName("GeochronDock")
+
+        self.setupUI()
+        self.connect_widgets()
+
+        self.setGeometry(QRect(0, 0, 300, 640))
+
+    @property
+    def app_data(self):
+        """Delegate to ui.app_data so FieldLogicUI methods work correctly."""
+        return self.ui.app_data
+
+    @property
+    def data(self):
+        """Access current sample data without caching a reference."""
+        if hasattr(self.ui, 'app_data'):
+            return self.ui.app_data.current_data
+        return None
+
+    @data.setter
+    def data(self, value):
+        """Ignored -- data is always derived from ui.app_data.current_data."""
+        pass
+
+    def setupUI(self):
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
+        container = QWidget()
+        container.setGeometry(QRect(0, 0, 260, 303))
+
+        scroll_area_layout = QVBoxLayout(container)
+        scroll_area_layout.setContentsMargins(6, 6, 6, 6)
+        scroll_area_layout.setObjectName("verticalLayout_58")
+
+        self.verticalLayoutDatingParams = QVBoxLayout()
+        self.verticalLayoutDatingParams.setObjectName("verticalLayoutDatingParams")
+
+        self.formLayoutDatingMethod = QFormLayout()
+        self.formLayoutDatingMethod.setObjectName("formLayoutDatingMethod")
+
+        self.labelDatingMethod = QLabel("Method", container)
+        self.labelDatingMethod.setObjectName("labelDatingMethod")
+
+        self.formLayoutDatingMethod.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelDatingMethod)
+
+        self.comboBoxDatingMethod = QComboBox(container)
+        self.comboBoxDatingMethod.setMaximumSize(QSize(200, 16777215))
+        self.comboBoxDatingMethod.setObjectName("comboBoxDatingMethod")
+        for method in Geochronology.DATING_METHODS:
+            self.comboBoxDatingMethod.addItem(method)
+            if method not in Geochronology.IMPLEMENTED_METHODS:
+                idx = self.comboBoxDatingMethod.count() - 1
+                self.comboBoxDatingMethod.setItemText(idx, f"{method} (not yet implemented)")
+
+        self.formLayoutDatingMethod.setWidget(0, QFormLayout.ItemRole.FieldRole, self.comboBoxDatingMethod)
+
+        self.verticalLayoutDatingParams.addLayout(self.formLayoutDatingMethod)
+
+        # -- isotope ratio field pickers (4 rows: label | field type | field) --
+        self.gridLayoutDatingParams = QGridLayout()
+        self.gridLayoutDatingParams.setObjectName("gridLayoutDatingParams")
+
+        self.labelIsotope = []
+        self.comboBoxIsotopeAgeFieldType = []
+        self.comboBoxIsotopeAgeField = []
+        for i in range(1, 5):
+            label = QLabel(self.ISOTOPE_LABELS[i - 1], container)
+            label.setObjectName(f"labelIsotope{i}")
+            self.gridLayoutDatingParams.addWidget(label, i - 1, 0, 1, 1)
+            setattr(self, f"labelIsotope{i}", label)
+            self.labelIsotope.append(label)
+
+            type_box = QComboBox(container)
+            type_box.setMaximumSize(QSize(125, 16777215))
+            type_box.setObjectName(f"comboBoxIsotopeAgeFieldType{i}")
+            self.gridLayoutDatingParams.addWidget(type_box, i - 1, 1, 1, 1)
+            setattr(self, f"comboBoxIsotopeAgeFieldType{i}", type_box)
+            self.comboBoxIsotopeAgeFieldType.append(type_box)
+
+            field_box = QComboBox(container)
+            field_box.setObjectName(f"comboBoxIsotopeAgeField{i}")
+            self.gridLayoutDatingParams.addWidget(field_box, i - 1, 2, 1, 1)
+            setattr(self, f"comboBoxIsotopeAgeField{i}", field_box)
+            self.comboBoxIsotopeAgeField.append(field_box)
+
+        self.labelDecayConstant = QLabel("λ ± unc. (Ma⁻¹)", container)
+        self.labelDecayConstant.setWordWrap(True)
+        self.labelDecayConstant.setObjectName("labelDecayConstant")
+        self.gridLayoutDatingParams.addWidget(self.labelDecayConstant, 4, 0, 1, 1)
+
+        self.lineEditDecayConstant = CustomLineEdit(parent=container, precision=8)
+        self.lineEditDecayConstant.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDecayConstant.setObjectName("lineEditDecayConstant")
+        self.gridLayoutDatingParams.addWidget(self.lineEditDecayConstant, 4, 1, 1, 1)
+
+        self.lineEditDecayConstantUncertainty = CustomLineEdit(parent=container, precision=8)
+        self.lineEditDecayConstantUncertainty.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.lineEditDecayConstantUncertainty.setObjectName("lineEditDecayConstantUncertainty")
+        self.gridLayoutDatingParams.addWidget(self.lineEditDecayConstantUncertainty, 4, 2, 1, 1)
+
+        self.verticalLayoutDatingParams.addLayout(self.gridLayoutDatingParams)
+        scroll_area_layout.addLayout(self.verticalLayoutDatingParams)
+
+        # -- compute actions --
+        compute_group = QGroupBox("Compute", container)
+        compute_layout = QVBoxLayout(compute_group)
+
+        self.pushButtonComputeAge = QPushButton("Single-pixel date map", container)
+        self.pushButtonComputeAge.setObjectName("pushButtonComputeAge")
+        self.pushButtonComputeAge.setToolTip("Compute a per-pixel forward and inverse date map from the selected ratio fields.")
+        compute_layout.addWidget(self.pushButtonComputeAge)
+
+        self.pushButtonComputeIsochron = QPushButton("Multi-pixel isochron", container)
+        self.pushButtonComputeIsochron.setObjectName("pushButtonComputeIsochron")
+        self.pushButtonComputeIsochron.setToolTip("Fit an isochron to each selected cluster (Cluster Filtering tab) and show the result as a new plot.")
+        compute_layout.addWidget(self.pushButtonComputeIsochron)
+
+        scroll_area_layout.addWidget(compute_group)
+
+        # -- smoothing (noise reduction) --
+        smooth_group = QGroupBox("Smooth Isotope Fields", container)
+        smooth_layout = QFormLayout(smooth_group)
+
+        self.lineEditSigmaSpatial = CustomLineEdit(value=2.0, precision=3, parent=container)
+        smooth_layout.addRow("Spatial sigma", self.lineEditSigmaSpatial)
+
+        self.lineEditSigmaIntensity = CustomLineEdit(value=0.1, precision=3, parent=container)
+        smooth_layout.addRow("Intensity sigma", self.lineEditSigmaIntensity)
+
+        self.pushButtonSmoothFields = QPushButton("Smooth selected isotope fields", container)
+        self.pushButtonSmoothFields.setObjectName("pushButtonSmoothFields")
+        self.pushButtonSmoothFields.setToolTip("Bilateral-filter (log-space, cluster-mean-preserving) the 4 selected ratio fields and save as new Calculated fields.")
+        smooth_layout.addRow(self.pushButtonSmoothFields)
+
+        scroll_area_layout.addWidget(smooth_group)
+
+        # -- results --
+        results_group = QGroupBox("Results", container)
+        results_layout = QVBoxLayout(results_group)
+
+        self.textEditDatingResults = QPlainTextEdit(container)
+        self.textEditDatingResults.setObjectName("textEditDatingResults")
+        self.textEditDatingResults.setReadOnly(True)
+        self.textEditDatingResults.setMaximumHeight(160)
+        results_layout.addWidget(self.textEditDatingResults)
+
+        self.pushButtonCopyToNotes = QPushButton("Copy to Notes", container)
+        self.pushButtonCopyToNotes.setObjectName("pushButtonCopyToNotes")
+        results_layout.addWidget(self.pushButtonCopyToNotes)
+
+        scroll_area_layout.addWidget(results_group)
+
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        scroll_area_layout.addItem(spacer)
+
+        scroll_area.setWidget(container)
+        self.setWidget(scroll_area)
+
+    def connect_widgets(self):
+        for type_box, field_box in zip(self.comboBoxIsotopeAgeFieldType, self.comboBoxIsotopeAgeField):
+            type_box.activated.connect(lambda _, t=type_box, f=field_box: self.update_field_combobox(t, f))
+
+        self.comboBoxDatingMethod.activated.connect(lambda: self.geochron.callback_dating_method())
+        self.pushButtonComputeAge.clicked.connect(lambda: self.geochron.compute_date_map())
+        self.pushButtonComputeIsochron.clicked.connect(lambda: self.geochron.compute_multipixel_isochron())
+        self.pushButtonSmoothFields.clicked.connect(lambda: self.geochron.smooth_isotope_fields())
+        self.pushButtonCopyToNotes.clicked.connect(lambda: self.geochron.copy_results_to_notes())

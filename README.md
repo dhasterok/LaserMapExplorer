@@ -61,6 +61,7 @@ LaME depends on several sibling packages that must be installed as editable inst
 ```bash
 git clone https://github.com/dhasterok/lame-core ../lame-core
 git clone https://github.com/dhasterok/blueberry-colortools ../blueberry-colortools
+git clone https://github.com/dhasterok/global_geochemistry ../global_geochemistry
 git clone https://github.com/dhasterok/siesta-rest-editor ../siesta-rest-editor
 ```
 
@@ -71,7 +72,8 @@ GitHub/
 ├── LaserMapExplorer/
 ├── lame-core/
 ├── blueberry-colortools/
-└── siesta-rest-editor/
+├── siesta-rest-editor/
+└── global_geochemistry/
 ```
 
 ### 2. Install dependencies
@@ -89,11 +91,12 @@ This installs the sibling packages in editable mode (`-e`) along with all other 
 | `lame-core` | Shared widgets, theming, icon resources, and path configuration |
 | `blueberry-colortools` | Colour picker, colormap editor, and colormap data (custom and ternary colormaps) |
 | `siesta-rest-editor` | reStructuredText note editor |
+| `global_geochemistry` | geochemical plotting |
 | `LaserMapExplorer` | Main application |
 
 ## Development and Availability
 
-Currently in active development (beta).
+Currently in active development (beta). The software is approaching a complete stable version and needs brave users to use the software.
 
 ## Contribution
 

@@ -142,4 +142,40 @@ function resizeBlocklyWorkspace() {
 
 resizeBlocklyWorkspace();
 
+/**
+ * Serializes the current workspace state (all blocks) to a JSON string.
+ * Used by Python to save a workflow file.
+ * @returns {string} JSON-encoded workspace state
+ */
+function getWorkspaceStateJSON() {
+    const state = Blockly.serialization.workspaces.save(window.workspace);
+    return JSON.stringify(state);
+}
+
+/**
+ * Clears the workspace and loads a previously serialized state.
+ * Used by Python to open a saved workflow file.
+ * @param {string} stateStr JSON-encoded workspace state, as produced by getWorkspaceStateJSON
+ */
+function loadWorkspaceStateJSON(stateStr) {
+    window.workspace.clear();
+    const state = JSON.parse(stateStr);
+    Blockly.serialization.workspaces.load(state, window.workspace);
+}
+
+/**
+ * Appends a single block (as serialized JSON state) to the workspace, connecting it
+ * beneath the workspace's last top-level block when possible. Used by the Python-side
+ * Action Recorder to push live-captured actions into the workspace as blocks.
+ * @param {string} blockJson JSON-encoded block state (Blockly block-state schema, i.e. {type, fields, ...})
+ */
+function addBlockToWorkspace(blockJson) {
+    const blockState = JSON.parse(blockJson);
+    Blockly.serialization.blocks.append(blockState, window.workspace);
+}
+
+window.getWorkspaceStateJSON = getWorkspaceStateJSON;
+window.loadWorkspaceStateJSON = loadWorkspaceStateJSON;
+window.addBlockToWorkspace = addBlockToWorkspace;
+
 

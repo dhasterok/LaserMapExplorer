@@ -1,53 +1,60 @@
 import os
+from pathlib import Path
 from datetime import datetime
 import traceback
 from PyQt6.QtCore import ( Qt, QUrl, QMetaObject )
 from PyQt6.QtWidgets import (
-    QMessageBox,  QToolButton, QDialog, QLabel, QComboBox,
+    QMessageBox,  QToolButton, QDialog, QLabel, QComboBox, QFileDialog,
     QApplication, QMainWindow, QSizePolicy, QTreeView, QWidget
 ) # type: ignore
 from PyQt6.QtGui import ( QIcon ) 
 from lame_core.CustomWidgets import CustomToolButton, CustomComboBox, CustomAction
 from lame_core.UITheme import ThemeManager, PreferencesManager, apply_font_to_children
 from src.app.AppData import AppData
-from src.app.StyleToolbox import StyleData
+from src.style.StyleToolbox import StyleData
 from src.app.MainToolBar import MainActions, MainMenubar, MainToolbar
-from src.common.ScheduleTimer import Scheduler
+from src.control.ScheduleTimer import Scheduler
 import numpy as np
 import pandas as pd
 pd.options.mode.copy_on_write = True
 import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
-from src.common.LamePlot import (
+from src.plotting.LamePlot import (
     create_plot, plot_map_mpl, plot_histogram, plot_correlation, get_scatter_data, plot_scatter,
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
-from src.app.FieldLogic import ControlDock
-from src.app.AnalyteDialog import AnalyteDialog
+from src.project.ProjectManager import ProjectManager
+from src.control.FieldLogic import ControlDock
+from src.data.AnalyteDialog import AnalyteDialog
 from src.app.FieldDialog import FieldDialog
-from src.app.StylingUI import StylingDock
+from src.style.StylingUI import StylingDock
 from src.app.LameStatusBar import MainStatusBar
 from src.common.TableFunctions import TableFcn as TableFcn
-from src.app.PlotTree import PlotTree
-from src.app.CanvasWidget import CanvasWidget
-from src.common.Masking import MaskDock
-from src.app.CropImage import CropTool
-from src.app.Profile import Profiling, ProfileDock
-from src.common.Regression import RegressionDock
-from src.common.Polygon import PolygonManager
+from src.tree.PlotTree import PlotTree
+from src.plotting.CanvasWidget import CanvasWidget
+from src.data.Masking import MaskDock
+from src.plotting.CropImage import CropTool
+from src.plotting.Profile import Profiling, ProfileDock
+from src.data.Regression import RegressionDock
+from src.common.geochronology import GeochronDock
+from src.common.diffusion import DiffusionDock
+from src.project.ProjectFilesDock import ProjectFilesDock
 from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
-from src.app.Workflow import Workflow
+from src.workflow.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
 from lame_core.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
 from src.app.settings import prefs
 from src.app.help_mapping import create_help_mapping
-from src.common.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
+from src.control.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
 from src.common.Calculator import CalculatorDock
-from src.app.PlotRegistry import PlotRegistry
-from src.common.CustomMplCanvas import MplCanvas
+from src.tree.PlotRegistry import PlotRegistry
+from src.workflow.ActionRecorder import ActionRecorder
+from src.app.ReportWriter import ReportWriter
+from src.workflow import WorkflowFile
+from src.plotting.CustomMplCanvas import MplCanvas
 
 import faulthandler
 faulthandler.enable()
@@ -113,6 +120,11 @@ class MainWindow(QMainWindow):
         #       basic processing methods
         self.data = {}
 
+        # Owns the current session's Project (samples, per-sample processing
+        # state, dirty tracking) -- see src/project/ProjectManager.py. Created
+        # before LameIO/MainToolBar since both depend on it.
+        self.project_manager = ProjectManager(self)
+
         # The plot info dictionary holds information about the current plot
         self.plot_info = {}
 
@@ -127,11 +139,20 @@ class MainWindow(QMainWindow):
         # initialize plot registry for canvas and metadata management
         self.plot_registry = PlotRegistry(app_data=self.app_data, max_cached_canvases=10)
 
+        # records structured, replayable action events for the Workflow dock and
+        # the auto-report writer; see connect_action_recorder_sources
+        self.action_recorder = ActionRecorder(parent=self)
+
+        # appends a live .rst report to the Notes dock while a workflow runs
+        self.report_writer = ReportWriter(self)
+
         # used to schedule plot updates
         self.scheduler = Scheduler(callback=self.update_SV)
 
         # initialize the styling data and dock
         self.setupUI()
+
+        self.connect_action_recorder_sources()
 
         self.help_mapping = create_help_mapping(self)
 
@@ -442,11 +463,24 @@ class MainWindow(QMainWindow):
     def quit(self, *args):
         """Shutdown function
 
-        Saves necessary files and then executes close() function.
-        """        
-        # save files
-
+        Closes the window, which triggers `closeEvent()`'s unsaved-changes
+        prompt before the app actually exits.
+        """
         self.close()
+
+    def closeEvent(self, event):
+        """Prompt to save unsaved project changes before the app closes.
+
+        Fires for both `quit()` (File/LaME menu) and the window's native
+        close button -- Qt routes both through `closeEvent()`. Delegates to
+        `ProjectManager.close_project()` for the actual Save/Discard/Cancel
+        prompt and teardown, so there's one implementation of that logic,
+        not a second one here.
+        """
+        if self.project_manager.close_project():
+            event.accept()
+        else:
+            event.ignore()
 
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
@@ -523,6 +557,277 @@ class MainWindow(QMainWindow):
         #app_data.add_observer("sort_method", self.update_sort_method)
         app_data.selectedClustersChanged.connect(self.update_selected_clusters_spinbox)
 
+    def toggle_action_capture(self, enabled):
+        """Toggle auto-capture of recorded actions into the active workflow file.
+
+        Capture works whether or not the Workflow dock is open: actions are
+        appended directly to the active workflow file on disk (see
+        `_record_to_active_workflow`), and the dock - if and when it's open -
+        is kept in sync via `Workflow.reload_active_file`. The first time
+        capture is turned on for a project with no active workflow file yet,
+        the user is prompted to create or open one (`ensure_active_workflow_file`).
+
+        Parameters
+        ----------
+        enabled : bool
+            New capture state, from the `CaptureToggle` toolbar/menu action.
+        """
+        if enabled and self.ensure_active_workflow_file() is None:
+            # user cancelled the create/open prompt - revert the toggle and stay off
+            self.lame_action.CaptureToggle.setChecked(False)
+            return
+        self.action_recorder.set_capture_enabled(enabled)
+        self.statusbar.set_capture_status(enabled)
+
+    def ensure_active_workflow_file(self):
+        """Return the project's active workflow file, prompting to create/open one if unset.
+
+        Returns
+        -------
+        Path or None
+            The active workflow file, or None if the user cancelled the prompt.
+        """
+        if self.app_data.active_workflow_file is not None:
+            return self.app_data.active_workflow_file
+
+        box = QMessageBox(self)
+        box.setWindowTitle("Workflow File")
+        box.setText("No workflow file is active for this project yet.")
+        box.setInformativeText("Create a new workflow file, or open an existing one?")
+        new_btn = box.addButton("New...", QMessageBox.ButtonRole.AcceptRole)
+        open_btn = box.addButton("Open...", QMessageBox.ButtonRole.AcceptRole)
+        box.addButton(QMessageBox.StandardButton.Cancel)
+        box.exec()
+
+        clicked = box.clickedButton()
+        if clicked is new_btn:
+            return self.new_workflow()
+        elif clicked is open_btn:
+            path, _ = QFileDialog.getOpenFileName(self, "Open Workflow", "", "LaME Workflow (*.json)")
+            if not path:
+                return None
+            self.set_active_workflow_file(path)
+            return self.app_data.active_workflow_file
+        return None
+
+    def new_workflow(self):
+        """Create a new, empty workflow file and make it the project's active workflow.
+
+        Reachable from the main program independent of the Workflow dock (see
+        `CaptureToggle`'s prompt and the `NewWorkflow` toolbar/menu action) -
+        the active-workflow-file model doesn't require the dock to ever have
+        been opened.
+
+        Returns
+        -------
+        Path or None
+            The new file's path, or None if the user cancelled.
+        """
+        path, _ = QFileDialog.getSaveFileName(self, "New Workflow", "", "LaME Workflow (*.json)")
+        if not path:
+            return None
+        WorkflowFile.save_workflow_file(path, WorkflowFile.new_workflow_payload())
+        self.set_active_workflow_file(path)
+        return self.app_data.active_workflow_file
+
+    def set_active_workflow_file(self, path):
+        """Set the project's active workflow file and sync the Workflow dock if open.
+
+        Parameters
+        ----------
+        path : str or Path
+        """
+        self.app_data.active_workflow_file = Path(path)
+        if hasattr(self, 'workflow'):
+            self.workflow.reload_active_file()
+        self.project_manager.mark_dirty('workflow linked')
+
+    def open_workflow_file(self):
+        """Open an existing workflow file and make it the project's active workflow.
+
+        Unlike `open_workflow` (which opens the Workflow *dock*), this only
+        needs a file - it works whether or not the dock is open, syncing it via
+        `set_active_workflow_file` if it happens to be.
+        """
+        path, _ = QFileDialog.getOpenFileName(self, "Open Workflow", "", "LaME Workflow (*.json)")
+        if not path:
+            return
+        self.set_active_workflow_file(path)
+
+    def save_workflow_file(self):
+        """Save the active workflow to a chosen location.
+
+        If the Workflow dock is open, delegates to `Workflow.save_workflow`
+        (dumps the live Blockly workspace). Otherwise saves a copy of the
+        active workflow file's current on-disk content ("Save As"), since
+        captured actions are already written straight to it as they happen.
+        """
+        if hasattr(self, 'workflow'):
+            self.workflow.save_workflow()
+            return
+
+        if self.app_data.active_workflow_file is None:
+            self.statusbar.showMessage("No active workflow to save", 4000)
+            return
+
+        path, _ = QFileDialog.getSaveFileName(self, "Save Workflow", "", "LaME Workflow (*.json)")
+        if not path:
+            return
+        payload = WorkflowFile.load_workflow_file(self.app_data.active_workflow_file)
+        WorkflowFile.save_workflow_file(path, payload)
+        self.set_active_workflow_file(path)
+
+    def close_workflow_file(self):
+        """Detach the project's active workflow file.
+
+        Turns capture off first (it requires an active file to write into) and
+        clears the Workflow dock's view if open. The file itself is untouched
+        on disk - this only stops treating it as "active" for this project.
+        """
+        if self.action_recorder.capture_enabled:
+            self.lame_action.CaptureToggle.setChecked(False)
+        had_active_file = self.app_data.active_workflow_file is not None
+        self.app_data.active_workflow_file = None
+        if hasattr(self, 'workflow'):
+            self.workflow.clear_workflow()
+        if had_active_file:
+            self.project_manager.mark_dirty('workflow closed')
+        self.statusbar.showMessage("Workflow closed", 4000)
+
+    def snapshot_workflow(self):
+        """Capture the most recent plot's settings and data state into the active workflow file.
+
+        Unlike auto-captured actions (filters, analyte selection, clustering,
+        etc., recorded as they happen), a snapshot is an explicit, on-demand
+        record of the *current* plot - its type, style settings, and the field
+        selection that produced it. There's no Blockly block for this yet (see
+        `ActionRecorder.build_block_state`), so it's appended to the workflow
+        file's ``snapshots`` list (`WorkflowFile.append_snapshot`) rather than
+        as a block, and separately recorded via `ActionRecorder` so it also
+        shows up in the live `.rst` report during a workflow run.
+        """
+        if not self.plot_info:
+            self.statusbar.showMessage("No plot to snapshot yet", 4000)
+            return
+
+        data = self.app_data.current_data
+        plot_type = self.plot_info.get('plot_type')
+        fields_used = list(data.processed.match_attributes({'use': True})) if data is not None else []
+
+        snapshot = {
+            'sample_id': self.app_data.sample_id,
+            'plot_type': plot_type,
+            'plot_name': self.plot_info.get('plot_name'),
+            'style': self.style_data.style_dict.get(plot_type, {}),
+            'fields_used': fields_used,
+        }
+
+        path = self.ensure_active_workflow_file()
+        if path is None:
+            return
+        payload = WorkflowFile.load_workflow_file(path)
+        WorkflowFile.append_snapshot(payload, snapshot)
+        WorkflowFile.save_workflow_file(path, payload)
+
+        self.action_recorder.record('snapshot', f"Snapshot of {plot_type or 'plot'}", snapshot, force=True)
+        self.statusbar.showMessage(f"Snapshot added to workflow: {plot_type}", 4000)
+
+    def _record_to_active_workflow(self, event):
+        """Append a recorded action to the active workflow file, if applicable.
+
+        Connected unconditionally to `action_recorder.actionRecorded` (see
+        `connect_action_recorder_sources`) - this is what lets capture work
+        without the Workflow dock ever being open. Only appends when capture is
+        enabled or the event was force-pushed (e.g. an "Add to Workflow"
+        action), and only for action types with a matching Blockly block
+        (`event['block_state']` is not None; see `ActionRecorder.build_block_state`).
+
+        Parameters
+        ----------
+        event : dict
+            Event dict produced by `ActionRecorder.record`.
+        """
+        if event['block_state'] is None:
+            return
+        if not (self.action_recorder.capture_enabled or event.get('force')):
+            return
+
+        path = self.ensure_active_workflow_file()
+        if path is None:
+            return
+
+        payload = WorkflowFile.load_workflow_file(path)
+        WorkflowFile.append_block(payload, event['block_state']['type'], event['block_state']['fields'])
+        WorkflowFile.save_workflow_file(path, payload)
+
+        if hasattr(self, 'workflow'):
+            self.workflow.reload_active_file()
+        self.statusbar.showMessage(f"Added to workflow: {event['label']}", 4000)
+
+    def connect_action_recorder_sources(self):
+        """Wire the sources that feed `self.action_recorder`.
+
+        Connects signals from objects that exist for the lifetime of the app
+        (`app_data`, `plot_registry`, `control_dock`'s clustering/dim-red pages),
+        plus `_record_to_active_workflow`, which persists captured actions
+        regardless of whether the Workflow dock is open. The Mask Dock's
+        `FilterTab.filtersApplied` is lazily created, so it's connected
+        separately in `open_mask_dock`.
+        """
+        self.action_recorder.actionRecorded.connect(self._record_to_active_workflow)
+        self.app_data.sampleChanged.connect(self._record_sample_changed)
+        self.app_data.fieldSelectionChanged.connect(self._record_field_selection_changed)
+        self.plot_registry.plotRegistered.connect(self._record_plot_registered)
+        self.control_dock.clustering.clusteringComputed.connect(self._record_clustering_computed)
+        self.control_dock.dimreduction.dimRedComputed.connect(self._record_dim_red_computed)
+
+    def _record_sample_changed(self, sample_id):
+        if not sample_id:
+            return
+        self.action_recorder.record('sample_change', f"Sample changed to '{sample_id}'", {'sample_id': sample_id})
+
+    def _record_field_selection_changed(self, fields, norms, use_normalized):
+        if not fields:
+            return
+        self.action_recorder.record(
+            'field_selection',
+            f"Selected {len(fields)} field(s): {', '.join(fields)}",
+            {'fields': fields, 'norms': norms, 'use_normalized': use_normalized},
+        )
+
+    def _record_filters_applied(self, filter_df):
+        active = filter_df[filter_df['use']] if 'use' in filter_df.columns else filter_df
+        self.action_recorder.record(
+            'filter',
+            f"Applied {len(active)} filter(s)",
+            {'filter_df': filter_df, 'sample_id': self.app_data.sample_id},
+        )
+
+    def _record_plot_registered(self, plot_id):
+        metadata = self.plot_registry.get_plot_metadata(plot_id)
+        if not metadata:
+            return
+        plot_type = metadata.get('plot_type', 'plot')
+        self.action_recorder.record(
+            'plot',
+            f"Generated {plot_type} plot",
+            {'plot_id': plot_id, 'metadata': metadata},
+        )
+
+    def _record_clustering_computed(self, info):
+        self.action_recorder.record(
+            'clustering',
+            f"Ran clustering ({info.get('method')}, {info.get('n_clusters')} clusters)",
+            info,
+        )
+
+    def _record_dim_red_computed(self, info):
+        self.action_recorder.record(
+            'dim_red',
+            f"Ran dimensional reduction ({info.get('method')}, {info.get('n_components')} components)",
+            info,
+        )
+
     # -------------------------------
     # UI update functions
     # Executed when a property is changed
@@ -539,10 +844,20 @@ class MainWindow(QMainWindow):
 
     def change_sample(self):
         """Changes sample and plots first map.
-        
+
         The UI is updated with a newly or previously loaded sample data."""
         # set plot flag to false, allow plot to update only at the end
         self.plot_flag = False
+
+        if not self.app_data.sample_id:
+            # No sample selected -- e.g. the sample list was just cleared
+            # (ProjectManager.close_project() sets sample_list = []). The
+            # rest of this method assumes a current sample (current_data,
+            # field_dict, etc. would all be None/empty); nothing to load or
+            # refresh here.
+            self.lame_action.toggle_actions(False)
+            self.plot_flag = True
+            return
 
         if self.app_data.sample_id not in self.data:
             self.io.initialize_sample_object(outlier_method=self.control_dock.preprocess.comboBoxOutlierMethod.currentText(), negative_method = self.control_dock.preprocess.comboBoxNegativeMethod.currentText())
@@ -623,7 +938,9 @@ class MainWindow(QMainWindow):
 
         if hasattr(self, 'notes_dock'):
             # change notes file to new sample.  This will initiate the new file and autosave timer.
-            self.notes_dock.notes.notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
+            # None (project not saved yet) is a valid value here -- the
+            # notes_file setter handles it (status label only, no crash).
+            self.notes_dock.notes.notes_file = self.project_manager.notes_path_for_sample(self.app_data.sample_id)
 
 
         if hasattr(self,"info_dock"):
@@ -930,7 +1247,7 @@ class MainWindow(QMainWindow):
                         
                         # Handle histogram separately if needed (UI-specific feature)
                         if self.control_dock.toolbox.currentIndex() == self.control_dock.tab_dict['process']:
-                            from src.common.LamePlot import plot_map_mpl
+                            from src.plotting.LamePlot import plot_map_mpl
                             field_type = self.app_data.c_field_type
                             field = self.app_data.c_field
                             _, _, hist_canvas = plot_map_mpl(self, data, self.app_data, self.style_data, field_type, field, add_histogram=True)
@@ -1168,6 +1485,8 @@ class MainWindow(QMainWindow):
 
             self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.statusbar.toolButtonBottomDock))
 
+            self.mask_dock.filter_tab.filtersApplied.connect(self._record_filters_applied)
+
             if self.mask_dock not in self.help_mapping:
                 self.help_mapping[self.mask_dock] = 'filtering'
 
@@ -1215,6 +1534,62 @@ class MainWindow(QMainWindow):
 
         self.regression_dock.show()
 
+    def open_geochron_dock(self):
+        """Opens/closes the Geochronology dock
+
+        Opens the Geochronology dock, creates on first instance. On later calls,
+        toggles its visibility (and the Tools menu action's checked state) rather
+        than always showing it, so the same action opens and closes the dock.
+        """
+        if not hasattr(self, 'geochron_dock'):
+            self.geochron_dock = GeochronDock(self)
+
+            if self.geochron_dock not in self.help_mapping:
+                self.help_mapping[self.geochron_dock] = 'geochronology'
+
+            self.geochron_dock.show()
+            self.lame_action.Geochron.setChecked(True)
+        else:
+            self.toggle_dock_visibility(dock=self.geochron_dock, button=self.lame_action.Geochron)
+
+    def open_diffusion_dock(self):
+        """Opens/closes the Diffusion Modeling dock
+
+        Opens the Diffusion Modeling dock, creates on first instance. On later
+        calls, toggles its visibility (and the Tools menu action's checked
+        state) rather than always showing it, so the same action opens and
+        closes the dock.
+        """
+        if not hasattr(self, 'diffusion_dock'):
+            self.diffusion_dock = DiffusionDock(self)
+
+            if self.diffusion_dock not in self.help_mapping:
+                self.help_mapping[self.diffusion_dock] = 'diffusion'
+
+            self.diffusion_dock.show()
+            self.lame_action.Diffusion.setChecked(True)
+        else:
+            self.toggle_dock_visibility(dock=self.diffusion_dock, button=self.lame_action.Diffusion)
+
+    def open_project_files_dock(self):
+        """Opens/closes the Project Files dock
+
+        Opens the Project Files dock (the samples in the current project,
+        with link/calibration/processing/notes status), creates on first
+        instance. On later calls, toggles its visibility (and the action's
+        checked state) rather than always showing it.
+        """
+        if not hasattr(self, 'project_files_dock'):
+            self.project_files_dock = ProjectFilesDock(self)
+
+            if self.project_files_dock not in self.help_mapping:
+                self.help_mapping[self.project_files_dock] = 'project_files'
+
+            self.project_files_dock.show()
+            self.lame_action.ProjectFiles.setChecked(True)
+        else:
+            self.toggle_dock_visibility(dock=self.project_files_dock, button=self.lame_action.ProjectFiles)
+
     def open_notes(self):
         """Opens Notes Dock
 
@@ -1227,10 +1602,7 @@ class MainWindow(QMainWindow):
             NoteTaking
         """            
         if not hasattr(self, 'notes_dock'):
-            if hasattr(self.app_data,'selected_directory') and self.app_data.sample_id != '':
-                notes_file = self.app_data.selected_directory / f"{self.app_data.sample_id}.rst"
-            else:
-                notes_file = None
+            notes_file = self.project_manager.notes_path_for_sample(self.app_data.sample_id)
 
             self.notes_dock = NotesDock(self, filename=notes_file)
             info_menu_items = [
@@ -1239,7 +1611,8 @@ class MainWindow(QMainWindow):
                 ('Current plot details', lambda: self.insert_info_note('plot info')),
                 ('Filter table', lambda: self.insert_info_note('filters')),
                 ('PCA results', lambda: self.insert_info_note('pca results')),
-                ('Cluster results', lambda: self.insert_info_note('cluster results'))
+                ('Cluster results', lambda: self.insert_info_note('cluster results')),
+                ('Diffusion results', lambda: self.insert_info_note('diffusion results')),
             ]
             self.notes_dock.notes.info_menu_items = info_menu_items
 
@@ -1267,14 +1640,27 @@ class MainWindow(QMainWindow):
                 text += '\n'
                 self.notes_dock.notes.print_info(text)
             case 'analytes':
-                analytes = data.processed.match_attribute('data_type', 'Analyte')
-                ratios = data.processed.match_attribute('data_type', 'Ratio')
+                # mirrors SampleObj.get_processed_data()'s field selection exactly
+                # (the same 'use'/'use_normalized' attributes PCA/clustering/
+                # correlation etc. draw from), so this reports exactly what an
+                # analysis run would actually include -- not just every analyte/
+                # ratio column that happens to exist on the sample
+                analytes = data.processed.match_attributes({'data_type': 'Analyte', 'use': True})
+                analytes_norm = data.processed.match_attributes({'data_type': 'Analyte', 'use_normalized': True})
+                ratios = data.processed.match_attributes({'data_type': 'Ratio', 'use': True})
+                ratios_norm = data.processed.match_attributes({'data_type': 'Ratio', 'use_normalized': True})
                 text = ''
                 if analytes:
-                    text += ':analytes collected: '+', '.join(analytes)
+                    text += ':analytes used: '+', '.join(analytes)
+                    text += '\n'
+                if analytes_norm:
+                    text += ':normalized analytes used: '+', '.join(analytes_norm)
                     text += '\n'
                 if ratios:
-                    text += ':ratios computed: '+', '.join(ratios)
+                    text += ':ratios used: '+', '.join(ratios)
+                    text += '\n'
+                if ratios_norm:
+                    text += ':normalized ratios used: '+', '.join(ratios_norm)
                     text += '\n'
                 text += '\n'
                 self.notes_dock.notes.print_info(text)
@@ -1318,8 +1704,67 @@ class MainWindow(QMainWindow):
                 # add PCA results to table
                 self.add_table_note(matrix, row_labels=analytes, col_labels=header)
             case 'cluster results':
-                if not self.parent.cluster_results:
+                method = self.app_data.cluster_method
+                if method not in data.processed.columns:
                     return
+
+                # only the settings actually passed to the clustering algorithm
+                # (see DataAnalysis.Clustering.compute_clusters) -- e.g. 'distance'
+                # is stored in cluster_dict but currently unused by either method,
+                # so it's deliberately left out here
+                algorithm_params = {
+                    'k-means': ['n_clusters', 'seed'],
+                    'fuzzy c-means': ['n_clusters', 'exponent', 'seed'],
+                }
+                settings = self.app_data.cluster_dict.get(method, {})
+
+                text = f':clustering algorithm: {method}\n'
+                for key in algorithm_params.get(method, []):
+                    if key in settings:
+                        text += f':{key}: {settings[key]}\n'
+                text += '\n'
+
+                percentages = data.cluster_percentages(method)
+                rows = []
+                for c in sorted(percentages):
+                    cluster_name = settings.get(c, {}).get('name', f'Cluster {c+1}')
+                    rows.append({
+                        'Cluster': cluster_name,
+                        '% of Total': f"{percentages[c]['pct_total']:.1f}",
+                        '% of Filtered': f"{percentages[c]['pct_filtered']:.1f}",
+                    })
+
+                self.notes_dock.notes.print_info(text)
+                if rows:
+                    rst_table = self.notes_dock.notes.to_rst_table(pd.DataFrame(rows))
+                    self.notes_dock.notes.print_info(rst_table)
+            case 'diffusion results':
+                if not hasattr(self, 'diffusion_dock') or not self.diffusion_dock._last_results:
+                    return
+                r = self.diffusion_dock._last_results
+
+                duration_ka = r['duration_s'] / (1000.0 * 365.25 * 24 * 3600)
+                text = f':mineral: {r["mineral"]}\n'
+                text += f':region: {r["region_label"]}\n'
+                text += f':temperature: {r["T_K"] - 273.15:.0f} °C\n'
+                if r.get('duration_std_s'):
+                    duration_std_ka = r['duration_std_s'] / (1000.0 * 365.25 * 24 * 3600)
+                    text += f':fitted duration: {duration_ka:.4g} ± {duration_std_ka:.4g} ka\n'
+                else:
+                    text += f':duration: {duration_ka:.4g} ka\n'
+                text += f':RMS misfit: {r["rms_misfit"]:.4g}\n'
+                text += ':note: boundary pixels are fixed to their observed value and always show ~0 residual -- not diagnostic of fit quality\n'
+                text += '\n'
+
+                rows = [
+                    {'Element': e, 'D0 (m²/s)': f"{r['D0_dict'][e]:.3g}", 'Ea (kJ/mol)': f"{r['Ea_dict'][e] / 1000.0:.4g}"}
+                    for e in r['D0_dict']
+                ]
+
+                self.notes_dock.notes.print_info(text)
+                if rows:
+                    rst_table = self.notes_dock.notes.to_rst_table(pd.DataFrame(rows))
+                    self.notes_dock.notes.print_info(rst_table)
 
 
     def open_calculator(self):

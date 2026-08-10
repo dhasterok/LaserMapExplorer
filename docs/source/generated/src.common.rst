@@ -12,13 +12,7 @@
 
    Browser
    Calculator
-   CodingWidgets
-   ColorManager
-   ColorPicker
-   ColorSelector
-   ColormapEditor
    CustomMplCanvas
-   CustomWidgets
    DataHandling
    DualWidgetList
    ExtendedDF
@@ -30,8 +24,8 @@
    Polygon
    PolygonMatplotlib
    Regression
+   RegressionModel
    ScheduleTimer
-   SearchTool
    SortAnalytes
    Status
    TableFunctions
@@ -41,11 +35,6 @@
    geochronology
    outliers
    plot_spider
-   radar
-   radar_factory
-   reSTEdit
-   reSTNotes
-   reSTRules
    scalebar
    ternary_plot
    varfunc

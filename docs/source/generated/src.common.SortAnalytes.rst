@@ -8,5 +8,6 @@ src.common.SortAnalytes
 
    .. autosummary::
    
+      resolve_element_tokens
       sort_analytes
    

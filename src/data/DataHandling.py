@@ -1,0 +1,2765 @@
+import re, os, copy, json
+import uuid
+from datetime import datetime
+from typing import Optional, Union, Any, Dict, List
+import numpy as np
+from numpy.typing import NDArray
+import pandas as pd
+from src.data.ExtendedDF import AttributeDataFrame
+from scipy.stats import yeojohnson
+from scipy import ndimage
+# from kneed import KneeLocator
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import lame_core.format as fmt
+from src.data.SortAnalytes import sort_analytes
+from src.data.outliers import chauvenet_criterion, quantile_and_difference
+from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QMessageBox
+from src.common.Status import StatusMessageManager
+from src.control.Logger import LoggerConfig, auto_log_methods, log
+
+
+@auto_log_methods(logger_key='Data')
+class SampleObj(QObject):
+    """Creates a base sample object to store and manipulate geochemical data in map form
+    
+    The sample object is initially constructed from the data within a *.lame.csv file and loaded into
+    the ``raw_data`` dataframe.  The sample object also contains a number of properties in addition
+    to the input data.  These include metadata that are linked to each column.  To make this link,
+    the dataframe is initialized as an ``ExtendedDF.AttributeDataFrame``, which brings with it a
+    number of methods to set, get and search the dataframe's metadata.
+
+    Parameters
+    ----------
+    sample_id : str
+        Sample identifier.
+    file_path : str
+        Path to data file for sample_id
+    outlier_method : str
+        Method used ot handle outliers in the dataset
+    negative_method : str
+        Method used to handle negative values in the dataset
+    ref_chem : pandas.DataFrame
+        Reference chemistry for normalizing data
+    
+    Methods
+    -------
+    reset_data :
+        Reverts back to the original data
+
+    add_columns :
+        Add one or more columns to the sample object
+
+    delete_column :
+        Deletes a column and associated attributes from the AttributeDataFrame
+
+    get_attribute_dict :
+        Creates a dictionary from an attribute where the unique values of the attribute becomes the
+        keys and the items are lists with the column names that match each attribute_name
+
+    swap_xy : 
+        Swaps data in a SampleObj
+
+    _swap_xy :
+        Swaps X and Y of a dataframe
+    
+    swap_resolution :
+        Swaps DX and DY for a dataframe
+
+    reset_crop :
+        Reset the data to the new bounds.
+
+    compute_ratio :
+        Compute a ratio field from two analytes
+
+    cluster_data :
+        Clusters data for use with data preprocessing
+
+
+    prep_data :
+        Applies adjustments to data data prior to analyses and plotting
+
+    k_optimal_clusters :
+        Predicts the optimal number of clusters
+
+    outlier_detection :
+        Outlier detection with cluster-based correction for negatives and compositional constraints, using percentile-based shifting
+
+    transform_array :
+        Negative and zero handling with clustering for noise detection
+
+    update_norm :
+        Update the norm of the data
+
+    get_map_data :
+        Retrieves and processes the mapping data for the given sample and analytes
+
+    get_processed_data :
+        Gets the processed data for analysis
+
+    get_vector :
+        Creates a dictionary of values for plotting
+
+    ref_chem : dict
+        Reference chemistry. By default `None`.
+
+    Attributes
+    ----------
+    update_crop_mask :
+        Automatically update the crop_mask whenever crop bounds change.
+    reset_crop : 
+        Resets dataframe to original bounds.
+    raw :
+    filter_df : (pandas.DataFrame) -- stores filters for each sample
+        | 'field_type' : (str) -- field type
+        | 'field' : (str) -- name of field
+        | 'norm' : (str) -- scale normalization function, ``linear`` or ``log``
+        | 'min' : (float) -- minimum value for filtering
+        | 'max' : (float) -- maximum value for filtering
+        | 'operator' : (str) -- boolean operator for combining filters, ``and`` or ``or``
+        | 'use' : (bool) -- ``True`` indicates the filter should be used to filter data
+        | 'persistent' : (bool) -- ``True`` retains the filter when the sample is changed
+
+        | 'crop' : () --
+        | 'x_max' : () --
+        | 'x_min' : () --
+        | 'y_max' : () --
+        | 'y_min' : () --
+        | 'crop_x_max' : () --
+        | 'crop_x_min' : () --
+        | 'crop_y_max' : () --
+        | 'crop_y_min' : () --
+        | 'processed data': () --
+        | 'raw_data': () -- 
+        | 'cropped_raw_data': () --
+            
+        | 'crop' : () --
+        | 'x_max' : () --
+        | 'x_min' : () --
+        | 'y_max' : () --
+        | 'y_min' : () --
+        | 'crop_x_max' : () --
+        | 'crop_x_min' : () --
+        | 'crop_y_max' : () --
+        | 'crop_y_min' : () --
+        | 'raw_data': () -- 
+        | 'cropped_raw_data': () -- 
+        | 'raw data' : (pandas.DataFrame) --
+        | 'x_min' : (float) -- minimum x of full data
+        | 'x_max' : (float) -- maximum x of full data
+        | 'y_min' : (float) -- minimum y of full data
+        | 'y_max' : (float) -- maximum y of full data
+        | 'crop_x_min' : (float) -- minimum x of cropped data
+        | 'crop_x_max' : (float) -- maximum x of cropped data
+        | 'crop_x_min' : (float) -- minimum y of cropped data
+        | 'crop_x_max' : (float) -- maximum y of cropped data
+        | 'norm' : () --
+        | 'analysis data' : (pandas.DataFrame) --
+        | 'cropped_raw_data' : (pandas.DataFrame) --
+
+    'processed' : (pandas.DataFrame) --
+    'crop_mask' : (MaskObj) -- mask created from cropped axes.
+    'filter_mask' : (MaskObj) -- mask created by a combination of filters.  Filters are displayed for the user in ``tableWidgetFilters``.
+    'polygon_mask' : (MaskObj) -- mask created from selected polygons.
+    'cluster_mask' : (MaskObj) -- mask created from selected or inverse selected cluster groups.  Once this mask is set, it cannot be reset unless it is turned off, clustering is recomputed, and selected clusters are used to produce a new mask.
+    'mask' : () -- combined mask, derived from filter_mask & 'polygon_mask' & 'crop_mask'
+
+    Signals
+    -------
+    annotationAdded : (str, dict)
+        Emitted when an annotation is added to a plot.
+    annotationUpdated : (str, str, dict)
+        Emitted when an annotation is updated.
+    annotationRemoved : (str, str)
+        Emitted when an annotation is removed from a plot.
+    annotationVisibilityChanged : (str, str, bool)
+        Emitted when the visibility of an annotation is changed.
+    pixelDimensionChanged : (str, float)
+        Emitted when the pixel dimension (dx or dy) is changed.
+    imageResolutionChanged : (str, int)
+        Emitted when the image resolution (nx or ny) is changed.
+    dataQuantileChanged : (str, float)
+        Emitted when the data quantile (min or max) is changed.
+    dataDiffQuantileChanged : (str, float)
+        Emitted when the data difference quantile (min or max) is changed.
+    applyOutlierAllChanged : (bool)
+        Emitted when the apply outlier to all flag is changed.
+    outlierMethodChanged : (str)
+        Emitted when the outlier method is changed.
+    negativeMethodChanged : (str)
+        Emitted when the negative method is changed.
+    autoscaleStateChanged : (bool)
+        Emitted when the autoscale state is changed.
+    currentFieldUpdated : (str)
+        Emitted when the current field is updated.
+    """
+    # PyQt signals for annotation management
+    annotationAdded = pyqtSignal(str, dict)  # plot_id, annotation_data
+    annotationUpdated = pyqtSignal(str, str, dict)  # plot_id, annotation_id, updates
+    annotationRemoved = pyqtSignal(str, str)  # plot_id, annotation_id
+    annotationVisibilityChanged = pyqtSignal(str, str, bool)  # plot_id, annotation_id, visible
+
+    pixelDimensionChanged = pyqtSignal(str, float)  # axis, new_value
+    imageResolutionChanged = pyqtSignal(str, int)  # axis, new_value
+    dataQuantileChanged = pyqtSignal(str, float)  # bound, new_value
+    dataDiffQuantileChanged = pyqtSignal(str, float)  # bound, new_value
+
+    applyOutlierAllChanged = pyqtSignal(bool)  # new state
+    outlierMethodChanged = pyqtSignal(str)  # new method
+    negativeMethodChanged = pyqtSignal(str)  # new method
+    autoscaleStateChanged = pyqtSignal(bool)  # new value
+
+    currentFieldUpdated = pyqtSignal(str)  # new field
+    
+
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
+        # Initialize both parent classes
+        super().__init__()
+
+        self.ui = ui
+
+        self.logger_key = 'Data'
+        
+        # Plot annotations storage
+        self.plot_annotations = {}  # plot_id -> list[annotation_data]
+
+        self.sample_id = sample_id
+        self.file_path = file_path
+
+        # sample-level acquisition metadata (spot size, sweep time, etc.), loaded
+        # from the sibling <sample_id>.lmdf.json file in reset_data(), if present
+        self.metadata = {}
+        # per-file/analyte records from the same file, for the future per-analyte-units feature
+        self.analyte_metadata = []
+
+        self._outlier_method = outlier_method
+        
+        self._negative_method = negative_method
+        self._smoothing_method = smoothing_method
+        self._updating = False
+        
+        # Default ref_chem for base class - empty Series, subclasses can override
+        self._ref_chem = pd.Series(dtype=float)
+
+        # cache of analyte correlation matrices, keyed by method ('pearson', 'spearman');
+        # cleared whenever prep_data() runs since that's the only place analyte values change
+        self._correlation_cache = {}
+
+        self._default_lower_bound = 0.005
+        self._default_upper_bound = 0.995
+
+        self._default_difference_lower_bound= 0.005
+        self._default_difference_upper_bound= 0.995
+
+        self._data_min_quantile = 0.005
+        self._data_max_quantile = 0.005
+        self._data_min_diff_quantile = 0.005
+        self._data_max_diff_quantile = 0.005
+
+        self._nx = 0
+        self._ny = 0
+        self._dx = 0
+        self._dy = 0
+
+        self._auto_scale_flag = True
+
+        # filter dataframe
+        self.filter_df = pd.DataFrame(columns=[
+            'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'
+        ])
+
+        # will be AttributeDataFrame once data is loaded into them
+        self.raw: AttributeDataFrame = AttributeDataFrame()
+        self.processed: AttributeDataFrame = AttributeDataFrame()
+
+        self._outlier_method_options = [
+            'none',
+            'quantile criteria',
+            'quantile and distance criteria',
+            'Chauvenet criterion',
+            'log(n>x) inflection'
+        ]
+
+        # matrix order set by x-y sorting, which changes when swapping axes
+        self.is_swapped = False
+
+        # data types stored in AttributeDataFrames.column_attributes['data_type']
+        self._default_data_types = [
+            'Analyte',
+            'Ratio',
+            'Calculated',
+            'Special',
+            'PCA score',
+            'Cluster',
+            'Cluster score',
+            'Diffusion model'
+        ]
+        self._valid_data_types = self._default_data_types
+
+        self.order = 'F'
+
+        #self._default_scale_options = ['linear', 'log', 'inv_logit', 'symlog']
+        self._default_scale_options = {'standard':['linear', 'log', 'inv_logit', 'symlog'],
+                                       'linear':['linear'],
+                                       'discrete':['discrete']}
+
+        self.order = 'F'
+
+    # --------------------------------------
+    # Define properties and setter functions
+    # --------------------------------------
+    # note properties are based on the cropped X and Y values
+    @property
+    def x(self):
+        """numpy.ndarray : Value of x-coordinate associated with map data"""
+        return self._x
+
+    @x.setter
+    def x(self, new_x):
+        if not self._updating:
+            self._updating = True
+            self._x = new_x
+            self._dx = self.x_range / new_x.nunique()
+            self._nx = new_x.nunique()
+            self._updating = False
+
+    # Define the y property
+    @property
+    def y(self):
+        """numpy.ndarray : Value of y-coordinate associated with map data"""
+        return self._y
+
+    @y.setter
+    def y(self, new_y):
+        if not self._updating:
+            self._updating = True
+            self._y = new_y
+            self._dy = self.y_range / new_y.nunique() 
+            self._ny = new_y.nunique()
+            self._updating = False
+
+    @property
+    def dx(self):
+        """float : Width of pixels in x-direction."""
+        return self._dx
+
+    @dx.setter
+    def dx(self, new_dx):
+        if not self._updating:
+            self._updating = True
+
+            if new_dx == self._dx:
+                return
+
+            # Recalculates X for self.raw
+            # (does not use self.processed because the x limits will otherwise be incorrect)
+            # X = round(self.raw['Xc']/self._dx)
+            X = self.raw['Xc']/self._dx
+            self._dx = new_dx
+            X_new = new_dx*X
+
+            # Extract cropped region and update self.processed
+            self._x = X_new[self.crop_mask]
+            self.processed['Xc'] = self._x
+            
+            self._updating = False
+
+            self.pixelDimensionChanged.emit("x", self._dx)
+        
+    @property
+    def dy(self):
+        """float : Width of pixels in y-direction."""
+        return self._dy
+
+    @dy.setter
+    def dy(self, new_dy):
+        if not self._updating:
+            self._updating = True
+
+            if new_dy == self._dy:
+                return
+
+            # Recalculates Y for self.raw
+            # (does not use self.processed because the y limits will otherwise be incorrect)
+            Y = self.raw['Yc']/self._dy
+            self._dy = new_dy
+            Y_new = new_dy*Y
+
+            # Extract cropped region and update self.processed
+            self._y = Y_new[self.crop_mask]
+            self.processed['Yc'] = self._y
+
+            self._updating = False
+
+            self.pixelDimensionChanged.emit("y", self._dy)
+        
+    @property
+    def nx(self):
+        return self._nx
+    
+    @nx.setter
+    def nx(self, new_nx):
+        if new_nx == self._nx:
+            return
+
+        self._nx = new_nx
+        self.imageResolutionChanged.emit("x", self._ny)
+
+    @property
+    def ny(self):
+        return self._ny
+    
+    @ny.setter
+    def ny(self, new_ny):
+        if new_ny == self._ny:
+            return
+
+        self._ny = new_ny
+        self.imageResolutionChanged.emit("y", self._ny)
+
+    # Cropped X-axis limits
+    @property
+    def xlim(self):
+        """list : (float, float) Limits of pixels in x-direction."""
+        return (self._x.min(), self._x.max()) if self._x is not None else (None, None)
+
+    # Cropped Y-axis limits
+    @property
+    def ylim(self):
+        """list : (float, float) Limits of pixels in y-direction."""
+        return (self._y.min(), self._y.max()) if self._y is not None else (None, None)
+
+    @property
+    def x_range(self):
+        """float : Range of pixels in x-direction."""
+        return self._x.max() - self._x.min() if self._x is not None else None
+
+    @property
+    def y_range(self):
+        """float : Range of pixels in y-direction."""
+        return self._y.max() - self._y.min() if self._y is not None else None
+    
+    @property
+    def aspect_ratio(self):
+        """float : Aspect ratio of maps (dy / dx)."""
+        if self._dx and self._dy:
+            return self._dy / self._dx
+        return None
+
+    @property
+    def array_size(self):
+        """tuple : (int, int) Size of map in pixels"""
+        return (self._y.nunique(), self._x.nunique())
+
+    @property
+    def apply_outlier_to_all(self):
+        """bool : flag that indicates whether the outlier method should be applied to all analytes."""
+        return self._apply_outlier_to_all
+    
+    @apply_outlier_to_all.setter
+    def apply_outlier_to_all(self, state):
+        if state == self._apply_outlier_to_all:
+            return
+    
+        self._apply_outlier_to_all = state
+        self.applyOutlierAllChanged.emit(state)
+
+    @property
+    def auto_scale_flag(self):
+        return self._auto_scale_flag
+    
+    @auto_scale_flag.setter
+    def auto_scale_flag(self, flag):
+        if flag == self._auto_scale_flag:
+            return
+        self._auto_scale_flag = flag
+        self.prep_data()
+        self.autoscaleStateChanged.emit(flag)
+
+
+    @property
+    def outlier_method(self):
+        """str : Method for predicting and clipping outliers."""        
+        return self._outlier_method
+
+    @outlier_method.setter
+    def outlier_method(self, method):
+        if method == self._outlier_method:
+            return
+        self._outlier_method = method
+        self.prep_data()
+        self.outlierMethodChanged.emit(method)
+
+    @property
+    def negative_method(self):
+        """str : Method for negative handling."""        
+        return self._negative_method
+ 
+    @negative_method.setter
+    def negative_method(self, method):
+        if method == self._negative_method:
+            return
+        self._negative_method = method
+        self.prep_data()
+        self.negativeMethodChanged.emit(method)
+
+    @property
+    def data_min_quantile(self):
+        """float : minimum quantile used for autoscaling."""
+        return self._data_min_quantile
+    
+    @data_min_quantile.setter
+    def data_min_quantile(self, value):
+        if value == self._data_min_quantile:
+            return
+    
+        self._data_min_quantile = value
+        self.dataQuantileChanged.emit("min", value)
+
+    @property
+    def data_max_quantile(self):
+        """float : maximum quantile used for autoscaling."""
+        return self._data_max_quantile
+    
+    @data_max_quantile.setter
+    def data_max_quantile(self, value):
+        if value == self._data_max_quantile:
+            return
+    
+        self._data_max_quantile = value
+        self.dataQuantileChanged.emit("max", value)
+
+    @property
+    def data_min_diff_quantile(self):
+        """float : minimum quantile for differences used for autoscaling."""
+        return self._data_min_diff_quantile
+    
+    @data_min_diff_quantile.setter
+    def data_min_diff_quantile(self, value):
+        if value == self._data_min_diff_quantile:
+            return
+    
+        self._data_min_diff_quantile = value
+        self.dataDiffQuantileChanged.emit("min", value)
+
+    @property
+    def data_max_diff_quantile(self):
+        """float : maximum quantile for differences used for autoscaling."""
+        return self._data_max_diff_quantile
+    
+    @data_max_diff_quantile.setter
+    def data_max_diff_quantile(self, value):
+        if value == self._data_max_diff_quantile:
+            return
+    
+        self._data_max_diff_quantile = value
+        self.dataDiffQuantileChanged.emit("max", value)
+
+    @property
+    def crop_mask(self):
+        """numpy.ndarray: Boolean mask used to crop the raw data. True values will be used."""
+        return self._crop_mask
+    
+    @crop_mask.setter
+    def crop_mask(self, new_xlim, new_ylim):
+        self.crop=True
+
+        self._crop_mask = (
+            (self.raw['Xc'] >= new_xlim[0]) & 
+            (self.raw['Xc'] <= new_xlim[1]) &
+            (self.raw['Yc'] <= self.raw['Yc'].max() - new_ylim[0]) &
+            (self.raw['Yc'] >= self.raw['Yc'].max() - new_ylim[1])
+        )
+
+        #crop clipped_analyte_data based on self.crop_mask
+        self.raw[self.crop_mask].reset_index(drop=True)
+        # Ensure we maintain AttributeDataFrame type after cropping
+        cropped_processed = self.processed[self.crop_mask].reset_index(drop=True)
+        if not isinstance(cropped_processed, AttributeDataFrame):
+            # If pandas operation returned regular DataFrame, convert back to AttributeDataFrame
+            new_processed = AttributeDataFrame(cropped_processed)
+            new_processed.column_attributes = self.processed.column_attributes.copy()
+            self.processed = new_processed
+        else:
+            self.processed = cropped_processed
+
+        self.x = self.processed['Xc']
+        self.y = self.processed['Yc']
+
+        self._crop_mask = np.ones_like(self.raw['Xc'], dtype=bool)
+
+        self.prep_data()
+
+    def scale_options(self, plot_type: str|None=None, ax: str|None=None, field_type: str|None=None, field: str|None=None) -> list:
+        """Options for scaling the data.
+
+        Parameters
+        ----------
+        plot_type : str, optional
+            Type of plot, by default None
+        ax : str, optional
+            Axis being plotted, by default None
+        field_type : str, optional
+            Type of field being plotted, by default None
+        field : str, optional
+            Name of field being plotted, by default None
+
+        Returns
+        -------
+        list :
+            List of valid scaling options for the data.
+        """
+        scale_options = {
+            'standard':['linear', 'log', 'inv_logit', 'symlog'],
+            'linear':['linear'],
+            'discrete':['discrete'],
+        }
+        if plot_type is not None:
+            if plot_type == 'correlation':
+                return scale_options['linear']
+            if plot_type == 'histogram' and ax == 'y':
+                return scale_options['linear']
+
+        if field_type is not None and field is not None:
+            if field_type.lower() in ['cluster'] and field.lower() in ['k-means', 'fuzzy-c means']:
+                return scale_options['discrete']
+        return scale_options['standard']
+
+    @property
+    def valid_data_types(self):
+        """list : data types possible for in processed data."""
+        return self._valid_data_types
+
+    @valid_data_types.setter
+    def valid_data_types(self, new_list):
+        if set(new_list).issubset(self._default_data_types):
+            self._valid_data_types = new_list
+        else:
+            raise ValueError("List (new_list) is not a subset of self._default_data_types.")
+    
+    @property
+    def ref_chem(self):
+        """pd.Series : Reference chemistry data for normalization. Base class returns empty Series."""
+        return self._ref_chem
+    
+    @ref_chem.setter 
+    def ref_chem(self, value):
+        """Set reference chemistry. Base class stores but doesn't validate."""
+        if value is not None:
+            self._ref_chem = value
+        else:
+            self._ref_chem = pd.Series(dtype=float)
+
+    @property
+    def current_field(self):
+        """str : """
+        return self._current_field
+    
+    @current_field.setter
+    def current_field(self, new_field):
+        if new_field == self._current_field:
+            return
+
+        self._current_field = new_field
+        if not hasattr(self,"processed"):
+            return
+
+        if new_field is None:
+            # if new_field is None, use first analyte field
+            field = self.processed.match_attribute('data_type','Analyte')[0]
+
+            self.negative_method = self.processed.get_attribute(field, 'negative_method')
+            self.outlier_method = self.processed.get_attribute(field, 'outlier_method')
+            self.smoothing_method = self.processed.get_attribute(field, 'smoothing_method')
+            self.data_min_quantile = self.processed.get_attribute(field,'lower_bound')
+            self.data_max_quantile = self.processed.get_attribute(field,'upper_bound')
+            self.data_min_diff_quantile = self.processed.get_attribute(field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed.get_attribute(field,'diff_upper_bound')
+        else:
+            # use new_field
+            self.negative_method = self.processed.get_attribute(new_field, 'negative_method')
+            self.outlier_method = self.processed.get_attribute(new_field, 'outlier_method')
+            self.smoothing_method = self.processed.get_attribute(new_field, 'smoothing_method')
+            self.data_min_quantile = self.processed.get_attribute(new_field,'lower_bound')
+            self.data_max_quantile = self.processed.get_attribute(new_field,'upper_bound')
+            self.data_min_diff_quantile = self.processed.get_attribute(new_field,'diff_lower_bound')
+            self.data_max_diff_quantile = self.processed.get_attribute(new_field,'diff_upper_bound')
+
+        self.currentFieldUpdated.emit(self._current_field)
+
+    # validation functions
+    def _is_valid_oulier_method(self, text):
+        """Validates if a the method is a valid string.
+
+        Valid outlier methods include: `'none'`, `'quantile criteria'`, 
+        `'quantile and distance criteria'`, `'chauvenet criterion'`, `'log(n>x) inflection'`.
+
+        
+        Parameters
+        ----------
+        text : str
+            Ensures the method is a valid oulier method.
+        """
+        return isinstance(text, str) and text.lower() in self._outlier_method_options
+
+    def reset_data(self):
+        """Reverts back to the original data.
+
+        What is reset?
+
+        What is not reset?
+        """        
+        # load sibling acquisition-metadata file, if present -- older samples (or data
+        # types that don't populate it yet) simply leave self.metadata/analyte_metadata
+        # at their __init__ defaults ({} / [])
+        metadata_path = self.file_path.replace('.lame.', '.lmdf.').replace('.csv', '.json')
+        if os.path.exists(metadata_path):
+            try:
+                with open(metadata_path, 'r') as f:
+                    lmdf = json.load(f)
+                self.metadata = {
+                    'Data type': lmdf.get('data_type'),
+                    'Method': lmdf.get('method'),
+                    **lmdf.get('metadata', {}),
+                }
+                self.analyte_metadata = lmdf.get('analytes', [])
+            except Exception as e:
+                log(f"Could not load metadata file '{os.path.basename(metadata_path)}': {e}", prefix="Data")
+
+        sample_df = pd.read_csv(self.file_path, engine='c')
+        sample_df = sample_df.loc[:, ~sample_df.columns.str.contains('^Unnamed')]  # Remove unnamed columns
+
+        # pandas mangles duplicate CSV header names by appending '.1', '.2', etc.
+        # (the source file had the same column title twice, e.g. an export bug
+        # upstream). Downstream analyte/ratio-name parsing assumes clean names
+        # and breaks on the mangled suffix, so drop those duplicates here.
+        dupe_pattern = re.compile(r'^(.*)\.\d+$')
+        mangled = [col for col in sample_df.columns
+                   if (m := dupe_pattern.match(col)) and m.group(1) in sample_df.columns]
+        if mangled:
+            log(f"'{os.path.basename(self.file_path)}' has duplicate column(s), dropping: {mangled}",
+                prefix="Data")
+            sample_df = sample_df.drop(columns=mangled)
+
+        # Older .lame files use 'X'/'Y'; current schema uses 'Xc'/'Yc' — normalise on load
+        if 'Xc' not in sample_df.columns and 'X' in sample_df.columns:
+            sample_df = sample_df.rename(columns={'X': 'Xc', 'Y': 'Yc'})
+
+        # determine column data types
+        # initialize all as 'Analyte'
+        data_type = ['Analyte']*sample_df.shape[1]
+
+        # identify coordinate columns
+        data_type[sample_df.columns.get_loc('Xc')] = 'coordinate'
+        data_type[sample_df.columns.get_loc('Yc')] = 'coordinate'
+
+        # identify and ratio columns
+        ratio_pattern = re.compile(r'([A-Za-z]+[0-9]*) / ([A-Za-z]+[0-9]*)')
+
+        # List to store column names that match the ratio pattern
+        ratio_columns = [col for col in sample_df.columns if ratio_pattern.match(col)]
+
+        # Update the data_type list for ratio columns by finding their index positions
+        for col in ratio_columns:
+            col_index = sample_df.columns.get_loc(col)
+            data_type[col_index] = 'Ratio'
+
+        # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
+        # may includes analytes, ratios, and special data
+        self.raw = AttributeDataFrame(data=sample_df)
+        self.raw.set_attribute(list(self.raw.columns), 'data_type', data_type)
+
+        self.x = self._orig_x = self.raw['Xc']
+        self.y = self._orig_y = self.raw['Yc']
+        self._orig_dx = self.dx
+        self._orig_dy = self.dy
+
+        # initialize X and Y axes bounds for plotting and cropping, initially the entire map
+        self._xlim = [self.raw['Xc'].min(), self.raw['Xc'].max()]
+        self._ylim = [self.raw['Yc'].min(), self.raw['Yc'].max()]
+
+        # initialize crop flag to false
+        self.crop = False
+
+        # Remove the ratio columns from the raw_data and store the rest
+        #non_ratio_columns = [col for col in sample_df.columns if col not in ratio_columns]
+        #self.raw = sample_df[non_ratio_columns]
+
+        # set mask of size of analyte array
+        self._crop_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.filter_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.polygon_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.cluster_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.mask = \
+            self.crop_mask & \
+            self.filter_mask & \
+            self.polygon_mask & \
+            self.cluster_mask
+
+        self.dim_red_results = {}
+        self.cluster_results = {}
+        self.silhouette_scores = {}
+
+
+        # autoscale and negative handling
+        self.reset_data_handling()
+
+    def reset_data_handling(self):
+        """Resets processed data back to raw before performing autoscaling.
+        
+        Any computed fields will be removed."""
+        coordinate_columns = self.raw.match_attribute(attribute='data_type',value='coordinate')
+        self.raw.set_attribute(coordinate_columns, 'units', None)
+        self.raw.set_attribute(coordinate_columns, 'use', False)
+
+        analyte_columns = self.raw.match_attribute(attribute='data_type',value='Analyte')
+        self.raw.set_attribute(analyte_columns, 'units', None)
+        self.raw.set_attribute(analyte_columns, 'use', True)
+        self.raw.set_attribute(analyte_columns, 'use_normalized', False)
+        # quantile bounds
+        self.raw.set_attribute(analyte_columns, 'lower_bound', 0.05)
+        self.raw.set_attribute(analyte_columns, 'upper_bound', 99.5)
+        # quantile bounds for differences
+        self.raw.set_attribute(analyte_columns, 'diff_lower_bound', 0.05)
+        self.raw.set_attribute(analyte_columns, 'diff_upper_bound', 99)
+        # linear/log scale
+        self.raw.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw.set_attribute(analyte_columns, 'auto_scale', True)
+
+        analyte_columns = self.raw.match_attribute(attribute='data_type',value='Ratio')
+        self.raw.set_attribute(analyte_columns, 'units', None)
+        self.raw.set_attribute(analyte_columns, 'use', True)
+        self.raw.set_attribute(analyte_columns, 'use_normalized', False)
+        # quantile bounds
+        self.raw.set_attribute(analyte_columns, 'lower_bound', self._default_lower_bound)
+        self.raw.set_attribute(analyte_columns, 'upper_bound', self._default_upper_bound)
+        # quantile bounds for differences
+        self.raw.set_attribute(analyte_columns, 'diff_lower_bound', self._default_difference_lower_bound)
+        self.raw.set_attribute(analyte_columns, 'diff_upper_bound', self._default_difference_upper_bound)
+        # linear/log scale
+        self.raw.set_attribute(analyte_columns, 'norm', 'linear')
+        self.raw.set_attribute(analyte_columns, 'auto_scale', True)
+
+        # cluster data
+        # This determines the optimal number of clusters and creates cluster indicies that are used for preprocessing.
+        # This should only need to be run once on the initial raw data, unless the set of used analytes changes.
+
+        self.cluster_data()
+
+        self.prep_data()
+    
+    # def update_crop_mask(self):
+    #     """Automatically update the crop_mask whenever crop bounds change."""
+    #     for analysis_type, df in self.computed_data.items():
+    #         if isinstance(df, pd.DataFrame):
+    #             df = df[self.crop_mask].reset_index(drop=True)
+    #     self.prep_data()
+
+    def reset_resolution(self):
+        """Resets dx and dy to initial values."""        
+        self.dx = self._orig_dx
+        self.dy = self._orig_dy
+
+    def swap_xy(self):
+        """Swaps data in a SampleObj."""        
+        self.is_swapped = not self.is_swapped
+
+        if self.is_swapped:
+            self.order = 'C'
+        else:
+            self.order = 'F'
+
+        self._swap_xy(self.raw)
+        self._swap_xy(self.processed)
+
+        self.x = self.raw['Xc']
+        self.y = self.raw['Yc']
+
+        # swap orientation of original dx and dy to be consistent with X and Y
+        self._orig_dx, self._orig_dy = self._orig_dy, self._orig_dx
+
+    def _swap_xy(self, df):
+        """Swaps X and Y of a dataframe
+
+        Swaps coordinates for all maps in sample dataframe.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            data frame to swap X and Y coordinates
+        """
+        xtemp = df['Yc']
+        df['Yc'] = df['Xc']
+        df['Xc'] = xtemp
+
+        df = df.sort_values(['Yc','Xc'])
+
+    def update_resolution(self, axis, value):
+        """Updates DX and DY for a dataframe
+
+        Recalculates X and Y for a dataframe when the user changes the value of
+        pixel dimensions Dx or Dy
+
+        Parameter
+        ---------
+        axis : str
+            Indicates axis to update resolution, 'x' or 'y'.
+        value: float
+            Holds the new value that is used to update.
+        """
+        # update resolution based on user change
+        if axis == 'x':
+            self.dx = value
+            dx = self.dx
+        elif axis == 'y':
+            self.dy = value
+            dy = self.dy
+
+    def swap_resolution(self):
+        """Swaps DX and DY for a dataframe, updates X and Y
+
+        Recalculates X and Y for a dataframe
+        """  
+        X = round(self.raw['Xc']/self.dx)
+        Y = round(self.raw['Yc']/self.dy)
+
+        Xp = round(self.processed['Xc']/self.dx)
+        Yp = round(self.processed['Yc']/self.dy)
+
+        dx = self.dx
+        self.dx = self.dy
+        self.dy = dx
+
+        self.raw['Xc'] = self.dx*X
+        self.raw['Yc'] = self.dy*Y
+
+        self.processed['Xc'] = self.dx*Xp
+        self.processed['Yc'] = self.dy*Yp
+
+    def reset_crop(self):
+        """Reset the data to the original bounds.
+
+        Reseting the data to the original bounds results in deleting progress on analyses,
+        computations, etc.
+        """
+        # bring up dialog asking if user wishes to proceed
+        if not self.confirm_reset():
+            return
+
+        # Need to update to keep computed columns?
+        self.reset_data()
+
+    def compute_ratio(self, analyte_1, analyte_2):
+        """Compute a ratio field from two analytes.
+
+        Ratios are computed on the processed data, after negative handling, but before autoscaling.
+
+        Parameters
+        ----------
+        analyte_1 : str
+            Analyte field to be used as numerator of ratio.
+        analyte_2 : str
+            Analyte field to be used as denominator of ratio.
+        """
+        # Create a mask where both analytes are positive
+        mask = (self.processed[analyte_1] > 0) & (self.processed[analyte_2] > 0)
+
+        # Calculate the ratio and set invalid values to NaN
+        ratio_array = np.where(mask, self.processed[analyte_1] / self.processed[analyte_2], np.nan)
+
+        # Generate the ratio column name
+        ratio_name = f'{analyte_1} / {analyte_2}'
+
+        self.add_columns('Ratio',ratio_name,ratio_array)
+        self.processed.set_attribute(ratio_name, 'use', True)
+        self.processed.set_attribute(ratio_name, 'use_normalized', False)
+
+    def get_correlation_matrix(self, method='pearson'):
+        """Correlation matrix between analyte columns, cached per method.
+
+        Computing the correlation matrix (especially with ``'spearman'``, which ranks
+        every column) is expensive, so the result is cached and reused until ``prep_data``
+        next runs and invalidates the cache.
+
+        Parameters
+        ----------
+        method : str
+            Correlation method, ``'pearson'`` or ``'spearman'``. Defaults to ``'pearson'``.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Correlation matrix indexed and labeled by analyte name.
+        """
+        method = method.lower()
+        if method not in self._correlation_cache:
+            analyte_columns = self.processed.match_attribute('data_type', 'Analyte')
+            self._correlation_cache[method] = self.processed[analyte_columns].corr(method=method)
+        return self._correlation_cache[method]
+
+    # ------------------------------------------
+    # Dialogs
+    # ------------------------------------------
+    def confirm_reset(self):
+        """A simple dialog that ensures the user wishes to reset data
+
+        Returns
+        -------
+        bool
+            ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
+        """        
+        # Create a message box
+        msgBox = QMessageBox.warning(self.ui,
+            "Confirm Reset", 
+            "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        # Show the message box and get the user's response
+        response = msgBox.exec()
+
+        # Check the user's response
+        if response == QMessageBox.StandardButton.No:
+            return False  # User chose not to proceed
+        return True  # User chose to proceed
+
+    # ------------------------------------------
+    # Methods related to the AttributeDataFrames
+    # ------------------------------------------
+    # note properties are based on the cropped X and Y values
+    def add_columns(self, data_type, column_names, array, mask=None):
+        """
+        Add one or more columns to the sample object.
+
+        Adds one or more columns to `SampleObj.processed`. If a mask is provided,
+        the data is placed in the correct rows based on the mask.
+
+        Parameters
+        ----------
+        data_type : str
+            The type of data stored in the columns.
+        column_names : str or list of str
+            The name or names of the columns to add. If a column already exists, it will be overwritten.
+        array : numpy.ndarray
+            A 1D array (for single column) or 2D array (for multiple columns). The data to be added.
+        mask : numpy.ndarray, optional
+            A boolean mask that indicates which rows in the original data should be filled. If not provided,
+            the length of `array` must match the height of `processed data`.
+
+        Returns
+        -------
+        dict or str
+            Returns a message if a column is overwritten, or a dictionary with column names as keys
+            and "overwritten" or "added" as values if multiple columns are added.
+
+        Raises
+        ------
+        ValueError
+            Valid types are given in `SampleObj._valid_data_types`.
+        ValueError
+            The number of columns in the array must match the length of `column_names` (if multiple columns are being added).
+        ValueError
+            The length of array must match the height of `processed data` if no mask is provided.
+        ValueError
+            If a mask is provided, its length must match the height of `processed data`, and the number of `True` values
+            in the mask must match the number of rows in `array`.
+        """
+        # Ensure column_names is a list, even if adding a single column
+        if isinstance(column_names, str):
+            column_names = [column_names]
+            array = np.expand_dims(array, axis=1)  # Convert 1D array to 2D for consistency
+
+        # Check data type
+        if data_type not in self._valid_data_types:
+            raise ValueError("The (data_type) provided is not valid. Valid types include: " + ", ".join([f"{dt}" for dt in self._valid_data_types]))
+
+        # Check if number of columns in array matches column_names
+        if len(column_names) != array.shape[1]:
+            raise ValueError("The number of columns in (array) must match the number of (column_names).")
+
+        # Check array length or mask
+        if mask is None:
+            # No mask, array length must match the height of processed data
+            if len(array) != self.processed.shape[0]:
+                raise ValueError("Length of (array) must be the same as the height of the data frame.")
+        else:
+            # Mask provided, check its validity
+            if len(mask) != self.processed.shape[0]:
+                raise ValueError("The length of (mask) must be the same as the number of rows in the data frame.")
+            if array.shape[0] != mask.sum():
+                raise ValueError("The number of rows in (array) must match the number of `True` values in the mask.")
+
+        result = {}
+
+        # Loop through each column
+        for i, column_name in enumerate(column_names):
+            # Check if the column already exists
+            if column_name in self.processed.columns:
+                result[column_name] = "overwritten"
+            else:
+                result[column_name] = "added"
+
+            # Create the new column array
+            if mask is None:
+                # No mask: directly use the array for this column
+                self.processed[column_name] = array[:, i]
+            else:
+                # Masked: fill a new column initialized with NaNs, then assign the masked rows
+                full_column = np.full(self.processed.shape[0], np.nan)
+                full_column[mask] = array[:, i]
+                self.processed[column_name] = full_column
+
+            # Set attributes for the newly added column
+            self.processed.set_attribute(column_name, 'data_type', data_type)
+            self.processed.set_attribute(column_name, 'units', None)
+            self.processed.set_attribute(column_name, 'use', False)
+            # Set quantile bounds
+            self.processed.set_attribute(column_name, 'lower_bound', self._default_lower_bound)
+            self.processed.set_attribute(column_name, 'upper_bound', self._default_upper_bound)
+            # Set quantile bounds for differences
+            self.processed.set_attribute(column_name, 'diff_lower_bound', self._default_difference_lower_bound)
+            self.processed.set_attribute(column_name, 'diff_upper_bound', self._default_difference_upper_bound)
+
+            self.processed.set_attribute(column_name,'label',self.create_label(column_name))
+
+            # Set min and max unmasked values
+            if mask is None:
+                amin = np.min(self.processed[column_name])
+                amax = np.max(self.processed[column_name])
+            else:
+                amin = np.min(self.processed[column_name][mask])
+                amax = np.max(self.processed[column_name][mask])
+            
+            if column_name not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
+                amin = fmt.oround(amin, order=2, toward=0)
+                amax = fmt.oround(amax, order=2, toward=1)
+            self.processed.set_attribute(column_name,'plot_min',amin)
+            self.processed.set_attribute(column_name,'plot_max',amax)
+
+            # Set additional attributes
+            self.processed.set_attribute(column_name, 'norm', 'linear')
+            self.processed.set_attribute(column_name, 'negative_method', None)
+            self.processed.set_attribute(column_name, 'outlier_method', None)
+            self.processed.set_attribute(column_name, 'smoothing_method', None)
+            self.processed.set_attribute(column_name, 'auto_scale', False)
+            # add probability axis associated with histograms
+            self.processed.set_attribute(column_name, 'p_min', None)
+            self.processed.set_attribute(column_name, 'p_max', None)
+
+        # Return a message if a single column was added, or the result dictionary for multiple columns
+        if len(column_names) == 1:
+            return result[column_names[0]]
+
+        return result
+
+    def cluster_percentages(self, method):
+        """Computes, per cluster, what fraction of the map it occupies.
+
+        Used by both ``tableWidgetViewGroups`` (``Masking.py``) and the Notes
+        "cluster results" entry (``MainWindow.insert_info_note``), so both stay
+        consistent with each other and with how ``add_columns`` actually wrote
+        the labels (masked-out pixels are NaN, in-mask pixels are integer
+        cluster ids stored as float).
+
+        Parameters
+        ----------
+        method : str
+            Clustering method name, and the column in ``self.processed`` holding
+            per-pixel cluster labels (e.g. ``'k-means'``, ``'fuzzy c-means'``).
+
+        Returns
+        -------
+        dict
+            ``{cluster_id: {'pct_total': float, 'pct_filtered': float}}``, one
+            entry per cluster id present in the labels (excluding the transient
+            ``99`` "Mask" placeholder, if somehow still present). Percentages
+            are 0-100. ``pct_total`` is relative to every pixel in the map;
+            ``pct_filtered`` is relative to only the pixels passing ``self.mask``.
+        """
+        if method not in self.processed.columns:
+            return {}
+
+        labels = self.processed[method]
+        total_n = len(labels)
+        filtered_n = int(np.sum(self.mask))
+
+        clusters = sorted(int(c) for c in labels.dropna().unique() if c != 99)
+
+        masked_labels = labels[self.mask]
+        result = {}
+        for c in clusters:
+            total_count = int((labels == c).sum())
+            filtered_count = int((masked_labels == c).sum())
+            result[c] = {
+                'pct_total': 100 * total_count / total_n if total_n else 0.0,
+                'pct_filtered': 100 * filtered_count / filtered_n if filtered_n else 0.0,
+            }
+
+        return result
+
+    def grain_regions(self, mask=None, structure=None):
+        """Connected-component labeling of a boolean pixel mask.
+
+        A cluster/filter/polygon selection can span multiple disjoint blobs in
+        the map (e.g. several garnet grains that happen to classify identically)
+        -- this isolates them individually so a caller (e.g. a diffusion-modeling
+        tool) can operate on one grain at a time. Reshapes ``mask`` to 2-D using
+        ``self.array_size``/``self.order`` -- the same reshape convention used
+        elsewhere to turn a flat per-pixel array back into a map image -- then
+        runs ``scipy.ndimage.label``.
+
+        Parameters
+        ----------
+        mask : numpy.ndarray, optional
+            Boolean array, length == number of rows in ``self.processed``. Defaults
+            to ``self.mask`` (the combined crop/filter/polygon/cluster mask).
+        structure : numpy.ndarray, optional
+            Connectivity structure passed to ``scipy.ndimage.label``. Defaults to
+            4-connectivity (``scipy.ndimage``'s own default).
+
+        Returns
+        -------
+        dict
+            ``{blob_id: {'mask': bool ndarray (len == len(self.processed)),
+            'size': int pixel count, 'pct_of_map': float}}``, one entry per
+            connected blob found in ``mask`` (blob ids start at 1; pixels outside
+            ``mask`` are never included in any blob).
+        """
+        if mask is None:
+            mask = self.mask
+
+        mask_2d = np.asarray(mask).reshape(self.array_size, order=self.order)
+        labeled_2d, n_blobs = ndimage.label(mask_2d, structure=structure)
+
+        total_n = mask_2d.size
+        result = {}
+        for blob_id in range(1, n_blobs + 1):
+            blob_mask = (labeled_2d == blob_id).reshape(-1, order=self.order)
+            size = int(blob_mask.sum())
+            result[blob_id] = {
+                'mask': blob_mask,
+                'size': size,
+                'pct_of_map': 100 * size / total_n if total_n else 0.0,
+            }
+
+        return result
+
+    def export_processing_state(self, cluster_selection=None):
+        """Capture this sample's current filters/masks/computed fields as a
+        plain, JSON-serializable `SampleProcessingState` for a project to persist.
+
+        Notes are deliberately not included here -- they stay as the
+        per-sample ``.rst`` file (see the project-migration plan's Notes
+        decision), not folded into this record.
+
+        Parameters
+        ----------
+        cluster_selection : dict, optional
+            ``{'method': str, 'selected_clusters': list, 'inverse': bool}``
+            describing the active cluster-mask selection, if any -- this
+            lives on ``AppData`` (``cluster_method``/``cluster_dict``), not
+            on `SampleObj`, so the caller supplies it when known. Without
+            it, an active cluster mask is still recorded (so processing
+            status is accurate) but with empty params, meaning
+            `apply_processing_state` can note it existed but not replay it.
+
+        Returns
+        -------
+        src.project.ProjectModel.SampleProcessingState
+        """
+        from src.project.ProjectModel import SampleProcessingState, FilterSpec, MaskSpec, ComputedFieldSpec
+
+        applied_filters = [
+            FilterSpec(
+                use=bool(row['use']),
+                field_type=row['field_type'],
+                field=row['field'],
+                norm=row['norm'],
+                min=float(row['min']),
+                max=float(row['max']),
+                operator=row['operator'],
+                persistent=bool(row['persistent']),
+            )
+            for _, row in self.filter_df.iterrows()
+        ]
+
+        masks = []
+        if self.crop:
+            masks.append(MaskSpec(
+                kind='crop', enabled=True,
+                params={'xlim': list(self.xlim), 'ylim': list(self.ylim)},
+            ))
+        if not np.all(self.polygon_mask):
+            # Geometry itself round-trips separately via PolygonManager's
+            # own .poly files -- this is a status marker only.
+            masks.append(MaskSpec(kind='polygon', enabled=True, params={}))
+        if not np.all(self.cluster_mask):
+            masks.append(MaskSpec(kind='cluster', enabled=True, params=cluster_selection or {}))
+
+        computed_fields = []
+        for field in self.processed.match_attribute('data_type', 'Calculated'):
+            formula = self.processed.get_attribute(field, 'formula')
+            if formula:
+                computed_fields.append(ComputedFieldSpec(field=field, formula=formula))
+
+        return SampleProcessingState(
+            applied_filters=applied_filters,
+            masks=masks,
+            computed_fields=computed_fields,
+        )
+
+    def apply_processing_state(self, state, ref_chem=None, field_calculator=None):
+        """Replay a project's saved Tier-2 processing choices onto this
+        freshly loaded sample.
+
+        Parameters
+        ----------
+        state : src.project.ProjectModel.SampleProcessingState
+        ref_chem : pandas.Series, optional
+            Reference chemistry for normalization (``AppData.ref_chem``),
+            needed to replay ``computed_fields`` formulas that reference
+            normalized values. If omitted, computed-field replay is skipped.
+        field_calculator : object, optional
+            Anything exposing
+            ``calculate_new_field(data, ref_chem, new_field, txt) -> bool``,
+            e.g. ``src.common.Calculator.CustomFieldCalculator``. Passed in
+            rather than imported here, so this data-layer method stays free
+            of the Calculator dock's Qt/UI imports. If omitted,
+            computed-field replay is skipped (logged, not raised).
+
+        Notes
+        -----
+        Crop and polygon masks are recorded in `state.masks` for status
+        reporting, but are not replayed here: crop re-application currently
+        has no working entry point in this codebase (`CropImage.CropTool`'s
+        ``apply_crop`` and `SampleObj.crop_mask`'s setter are both
+        pre-existing, unrelated dead code -- assigning to either raises),
+        and polygon-mask re-application belongs to `PolygonManager`
+        (geometry) + `MaskDock.apply_polygon_mask` (mask recomputation),
+        which run after this method, not through `SampleObj` itself.
+        Cluster-mask replay requires the named cluster method's column to
+        already exist in `self.processed` (i.e. clustering already
+        (re)computed this session) -- also outside this method's scope,
+        left to `MainWindow.apply_cluster_mask`.
+        """
+        if state.applied_filters:
+            self.filter_df = pd.DataFrame(
+                [
+                    {
+                        'use': f.use, 'field_type': f.field_type, 'field': f.field,
+                        'norm': f.norm, 'min': f.min, 'max': f.max,
+                        'operator': f.operator, 'persistent': f.persistent,
+                    }
+                    for f in state.applied_filters
+                ],
+                columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'],
+            )
+            self.apply_field_filters()
+
+        for mask_spec in state.masks:
+            log(
+                f"apply_processing_state: mask '{mask_spec.kind}' recorded "
+                f"(enabled={mask_spec.enabled}); reapplication is handled by "
+                f"its owning system, not SampleObj.",
+                prefix='Data',
+            )
+
+        if state.computed_fields:
+            if field_calculator is None:
+                log(
+                    "apply_processing_state: skipping computed_fields replay "
+                    "-- no field_calculator provided",
+                    prefix='Data',
+                )
+            else:
+                for spec in state.computed_fields:
+                    field_calculator.calculate_new_field(self, ref_chem, spec.field, spec.formula)
+                    self.processed.set_attribute(spec.field, 'formula', spec.formula)
+
+    def delete_column(self, column_name):
+        """Deletes a column and associated attributes from the AttributeDataFrame.
+
+        Parameters
+        ----------
+        column_name : str
+            Name of column to remove.
+
+        Raises
+        ------
+        ValueError
+            Raises an error if the column is not a member of the AttributeDataFrame.
+        """        
+        # Check if the column exists
+        if column_name not in self.processed.columns:
+            raise ValueError(f"Column {column_name} does not exist in the DataFrame.")
+        
+        # Remove the column from the DataFrame
+        self.processed.drop(columns=[column_name], inplace=True)
+        
+        # Remove associated attributes, if any
+        if column_name in self.processed.column_attributes:
+            del self.processed.column_attributes[column_name]
+
+
+    def apply_field_filters(self):
+        """Applies filters based on field values.
+        
+        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
+        """        
+        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
+        if self.filter_df.empty:
+            self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+            self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
+            log(f"apply_field_filters: filter_df empty, mask reset to all True ({len(self.mask)} points)", prefix='Mask')
+            return
+
+        # Initialize mask to all True, then apply filters
+        self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+
+        # by creating a mask based on min and max of the corresponding filter analytes
+        for index, filter_row in self.filter_df.iterrows():
+            use_val = filter_row['use']
+            if isinstance(use_val, str):
+                use_val = use_val.strip().lower() == 'true'
+            if use_val:
+                try:
+                    field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+                except KeyError:
+                    # Field doesn't exist in the current sample — skip this filter
+                    continue
+
+                # Create mask for this filter
+                field_mask = ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+
+                operator = filter_row['operator']
+                if operator == 'and':
+                    self.filter_mask = self.filter_mask & field_mask
+                elif operator == 'or':
+                    self.filter_mask = self.filter_mask | field_mask
+                elif operator == 'not':
+                    self.filter_mask = self.filter_mask & ~field_mask
+
+        # Recompute the combined mask so the plot sees the updated filter
+        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
+        log(f"apply_field_filters: filter_mask={self.filter_mask.sum()}/{len(self.filter_mask)} True, mask={self.mask.sum()}/{len(self.mask)} True", prefix='Mask')
+
+    def add_filter(self, field_type, field, min_val, max_val, operator='and', use=True, persistent=True):
+        """Add a new filter to the filter_df.
+        
+        Parameters
+        ----------
+        field_type : str
+            Type of field (e.g., 'Analyte', 'Ratio', etc.)
+        field : str
+            Name of the field
+        min_val : float
+            Minimum value for the filter
+        max_val : float
+            Maximum value for the filter
+        operator : str, optional
+            Boolean operator ('and', 'or', 'not'), by default 'and'
+        use : bool, optional
+            Whether to use this filter, by default True
+        persistent : bool, optional
+            Whether to keep filter when sample changes, by default True
+            
+        Returns
+        -------
+        int
+            Index of the added filter
+        """
+        # Get the scale/norm for this field
+        try:
+            norm = self.processed.get_attribute(field, 'norm')
+        except:
+            norm = 'linear'
+            
+        filter_info = {
+            'use': use,
+            'field_type': field_type,
+            'field': field,
+            'norm': norm,
+            'min': min_val,
+            'max': max_val,
+            'operator': operator,
+            'persistent': persistent
+        }
+        
+        # Add to filter_df
+        new_index = len(self.filter_df)
+        self.filter_df.loc[new_index] = filter_info
+        
+        return new_index
+
+    def remove_filter(self, index=None, field=None, field_type=None):
+        """Remove filter(s) from filter_df.
+        
+        Parameters
+        ----------
+        index : int, optional
+            Index of filter to remove
+        field : str, optional
+            Remove filters matching this field name
+        field_type : str, optional
+            Remove filters matching this field type (used with field parameter)
+        """
+        if index is not None:
+            # Remove by index
+            if index in self.filter_df.index:
+                self.filter_df.drop(index, inplace=True)
+                self.filter_df.reset_index(drop=True, inplace=True)
+        elif field is not None:
+            # Remove by field name (and optionally field_type)
+            mask = self.filter_df['field'] == field
+            if field_type is not None:
+                mask = mask & (self.filter_df['field_type'] == field_type)
+            self.filter_df.drop(self.filter_df[mask].index, inplace=True)
+            self.filter_df.reset_index(drop=True, inplace=True)
+
+    def update_filter(self, index, **kwargs):
+        """Update an existing filter.
+        
+        Parameters
+        ----------
+        index : int
+            Index of filter to update
+        **kwargs
+            Filter parameters to update (use, field_type, field, min, max, operator, persistent)
+        """
+        if index in self.filter_df.index:
+            for key, value in kwargs.items():
+                if key in self.filter_df.columns:
+                    self.filter_df.at[index, key] = value
+
+    def clear_filters(self, persistent_only=False):
+        """Clear all or non-persistent filters.
+        
+        Parameters
+        ----------
+        persistent_only : bool, optional
+            If True, only remove non-persistent filters, by default False
+        """
+        if persistent_only:
+            # Remove only non-persistent filters
+            self.filter_df = self.filter_df[self.filter_df['persistent']].copy()
+            self.filter_df.reset_index(drop=True, inplace=True)
+        else:
+            # Clear all filters
+            self.filter_df = pd.DataFrame(columns=[
+                'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'
+            ])
+
+    
+    def sort_data(self, method):
+        """
+        Sorts analyte columns in the raw and processed data according to the specified method.
+
+        This method retrieves a list of analytes from the ``processed`` data DataFrame
+        and reorders the columns in both ``raw`` and ``processed`` data based on the
+        sorting strategy provided. The sorting is performed using an external function
+        ``sort_analytes``, which takes the user-defined ``method`` and the analyte list as inputs.
+
+        Parameters
+        ----------
+        method : str
+            Sorting method selected by the user. This is passed to ``sort_analytes`` and
+            determines the order in which analytes are arranged (e.g., alphabetical, PCA loadings,
+            cluster association, etc.).
+
+        Returns
+        -------
+        analyte_list : list
+            the original list of analytes found in processed data.
+        sorted_analyte_list : list
+            the list of analytes sorted according to the provided method.
+        """ 
+        # retrieve analyte_list
+        analyte_list = self.processed.match_attribute('data_type','Analyte')
+
+        # sort analyte sort based on method chosen by user
+        sorted_analyte_list = sort_analytes(method, analyte_list)
+
+        # Check if the current order already matches the desired sorted order
+        if analyte_list == sorted_analyte_list:
+            return analyte_list, sorted_analyte_list  # No sorting needed
+
+        # Reorder the columns of the DataFrame based on self.analyte_list
+        self.raw.sort_columns(sorted_analyte_list)
+        if hasattr(self, "processed"):
+            self.processed.sort_columns(sorted_analyte_list)
+
+        return analyte_list, sorted_analyte_list
+
+    def create_label(self, column_name):
+        """Creates a default label for axes.
+
+        Creates a default label for axes on plots, using the column name in processed data.
+
+        Parameters
+        ----------
+        column_name : str
+            Column in processed data.
+        """        
+        data_type = self.processed.get_attribute(column_name,'data_type') 
+        label = None
+        match data_type:
+            case 'Analyte' | 'Analyte (normalized)': 
+                symbol, mass = fmt.parse_isotope(column_name)
+                if mass:
+                    label = f"$^{{{mass}}}${symbol}"
+                else:
+                    label = f"{symbol}"
+
+                unit = self.processed.get_attribute(column_name,'units')
+                if data_type == 'Analyte':
+                    label = f"{label} ({unit})"
+                else: # normalized analyte
+                    label = f"{label}$_N$ ({unit})"
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = column_name.split(' / ')[0]
+                field_2 = column_name.split(' / ')[1]
+                symbol_1, mass_1 = fmt.parse_isotope(field_1)
+                symbol_2, mass_2 = fmt.parse_isotope(field_2)
+
+                # numerator
+                label_1 = ''
+                if mass_1: # isotope
+                    label_1 = f"$^{{{mass_1}}}${symbol_1}"
+                else: # element
+                    label_1 = f"{symbol_1}"
+
+                # denominator
+                label_2 = ''
+                if mass_2: # isotope
+                    label_2 = f"$^{{{mass_2}}}${symbol_2}"
+                else: # element
+                    label_2 = f"{symbol_2}"
+
+                if data_type == 'Ratio':
+                    label = f"{label_1} / {label_2}"
+                else:   # normalized ratio
+                    label = f"{label_1}$_N$ / {label_2}$_N$"
+            case _:
+                unit = self.processed.get_attribute(column_name,'units')
+                if unit == None:
+                    label = f"{column_name}"
+                else:
+                    label = f"{column_name} ({unit})"
+
+        return label
+
+    def cluster_data(self):
+        """Clusters data for use with data preprocessing."""
+        # Step 1: Clustering
+        # ------------------
+        # Select columns where 'data_type' attribute is 'Analyte'
+        analyte_columns = [col for col in self.raw.columns if (self.raw.get_attribute(col, 'data_type') == 'Analyte') 
+            and (self.raw.get_attribute(col, 'use') is not None
+            and self.raw.get_attribute(col, 'use')) ]
+
+        # Extract the analyte data
+        analyte_data = self.raw[analyte_columns].values
+
+        # Mask invalid data (e.g., NaN, inf)
+        mask_valid = np.isfinite(analyte_data).all(axis=1)
+
+        # Filter out the invalid data
+        analyte_data = analyte_data[mask_valid]
+
+        # Calculate percentiles for central bulk of the valid data
+        lower_percentile = np.percentile(analyte_data, 1.25, axis=0)
+        upper_percentile = np.percentile(analyte_data, 98.75, axis=0)
+
+        # Create a mask for central bulk of the data (within the range of percentiles)
+        mask_central = np.all((analyte_data >= lower_percentile) & (analyte_data <= upper_percentile), axis=1)
+
+        # Data for optimal cluster calculation: central 97.5%
+        # Determine the optimal number of clusters using filtered_data
+        optimal_clusters = self.k_optimal_clusters(analyte_data[mask_central])
+
+        # Fit KMeans with the optimal number of clusters
+        kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
+        cluster_labels = kmeans.fit_predict(analyte_data)
+
+        # Create a full-sized vector with NaN values where mask is False
+        self.cluster_labels = np.full(mask_valid.shape[0], np.nan)
+        self.cluster_labels[mask_valid] = cluster_labels
+
+        # if DEBUG_PLOT:
+        #     # Reshape the full_labels array based on unique X and Y values
+        #     x_unique = self.raw['Xc'].nunique()  # Assuming 'X' is a column in raw_data
+        #     y_unique = self.raw['Yc'].nunique()  # Assuming 'Y' is a column in raw_data
+
+        #     # Ensure the reshaped array has the same shape as the spatial grid
+        #     reshaped_labels = np.reshape(self.cluster_labels, (y_unique, x_unique), order='F')
+
+        #     # Plot using imshow
+        #     fig, ax1 = plt.subplots() 
+        #     cax = ax1.imshow(reshaped_labels, cmap='viridis', interpolation='none')
+        #     cbar = fig.colorbar(cax, label='Cluster Labels', ax=ax1, orientation='horizontal')
+        #     ax1.set_title('Cluster Labels with NaN Handling')
+        #     ax1.set_xlabel('X')
+        #     ax1.set_ylabel('Y')
+        #     fig.show()
+
+    def prep_data(self, field: str='all'):
+        """Applies adjustments to data data prior to analyses and plotting.
+
+        This method applies a workflow to adjust data to limit the number of data that are otherwise
+        unusable due to incorrect calibrations, particularly for low and high element concentration regions.
+        
+        Data are adjusted according to the proceedure:
+        | Determine optimal number of clusters and use it to classify the data using kmeans.
+        | Transform each cluster, by handling negative data.  The method of negative handling is set by ``MainWindow.comboBoxNegativeMethod.currentText()``.
+        | Compute ratios not imported (i.e., not in raw_data).
+        | Determine outliers and limit their impact on analyses by clipping/autoscaling
+
+        These calculations start from the cropped data, but do not include chemical, polygonal, or cluster filtering.
+
+        Parameters
+        ----------
+        field : str or list of str, optional
+            The field or fields to preprocess.  If 'all', all analyte and ratio fields
+
+        Raises
+        ------
+        AssertionError
+            processed data has not yet been initialized.  processed data should be created when the sample is initialized and prep_data is
+            run for the first time.
+        """
+        # processed is about to change, so any cached correlation matrix is now stale
+        self._correlation_cache = {}
+
+        analyte_columns = []
+        ratio_columns = []
+        computed_ratios = {}
+        if field == 'all':
+            # Capture ratios that were computed (e.g. via compute_ratio) and live only in
+            # self.processed, along with their attributes, before self.processed gets
+            # rebuilt from self.raw below. self.raw never receives computed ratio columns,
+            # so without this they would silently disappear from processed.
+            for col in self.processed.match_attribute('data_type', 'Ratio'):
+                if col not in self.raw.columns:
+                    computed_ratios[col] = dict(self.processed.column_attributes.get(col, {}))
+
+            # Select columns where 'data_type' attribute is 'Analyte'
+            analyte_columns = self.raw.match_attributes({'data_type': 'Analyte', 'use': True})
+
+            # Select columns where 'data_type' attribute is 'Ratio'
+            ratio_columns = self.raw.match_attributes({'data_type': 'Ratio', 'use': True})
+
+            columns = analyte_columns + ratio_columns
+
+            # this needs to be updated to handle different negative handling methods for different fields.
+            # may need to create a copy of processed data overwriting with raw data
+            negative_method = self._negative_method
+            self.processed = copy.deepcopy(self.raw)
+            self.processed.set_attribute(analyte_columns, 'negative_method', negative_method)
+        else:
+            columns = field
+
+        if not hasattr(self, 'processed'):
+            raise AssertionError("processed data has not yet been defined.")
+
+        # Handle negative values
+        # ----------------------
+        # for col in analyte_columns:
+        #     if col not in self.raw.columns:
+        #         continue
+
+        #     for idx in np.unique(self.cluster_labels):
+        #         if np.isnan(idx):
+        #             continue
+        #         cluster_mask = self.cluster_labels == idx
+        #         print(f"{(col, idx)} before: {sum(self.processed[col] < 0)}, {sum(self.processed[col][cluster_mask] < 0)}")
+        #         transformed_data = self.transform_array(self.processed[col][cluster_mask],self.processed.get_attribute(col,'negative_method'))
+        #         self.processed.loc[cluster_mask, col] = transformed_data
+        #         print(f"{(col, idx)} after : {sum(self.processed[col] < 0)}, {sum(self.processed[col][cluster_mask] < 0)}, {sum(transformed_data < 0)}")
+
+        # Recompute ratios not included in raw_data
+        # ------------------------------------------
+        if field == 'all' and computed_ratios:
+            for ratio_name, attrs in computed_ratios.items():
+                analyte_1, analyte_2 = ratio_name.split(' / ')
+                if analyte_1 not in self.processed.columns or analyte_2 not in self.processed.columns:
+                    continue
+
+                self.compute_ratio(analyte_1, analyte_2)
+                columns.append(ratio_name)
+
+                # restore the attributes (use, norm/scale, bounds, etc.) that were set
+                # before the reset, since compute_ratio/add_columns only fill in defaults
+                for attr_name, attr_value in attrs.items():
+                    self.processed.set_attribute(ratio_name, attr_name, attr_value)
+
+
+        # Clip outliers / autoscale the data
+        # ------------------
+        # loop over all fields
+        for col in (col for col in self.processed.columns if self.processed.get_attribute(col, 'data_type') != 'coordinate'):
+
+            lq = self.processed.get_attribute(col, 'lower_bound')
+            uq = self.processed.get_attribute(col, 'upper_bound')
+            # skip is autoscale is False for column
+            if not self.processed.get_attribute(col, 'autoscale'):
+                #clip data using ub and lb
+                lq_val = np.nanpercentile(self.processed[col], lq, axis=0)
+                uq_val = np.nanpercentile(self.processed[col], uq, axis=0)
+                self.processed[col] = np.clip(self.processed[col], lq_val, uq_val)
+                continue
+
+            d_lq = self.processed.get_attribute(col, 'diff_lower_bound')
+            d_uq = self.processed.get_attribute(col, 'diff_upper_bound')
+
+            match self.processed.get_attribute(col, 'units'):
+                case 'ppm':
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
+                case 'cps':
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
+                case _:
+                    compositional = True
+                    max_val = 1e6
+                    shift_percentile = 90
+
+            # Apply robust outlier detection to each cluster
+            for idx in np.unique(self.cluster_labels):
+                cluster_mask = (self.cluster_labels == idx)
+
+                transformed_data = self.clip_outliers(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq)
+                self.processed.loc[cluster_mask, col] = transformed_data
+
+                transformed_data = quantile_and_difference(self.processed[col][cluster_mask], lq, uq, d_lq, d_uq, compositional, max_val)
+                self.processed.loc[cluster_mask, col] = transformed_data
+
+        
+        # Compute special fields?
+        # -----------------------
+        for col in self.processed.columns:
+            self.processed.set_attribute(col,'label',self.create_label(col))
+            
+            # Set min and max unmasked values
+            amin = np.min(self.processed[col])
+            amax = np.max(self.processed[col])
+            
+            if col not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
+                amin = fmt.oround(amin, order=2, toward=0)
+                amax = fmt.oround(amax, order=2, toward=1)
+            self.processed.set_attribute(col,'plot_min',amin)
+            self.processed.set_attribute(col,'plot_max',amax)
+            
+            # Set norm attribute for coordinate fields if not already set
+            if self.processed.get_attribute(col, 'data_type') == 'coordinate' and self.processed.get_attribute(col, 'norm') is None:
+                self.processed.set_attribute(col, 'norm', 'linear')
+
+    def k_optimal_clusters(self, data: np.ndarray, max_clusters: int=10):
+        """
+        Predicts the optimal number of clusters.
+
+        Predicts the optimal number of k-means clusters using the elbow method based on the within-cluster sum of squares (WCSS):
+
+        .. math::
+            WCSS = \\sum_{i=1}^k \\sum_{x \\in C_i} (x - \\mu_i)^2
+
+        The optimal number of clusters is determined by selecting the k-value corresponding to the maximum value of the second derivative of WCSS.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Data used in clustering. Make sure it has NaN and ±inf values removed.
+        max_clusters : int, optional
+            Computes cluster results from 1 to ``max_clusters``, by default 10.
+
+        Returns
+        -------
+        int
+            The optimal number of k-means clusters.
+        """
+        inertia = []
+
+        # clip outliers and make entirely positive
+        percentile = 2.5
+        min_pos = 1e-2
+        for i in range(data.shape[1]):
+            # Find the minimum positive value in the column
+            col_min_pos = np.min(data[data[:, i] > 0, i])
+            min_threshold = max(col_min_pos, min_pos)  # Choose the larger of min positive or 0.01
+
+            # Set all values less than the threshold to the threshold value
+            data[:, i] = np.where(data[:, i] < min_threshold, min_threshold, data[:, i])
+
+        lower_bound = np.percentile(data, percentile, axis=0)
+        upper_bound = np.percentile(data, 100-percentile, axis=0)
+
+        # Clip values to the 5th and 95th percentiles per column
+        data = np.log(np.clip(data, lower_bound, upper_bound))
+        
+        # Perform KMeans for cluster numbers from 1 to max_clusters
+        for n_clusters in range(1, max_clusters+1):
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            kmeans.fit(data)
+            inertia.append(kmeans.inertia_)  # Record the inertia (sum of squared distances)
+        
+        # Calculate second-order difference (second derivative)
+        second_derivative = np.diff(np.diff(inertia))
+
+        # Identify the elbow point
+        # add 2 to the maximum index to obtain the optimal number of clusters,
+        # 1 because it starts at 0 and 1 because it is the second derivative
+        optimal_k = np.argmax(second_derivative) + 2  # Example heuristic
+
+        # if DEBUG_PLOT:
+        #     # Plot inertia
+        #     fig, ax1 = plt.subplots()
+
+        #     ax1.plot(range(1, max_clusters+1), inertia, marker='o', color='b', label='Inertia')
+        #     ax1.set_xlabel('Number of clusters')
+        #     ax1.set_ylabel('Inertia', color='b')
+        #     ax1.tick_params(axis='y', labelcolor='b')
+        #     ax1.set_title('Elbow Method for Optimal Clusters')
+        #     ax1.axvline(x=optimal_k, linestyle='--', color='r', label=f'Elbow at k={optimal_k}')
+
+
+        #     # Create a secondary y-axis to plot the second derivative
+        #     ax2 = ax1.twinx()
+        #     ax2.plot(range(2, max_clusters), second_derivative, marker='x', color='r', label='2nd Derivative')
+        #     ax2.set_ylabel('2nd Derivative', color='r')
+        #     ax2.tick_params(axis='y', labelcolor='r')
+
+        #     self.logger.print(f"Second derivative of inertia: {second_derivative}")
+        #     self.logger.print(f"Optimal number of clusters: {optimal_k}")
+
+        return optimal_k
+
+
+    def clip_outliers(self, array: np.ndarray, outlier_method: str, pl: float=None, pu: float=None, dpl: float=None, dpu: float=None):
+        """Attempts to remove outliers to by a method selected by the user.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Data vector
+        outlier_method : str
+            Method for removing outliers
+        pl : float, optional
+            Lower percentile bound required by selected methods
+        pu : float, optional
+            Upper percentile bound required by selected methods
+        dpl : float, optional
+            Lower percentile bound for distances required by selected methods
+        dpu : float, optional
+            Upper percentile bound for distances required by selected methods
+
+        Returns
+        -------
+        numpy.ndarray
+            Clipped data vector
+        """        
+        t_array = np.copy(array)
+
+        match outlier_method.lower():
+            case 'none':
+                return t_array
+
+            case 'quantile criteria':
+                ql = np.nanpercentile(array, pl, axis=0)
+                qu = np.nanpercentile(array, pu, axis=0)
+                t_array = np.clip(array, ql, qu)
+                
+            case 'quantile and distance criteria':
+                t_array = quantile_and_difference(array, pl, pu, dpl, dpu, compositional, max_val)
+            case 'chauvenet criterion':
+                mask = chauvenet_criterion(array, threshold=1)
+                if not any(mask):
+                    return t_array
+
+                min_value = np.min(t_array[mask], axis=0)
+                max_value = np.max(t_array[mask], axis=0)
+
+                t_array[~mask & (t_array < min_value)] = min_value
+                t_array[~mask & (t_array > max_value)] = max_value
+
+            case 'log(n>x) inflection':
+                pass
+
+        return t_array
+
+    def transform_array(self, array: np.ndarray, negative_method: str):
+        """
+        Negative and zero handling with clustering for noise detection.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Input data
+        negative_method : str
+            Method for handling negative values
+        Returns
+        -------
+        numpy.ndarray
+            Transformed data
+        """
+        match negative_method.lower():
+            case 'ignore negatives':
+                # do nothing, the values remain unchanged
+                t_array = np.copy(array)
+                t_array = np.where(t_array > 0, t_array, np.nan)
+
+            case 'minimum positive':
+                # shift all negative values to be a minimum value
+                min_positive_value = np.nanmin(array[array > 0])
+                t_array = np.where(array < 0, min_positive_value, array)
+
+            case 'gradual shift':
+                # Handle multidimensional case (2D array)
+                if array.ndim == 2:
+                    min_val = np.nanmin(array, axis=0, keepdims=True) - 0.0001
+                    max_val = np.nanmax(array, axis=0, keepdims=True)
+                    t_array = np.where(min_val <= 0, 
+                                    (max_val * (array - min_val)) / (max_val - min_val),
+                                    array)
+                else:
+                    # 1D array case
+                    min_val = np.nanmin(array) - 0.0001
+                    max_val = np.nanmax(array)
+                    t_array = (max_val * (array - min_val)) / (max_val - min_val) if min_val < 0 else np.copy(array)
+
+            case 'yeo-johnson transform':
+                t_array, _ = yeojohnson(array)
+
+        return t_array
+
+    def update_norm(self, norm: str=None, field: str=None):
+        """Update the norm of the data.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        norm : str, optional
+            Data scale method ``linear`` or ``log``, by default None
+        field : str, optional
+            Field to change the norm, by default None
+        update : bool, optional
+            Update the scale information of the data, by default False
+        """ 
+        if field is not None: #if normalising single analyte
+            self.processed.set_attribute(field,'norm',norm)
+            self.prep_data(field)
+        else: #if normalising all analytes in sample
+            self.processed.set_attribute(self.processed.match_attribute('data_type','Analyte'),'norm',norm)
+            self.prep_data('all')
+
+
+    def get_map_data(self, field: str, field_type: str='Analyte', norm: bool=False, processed: bool=True):
+        """
+        Retrieves and processes the mapping data for the given sample and analytes
+
+        The method also updates certain parameters in the analyte data frame related to scaling.
+        Based on the plot type, this method internally calls the appropriate plotting functions.
+
+        Parameters
+        ----------
+        field : str
+            Name of field to plot. By default `None`.
+        field_type : str, optional
+            Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
+            'Special', 'Calculated'. By default `'Analyte'`
+        norm : str
+            Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
+            data are returned with a linear scale.  By default `False`.
+        processed : bool, optional
+            If `True`, use processed data.  If `False`, use raw data.  By default `True`.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Processed data for plotting. This is only returned if analysis_type is not 'laser' or 'hist'.
+        """
+        # ----begin debugging----
+        # print('[get_map_data] sample_id: '+sample_id+'   field_type: '+field_type+'   field: '+field)
+        # ----end debugging----
+
+        # if sample_id != self.sample_id:
+        #     #axis mask is not used when plot analytes of a different sample
+        #     crop_mask  = np.ones_like( self.raw['Xc'], dtype=bool)
+        # else:
+        #     crop_mask = self.data[self.sample_id]['crop_mask']
+        
+        # retrieve axis mask for that sample
+        #crop_mask = self.crop_mask
+        
+        #crop plot if filter applied
+        df = self.processed[['Xc','Yc']]
+
+        match field_type:
+            case 'Analyte' | 'Analyte (normalized)':
+                # unnormalized
+                if processed:
+                    df['array'] = self.processed[field].values
+                else:
+                    df['array'] = self.raw[field].values
+
+                #norm = self.processed.get_attribute(field, 'norm')
+                
+                #perform scaling for groups of analytes with same norm parameter
+                match norm:
+                    case 'log':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+                    case 'inv_logit':
+                        # Handle division by zero and NaN values
+                        with np.errstate(divide='ignore', invalid='ignore'):
+                            df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.inv_logit(df['array']), np.nan)
+                    case 'symlog':
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), fmt.symlog(df['array']), np.nan)
+                
+                # normalize
+                # .get(..., 0) treats an element missing from the reference table the
+                # same as a non-positive reference value below -- both mean "can't
+                # normalize" (NaN), rather than raising a KeyError.
+                if not self.ref_chem.empty and 'normalized' in field_type:
+                    refval = self.ref_chem.get(re.sub(r'\d', '', field).lower(), 0)
+                    df['array'] = df['array'] / refval if refval > 0 else np.nan
+
+            case 'Ratio' | 'Ratio (normalized)':
+                field_1 = field.split(' / ')[0]
+                field_2 = field.split(' / ')[1]
+
+                # unnormalized
+                df['array'] = self.processed[field].values
+
+                # normalize
+                if not self.ref_chem.empty and 'normalized' in field_type:
+                    refval_1 = self.ref_chem.get(re.sub(r'\d', '', field_1).lower(), 0)
+                    refval_2 = self.ref_chem.get(re.sub(r'\d', '', field_2).lower(), 0)
+                    df['array'] = df['array'] * (refval_2 / refval_1) if (refval_1 > 0 and refval_2 > 0) else np.nan
+
+                #get norm value
+                if norm == 'log':
+                    df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array']), np.nan)
+
+                elif norm == 'logit':
+                    # Handle division by zero and NaN values
+                    with np.errstate(divide='ignore', invalid='ignore'):
+                        df['array'] = np.where((~np.isnan(df['array'])) & (df['array'] > 0), np.log10(df['array'] / (10**6 - df['array'])), np.nan)
+
+            case _:#'PCA score' | 'Cluster' | 'Cluster score' | 'Special' | 'Calculated':
+                df['array'] = self.processed[field].values
+            
+        # ----begin debugging----
+        # print(df.columns)
+        # ----end debugging----
+        return df
+
+    def get_processed_data(self, field_types=('Analyte', 'Ratio')):
+        """Gets the processed data for analysis
+
+        Builds a matrix from columns flagged for inclusion via the ``use``
+        and ``use_normalized`` column attributes, across `field_types`. Each
+        included column is built via ``get_map_data()`` -- the same function
+        plots use -- so analysis values (norm scaling, reference-chemistry
+        normalization) always match what's shown on screen. A column flagged
+        both ``use`` and ``use_normalized`` is included as two separate
+        columns (the normalized one suffixed ``' (normalized)'``) so they
+        don't collide as separate analysis inputs.
+
+        Parameters
+        ----------
+        field_types : tuple of str, optional
+            ``data_type`` values to include, by default ``('Analyte', 'Ratio')``
+
+        Returns
+        -------
+        pandas.DataFrame
+            Filtered/normalized data used for analysis
+        list
+            Column names included (matches the DataFrame's columns)
+        """
+        if self.sample_id == '':
+            return
+
+        columns = {}
+        for field_type in field_types:
+            for field in self.processed.match_attributes({'data_type': field_type, 'use': True}):
+                norm = self.processed.get_attribute(field, 'norm')
+                columns[field] = self.get_map_data(field, field_type=field_type, norm=norm)['array'].values
+
+            normalized_field_type = f'{field_type} (normalized)'
+            for field in self.processed.match_attributes({'data_type': field_type, 'use_normalized': True}):
+                norm = self.processed.get_attribute(field, 'norm')
+                array = self.get_map_data(field, field_type=normalized_field_type, norm=norm)['array'].values
+                if np.isnan(array).all():
+                    # can't normalize (e.g. no matching reference-chemistry value) --
+                    # drop the column rather than let one all-NaN column zero out
+                    # every row of every other selected column via nan_mask below.
+                    continue
+                # avoid name collision when both the raw and normalized variant are selected
+                col_name = f'{field} (normalized)' if field in columns else field
+                columns[col_name] = array
+
+        use_fields = list(columns.keys())
+        df = pd.DataFrame(columns, index=self.processed.index)
+
+        # Combine the two masks to create a final mask
+        nan_mask = df.notna().all(axis=1) if use_fields else pd.Series(True, index=self.processed.index)
+
+        # mask nan values and add to self.mask
+        self.mask = self.mask & nan_mask.values
+
+        return df, use_fields
+    
+    # extracts data for scatter plot
+    def get_vector(self, field_type: str, field: str, norm: str='linear', processed: bool=True):
+        """Creates a dictionary of values for plotting
+
+        Parameters
+        ----------
+        field_type : str
+            Type of field to plot. Types include 'Analyte', 'Ratio', 'PCA', 'Cluster', 'Cluster score',
+            'Special', 'Calculated'. By default `'Analyte'`
+        field : str
+            Name of field to plot. By default `None`.
+        norm : str, optional
+            Scale data as linear, log, etc. based on stored norm.  If scale_data is `False`, the
+            data are returned with a linear scale.  By default `'linear'`.
+        processed : bool, optional
+            If `True`, use processed data.  If `False`, use raw data.  By default `True`.
+
+        Returns
+        -------
+        dict
+            Dictionary with array and additional relevant plot data, contains
+            'field', 'type', 'label', and 'array'.
+        """
+        # initialize dictionary
+        value_dict = {'type': field_type, 'field': field, 'label': None, 'array': None}
+
+        if field == '':
+            return value_dict
+
+        # add label
+        unit = self.processed.get_attribute(field, 'unit')
+        if unit is None:
+            value_dict['label'] = value_dict['field']
+        else:
+            value_dict['label'] = value_dict['field'] + ' (' + unit + ')'
+
+        # add array
+        df = self.get_map_data(field=field, field_type=field_type, norm='linear', processed=processed)
+        value_dict['array'] = df['array'][self.mask].values if not df.empty else []
+
+        return value_dict
+
+    def auto_scale(self, sample_id: str, field: str, update: bool=False):
+        """Auto-scales pixel values in map
+
+        Executes on ``MainWindow.toolButtonAutoScale`` click.
+
+        Outliers can make it difficult to view the variations of values within a map.
+        This is a larger problem for linear scales, but can happen when log-scaled. Auto-
+        scaling the data clips the values at a lower and upper bound.  Auto-scaling may be
+        acceptable as minerals that were not specifically calibrated can have erroneously
+        high or low (even negative) values.
+
+        Parameters
+        ----------
+        sample_id : str
+            Sample identifier
+        field : str
+            Field to change the auto scale, by default None
+        update : bool, optional
+            Update auto scale parameters, by default, False
+        """
+        if '/' in field:
+            analyte_1, analyte_2 = field.split(' / ')
+        else:
+            analyte_1 = field
+            analyte_2 = None
+
+        lb = self.data_min_quantile
+        ub = self.data_max_quantile
+        d_lb = self.data_min_diff_quantile
+        d_ub = self.data_max_diff_quantile
+        auto_scale = self.auto_scale_flag
+
+        if auto_scale and not update:
+            #reset to default auto scale values
+            lb = 0.05
+            ub = 99.5
+            d_lb = 99
+            d_ub = 99
+
+            self.data_min_quantile = lb
+            self.data_max_quantile = ub
+            self.data_min_diff_quantile.value = d_lb
+            self.data_max_diff_quantile = d_ub
+            self.auto_scale_flag = True
+
+        elif not auto_scale and not update:
+            # show unbounded plot when auto scale switched off
+            lb = 0
+            ub = 100
+            self.data_min_quantile = lb
+            self.data_max_quantile = ub
+            self.data_min_diff_quantile.setEnabled(False)
+            self.auto_scale_flag = False
+
+        # if update is true
+        if analyte_1 and not analyte_2:
+            if (self.apply_outlier_to_all):
+                # Apply to all analytes in sample
+                columns = self.processed.columns
+
+                # clear existing plot info from tree to ensure saved plots using most recent data
+                for tree in ['Analyte', 'Analyte (normalized)', 'Ratio', 'Ratio (normalized)']:
+                    self.plot_tree.clear_tree_data(tree)
+            else:
+                columns = analyte_1
+
+            # update column attributes
+            self.processed.set_attribute(columns, 'auto_scale', auto_scale)
+            self.processed.set_attribute(columns, 'upper_bound', ub)
+            self.processed.set_attribute(columns, 'lower_bound', lb)
+            self.processed.set_attribute(columns, 'diff_upper_bound', d_ub)
+            self.processed.set_attribute(columns, 'diff_lower_bound', d_lb)
+            self.processed.set_attribute(columns, 'negative_method', self.comboBoxNegativeMethod.currentText())
+
+            # update data with new auto-scale/negative handling
+            self.prep_data(sample_id)
+            
+
+        # else:
+        #     if self.apply_outlier_to_all:
+        #         # Apply to all ratios in sample
+        #         self.processed['ratio_info']['auto_scale'] = auto_scale
+        #         self.processed['ratio_info']['upper_bound']= ub
+        #         self.processed['ratio_info']['lower_bound'] = lb
+        #         self.processed['ratio_info']['d_l_bound'] = d_lb
+        #         self.processed['ratio_info']['d_u_bound'] = d_ub
+        #         self.prep_data(sample_id)
+        #     else:
+        #         self.processed['ratio_info'].loc[ (self.processed['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed['ratio_info']['Analyte_2']==analyte_2),'auto_scale']  = auto_scale
+        #         self.processed['ratio_info'].loc[ (self.processed['ratio_info']['Analyte_1']==analyte_1)
+        #                                     & (self.processed['ratio_info']['Analyte_2']==analyte_2),
+        #                                     ['upper_bound','lower_bound','d_l_bound', 'd_u_bound']] = [ub,lb,d_lb, d_ub]
+        #         self.prep_data(sample_id, analyte_1,analyte_2)
+        return True  # User chose to proceed
+
+
+    # # -------------------------------
+    # # Filter functions
+    # # -------------------------------
+    # def apply_filters(self, fullmap=False):
+    #     """Applies filter to map data
+
+    #     Applies user specified data filters to mask data for analysis and calls ``MainWindow.update_SV`` to update the current figure.
+    #     Updates mask for the current sample whenever the crop (axis), filter, polygon, or cluster mask changes.
+    #     Updates figure if the *Single View* canvas is active.
+
+    #     Parameters
+    #     ----------
+    #     fullmap : bool, optional
+    #         If ``True``, filters are ignored, otherwise the map is filtered, by default ``False``
+    #     """
+    #     #reset all masks in current sample id
+    #     sample_id = self.app_data.sample_id
+
+    #     # remove all masks
+    #     if fullmap:
+    #         #user clicked on Map viewable
+    #         self.actionFilterToggle.setChecked(False)
+    #         self.actionPolygonMask.setChecked(False)
+    #         self.actionClusterMask.setChecked(False)
+
+    #         self.actionClearFilters.setEnabled(False)
+    #         self.actionFilterToggle.setEnabled(False)
+    #         self.actionPolygonMask.setEnabled(False)
+    #         self.actionClusterMask.setEnabled(False)
+
+    #         self.data[sample_id].mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+    #         return
+
+    #     # apply interval filters
+    #     if self.actionFilterToggle.isChecked():
+    #         filter_mask = self.data[sample_id].filter_mask
+    #     else:
+    #         filter_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     # apply polygon filters
+    #     if self.actionPolygonMask.isChecked():
+    #         polygon_mask = self.data[sample_id].polygon_mask
+    #     else:
+    #         polygon_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     # apply cluster mask
+    #     if self.actionClusterMask.isChecked():
+    #         # apply map mask
+    #         cluster_mask = self.data[sample_id].cluster_mask
+    #     else:
+    #         cluster_mask = np.ones_like( self.data[sample_id].mask, dtype=bool)
+
+    #     self.data[sample_id].mask = filter_mask & polygon_mask & cluster_mask
+
+    #     # if single view is active
+    #     if self.canvasWindow.currentIndex() == self.tab_dict['sv']:
+    #         # trigger update to plot
+    #         self.schedule_update()
+
+    # # Field filter functions
+    # # -------------------------------
+    # def apply_field_filters(self, update_plot=True):
+    #     """Creates the field filter for masking data
+
+    #     Updates ``MainWindow.data[sample_id].filter_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """        
+    #     sample_id = self.app_data.sample_id
+
+    #     # create array of all true
+    #     self.data[sample_id].filter_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+
+    #     # remove all masks
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionFilterToggle.setEnabled(True)
+    #     self.actionFilterToggle.setChecked(True)
+
+    #     # apply interval filters
+    #     #print(self.data[sample_id].filter_df)
+    #     self.data[self.app_data.sample_id].apply_field_filters()
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+    # # Polygon mask functions
+    # # -------------------------------
+    # def apply_polygon_mask(self, update_plot=True):
+    #     """Creates the polygon mask for masking data
+
+    #     Updates ``MainWindow.data[sample_id].polygon_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """        
+    #     sample_id = self.app_data.sample_id
+
+    #     # create array of all true
+    #     self.data[sample_id].polygon_mask = np.ones_like(self.data[sample_id].mask, dtype=bool)
+
+    #     # remove all masks
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionPolygonMask.setEnabled(True)
+    #     self.actionPolygonMask.setChecked(True)
+
+    #     # apply polygon mask
+    #     # Iterate through each polygon in self.polygons[self.main_window.sample_id]
+    #     for row in range(self.tableWidgetPolyPoints.rowCount()):
+    #         #check if checkbox is checked
+    #         checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+
+    #         if checkBox.isChecked():
+    #             pid = int(self.tableWidgetPolyPoints.item(row,0).text())
+
+    #             polygon_points = self.polygon.polygons[sample_id][pid].points
+    #             polygon_points = [(x,y) for x,y,_ in polygon_points]
+
+    #             # Convert the list of (x, y) tuples to a list of points acceptable by Path
+    #             path = Path(polygon_points)
+
+    #             # Create a grid of points covering the entire array
+    #             # x, y = np.meshgrid(np.arange(self.array.shape[1]), np.arange(self.array.shape[0]))
+
+    #             points = pd.concat([self.data[sample_id].processed['X'], self.data[sample_id].processed['Y']] , axis=1).values
+    #             # Use the path to determine which points are inside the polygon
+    #             inside_polygon = path.contains_points(points)
+
+    #             # Reshape the result back to the shape of self.array
+    #             inside_polygon_mask = np.array(inside_polygon).reshape(self.data[self.app_data.sample_id].array_size, order =  'C')
+    #             inside_polygon = inside_polygon_mask.flatten('F')
+    #             # Update the polygon mask - include points that are inside this polygon
+    #             self.data[sample_id].polygon_mask &= inside_polygon
+
+    #             #clear existing polygon lines
+    #             #self.polygon.clear_lines()
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+    # # Cluster mask functions
+    # # -------------------------------
+    # def apply_cluster_mask(self, inverse=False, update_plot=True):
+    #     """Creates a mask from selected clusters
+
+    #     Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
+    #     clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
+    #     on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \\ Filter Page*.
+
+    #     Updates ``MainWindow.data[sample_id].cluster_mask`` and if ``update_plot==True``, updates ``MainWindow.data[sample_id].mask``.
+
+    #     Parameters
+    #     ----------
+    #     inverse : bool, optional
+    #         Inverts selected clusters to define the mask when ``MainWindow.toolButtonGroupMaskInverse`` is clicked, otherwise
+    #         the selected clusers are used to define the mask when ``MainWindow.toolButtonGroupMask`` is clicked, by default False
+    #     update_plot : bool, optional
+    #         If true, calls ``MainWindow.apply_filters`` which also calls ``MainWindow.update_SV``, by default True
+    #     """
+    #     sample_id = self.app_data.sample_id
+
+    #     method = self.app_data.cluster_dict['active method']
+    #     selected_clusters = self.app_data.cluster_dict[method]['selected_clusters']
+
+    #     # Invert list of selected clusters
+    #     if not inverse:
+    #         selected_clusters = [cluster_idx for cluster_idx in range(self.app_data.cluster_dict[method]['n_clusters']) if cluster_idx not in selected_clusters]
+
+    #     # create boolean array with selected_clusters == True
+    #     cluster_group = self.data[sample_id].processed.loc[:,method]
+    #     ind = np.isin(cluster_group, selected_clusters)
+    #     self.data[sample_id].cluster_mask = ind
+
+    #     self.actionClearFilters.setEnabled(True)
+    #     self.actionClusterMask.setEnabled(True)
+    #     self.actionClusterMask.setChecked(True)
+
+    #     self.update_cluster_flag = True
+
+    #     if update_plot:
+    #         self.apply_filters(fullmap=False)
+
+    # ==========================================
+    # ANNOTATION MANAGEMENT METHODS
+    # ==========================================
+    
+    def add_annotation(self, plot_id, annotation_data):
+        """
+        Add annotation to a specific plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Unique plot identifier
+        annotation_data : dict
+            Annotation data containing type, position, style, etc.
+        """
+        if plot_id not in self.plot_annotations:
+            self.plot_annotations[plot_id] = []
+        
+        # Add unique ID if not present
+        if 'id' not in annotation_data:
+            annotation_data['id'] = self._generate_annotation_id()
+            
+        # Add timestamps
+        annotation_data['created_at'] = datetime.now()
+        annotation_data['modified_at'] = datetime.now()
+        
+        self.plot_annotations[plot_id].append(annotation_data)
+        
+        # Emit signal
+        self.annotationAdded.emit(plot_id, annotation_data)
+    
+    def get_annotations(self, plot_id):
+        """
+        Get all annotations for a plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+            
+        Returns
+        -------
+        list
+            List of annotation dictionaries
+        """
+        return self.plot_annotations.get(plot_id, [])
+    
+    def update_annotation(self, plot_id, annotation_id, updates):
+        """
+        Update specific annotation properties.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+        updates : dict
+            Dictionary of properties to update
+        """
+        if plot_id in self.plot_annotations:
+            for annotation in self.plot_annotations[plot_id]:
+                if annotation['id'] == annotation_id:
+                    annotation.update(updates)
+                    annotation['modified_at'] = datetime.now()
+                    
+                    # Emit specific signal based on what was updated
+                    if 'visible' in updates:
+                        self.annotationVisibilityChanged.emit(
+                            plot_id, annotation_id, updates['visible']
+                        )
+                    
+                    self.annotationUpdated.emit(plot_id, annotation_id, updates)
+                    break
+    
+    def remove_annotation(self, plot_id, annotation_id):
+        """
+        Remove annotation by ID.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+        """
+        if plot_id in self.plot_annotations:
+            original_count = len(self.plot_annotations[plot_id])
+            self.plot_annotations[plot_id] = [
+                ann for ann in self.plot_annotations[plot_id] 
+                if ann['id'] != annotation_id
+            ]
+            
+            # Only emit if annotation was actually removed
+            if len(self.plot_annotations[plot_id]) < original_count:
+                self.annotationRemoved.emit(plot_id, annotation_id)
+    
+    def clear_annotations_for_plot(self, plot_id):
+        """
+        Clear all annotations for a specific plot.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        """
+        if plot_id in self.plot_annotations:
+            annotation_ids = [ann['id'] for ann in self.plot_annotations[plot_id]]
+            self.plot_annotations[plot_id] = []
+            
+            # Emit removal signal for each annotation
+            for annotation_id in annotation_ids:
+                self.annotationRemoved.emit(plot_id, annotation_id)
+    
+    def get_annotation_by_id(self, plot_id, annotation_id):
+        """
+        Get specific annotation by ID.
+        
+        Parameters
+        ----------
+        plot_id : str
+            Plot identifier
+        annotation_id : str
+            Annotation identifier
+            
+        Returns
+        -------
+        dict or None
+            Annotation data or None if not found
+        """
+        if plot_id in self.plot_annotations:
+            for annotation in self.plot_annotations[plot_id]:
+                if annotation['id'] == annotation_id:
+                    return annotation
+        return None
+    
+    def _generate_annotation_id(self):
+        """Generate unique annotation ID."""
+        return str(uuid.uuid4())[:8]  # Short unique ID
+
+
+@auto_log_methods(logger_key='Data')
+class LaserSampleObj(SampleObj):
+    """Class for laser ablation sample data and operations
+
+    Inherits from ``SampleObj``
+    
+    Attributes
+    ----------
+    sample_id : str
+        Sample identifier
+        file_path : str
+        Path to data file
+    outlier_method : str
+        Method for removing outliers
+    negative_method : str
+        Method for handling negative values
+    smoothing_method : str, optional
+        Method for smoothing data, by default None
+    ref_chem : dict, optional
+        Reference chemistry, by default None
+    ui : MainWindow, optional
+        Main window instance, by default None
+    polygon : dict
+        Dictionary of polygon masks
+    profile : dict
+        Dictionary of profiles
+    filter_df : pandas.DataFrame
+        DataFrame of field filters
+    spotdata : AttributeDataFrame
+        DataFrame of spot data
+    """
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ref_chem=None, ui=None):
+        super().__init__(sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
+        self.ui = ui
+        self.logger_key = 'Data'
+
+        self._current_field = None
+        self._ref_chem = ref_chem
+
+        self.polygon = {}
+        self.profile = {}
+
+        # filter dataframe
+        self.filter_df = pd.DataFrame()
+        self.filter_df = pd.DataFrame(columns=['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'])
+
+        self.spotdata = AttributeDataFrame()
+
+        self.reset_data()
+
+    @property
+    def ref_chem(self):
+        """dict : Reference chemistry"""
+        return self._ref_chem
+
+    @ref_chem.setter
+    def ref_chem(self, d):
+        self._ref_chem = d
+
+@auto_log_methods(logger_key='Data')
+class XRFSampleObj(SampleObj):
+    """Class for XRF sample data and operations
+    
+    Inherits from ``SampleObj``
+
+    Attributes
+    ----------
+    sample_id : str
+        Sample identifier
+    file_path : str
+        Path to data file
+    outlier_method : str
+        Method for removing outliers
+    negative_method : str
+        Method for handling negative values
+    smoothing_method : str, optional
+        Method for smoothing data, by default None
+    ui : MainWindow, optional
+        Main window instance, by default None
+    """
+    def __init__(self, sample_id, file_path, outlier_method, negative_method, smoothing_method=None, ui=None):
+        super().__init__(sample_id, file_path, outlier_method, negative_method, smoothing_method=smoothing_method, ui=ui)
+        self.ui = ui
+        self.logger_key = 'Data'

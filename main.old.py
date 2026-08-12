@@ -2149,7 +2149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             method = self.app_data.cluster_dict['active method']
 
             # get the selected clusters
-            for idx in self.tableWidgetViewGroups.selectionModel().selectedRows():
+            for idx in self.cluster_table.selectionModel().selectedRows():
                 selected_clusters.append(idx.row())
             selected_clusters.sort()
 
@@ -2171,12 +2171,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # block signals
-        self.tableWidgetViewGroups.blockSignals(True)
+        self.cluster_table.blockSignals(True)
         self.spinBoxClusterGroup.blockSignals(True)
 
         # Clear the list widget
-        self.tableWidgetViewGroups.clearContents()
-        self.tableWidgetViewGroups.setHorizontalHeaderLabels(['Name','Link','Color'])
+        self.cluster_table.clearContents()
+        self.cluster_table.setHorizontalHeaderLabels(['Name','Link','Color'])
 
         method = self.comboBoxClusterMethod.currentText()
         if method in self.data[self.app_data.sample_id].processed.columns:
@@ -2199,16 +2199,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         break
 
 
-                # set number of rows in tableWidgetViewGroups
+                # set number of rows in cluster_table
                 # set default colors for clusters and update associated widgets
                 self.spinBoxClusterGroup.setMinimum(1)
                 if 99 in clusters:
-                    self.tableWidgetViewGroups.setRowCount(len(clusters)-1)
+                    self.cluster_table.setRowCount(len(clusters)-1)
                     self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
 
                     hexcolor = self.plot_style.set_default_cluster_colors(mask=True)
                 else:
-                    self.tableWidgetViewGroups.setRowCount(len(clusters))
+                    self.cluster_table.setRowCount(len(clusters))
                     self.spinBoxClusterGroup.setMaximum(len(clusters))
 
                     hexcolor = self.plot_style.set_default_cluster_colors(mask=False)
@@ -2223,11 +2223,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                     # Initialize the flag
                     self.isUpdatingTable = True
-                    self.tableWidgetViewGroups.setItem(c, 0, QTableWidgetItem(cluster_name))
-                    self.tableWidgetViewGroups.setItem(c, 1, QTableWidgetItem(''))
+                    self.cluster_table.setItem(c, 0, QTableWidgetItem(cluster_name))
+                    self.cluster_table.setItem(c, 1, QTableWidgetItem(''))
                     # colors in table are set by self.plot_style.set_default_cluster_colors()
-                    #self.tableWidgetViewGroups.setItem(i, 2, QTableWidgetItem(cluster_color))
-                    self.tableWidgetViewGroups.selectRow(c)
+                    #self.cluster_table.setItem(i, 2, QTableWidgetItem(cluster_color))
+                    self.cluster_table.selectRow(c)
                     
                     self.app_data.cluster_dict[method].update({c: {'name':cluster_name, 'link':[], 'color':hexcolor[c]}})
 
@@ -2239,7 +2239,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print(f'(group_changed) Cluster method, ({method}) is not defined')
 
         #print(self.app_data.cluster_dict)
-        self.tableWidgetViewGroups.blockSignals(False)
+        self.cluster_table.blockSignals(False)
         self.spinBoxClusterGroup.blockSignals(False)
         self.isUpdatingTable = False
 

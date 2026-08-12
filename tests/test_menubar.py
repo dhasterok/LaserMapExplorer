@@ -1,7 +1,8 @@
 import pytest
 from pytestqt.qtbot import QtBot
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QAction, QDialog, QTableWidgetItem, QComboBox, QFileDialog
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import QDialog, QTableWidgetItem, QComboBox, QFileDialog
 from tests.conftest import import_sample, MainWindow
 from src.data.AnalyteSelectionDialog import Ui_Dialog  # type: ignore # Import the UI class
 

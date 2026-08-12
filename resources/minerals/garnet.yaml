@@ -1,0 +1,32 @@
+# Garnet: X3Y2Z3O12 (dodecahedral X, octahedral Y, tetrahedral Z)
+mineral: garnet
+formula: X3Y2Z3O12
+normalization:
+  basis: oxygen
+  ideal_oxygens: 12
+  ideal_cations: 8
+sites:
+  Z:
+    target: 3.0
+    elements: [Si, Al, Fe3]
+    priority: [Si, Al, Fe3]     # fill order when site is under-occupied
+  Y:
+    target: 2.0
+    elements: [Al, Cr, Fe3, Ti]
+    priority: [Al, Cr, Fe3, Ti]
+  X:
+    target: 3.0
+    elements: [Ca, Mg, Fe2, Mn, Y, REE]
+    priority: [Ca, Mg, Fe2, Mn, Y, REE]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+trace_elements:
+  structural: [Y, Sc, Zn, Co, Ni]
+  excluded: [Zr, Hf, Nb]   # likely inclusion contamination, not structural garnet chemistry
+end_members:
+  method: locock_2008
+  members: [pyrope, almandine, spessartine, grossular, andradite, uvarovite]
+qc_checks:
+  - hydrogarnet_substitution

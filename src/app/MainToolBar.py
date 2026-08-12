@@ -3,6 +3,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QToolBar, QMenuBar, QMenu, QWidget, QLabel, QVBoxLayout, QComboBox, QMessageBox
 from lame_core.UITheme import default_font, PreferencesDialog
 from lame_core.CustomWidgets import CustomAction, CustomActionMenu
+from lame_core.PagedToolBar import PagedToolBar
 from lame_core.config import ICONPATH
 from src.app.settings import prefs
 from src.control.Logger import log, no_log
@@ -101,6 +102,7 @@ class MainActions(QObject):
         self.BiPlot = CustomAction(
             text="Scatter Plot",
             light_icon_unchecked="icon-scatter-64.svg",
+            icon_text="Scatter",
             parent=self.ui,
         )
         self.BiPlot.setMenuRole(QAction.MenuRole.TextHeuristicRole)
@@ -109,10 +111,21 @@ class MainActions(QObject):
         self.Ternary = CustomAction(
             text="Ternary Plot",
             light_icon_unchecked="icon-ternary-64.svg",
+            icon_text="Ternary",
             parent=self.ui,
         )
         self.Ternary.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Ternary.setObjectName("actionTernary")
+
+        self.DimRed = CustomAction(
+            text="Dimensional Reduction",
+            light_icon_unchecked="icon-dimensional-analysis-64.svg",
+            dark_icon_unchecked="icon-dimensional-analysis-dark-64.svg",
+            icon_text="Dimensional\nReduction",
+            parent=self.ui,
+        )
+        self.DimRed.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.DimRed.setObjectName("actionDimRed")
 
         self.Cluster = CustomAction(
             text="Cluster",
@@ -124,15 +137,20 @@ class MainActions(QObject):
         self.Cluster.setObjectName("actionCluster")
 
         self.TEC = CustomAction(
-            text="TEC plot",
+            text="TEC Plot",
             light_icon_unchecked="icon-TEC-64.svg",
             dark_icon_unchecked="icon-cluster-dark-64.svg",
+            icon_text="TEC",
             parent=self.ui,
         )
         self.TEC.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.TEC.setObjectName("actionTEC")
 
-        self.Radar = QAction(parent=self.ui)
+        self.Radar = CustomAction(
+            text="Radar Plot",
+            light_icon_unchecked="icon-radar-64.svg",
+            icon_text="Radar",
+            parent=self.ui)
         self.Radar.setObjectName("actionRadar")
 
         self.Compare_Spot_Map = CustomAction(
@@ -144,7 +162,7 @@ class MainActions(QObject):
         self.Compare_Spot_Map.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Compare_Spot_Map.setObjectName("actionCompare_Spot_Map")
 
-        # bself.uild menubar entry
+        # self.build menubar entry
         self.Preferences = QAction(parent=self.ui)
         self.Preferences.setObjectName("actionPreferences")
         self.Preferences.setMenuRole(QAction.MenuRole.PreferencesRole)
@@ -228,6 +246,17 @@ class MainActions(QObject):
         self.ClusterMask.setObjectName("actionClusterMask")
         self.ClusterMask.setToolTip("Turn filter by cluster on/off")
 
+        self.ROIMask = CustomAction(
+            text="ROI",
+            light_icon_unchecked="icon-mask-light-64.svg",
+            light_icon_checked="icon-mask-dark-64.svg",
+            parent=self.ui,
+        )
+        self.ROIMask.setCheckable(True)
+        self.ROIMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.ROIMask.setObjectName("actionROIMask")
+        self.ROIMask.setToolTip("Turn filter by region of interest on/off")
+
         self.Correlation = CustomAction(
             text="Correlation",
             light_icon_unchecked="icon-correlation-64.svg",
@@ -255,14 +284,33 @@ class MainActions(QObject):
         self.Reset.setToolTip("Clear all changes and plots to start over")
 
         self.AddSampleFiles = CustomAction(
-            text="Add Sample\nFiles",
-            light_icon_unchecked="icon-open-file-64.svg",
-            dark_icon_unchecked="icon-open-file-dark-64.svg",
+            text="Add Samples",
+            light_icon_unchecked="icon-add-directory-64.svg",
             parent=self.ui,
         )
         self.AddSampleFiles.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.AddSampleFiles.setObjectName("actionAddSampleFiles")
         self.AddSampleFiles.setToolTip("Add one or more sample files to the current project")
+
+        # Toolbar-only entry point: clicking the icon just pops this menu
+        # (no separate dropdown arrow -- CustomActionMenu wires its own
+        # `triggered` to `menu.exec()`). The two items call `.trigger()` on
+        # the real AddSampleFiles/AddSampleDirectory actions above/below
+        # rather than the dialog methods directly, so picking either one
+        # here still goes through the same triggered-signal wiring
+        # (dialog + logging) as the File menu's copies of those actions.
+        add_sample_menu_items = [
+            ("Add Sample Files", self.AddSampleFiles.trigger),
+            ("Add Sample Directory", self.AddSampleDirectory.trigger),
+            ]
+        self.SampleMenu = CustomActionMenu(
+            text="Add\nSamples",
+            menu_items=add_sample_menu_items,
+            light_icon_unchecked="icon-add-directory-64.svg",
+            parent=self.ui)
+        self.SampleMenu.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.SampleMenu.setObjectName("actionSampleMenu")
+        self.SampleMenu.setToolTip("Add one or more sample files or a directory of samples to the current project")
 
         self.NoiseReduction = CustomAction(
             text="Noise\nReduction",
@@ -379,11 +427,19 @@ class MainActions(QObject):
             text="",
             light_icon_unchecked="icon-sun-and-moon-64.svg",
             dark_icon_unchecked="",
+            icon_text="Theme",
             parent=self.ui,
         )
         self.ViewMode.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
         self.ViewMode.setObjectName("actionViewMode")
         self.ViewMode.setToolTip("Switch between light, dark, and auto modes")
+
+        self.ShowToolbarText = QAction(parent=self.ui)
+        self.ShowToolbarText.setObjectName("actionShowToolbarText")
+        self.ShowToolbarText.setText("Show Button Text")
+        self.ShowToolbarText.setCheckable(True)
+        self.ShowToolbarText.setChecked(True)
+        self.ShowToolbarText.setToolTip("Show text labels beneath toolbar icons (uncheck to save space)")
 
         self.ImportSpots = CustomAction(
             text="Import Spots",
@@ -563,7 +619,9 @@ class MainActions(QObject):
 
         self.Geochron = CustomAction(
             text="Geochronology",
-            light_icon_unchecked="icon-zoning-64.svg",
+            light_icon_unchecked="icon-dating-64.svg",
+            dark_icon_unchecked="icon-dating-dark-64.svg",
+            icon_text="Geochron",
             parent=self.ui,
         )
         self.Geochron.setCheckable(True)
@@ -580,6 +638,17 @@ class MainActions(QObject):
         self.Diffusion.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Diffusion.setObjectName("actionDiffusion")
         self.Diffusion.setToolTip("Open 2-D multi-component diffusion modeling tools")
+
+        self.Stoichiometry = CustomAction(
+            text="Stoichiometry",
+            light_icon_unchecked="icon-calculator-64.svg",
+            dark_icon_unchecked="icon-calculator-dark-64.svg",
+            parent=self.ui,
+        )
+        self.Stoichiometry.setCheckable(True)
+        self.Stoichiometry.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Stoichiometry.setObjectName("actionStoichiometry")
+        self.Stoichiometry.setToolTip("Open the stoichiometric mineral formula calculator")
 
         self.ProjectFiles = CustomAction(
             text="Project\nFiles",
@@ -607,6 +676,22 @@ class MainActions(QObject):
         self.UpdatePlot.triggered.connect(lambda: self.ui.control_dock.update_plot_type(force=True))
         self.UpdatePlot.triggered.connect(lambda: self.ui.style_dock.update_plot_type(force=True))
 
+        # Plot menu -- each switches the control dock to the toolbox page
+        # that plot type lives on, then selects that specific sub-type.
+        self.Correlation.triggered.connect(lambda: self.select_plot_type('sample', 'correlation'))
+        self.Histograms.triggered.connect(lambda: self.select_plot_type('sample', 'histogram'))
+        self.BiPlot.triggered.connect(lambda: self.select_plot_type('scatter', 'scatter'))
+        self.Ternary.triggered.connect(lambda: self.select_plot_type('scatter', 'ternary map'))
+        self.TEC.triggered.connect(lambda: self.select_plot_type('ndim', 'TEC'))
+        self.Radar.triggered.connect(lambda: self.select_plot_type('ndim', 'radar'))
+        self.Cluster.triggered.connect(lambda: self.select_plot_type('cluster', 'cluster map'))
+        # DimRed just opens the "Dimensional Reduction" toolbox page itself
+        # (unlike the sub-type selectors above) -- toolbox_changed() picks
+        # that page's own default plot type, no forced sub-type needed.
+        self.DimRed.triggered.connect(
+            lambda: self.ui.control_dock.toolbox.setCurrentIndex(self.ui.control_dock.tab_dict['dim_red'])
+        )
+
         self.SpotTools.setChecked(False)
         self.SpotTools.triggered.connect(self.ui.control_dock.toggle_spot_tab)
         self.ImportSpots.setVisible(False)
@@ -622,6 +707,9 @@ class MainActions(QObject):
 
         self.Diffusion.setChecked(False)
         self.Diffusion.triggered.connect(self.ui.open_diffusion_dock)
+
+        self.Stoichiometry.setChecked(False)
+        self.Stoichiometry.triggered.connect(self.ui.open_stoichiometry_dock)
 
         self.ProjectFiles.setChecked(False)
         self.ProjectFiles.triggered.connect(self.ui.open_project_files_dock)
@@ -658,6 +746,8 @@ class MainActions(QObject):
 
         self.ViewMode.triggered.connect(self.ui.theme_manager.cycle_mode)
 
+        self.ShowToolbarText.toggled.connect(self.ui.toolbar.set_show_button_text)
+
 
     @no_log
     def connect_logger(self):
@@ -681,20 +771,55 @@ class MainActions(QObject):
         self.Filters.triggered.connect(lambda: log("lame_action.Filters", prefix="UI"))
         self.PolygonMask.triggered.connect(lambda: log("lame_action.PolygonMask", prefix="UI"))
         self.ClusterMask.triggered.connect(lambda: log("lame_action.ClusterMask", prefix="UI"))
+        self.ROIMask.triggered.connect(lambda: log("lame_action.ROIMask", prefix="UI"))
         self.UpdatePlot.triggered.connect(lambda: log("lame_action.UpdatePlot", prefix="UI"))
         self.SavePlotToTree.triggered.connect(self._save_plot_to_tree)
+        self.Correlation.triggered.connect(lambda: log("lame_action.Correlation", prefix="UI"))
+        self.Histograms.triggered.connect(lambda: log("lame_action.Histograms", prefix="UI"))
+        self.BiPlot.triggered.connect(lambda: log("lame_action.BiPlot", prefix="UI"))
+        self.Ternary.triggered.connect(lambda: log("lame_action.Ternary", prefix="UI"))
+        self.TEC.triggered.connect(lambda: log("lame_action.TEC", prefix="UI"))
+        self.Radar.triggered.connect(lambda: log("lame_action.Radar", prefix="UI"))
+        self.Cluster.triggered.connect(lambda: log("lame_action.Cluster", prefix="UI"))
+        self.DimRed.triggered.connect(lambda: log("lame_action.DimRed", prefix="UI"))
         self.Notes.triggered.connect(lambda: log("lame_action.Notes", prefix="UI"))
         self.Calculator.triggered.connect(lambda: log("lame_action.Calculator", prefix="UI"))
         self.ReportBug.triggered.connect(lambda: log("lame_action.ReportBug", prefix="UI"))
         self.Help.triggered.connect(lambda: log("lame_action.Help", prefix="UI"))
         self.Reset.triggered.connect(lambda: log("lame_action.Reset", prefix="UI"))
         self.ViewMode.triggered.connect(lambda: log("lame_action.ViewMode", prefix="UI"))
+        self.ShowToolbarText.triggered.connect(lambda: log("lame_action.ShowToolbarText", prefix="UI"))
 
     def open_preferences(self):
         dlg = PreferencesDialog(prefs, parent=self.ui)
         if dlg.exec():
             # dialog already updated prefs via accept, listeners will fire
             pass
+
+    def select_plot_type(self, tab_key, plot_type):
+        """Switch the control dock to the toolbox page for `tab_key` and
+        select `plot_type` within it -- the composite action behind each
+        Plot-menu action (BiPlot, Ternary, TEC, Radar, Cluster, Correlation,
+        Histograms).
+
+        Mirrors ``PlotTree._sync_ui_to_plot``: switching the toolbox page
+        alone (``toolbox.setCurrentIndex``) only selects that page's
+        *default* plot type (see ``ControlDock.toolbox_changed``) and is a
+        no-op if the page is already current, so ``update_plot_type`` is
+        always called afterward to select the specific sub-type regardless.
+
+        Parameters
+        ----------
+        tab_key : str
+            Key into ``ControlDock.tab_dict`` (e.g. ``'scatter'``, ``'ndim'``,
+            ``'cluster'``, ``'sample'``).
+        plot_type : str
+            One of that page's ``plot_list`` entries (e.g. ``'scatter'``,
+            ``'ternary map'``, ``'TEC'``, ``'radar'``, ``'cluster map'``).
+        """
+        control_dock = self.ui.control_dock
+        control_dock.toolbox.setCurrentIndex(control_dock.tab_dict[tab_key])
+        control_dock.update_plot_type(new_plot_type=plot_type, force=True)
 
     def toggle_actions(self, enable):
         """Disables/enables widgets based on existence of self.ui.data.
@@ -791,15 +916,6 @@ class MainMenubar(QMenuBar):
         self.menuFile.addAction(lame_action.CloseProject)
         self.menuFile.addSeparator()
 
-        # Workflow group -- kept together as its own block: workflow files
-        # are explicitly reusable across projects, not part of the
-        # project-open/close lifecycle.
-        self.menuFile.addAction(lame_action.NewWorkflow)
-        self.menuFile.addAction(lame_action.OpenWorkflow)
-        self.menuFile.addAction(lame_action.SaveWorkflow)
-        self.menuFile.addAction(lame_action.CloseWorkflow)
-        self.menuFile.addSeparator()
-
         # Import group
         self.menuFile.addAction(lame_action.SpotData)
         self.menuFile.addAction(lame_action.ImportFiles)
@@ -808,6 +924,20 @@ class MainMenubar(QMenuBar):
 
         self.menuFile.addAction(lame_action.SaveFigure)
         self.menuFile.addAction(lame_action.Reset)
+
+        # Workflow Menu -- workflow files are explicitly reusable across
+        # projects, not part of the project-open/close lifecycle, so they
+        # get their own menu rather than living under File.
+        self.menuWorkflow = QMenu(parent=self)
+        self.menuWorkflow.setObjectName("menuWorkflow")
+        self.menuWorkflow.setTitle("Workflow")
+
+        self.menuWorkflow.addAction(lame_action.NewWorkflow)
+        self.menuWorkflow.addAction(lame_action.OpenWorkflow)
+        self.menuWorkflow.addAction(lame_action.SaveWorkflow)
+        self.menuWorkflow.addAction(lame_action.CloseWorkflow)
+        self.menuWorkflow.addSeparator()
+        self.menuWorkflow.addAction(lame_action.CaptureToggle)
 
         # Plot Menu
         self.menuPlot = QMenu(parent=self)
@@ -832,11 +962,16 @@ class MainMenubar(QMenuBar):
         self.menuAnalyze.addAction(lame_action.FilterToggle)
         self.menuAnalyze.addAction(lame_action.PolygonMask)
         self.menuAnalyze.addAction(lame_action.ClusterMask)
+        self.menuAnalyze.addAction(lame_action.ROIMask)
         self.menuAnalyze.addAction(lame_action.NoiseReduction)
         self.menuAnalyze.addSeparator()
         self.menuAnalyze.addAction(lame_action.Compare_Spot_Map)
         self.menuAnalyze.addAction(lame_action.Profiles)
         self.menuAnalyze.addAction(lame_action.Regression)
+        self.menuAnalyze.addAction(lame_action.DimRed)
+        self.menuAnalyze.addAction(lame_action.Geochron)
+        self.menuAnalyze.addAction(lame_action.Diffusion)
+        self.menuAnalyze.addAction(lame_action.Stoichiometry)
 
         # Tools Menu
         self.menuTools = QMenu(parent=self)
@@ -850,9 +985,6 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.SpotTools)
         self.menuTools.addAction(lame_action.Profiles)
         self.menuTools.addAction(lame_action.SpecialTools)
-        self.menuTools.addAction(lame_action.Regression)
-        self.menuTools.addAction(lame_action.Geochron)
-        self.menuTools.addAction(lame_action.Diffusion)
         self.menuTools.addAction(lame_action.ProjectFiles)
         self.menuTools.addSeparator()
         self.menuTools.addAction(lame_action.Info)
@@ -861,6 +993,16 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.Notes)
         self.menuTools.addSeparator()
         self.menuTools.addAction(lame_action.WorkflowTool)
+
+        # View Menu -- the toolbar is now a single paged widget (pinned row +
+        # page tabs + one swappable content row), so there's nothing left to
+        # individually show/hide the way the old grouped toolbars were --
+        # just the icon/text style toggle.
+        self.menuView = QMenu(parent=self)
+        self.menuView.setObjectName("menuView")
+        self.menuView.setTitle("View")
+
+        self.menuView.addAction(lame_action.ShowToolbarText)
 
         # Help Menu
         self.menuHelp = QMenu(parent=self)
@@ -874,9 +1016,11 @@ class MainMenubar(QMenuBar):
 
         self.addMenu(self.menuLaME)
         self.addMenu(self.menuFile)
+        self.addMenu(self.menuView)
         self.addMenu(self.menuPlot)
         self.addMenu(self.menuAnalyze)
         self.addMenu(self.menuTools)
+        self.addMenu(self.menuWorkflow)
         self.addMenu(self.menuHelp)
 
     def _refresh_recent_projects_menu(self, ui):
@@ -900,6 +1044,7 @@ class MainToolbar(QToolBar):
         super().__init__(parent=ui)
 
         self.ui = ui
+        self.lame_action = lame_action
 
         font = default_font()
         font.setPointSize(10)
@@ -908,12 +1053,19 @@ class MainToolbar(QToolBar):
         self.setIconSize(QSize(24, 24))
         self.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.setObjectName("toolBar")
+        self.setMovable(False)
 
         ui.addToolBar(Qt.ToolBarArea.TopToolBarArea, self)
 
+        self.paged = PagedToolBar(self)
+        self.paged.pinned_bar.setFont(font)
+        self.paged.pinned_bar.setIconSize(QSize(24, 24))
+        self.paged.pinned_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        self.paged.page_bar.setFont(font)
+        self.addWidget(self.paged)
+
         sample_widget = QWidget(self)
 
-        sample_widget.setGeometry(QRect(15, 85, 211, 40))
         sample_widget.setMaximumSize(QSize(16777215, 40))
         sample_widget.setObjectName("widgetSampleSelect")
 
@@ -932,48 +1084,177 @@ class MainToolbar(QToolBar):
 
         sample_widget.setLayout(sample_widget_layout)
 
+        # Pinned row -- always visible regardless of which page is showing.
+        # Kept lean on purpose: only things touched continuously no matter
+        # what task is underway belong here.
+        pinned = self.paged.pinned_bar
+        pinned.addWidget(sample_widget)
+        pinned.addAction(lame_action.SelectAnalytes)
+        pinned.addSeparator()
+        pinned.addAction(lame_action.UpdatePlot)
+        pinned.addAction(lame_action.SaveProject)
+        pinned.addSeparator()
 
-        self.addAction(lame_action.AddSampleFiles)
-        self.addAction(lame_action.AddSampleDirectory)
-        self.addAction(lame_action.ImportFiles)
-        self.addAction(lame_action.ImportSpots)
-        self.addAction(lame_action.OpenProject)
-        self.addAction(lame_action.SaveProject)
-        self.addSeparator()
-        #self.addWidget(sample_widget)
-        self.addAction(lame_action.SelectAnalytes)
-        self.insertWidget(lame_action.SelectAnalytes, sample_widget)
-        self.addAction(lame_action.WorkflowTool)
-        self.addAction(lame_action.CaptureToggle)
-        self.addAction(lame_action.Snapshot)
-        self.addSeparator()
-        self.addAction(lame_action.FullMap)
-        self.addAction(lame_action.Crop)
-        self.addAction(lame_action.SwapAxes)
-        self.addSeparator()
-        self.addAction(lame_action.NoiseReduction)
-        self.addAction(lame_action.ClearFilters)
-        self.addAction(lame_action.FilterToggle)
-        self.addAction(lame_action.PolygonMask)
-        self.addAction(lame_action.ClusterMask)
-        self.addSeparator()
-        self.addAction(lame_action.UpdatePlot)
-        self.addAction(lame_action.SavePlotToTree)
-        self.addSeparator()
-        self.addAction(lame_action.Notes)
-        self.addAction(lame_action.Calculator)
-        self.addSeparator()
-        self.addAction(lame_action.ReportBug)
-        self.addAction(lame_action.Reset)
-        self.addAction(lame_action.Help)
-        self.addAction(lame_action.ViewMode)
+        # Pages -- one row of content, swapped via the page tabs. Report Bug
+        # and Reset aren't repeated here: both already live in the Help/File
+        # menus (MainMenubar).
+        self.paged.add_page("Home", self._build_home_page(lame_action))
+        self.paged.add_page("Processing", self._build_processing_page(lame_action))
+        self.paged.add_page("Plot", self._build_plot_page(lame_action))
+        self.paged.add_page("Analysis", self._build_analysis_page(lame_action))
+        self.paged.add_page("Log", self._build_log_page(lame_action))
 
         self.connect_observers()
         self.connect_actions()
         self.connect_logger()
-    
+
+    def _styled_page_toolbar(self):
+        toolbar = QToolBar()
+        toolbar.setFont(self.font())
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+        return toolbar
+
+    def _build_home_page(self, lame_action):
+        """Builds the Home page of the toolbar, which contains actions related to project management and general functionality.
+
+        Parameters
+        ----------
+        lame_action : QAction
+            The action to be added to the toolbar.
+            
+        Returns
+        -------
+        QToolBar
+            The configured toolbar.
+        """
+        toolbar = self._styled_page_toolbar()
+
+        # Add Sample Files/Directory share one visual slot: clicking the
+        # icon only ever opens the SampleMenu action's menu (CustomActionMenu
+        # wires its own `triggered` to `menu.exec()`) -- no separate dropdown
+        # arrow, no direct file-dialog trigger from the icon itself.
+        toolbar.addAction(lame_action.OpenProject)
+        toolbar.addAction(lame_action.SampleMenu)
+        toolbar.addAction(lame_action.ImportFiles)
+        toolbar.addAction(lame_action.Help)
+        toolbar.addAction(lame_action.ViewMode)
+        return toolbar
+
+    def _build_plot_page(self, lame_action):
+        """Builds the Plot page of the toolbar, which contains actions related to plotting and visualization.
+        
+        Parameters
+        ----------
+        lame_action : QAction
+            The action to be added to the toolbar.
+            
+        Returns
+        -------
+        QToolBar
+            The configured toolbar.
+        """
+        toolbar = self._styled_page_toolbar()
+        toolbar.addAction(lame_action.SavePlotToTree)
+        toolbar.addAction(lame_action.FullMap)
+        toolbar.addAction(lame_action.Crop)
+        toolbar.addAction(lame_action.SwapAxes)
+        toolbar.addAction(lame_action.Correlation)
+        toolbar.addAction(lame_action.Histograms)
+        toolbar.addAction(lame_action.BiPlot)
+        toolbar.addAction(lame_action.Ternary)
+        toolbar.addAction(lame_action.TEC)
+        toolbar.addAction(lame_action.Radar)
+        return toolbar
+
+    def _build_processing_page(self, lame_action):
+        """Builds the Processing page of the toolbar, which contains actions related to data processing.
+
+        Parameters
+        ----------
+        lame_action : QAction
+            The action to be added to the toolbar.
+            
+        Returns
+        -------
+        QToolBar
+            The configured toolbar.
+        """
+        toolbar = self._styled_page_toolbar()
+        toolbar.addAction(lame_action.NoiseReduction)
+        toolbar.addAction(lame_action.ClearFilters)
+        toolbar.addAction(lame_action.FilterToggle)
+        toolbar.addAction(lame_action.PolygonMask)
+        toolbar.addAction(lame_action.ClusterMask)
+        toolbar.addAction(lame_action.ROIMask)
+        return toolbar
+
+    def _build_log_page(self, lame_action):
+        """Builds the Log page of the toolbar, which contains actions related to logging and reporting.
+        
+        Parameters
+        ----------
+        lame_action : QAction
+            The action to be added to the toolbar.
+            
+        Returns
+        -------
+        QToolBar
+            The configured toolbar.
+        """
+        toolbar = self._styled_page_toolbar()
+        toolbar.addAction(lame_action.Notes)
+        toolbar.addAction(lame_action.WorkflowTool)
+        toolbar.addAction(lame_action.CaptureToggle)
+        toolbar.addAction(lame_action.Snapshot)
+        return toolbar
+
+    def _build_analysis_page(self, lame_action):
+        """Builds the Analysis page of the toolbar, which contains actions related to data analysis.
+        
+        Parameters
+        ----------
+        lame_action : QAction
+            The action to be added to the toolbar.
+            
+        Returns
+        -------
+        QToolBar
+            The configured toolbar.
+        """
+        toolbar = self._styled_page_toolbar()
+        toolbar.addAction(lame_action.Calculator)
+        toolbar.addAction(lame_action.Regression)
+        toolbar.addAction(lame_action.DimRed)
+        toolbar.addAction(lame_action.Cluster)
+        toolbar.addAction(lame_action.Geochron)
+        toolbar.addAction(lame_action.Profiles)
+        toolbar.addAction(lame_action.Diffusion)
+        toolbar.addAction(lame_action.Stoichiometry)
+        return toolbar
+
+    def set_show_button_text(self, show_text):
+        """Show/hide the text labels beneath toolbar icons, across the
+        pinned row and every page, to save vertical/horizontal space. The
+        page-tab buttons themselves are always text-only, so they're not
+        part of this sweep.
+        """
+        style = (
+            Qt.ToolButtonStyle.ToolButtonTextUnderIcon if show_text
+            else Qt.ToolButtonStyle.ToolButtonIconOnly
+        )
+        self.paged.pinned_bar.setToolButtonStyle(style)
+        for i in range(self.paged.pages.count()):
+            self.paged.pages.widget(i).setToolButtonStyle(style)
+        self.paged.sync_content_height()
+
+    def _on_project_changed(self):
+        if self.ui.project_manager.current_project is not None:
+            self.paged.set_current_page("Plot")
+
     def connect_actions(self):
         self.comboBoxSampleId.activated.connect(lambda _: self.update_sample_id())
+        self.ui.project_manager.projectChanged.connect(self._on_project_changed)
 
     def connect_logger(self):
         self.comboBoxSampleId.activated.connect(lambda: log(f"comboBoxSampleId, value=[{self.comboBoxSampleId.currentText()}]", prefix="UI"))

@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
     QHeaderView, QDialog, QWidget, QCheckBox, QHeaderView, QSizePolicy, QToolButton,
     QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
-    QButtonGroup, QDialogButtonBox, QMenu, QPushButton
+    QButtonGroup, QDialogButtonBox, QMenu, QPushButton, QScrollArea
 )
 from PyQt6.QtGui import QFont, QIcon, QCursor
 from lame_core.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
@@ -24,6 +24,7 @@ import src.common.csvdict as csvdict
 from src.common.TableFunctions import TableFcn as TableFcn
 import src.app.CustomTableWidget as TW
 from src.data.SortAnalytes import sort_analytes
+from src.tree.PlotTree import PLOT_TREE_MIME_TYPE
 from lame_core.UITheme import default_font
 from src.control.Logger import auto_log_methods, log, no_log
 
@@ -71,8 +72,16 @@ class CanvasWidget(QWidget):
         self.canvasWindow = QTabWidget(parent=self)
 
         self.single_view = SingleViewTab(self.canvasWindow)
-        self.multi_view = MultiViewTab(self.canvasWindow)
-        self.quick_view = QuickViewTab(self.canvasWindow)
+        self.multi_view = MultiViewTab(self.canvasWindow, canvas_widget=self)
+
+        # quick_view holds the grid of canvases; it's wrapped in a scroll area
+        # so the grid can grow taller than the viewport as columns are added
+        self.quick_view = QuickViewTab()
+        quick_view_scroll = QScrollArea(self.canvasWindow)
+        quick_view_scroll.setObjectName("quickViewScrollArea")
+        quick_view_scroll.setWidgetResizable(True)
+        quick_view_scroll.setWidget(self.quick_view)
+        self.canvasWindow.addTab(quick_view_scroll, "Quick View")
 
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -342,11 +351,10 @@ class CanvasWidget(QWidget):
         qv_fields = self.sorted_qv_list(key)
         analyte_fields = set(self.ui.app_data.field_dict.get('Analyte', []))
 
-        # establish number of rows and columns, based on the fields actually
-        # being plotted (not the raw, possibly only-partly-available list)
-        ratio = 1.8 # aspect ratio of gridlayout
-        # ratio = ncol / nrow, nplots = ncol * nrow
-        ncol = max(1, int(np.sqrt(len(qv_fields)*ratio)))
+        # number of columns is user-controlled (spinBoxQVColumns); rows grow
+        # to fit, and the surrounding QScrollArea lets the user scroll to
+        # see them all
+        ncol = self.toolbar.qv.spinBoxQVColumns.value()
 
         # clear the quickView layout
         self.clear_layout(self.quick_view.layout())
@@ -678,6 +686,33 @@ class CanvasWidget(QWidget):
             if not plot_info.get('plot_id'):
                 self.ui.plot_tree.add_tree_item(plot_info)
 
+    def drop_plot_on_multiview(self, tree, branch, leaf, row, col):
+        """Places a plot dragged from the Plot Selector tree onto a specific Multi View cell.
+
+        Parameters
+        ----------
+        tree : str
+            Top level plot-type branch in the ``Plot Selector`` (e.g. 'Analyte').
+        branch : str
+            Sample ID branch under ``tree``.
+        leaf : str
+            Field/plot name leaf under ``branch``.
+        row, col : int
+            Target cell in the Multi View grid.
+        """
+        if not hasattr(self.ui, 'plot_tree'):
+            return
+
+        plot_info, _ = self.ui.plot_tree.retrieve_plotinfo_from_tree(tree=tree, branch=branch, leaf=leaf)
+        if not plot_info:
+            self.ui.statusbar.showMessage(
+                'Plot has not been generated yet -- double-click it in the Plot Selector first, then drag it to Multi View.'
+            )
+            return
+
+        self.canvasWindow.setCurrentIndex(self.tab_dict['mv'])
+        self.add_canvas_to_window(plot_info, position=(row, col))
+
     def save_current_plot_to_tree(self):
         """Save the current plot displayed on canvas to the plot tree and registry."""
         try:
@@ -910,12 +945,16 @@ class SingleViewTab(QWidget):
         parent.addTab(self, "Single View")
 
 class MultiViewTab(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, canvas_widget=None):
         super().__init__(parent=parent)
         self.setObjectName("multiViewTab")
         self.setMinimumSize(QSize(0, 0))
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setCursor(QCursor(Qt.CursorShape.CrossCursor))
+
+        # reference back to the owning CanvasWidget, used to resolve drops
+        self.canvas_widget = canvas_widget
+        self.setAcceptDrops(True)
 
         tab_layout = QGridLayout()
         tab_layout.setSpacing(0) # Set margins to 0 if you want to remove margins as well
@@ -924,20 +963,67 @@ class MultiViewTab(QWidget):
 
         parent.addTab(self, "Multi View")
 
+    def _cell_at(self, pos):
+        """Maps a drop position (widget coords) to a (row, col) grid cell."""
+        max_rows = self.canvas_widget.toolbar.mv.spinBoxMaxRows.value()
+        max_cols = self.canvas_widget.toolbar.mv.spinBoxMaxCols.value()
+        width = max(1, self.width())
+        height = max(1, self.height())
+        col = min(max_cols - 1, max(0, (pos.x() * max_cols) // width))
+        row = min(max_rows - 1, max(0, (pos.y() * max_rows) // height))
+        return row, col
+
+    def dragEnterEvent(self, event):
+        if self.canvas_widget is not None and event.mimeData().hasFormat(PLOT_TREE_MIME_TYPE):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if self.canvas_widget is not None and event.mimeData().hasFormat(PLOT_TREE_MIME_TYPE):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        mime_data = event.mimeData()
+        if self.canvas_widget is None or not mime_data.hasFormat(PLOT_TREE_MIME_TYPE):
+            event.ignore()
+            return
+
+        payload = bytes(mime_data.data(PLOT_TREE_MIME_TYPE)).decode("utf-8")
+        path = payload.split("\x1f")
+        if len(path) != 3:
+            event.ignore()
+            return
+
+        row, col = self._cell_at(event.position().toPoint())
+        tree, branch, leaf = path
+        self.canvas_widget.drop_plot_on_multiview(tree, branch, leaf, row, col)
+        event.acceptProposedAction()
+
 class QuickViewTab(QWidget):
-    def __init__(self, parent):
+    """Holds the grid of Quick View canvases.
+
+    Lives inside a ``QScrollArea`` (see ``CanvasWidget.setupUI``) rather than
+    being added to ``canvasWindow`` directly, since the number of canvases
+    (and thus rows) can exceed the visible height once a column count is set.
+    """
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName("quickViewTab")
         self.setMinimumSize(QSize(0, 0))
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # vertical policy is Minimum (not Expanding) so the widget's height
+        # tracks its grid layout's content -- this is what lets the
+        # surrounding QScrollArea know to show a scrollbar once the grid
+        # grows taller than the viewport.
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
         tab_layout = QGridLayout()
         tab_layout.setSpacing(0) # Set margins to 0 if you want to remove margins as well
         tab_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(tab_layout)
-
-        parent.addTab(self, "Quick View")
 
 class NavigationWidgetsSV(VisibilityWidget):
     def __init__(self, parent=None):
@@ -1236,11 +1322,27 @@ class NavigationWidgetsQV(VisibilityWidget):
         )
         self.toolButtonNewList.setObjectName("toolButtonNewList")
 
+        self.labelQVColumns = QLabel(parent=self)
+        self.labelQVColumns.setObjectName("labelQVColumns")
+        self.labelQVColumns.setText("Columns:")
+
+        self.spinBoxQVColumns = QSpinBox(parent=self)
+        self.spinBoxQVColumns.setMinimum(1)
+        self.spinBoxQVColumns.setMaximum(12)
+        self.spinBoxQVColumns.setProperty("value", 4)
+        self.spinBoxQVColumns.setObjectName("spinBoxQVColumns")
+        self.spinBoxQVColumns.setMinimumWidth(40)
+        self.spinBoxQVColumns.setMaximumWidth(40)
+        self.spinBoxQVColumns.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.spinBoxQVColumns.setToolTip("Number of columns used to lay out Quick View maps")
+
         navigation_spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         navigation_layout.addWidget(list_label)
         navigation_layout.addWidget(self.comboBoxQVList)
         navigation_layout.addWidget(self.toolButtonNewList)
+        navigation_layout.addWidget(self.labelQVColumns)
+        navigation_layout.addWidget(self.spinBoxQVColumns)
         navigation_layout.addItem(navigation_spacer)
 
 
@@ -1309,6 +1411,7 @@ class CanvasToolBar(QGroupBox):
         # quick view
         self.qv.toolButtonNewList.clicked.connect(lambda: QuickView(parent=self.parent))
         self.qv.comboBoxQVList.activated.connect(lambda: self.parent.display_QV())
+        self.qv.spinBoxQVColumns.valueChanged.connect(lambda _: self.parent.display_QV())
 
     def move_canvas_to_window(self):
         self.parent.current_canvas.toggle_tool('pop_figure',True)

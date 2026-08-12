@@ -1,8 +1,9 @@
 import pytest
 from pytestqt.qtbot import QtBot
-from PyQt5.QtWidgets import QFileDialog, QAction,QComboBox, QComboBox
-from PyQt5.QtCore import Qt
-from main import MainWindow,create_app  # Import the create_app function
+from PyQt6.QtWidgets import QFileDialog, QComboBox
+from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt
+from main import MainWindow, create_app  # Import the create_app function
 
 @pytest.fixture(scope='module')
 def app():
@@ -12,19 +13,19 @@ def app():
     return app
 
 @pytest.fixture
-def main_window(qtbot,app):
+def main_window(qtbot, app):
     """Fixture for creating the MainWindow."""
-    main_window = MainWindow()
+    main_window = MainWindow(app)
     qtbot.addWidget(main_window)
     return main_window
 
 def import_sample(qtbot, main_window, mocker):
     # Mock the file dialog to return the desired directory
     mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value='maps/Alex_garnet_maps/processed data')
-    
 
-    # Mock the exec_ method of QFileDialog to simulate the dialog being accepted
-    mocker.patch.object(QFileDialog, 'exec_', return_value=QFileDialog.Accepted)
+
+    # Mock the exec method of QFileDialog to simulate the dialog being accepted
+    mocker.patch.object(QFileDialog, 'exec', return_value=QFileDialog.DialogCode.Accepted)
     mocker.patch.object(QFileDialog, 'selectedFiles', return_value=['maps/Alex_garnet_maps/processed data/RM02.lame.csv'])
 
     # Find the action and trigger it

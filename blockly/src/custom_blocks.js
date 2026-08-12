@@ -77,8 +77,42 @@ const display_figure = {
 };
 Blockly.common.defineBlocks({ display_figure });
 
+// ---- Record notes ----
+/**
+.. block:: record_notes
+   :category: Global Settings
+   :color: 360
 
-//// File I/O //// 
+Toggle whether recorded workflow actions are written to the sample's Notes
+(.rst) file as the workflow runs.
+
+**Fields**
+- **RECORD** (Checkbox, default FALSE): When TRUE, each recorded action
+  (sample changes, filters, plots, clustering, etc.) is appended to the Notes
+  dock and compiled to PDF when the run ends. When FALSE, nothing is written.
+  Can be placed more than once to turn recording on/off partway through a run.
+
+**Connections**
+- Previous: Statement
+- Next: Statement
+*/
+const record_notes = {
+  init: function () {
+    this.appendDummyInput('HEADER')
+      .appendField('Record notes')
+      .appendField(new Blockly.FieldCheckbox('FALSE'), 'RECORD');
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(285);
+    this.setTooltip('When enabled, recorded actions are appended to the sample Notes file and compiled to PDF at the end of the run.');
+    this.setHelpUrl('');
+  }
+};
+Blockly.common.defineBlocks({ record_notes });
+
+
+//// File I/O ////
 
 /**
 .. block:: load_directory
@@ -905,7 +939,8 @@ const field_select = {
                     ['Analyte', 'Analyte'],
                     ['Analyte (Normalised)', 'Analyte (Normalised)'],
                     ['PCA Score', 'PCA Score'],
-                    ['Cluster', 'Cluster']
+                    ['Cluster', 'Cluster'],
+                    ['ROI', 'ROI']
                 ],
                 this.updateFieldDropdown.bind(this)  // Bind the update function
             ), 'fieldType');

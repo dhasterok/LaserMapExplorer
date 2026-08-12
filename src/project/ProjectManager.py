@@ -24,7 +24,7 @@ from PyQt6.QtCore import QObject, QSettings, pyqtSignal
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from lame_core.config import BASEDIR
-from src.common.Status import StatusMessageManager
+from src.app.Status import StatusMessageManager
 from src.control.Logger import auto_log_methods
 from src.project.ProjectModel import (
     Project, ProjectSampleEntry,

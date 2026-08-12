@@ -881,11 +881,15 @@ class AppData(QObject):
         self.fieldTypeChanged.emit('c', new_field_type)
 
         # update c_field
-        if new_field_type in ['', 'none', 'None']:
-            log("c_field_type.setter: resetting c_field to '' (none type)", prefix="Data")
+        available = self.field_dict.get(new_field_type, [])
+        if new_field_type in ['', 'none', 'None'] or not available:
+            # Also reached for a field type with no data yet (e.g. 'ROI'/
+            # 'Stoichiometry' before anything's been computed) -- same
+            # graceful reset as the explicit none case, not a KeyError.
+            log(f"c_field_type.setter: resetting c_field to '' (none type or no data for {new_field_type!r})", prefix="Data")
             self.c_field = ''
         else:
-            first_field = self.field_dict[new_field_type][0]
+            first_field = available[0]
             log(f"c_field_type.setter: side-effect sets c_field={first_field!r} (first of {new_field_type})", prefix="Data")
             self.c_field = first_field
 
@@ -1301,7 +1305,12 @@ class AppData(QObject):
         if 'normalized' in field_type:
             field_type = field_type.replace(' (normalized)','')
 
-        field_list = self.field_dict[field_type]
+        # .get(..., []) rather than a bare index: field_type is a valid,
+        # selectable *type* the moment any plot type lists it (see
+        # PlotAxisSettings.py), but genuinely optional types like 'ROI' or
+        # 'Stoichiometry' may have no column yet (nothing drawn/computed) --
+        # that's an empty list, not a KeyError.
+        field_list = self.field_dict.get(field_type, [])
 
         if field_type == 'Analyte':
             _, field_list = self.data[self.sample_id].sort_data(self.sort_method)

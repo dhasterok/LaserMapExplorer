@@ -471,7 +471,7 @@ class ControlDock(CustomDockWidget):
                     self.field_control_settings[tid] = ControlSettings(
                         page_name=tab_name,
                         saved_index=0,
-                        plot_list=['field map', 'histogram', 'correlation'],
+                        plot_list=['field map', 'histogram', 'correlation', 'roi map'],
                         axes={ax: AxisSettings() for ax in ['x','y','z','c']}
                     )
                 case 'spot data':
@@ -844,7 +844,13 @@ class ControlDock(CustomDockWidget):
         check_field_type = old_field_type.replace(' (normalized)', '') if 'normalized' in old_field_type else old_field_type
 
         childbox.blockSignals(True)
-        if check_field_type not in new_list:
+        if not new_list:
+            # No field type has data yet for this axis (e.g. 'ROI'/
+            # 'Stoichiometry' before anything's been computed) -- leave the
+            # child combobox empty rather than indexing new_list[0] into
+            # nothing.
+            childbox.clear()
+        elif check_field_type not in new_list:
             childbox.clear()
             childbox.addItems(field_dict[new_list[0]])
             childbox.setCurrentIndex(0)
@@ -1286,10 +1292,11 @@ class FieldLogicUI():
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
+                field_list = []
                 if 'Cluster' in data_type_dict:
-                    field_list = ['Cluster']
-                else:
-                    field_list = []
+                    field_list.append('Cluster')
+                if 'ROI' in data_type_dict:
+                    field_list.append('ROI')
             case 'cluster score map':
                 if 'Cluster score' in data_type_dict:
                     field_list = ['Cluster score']
@@ -1325,6 +1332,9 @@ class FieldLogicUI():
 
                 if 'Cluster score' in data_type_dict:
                     field_list.append('Cluster score')
+
+                if 'ROI' in data_type_dict:
+                    field_list.append('ROI')
 
                 if 'Calculated' in data_type_dict:
                     field_list.append('Calculated')

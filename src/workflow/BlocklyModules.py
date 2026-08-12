@@ -48,7 +48,7 @@ import src.app.config as config
 from src.app.help_mapping import create_help_mapping
 from src.control.Logger import LoggerDock
 from src.app.AppData import AppData
-from src.common.Status import StatusMessageManager
+from src.app.Status import StatusMessageManager
 import os
 import json
 from src.plotting.CanvasWidget import CanvasWidget, CanvasDialog
@@ -99,6 +99,10 @@ class LameBlockly(QObject):
     display_figures : bool
         Whether to show plots in a popup window (`True`) or embed them
         in the main layout (`False`).
+    record_notes : bool
+        Whether recorded workflow actions get written to the sample's Notes
+        (.rst) file as the workflow runs (`ReportWriter`). Set via the
+        "Record notes" Global Settings block; defaults to `False`.
     """
     def __init__(self,parent, *args, **kwargs):
         """
@@ -166,6 +170,7 @@ class LameBlockly(QObject):
         layout.addWidget(self.canvas_widget)
         popup.setLayout(layout)
         self.display_figures = True  # show popup with controls & pause; False = embed and continue
+        self.record_notes = False  # whether recorded actions get written to Notes/.rst during a run; set via the "Record notes" Global Settings block
         self.update_bins = False
         self.showMass = False
         # Block ID

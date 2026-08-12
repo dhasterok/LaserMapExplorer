@@ -38,3 +38,9 @@ docutils
 # Utilities
 darkdetect
 networkx
+PyYAML
+
+# Testing
+pytest
+pytest-qt
+pytest-mock

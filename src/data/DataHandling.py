@@ -17,7 +17,7 @@ from src.data.SortAnalytes import sort_analytes
 from src.data.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
-from src.common.Status import StatusMessageManager
+from src.app.Status import StatusMessageManager
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
 
@@ -294,7 +294,9 @@ class SampleObj(QObject):
             'PCA score',
             'Cluster',
             'Cluster score',
-            'Diffusion model'
+            'Diffusion model',
+            'ROI',
+            'Stoichiometry'
         ]
         self._valid_data_types = self._default_data_types
 
@@ -792,11 +794,22 @@ class SampleObj(QObject):
         self.filter_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.polygon_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.cluster_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
+        self.roi_selection_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.mask = \
             self.crop_mask & \
             self.filter_mask & \
             self.polygon_mask & \
-            self.cluster_mask
+            self.cluster_mask & \
+            self.roi_selection_mask
+
+        # Regions of interest: an ordered stack of named, colored, filter-defined
+        # groups (see `add_roi`). Each entry remembers the filter definition that
+        # created it (not just a frozen pixel mask), so it can be recalled for
+        # editing and re-evaluated later. Stack order is priority order -- later
+        # (higher-index) entries win overlapping pixels when `processed['ROI']`
+        # is (re)built by `recompute_roi_assignments`.
+        self.roi_stack = []
+        self.selected_rois = []
 
         self.dim_red_results = {}
         self.cluster_results = {}
@@ -1029,7 +1042,7 @@ class SampleObj(QObject):
     # Methods related to the AttributeDataFrames
     # ------------------------------------------
     # note properties are based on the cropped X and Y values
-    def add_columns(self, data_type, column_names, array, mask=None):
+    def add_columns(self, data_type, column_names, array, mask=None, merge=False):
         """
         Add one or more columns to the sample object.
 
@@ -1047,6 +1060,13 @@ class SampleObj(QObject):
         mask : numpy.ndarray, optional
             A boolean mask that indicates which rows in the original data should be filled. If not provided,
             the length of `array` must match the height of `processed data`.
+        merge : bool, optional
+            If True and a column already exists, rows outside ``mask`` keep their
+            current values instead of being reset to NaN -- for tools that
+            deliberately recompute only a subset of rows across repeated calls
+            (e.g. a calculation scoped to one ROI/cluster at a time) and need
+            each scoped run's results to coexist rather than overwrite each
+            other. Ignored when ``mask`` is None or the column is new.
 
         Returns
         -------
@@ -1106,8 +1126,14 @@ class SampleObj(QObject):
                 # No mask: directly use the array for this column
                 self.processed[column_name] = array[:, i]
             else:
-                # Masked: fill a new column initialized with NaNs, then assign the masked rows
-                full_column = np.full(self.processed.shape[0], np.nan)
+                # Masked: fill a new column initialized with NaNs, then assign the masked rows.
+                # With merge=True and an existing column, start from its current values instead
+                # of NaN so rows outside this call's mask keep whatever a previous scoped call
+                # already wrote there.
+                if merge and column_name in self.processed.columns:
+                    full_column = self.processed[column_name].to_numpy(dtype=float, copy=True)
+                else:
+                    full_column = np.full(self.processed.shape[0], np.nan)
                 full_column[mask] = array[:, i]
                 self.processed[column_name] = full_column
 
@@ -1157,7 +1183,7 @@ class SampleObj(QObject):
     def cluster_percentages(self, method):
         """Computes, per cluster, what fraction of the map it occupies.
 
-        Used by both ``tableWidgetViewGroups`` (``Masking.py``) and the Notes
+        Used by both ``cluster_table`` (``Masking.py``) and the Notes
         "cluster results" entry (``MainWindow.insert_info_note``), so both stay
         consistent with each other and with how ``add_columns`` actually wrote
         the labels (masked-out pixels are NaN, in-mask pixels are integer
@@ -1403,47 +1429,197 @@ class SampleObj(QObject):
             del self.processed.column_attributes[column_name]
 
 
-    def apply_field_filters(self):
-        """Applies filters based on field values.
-        
-        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
-        """        
-        # Check if rows in self.data[sample_id]['filter_info'] exist and filter array in current_plot_df
-        if self.filter_df.empty:
-            self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
-            self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
-            log(f"apply_field_filters: filter_df empty, mask reset to all True ({len(self.mask)} points)", prefix='Mask')
-            return
+    def _compute_filter_mask(self, filter_df):
+        """Evaluate a filter table (min/max/operator rows) into a boolean mask.
 
-        # Initialize mask to all True, then apply filters
-        self.filter_mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+        Factored out of `apply_field_filters` so the same row-by-row AND/OR/NOT
+        combination logic can be reused to evaluate *any* filter definition
+        against the current data, not just the live `self.filter_df` -- e.g.
+        re-checking which pixels a committed ROI's own stored filter
+        definition currently matches (see `recompute_roi_assignments`).
 
-        # by creating a mask based on min and max of the corresponding filter analytes
-        for index, filter_row in self.filter_df.iterrows():
+        Parameters
+        ----------
+        filter_df : pandas.DataFrame
+            Same schema as `self.filter_df` (columns: use, field_type, field,
+            norm, min, max, operator, persistent).
+
+        Returns
+        -------
+        numpy.ndarray of bool
+            One entry per row of `self.processed`.
+        """
+        mask = np.ones_like(self.processed['Xc'].values, dtype=bool)
+        for _, filter_row in filter_df.iterrows():
             use_val = filter_row['use']
             if isinstance(use_val, str):
                 use_val = use_val.strip().lower() == 'true'
-            if use_val:
-                try:
-                    field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
-                except KeyError:
-                    # Field doesn't exist in the current sample — skip this filter
-                    continue
+            if not use_val:
+                continue
+            try:
+                field_df = self.get_map_data(filter_row['field'], filter_row['field_type'])
+            except KeyError:
+                # Field doesn't exist in the current sample — skip this filter
+                continue
 
-                # Create mask for this filter
-                field_mask = ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
+            field_mask = ((filter_row['min'] <= field_df['array'].values) & (field_df['array'].values <= filter_row['max']))
 
-                operator = filter_row['operator']
-                if operator == 'and':
-                    self.filter_mask = self.filter_mask & field_mask
-                elif operator == 'or':
-                    self.filter_mask = self.filter_mask | field_mask
-                elif operator == 'not':
-                    self.filter_mask = self.filter_mask & ~field_mask
+            operator = filter_row['operator']
+            if operator == 'and':
+                mask = mask & field_mask
+            elif operator == 'or':
+                mask = mask | field_mask
+            elif operator == 'not':
+                mask = mask & ~field_mask
+        return mask
 
-        # Recompute the combined mask so the plot sees the updated filter
-        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask
+    def apply_field_filters(self):
+        """Applies filters based on field values.
+
+        Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
+        """
+        self.filter_mask = self._compute_filter_mask(self.filter_df)
+        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask & self.roi_selection_mask
         log(f"apply_field_filters: filter_mask={self.filter_mask.sum()}/{len(self.filter_mask)} True, mask={self.mask.sum()}/{len(self.mask)} True", prefix='Mask')
+
+    # -------------------------------------
+    # Regions of interest (ROI)
+    # -------------------------------------
+    def add_roi(self, name=None, color=None):
+        """Commit the current live filter definition (`self.filter_df`) as a
+        new, permanent region of interest, then clear the filter so the next
+        region can be defined from a clean slate.
+
+        The ROI doesn't store a frozen pixel mask -- it stores the filter
+        definition itself, so `recompute_roi_assignments` can re-evaluate it
+        later (e.g. after the stack is reordered, or the region's own filter
+        is edited via `update_roi_filter`). New regions are appended to the
+        end of the stack, so by default the most recently drawn region wins
+        any overlap with earlier ones -- see `recompute_roi_assignments`.
+
+        Parameters
+        ----------
+        name : str, optional
+            Display name; defaults to ``f"ROI {n}"``.
+        color : str, optional
+            Hex color string; if not provided, the caller (UI) should assign
+            one from its default colormap after this returns.
+
+        Returns
+        -------
+        int
+            The new ROI's id (1-based; 0 means "unassigned").
+        """
+        new_id = max((r['id'] for r in self.roi_stack), default=0) + 1
+        if name is None:
+            name = f"ROI {new_id}"
+        if color is None:
+            color = '#808080'
+
+        self.roi_stack.append({
+            'id': new_id,
+            'name': name,
+            'color': color,
+            'filter_df': self.filter_df.copy(),
+        })
+        self.selected_rois.append(new_id)
+
+        self.filter_df = pd.DataFrame(columns=[
+            'use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent'
+        ])
+        self.apply_field_filters()
+        self.recompute_roi_assignments()
+        return new_id
+
+    def remove_roi(self, roi_id):
+        """Remove a region of interest from the stack and recompute assignments."""
+        self.roi_stack = [r for r in self.roi_stack if r['id'] != roi_id]
+        self.selected_rois = [r for r in self.selected_rois if r != roi_id]
+        self.recompute_roi_assignments()
+
+    def reorder_roi_stack(self, new_id_order):
+        """Reorders the priority stack to match ``new_id_order`` and recomputes assignments.
+
+        Parameters
+        ----------
+        new_id_order : list of int
+            Every id currently in ``self.roi_stack``, in the desired new
+            (ascending-priority) order -- last entry wins overlapping
+            pixels, same as append order (see `recompute_roi_assignments`).
+        """
+        by_id = {r['id']: r for r in self.roi_stack}
+        self.roi_stack = [by_id[rid] for rid in new_id_order if rid in by_id]
+        self.recompute_roi_assignments()
+
+    def update_roi_filter(self, roi_id, filter_df):
+        """Replace a region's stored filter definition (e.g. after recalling
+        it into the filter table, editing it, and re-saving) and recompute
+        assignments.
+        """
+        for r in self.roi_stack:
+            if r['id'] == roi_id:
+                r['filter_df'] = filter_df.copy()
+                break
+        self.recompute_roi_assignments()
+
+    def recompute_roi_assignments(self):
+        """Rebuild the `processed['ROI']` column from the current stack.
+
+        Walks `self.roi_stack` in order, evaluating each region's own stored
+        filter definition (`_compute_filter_mask`) and stamping its id onto
+        matching pixels -- later (higher-index) regions overwrite earlier
+        ones on overlapping pixels, so stack order is priority order.
+        Unclaimed pixels stay 0. Also refreshes `roi_selection_mask` (which
+        ROI ids are currently selected for display) and the combined
+        `self.mask`.
+        """
+        n = self.processed.shape[0]
+        roi_values = np.zeros(n, dtype=float)
+        for entry in self.roi_stack:
+            member_mask = self._compute_filter_mask(entry['filter_df'])
+            roi_values[member_mask] = entry['id']
+
+        self.add_columns('ROI', 'ROI', roi_values)
+
+        ids = [r['id'] for r in self.roi_stack]
+        self.selected_rois = [i for i in self.selected_rois if i in ids]
+        selected = self.selected_rois if self.selected_rois else ids
+        self.roi_selection_mask = np.isin(roi_values, selected) if selected else np.ones(n, dtype=bool)
+        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask & self.roi_selection_mask
+
+    def roi_percentages(self):
+        """Computes, per ROI, what fraction of the map it occupies.
+
+        Mirrors `cluster_percentages`, but reads the single fixed `'ROI'`
+        column (there's only ever one, unlike clustering's per-method
+        columns).
+
+        Returns
+        -------
+        dict
+            ``{roi_id: {'pct_total': float, 'pct_filtered': float}}``, one
+            entry per region currently in `self.roi_stack`. Percentages are
+            0-100; `pct_total` is relative to every pixel in the map,
+            `pct_filtered` relative to only the pixels passing `self.mask`.
+        """
+        if 'ROI' not in self.processed.columns:
+            return {}
+
+        labels = self.processed['ROI']
+        total_n = len(labels)
+        filtered_n = int(np.sum(self.mask))
+        masked_labels = labels[self.mask]
+
+        result = {}
+        for entry in self.roi_stack:
+            rid = entry['id']
+            total_count = int((labels == rid).sum())
+            filtered_count = int((masked_labels == rid).sum())
+            result[rid] = {
+                'pct_total': 100 * total_count / total_n if total_n else 0.0,
+                'pct_filtered': 100 * filtered_count / filtered_n if filtered_n else 0.0,
+            }
+        return result
 
     def add_filter(self, field_type, field, min_val, max_val, operator='and', use=True, persistent=True):
         """Add a new filter to the filter_df.
@@ -1517,6 +1693,21 @@ class SampleObj(QObject):
                 mask = mask & (self.filter_df['field_type'] == field_type)
             self.filter_df.drop(self.filter_df[mask].index, inplace=True)
             self.filter_df.reset_index(drop=True, inplace=True)
+
+    def reorder_filters(self, new_order):
+        """Reorders ``filter_df`` rows to match ``new_order``.
+
+        Filter application is a sequential, non-commutative and/or/not chain
+        (see `_compute_filter_mask`), so row order affects the result --
+        call `apply_field_filters` after this to refresh `self.filter_mask`.
+
+        Parameters
+        ----------
+        new_order : list of int
+            Permutation of ``range(len(self.filter_df))``: the old row index
+            that should occupy each new row position.
+        """
+        self.filter_df = self.filter_df.iloc[new_order].reset_index(drop=True)
 
     def update_filter(self, index, **kwargs):
         """Update an existing filter.
@@ -2501,7 +2692,7 @@ class SampleObj(QObject):
     # def apply_cluster_mask(self, inverse=False, update_plot=True):
     #     """Creates a mask from selected clusters
 
-    #     Uses selected clusters in ``MainWindow.tableWidgetViewGroups`` to create a mask (or inverse mask).  Masking is controlled
+    #     Uses selected clusters in ``MainWindow.cluster_table`` to create a mask (or inverse mask).  Masking is controlled
     #     clicking either ``MainWindow.toolButtonGroupMask`` or ``MainWindow.toolButtonGroupMaskInverse``.  The masking can be turned
     #     on or off by changing the checked state of ``MainWindow.actionClusterMask`` on the *Left Toolbox \\ Filter Page*.
 

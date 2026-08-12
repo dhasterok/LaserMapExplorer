@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 import traceback
-from PyQt6.QtCore import ( Qt, QUrl, QMetaObject )
+from PyQt6.QtCore import ( Qt, QUrl, QMetaObject, QEventLoop, QTimer )
 from PyQt6.QtWidgets import (
     QMessageBox,  QToolButton, QDialog, QLabel, QComboBox, QFileDialog,
     QApplication, QMainWindow, QSizePolicy, QTreeView, QWidget
@@ -40,6 +40,7 @@ from src.plotting.Profile import Profiling, ProfileDock
 from src.data.Regression import RegressionDock
 from src.common.geochronology import GeochronDock
 from src.common.diffusion import DiffusionDock
+from src.stoichiometry.dock import StoichiometryDock
 from src.project.ProjectFilesDock import ProjectFilesDock
 from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
@@ -267,7 +268,6 @@ class MainWindow(QMainWindow):
         including the toolBox, comboBoxes, and buttons. It ensures that user interactions
         with these widgets trigger the appropriate methods for updating the UI and data.
         """
-        self.control_dock.toolbox.currentChanged.connect(lambda: self.canvas_widget.canvasWindow.setCurrentIndex(self.canvas_widget.tab_dict['sv']))
         self.lame_action.FullMap.triggered.connect(self.control_dock.preprocess.reset_crop)
 
     
@@ -478,9 +478,46 @@ class MainWindow(QMainWindow):
         not a second one here.
         """
         if self.project_manager.close_project():
+            self._teardown_workflow_webengine()
             event.accept()
         else:
             event.ignore()
+
+    def _teardown_workflow_webengine(self):
+        """Explicitly destroy the Workflow dock's QWebEngineView before the app quits.
+
+        `Workflow` (`src/workflow/Workflow.py`) deliberately calls
+        `self.setParent(None)` to stay a true top-level window, which also takes
+        it out of Qt's parent-child auto-delete tree -- its `QWebEngineView` would
+        otherwise only get destroyed whenever Python's GC happens to drop the last
+        reference to `self.workflow`, with no guarantee that happens before (or
+        long after) `QApplication` itself starts tearing down. Chromium's
+        WebEngine shutdown needs a live, still-spinning event loop to run its own
+        deferred cleanup; deleting it here, synchronously, while everything is
+        still fully alive, avoids racing that cleanup against interpreter/app
+        shutdown (observed as intermittent SIGBUS crashes inside
+        `QWebEnginePagePrivate::releaseProfile`/`ProfileAdapter` teardown).
+        """
+        if not hasattr(self, 'workflow'):
+            return
+        workflow = self.workflow
+        del self.workflow
+        try:
+            workflow.web_view.setPage(None)
+        except RuntimeError:
+            pass
+        workflow.close()
+        workflow.web_view.deleteLater()
+        workflow.deleteLater()
+
+        # Chromium's WebEngine shutdown is asynchronous across several posted
+        # events/IPC round-trips, not something a single processEvents() call
+        # flushes -- give the loop real idle time to finish it here, while the
+        # app is still fully alive, instead of racing it against interpreter
+        # shutdown.
+        loop = QEventLoop()
+        QTimer.singleShot(500, loop.quit)
+        loop.exec()
 
     def open_tab(self, tab_name):
         """Opens specified toolBox tab
@@ -1095,7 +1132,15 @@ class MainWindow(QMainWindow):
             return
 
         # get Auto scale parameters and neg handling from analyte info
-        parameters = self.app_data.current_data.processed.column_attributes[field]
+        column_attributes = self.app_data.current_data.processed.column_attributes
+        if field not in column_attributes:
+            # Stale field reference (e.g. a remembered selection for a
+            # sample/recompute that no longer has this column) -- ignore
+            # rather than crash; the field comboboxes will resolve to a
+            # valid selection on their own next refresh.
+            log(f"update_autoscale_widgets: '{field}' not in column_attributes, skipping", prefix="Main")
+            return
+        parameters = column_attributes[field]
 
         # update noise reduction, outlier detection, neg. handling, quantile bounds, diff bounds
         self.app_data.current_data.current_field = self.control_dock.comboBoxFieldC.currentText()
@@ -1356,7 +1401,7 @@ class MainWindow(QMainWindow):
             # No clusters selected → cluster filter is off; let everything through.
             d = self.data[sample_id]
             d.cluster_mask = np.ones(len(d.mask), dtype=bool)
-            d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
+            d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask & d.roi_selection_mask
             self.lame_action.ClusterMask.setChecked(False)
             self.schedule_update()
             return
@@ -1372,7 +1417,7 @@ class MainWindow(QMainWindow):
 
         # recompute combined mask
         d = self.data[sample_id]
-        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask
+        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask & d.roi_selection_mask
 
         self.lame_action.ClearFilters.setEnabled(True)
         self.lame_action.ClusterMask.setEnabled(True)
@@ -1571,6 +1616,25 @@ class MainWindow(QMainWindow):
         else:
             self.toggle_dock_visibility(dock=self.diffusion_dock, button=self.lame_action.Diffusion)
 
+    def open_stoichiometry_dock(self):
+        """Opens/closes the Stoichiometric Calculator dock
+
+        Opens the Stoichiometric Calculator dock, creates on first instance.
+        On later calls, toggles its visibility (and the Analyze menu action's
+        checked state) rather than always showing it, so the same action
+        opens and closes the dock.
+        """
+        if not hasattr(self, 'stoichiometry_dock'):
+            self.stoichiometry_dock = StoichiometryDock(self)
+
+            if self.stoichiometry_dock not in self.help_mapping:
+                self.help_mapping[self.stoichiometry_dock] = 'stoichiometry'
+
+            self.stoichiometry_dock.show()
+            self.lame_action.Stoichiometry.setChecked(True)
+        else:
+            self.toggle_dock_visibility(dock=self.stoichiometry_dock, button=self.lame_action.Stoichiometry)
+
     def open_project_files_dock(self):
         """Opens/closes the Project Files dock
 
@@ -1613,6 +1677,7 @@ class MainWindow(QMainWindow):
                 ('PCA results', lambda: self.insert_info_note('pca results')),
                 ('Cluster results', lambda: self.insert_info_note('cluster results')),
                 ('Diffusion results', lambda: self.insert_info_note('diffusion results')),
+                ('Stoichiometry results', lambda: self.insert_info_note('stoichiometry results')),
             ]
             self.notes_dock.notes.info_menu_items = info_menu_items
 
@@ -1764,6 +1829,23 @@ class MainWindow(QMainWindow):
                 self.notes_dock.notes.print_info(text)
                 if rows:
                     rst_table = self.notes_dock.notes.to_rst_table(pd.DataFrame(rows))
+                    self.notes_dock.notes.print_info(rst_table)
+            case 'stoichiometry results':
+                if not hasattr(self, 'stoichiometry_dock') or not self.stoichiometry_dock._last_results:
+                    return
+                r = self.stoichiometry_dock._last_results
+
+                text = f':mineral: {r["mineral"]}\n'
+                text += f':input basis: {r["input_mode"]}\n'
+                text += f':redox method: {r["redox_method"]}\n'
+                text += f':below-LOD treatment: {r["lod_treatment"]}\n'
+                text += f':pixels calculated: {r["n_pixels"]}\n'
+                text += '\n'
+
+                self.notes_dock.notes.print_info(text)
+                summary_df = r.get('summary_df')
+                if summary_df is not None and not summary_df.empty:
+                    rst_table = self.notes_dock.notes.to_rst_table(summary_df)
                     self.notes_dock.notes.print_info(rst_table)
 
 

@@ -13,6 +13,13 @@ pythonGenerator.forBlock['display_figure'] = function (block, generator) {
   return code;
 };
 
+pythonGenerator.forBlock['record_notes'] = function (block, generator) {
+  const record = block.getFieldValue('RECORD') === 'TRUE' ? 'True' : 'False';
+  let code  = `# record_notes block\n`;
+  code     += `self.record_notes = ${record}\n`;
+  return code;
+};
+
 // Python Generator: Load Directory
 pythonGenerator.forBlock['load_directory'] = function(block, generator) {
     var dir_name = generator.quote_(block.getFieldValue('DIR'));

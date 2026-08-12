@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import ( QIcon )
 from src.common.TableFunctions import TableFcn
 from lame_core.CustomWidgets import CustomPage, CustomComboBox, CustomToolButton, CustomTableWidget
+from src.app.CustomTableWidget import ReorderableTableWidget, compute_row_reorder
 from blueberry.ColorButton import ColorButton
 import src.common.csvdict as csvdict
 from src.data.SortAnalytes import resolve_element_tokens
@@ -921,17 +922,14 @@ class NDimUI(CustomPage):
         group_box_layout.addLayout(form_layout)
 
         table_layout = QHBoxLayout()
-        self.tableWidgetNDim = CustomTableWidget()
-        self.tableWidgetNDim.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableWidgetNDim.setObjectName("tableWidgetNDim")
-        self.tableWidgetNDim.setColumnCount(2)
-        self.tableWidgetNDim.setRowCount(0)
-        item = QTableWidgetItem()
-        self.tableWidgetNDim.setHorizontalHeaderItem(0, item)
-        item = QTableWidgetItem()
-        self.tableWidgetNDim.setHorizontalHeaderItem(1, item)
+        self.ndim_table = ReorderableTableWidget()
+        self.ndim_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.ndim_table.setObjectName("ndim_table")
+        self.ndim_table.setColumnCount(2)
+        self.ndim_table.setRowCount(0)
+        self.ndim_table.setHorizontalHeaderLabels(["Use", "Analyte"])
         # N-dim table
-        header = self.tableWidgetNDim.horizontalHeader()
+        header = self.ndim_table.horizontalHeader()
         if header:
             header.setSectionResizeMode(0,QHeaderView.ResizeMode.ResizeToContents)
             header.setSectionResizeMode(1,QHeaderView.ResizeMode.Stretch)
@@ -946,24 +944,6 @@ class NDimUI(CustomPage):
         )
         self.toolButtonNDimSelectAll.setObjectName("toolButtonNDimSelectAll")
         self.toolButtonNDimSelectAll.setToolTip("Select all fields in table")
-
-        self.toolButtonNDimUp = CustomToolButton(
-            text="Up",
-            light_icon_unchecked="icon-up-arrow-64.svg",
-            dark_icon_unchecked="icon-up-arrow-dark-64.svg",
-            parent=group_box
-        )
-        self.toolButtonNDimUp.setObjectName("toolButtonNDimUp")
-        self.toolButtonNDimUp.setToolTip("Move selected field up")
-
-        self.toolButtonNDimDown = CustomToolButton(
-            text="Down",
-            light_icon_unchecked="icon-down-arrow-64.svg",
-            dark_icon_unchecked="icon-down-arrow-dark-64.svg",
-            parent=group_box
-        )
-        self.toolButtonNDimDown.setObjectName("toolButtonNDimDown")
-        self.toolButtonNDimDown.setToolTip("Move selected field down")
 
         self.toolButtonNDimSaveList = CustomToolButton(
             text="Save List",
@@ -983,14 +963,12 @@ class NDimUI(CustomPage):
         self.toolButtonNDimRemove.setToolTip("Remove selected fields")
 
         table_tools_layout.addWidget(self.toolButtonNDimSelectAll)
-        table_tools_layout.addWidget(self.toolButtonNDimUp)
-        table_tools_layout.addWidget(self.toolButtonNDimDown)
         table_tools_layout.addWidget(self.toolButtonNDimSaveList)
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         table_tools_layout.addItem(spacer)
         table_tools_layout.addWidget(self.toolButtonNDimRemove)
 
-        table_layout.addWidget(self.tableWidgetNDim)
+        table_layout.addWidget(self.ndim_table)
         table_layout.addLayout(table_tools_layout)
 
         group_box_layout.addLayout(table_layout)
@@ -1025,16 +1003,12 @@ class NDimUI(CustomPage):
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda _ : self.update_ndim_table('analyteSetAdd'))
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(self.dock.ui.schedule_update)
 
-        self.toolButtonNDimUp.clicked.connect(lambda _: self.table_fcn.move_row_up(self.tableWidgetNDim))
-        self.toolButtonNDimUp.clicked.connect(self.dock.ui.schedule_update)
+        self.ndim_table.rowsMoved.connect(self._on_ndim_rows_moved)
 
-        self.toolButtonNDimDown.clicked.connect(lambda _: self.table_fcn.move_row_down(self.tableWidgetNDim))
-        self.toolButtonNDimDown.clicked.connect(self.dock.ui.schedule_update)
-
-        self.toolButtonNDimRemove.clicked.connect(lambda _: self.table_fcn.delete_row(self.tableWidgetNDim))
+        self.toolButtonNDimRemove.clicked.connect(lambda _: self.table_fcn.delete_row(self.ndim_table))
         self.toolButtonNDimRemove.clicked.connect(self.dock.ui.schedule_update)
 
-        self.toolButtonNDimSelectAll.clicked.connect(lambda _: self.tableWidgetNDim.selectAll())
+        self.toolButtonNDimSelectAll.clicked.connect(lambda _: self.ndim_table.selectAll())
         self.toolButtonNDimSaveList.clicked.connect(lambda _: self.save_ndim_list())
 
     def connect_observer(self):
@@ -1050,8 +1024,6 @@ class NDimUI(CustomPage):
         self.toolButtonNDimAnalyteSetAdd.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
         self.comboBoxNDimQuantiles.activated.connect(lambda: log(f"comboBoxNDimQuantiles value=[{self.comboBoxNDimQuantiles.currentText()}]", prefix="UI"))
         self.toolButtonNDimSelectAll.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.toolButtonNDimUp.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
-        self.toolButtonNDimDown.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
         self.toolButtonNDimSaveList.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
         self.toolButtonNDimRemove.clicked.connect(lambda: log("toolButtonNDimAnalyteAdd", prefix="UI"))
 
@@ -1061,16 +1033,11 @@ class NDimUI(CustomPage):
         if self.dock.toolbox.currentIndex() == self.dock.tab_dict['ndim']:
             self.dock.ui.schedule_update()
 
-    def update_ndim_table(self,calling_widget):
-        """Updates tableWidgetNDim based on the calling widget.
+    def _add_ndim_row(self, row, analyte):
+        """Appends a single row (checkbox + analyte name) to ``ndim_table`` at ``row``.
 
-        If the calling widget is 'analyteAdd', it adds a new row for the selected analyte.
-        If the calling widget is 'analyteSetAdd', it adds rows for all analytes in the selected set.
-
-        Parameters
-        ----------
-        calling_widget : str
-            The widget that triggered the update, either 'analyteAdd' or 'analyteSetAdd'.
+        Shared by `update_ndim_table` (adding newly-selected analytes) and
+        `rebuild_ndim_table` (full rebuild after a drag-and-drop reorder).
         """
         def on_use_checkbox_state_changed(row, state):
             """Callback for checkbox state change in the 'use' column.
@@ -1086,6 +1053,51 @@ class NDimUI(CustomPage):
             # Update the 'use' value in the filter_df for the given row
             self.dock.ui.app_data.current_data.filter_df.at[row, 'use'] = state == Qt.CheckState.Checked
 
+        self.ndim_table.insertRow(row)
+
+        # Create a QCheckBox for the 'use' column
+        chkBoxItem_use = QCheckBox()
+        chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
+        chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
+
+        self.ndim_table.setCellWidget(row, 0, chkBoxItem_use)
+        self.ndim_table.setItem(row, 1, QTableWidgetItem(analyte))
+
+    def rebuild_ndim_table(self):
+        """Rebuilds ``ndim_table`` from ``app_data.ndim_list`` (used after a drag-and-drop reorder).
+
+        A full rebuild is necessary (rather than moving existing rows in
+        place) because each checkbox's ``stateChanged`` closure captures its
+        row index by value -- only a rebuild keeps those indices correct.
+        """
+        self.ndim_table.setRowCount(0)
+        for row, analyte in enumerate(self.dock.ui.app_data.ndim_list):
+            self._add_ndim_row(row, analyte)
+
+    def _on_ndim_rows_moved(self, source_rows, target_row):
+        """Reorders ``app_data.ndim_list`` to match a drag-and-drop move in ``ndim_table``.
+
+        ``ndim_list`` is what `LamePlot.py` reads directly for TEC/radar/
+        spider field order, so this is what actually makes the plot follow
+        the table's row order.
+        """
+        ndim_list = self.dock.ui.app_data.ndim_list
+        new_order = compute_row_reorder(len(ndim_list), source_rows, target_row)
+        ndim_list[:] = [ndim_list[i] for i in new_order]
+        self.rebuild_ndim_table()
+        self.dock.ui.schedule_update()
+
+    def update_ndim_table(self,calling_widget):
+        """Updates ndim_table based on the calling widget.
+
+        If the calling widget is 'analyteAdd', it adds a new row for the selected analyte.
+        If the calling widget is 'analyteSetAdd', it adds rows for all analytes in the selected set.
+
+        Parameters
+        ----------
+        calling_widget : str
+            The widget that triggered the update, either 'analyteAdd' or 'analyteSetAdd'.
+        """
         if calling_widget == 'analyteAdd':
             el_list = [self.comboBoxNDimAnalyte.currentText().lower()]
             self.comboBoxNDimAnalyteSet.setCurrentText('user defined')
@@ -1102,18 +1114,8 @@ class NDimUI(CustomPage):
         self.dock.ui.app_data.ndim_list.extend(analytes)
 
         for analyte in analytes:
-            # Add a new row at the end of the table
-            row = self.tableWidgetNDim.rowCount()
-            self.tableWidgetNDim.insertRow(row)
+            self._add_ndim_row(self.ndim_table.rowCount(), analyte)
 
-            # Create a QCheckBox for the 'use' column
-            chkBoxItem_use = QCheckBox()
-            chkBoxItem_use.setCheckState(Qt.CheckState.Checked)
-            chkBoxItem_use.stateChanged.connect(lambda state, row=row: on_use_checkbox_state_changed(row, state))
-
-            self.tableWidgetNDim.setCellWidget(row, 0, chkBoxItem_use)
-            self.tableWidgetNDim.setItem(row, 1, QTableWidgetItem(analyte))
-    
     def update_ndim_quantile_index(self, new_index=None):
         """Updates quantiles displayed for NDim plots.
 
@@ -1148,7 +1150,7 @@ class NDimUI(CustomPage):
         name, ok = QInputDialog.getText(self.dock.ui, 'Save custom TEC list', 'Enter name for new list:')
         if ok:
             try:
-                self.dock.ui.app_data.ndim_list_dict[name] = self.tableWidgetNDim.column_to_list('Analyte')
+                self.dock.ui.app_data.ndim_list_dict[name] = self.ndim_table.column_to_list('Analyte')
 
                 # export the csv
                 csvdict.export_dict_to_csv(self.dock.ui.app_data.ndim_list_dict, self.dock.ui.app_data.ndim_list_filename)

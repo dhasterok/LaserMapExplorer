@@ -9,6 +9,12 @@ they stood when each step executed - whether the step came from interactive UI
 use or from `exec()`'d Blockly-generated code, since both paths fire the same
 `ActionRecorder`-connected signals.
 
+Recording is opt-in per workflow, via the "Record notes" Global Settings
+Blockly block (`LameBlockly.record_notes`, defaults to `False`). A session is
+always started/ended around a run, but nothing is actually written to Notes
+(and no PDF is compiled) unless that block turns recording on at some point
+during the run - see `_recording_enabled`.
+
 Reuses the same note-writing primitives as the manual "Formatted Info" menu
 (`MainWindow.insert_info_note`): `NotesWidget.print_info`, `to_rst_table`, and
 (via `LameIO.add_figure_to_notes`) `insert_image`.
@@ -30,6 +36,8 @@ class ReportWriter:
         self.main_window = main_window
         self._connected = False
         self._step = 0
+        self._title = None
+        self._header_written = False
 
     @property
     def notes(self):
@@ -37,8 +45,23 @@ class ReportWriter:
         self.main_window.open_notes()
         return self.main_window.notes_dock.notes
 
+    def _recording_enabled(self):
+        """Whether the workflow's "Record notes" Global Settings block is
+        currently on for this run (see `LameBlockly.record_notes`, which
+        defaults to `False` -- recording is opt-in per workflow).
+        """
+        workflow = getattr(self.main_window, 'workflow', None)
+        lame_blockly = getattr(getattr(workflow, 'bridge', None), 'lame_blockly', None)
+        return bool(getattr(lame_blockly, 'record_notes', False))
+
     def start_session(self, title=None):
-        """Begin a report session: subscribe to the recorder and write a header.
+        """Begin a report session: subscribe to the recorder.
+
+        Nothing is written to Notes yet -- whether anything gets written at
+        all depends on the workflow's "Record notes" setting, which is only
+        known once its generated code starts executing (after this call
+        returns), so it's checked per recorded action instead (see
+        `_on_action_recorded`).
 
         Parameters
         ----------
@@ -47,21 +70,31 @@ class ReportWriter:
         """
         if self._connected:
             return
-        title = title or f"Workflow run - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        self._title = title or f"Workflow run - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         self._step = 0
-        self.notes.print_info(f"\n\n{title}\n{'=' * len(title)}\n\n")
+        self._header_written = False
         self.main_window.action_recorder.actionRecorded.connect(self._on_action_recorded)
         self._connected = True
 
     def end_session(self):
-        """End a report session: unsubscribe and compile the notes file to PDF."""
+        """End a report session: unsubscribe, and compile to PDF only if
+        recording was actually turned on and something was written.
+        """
         if not self._connected:
             return
         self.main_window.action_recorder.actionRecorded.disconnect(self._on_action_recorded)
         self._connected = False
-        self.notes.save_notes_to_pdf()
+        if self._header_written:
+            self.notes.save_notes_to_pdf()
 
     def _on_action_recorded(self, event):
+        if not self._recording_enabled():
+            return
+
+        if not self._header_written:
+            self.notes.print_info(f"\n\n{self._title}\n{'=' * len(self._title)}\n\n")
+            self._header_written = True
+
         self._step += 1
         self.notes.print_info(f"\n.. rubric:: Step {self._step}: {event['label']}\n\n")
 

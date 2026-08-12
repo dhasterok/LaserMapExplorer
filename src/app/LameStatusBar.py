@@ -18,9 +18,15 @@ class MainStatusBar(QStatusBar):
         self.addPermanentWidget(self.labelInvalidValues)
 
         # Indicates whether the ActionRecorder is auto-pushing actions into the
-        # open Workflow dock's Blockly workspace (see MainWindow.toggle_action_capture)
-        self.labelCaptureStatus = QLabel("Capture: Off")
-        self.addPermanentWidget(self.labelCaptureStatus)
+        # open Workflow dock's Blockly workspace (see MainWindow.toggle_action_capture).
+        # A separate lamp rather than relying on the CaptureToggle button's own
+        # visibility/checked state, since that button must always stay visible
+        # and clickable (clicking it while off is what creates/links a workflow
+        # file in the first place - see MainWindow.ensure_active_workflow_file).
+        self.workflowLamp = QLabel("●")  # filled circle
+        self.workflowLamp.setObjectName("workflowLamp")
+        self._set_lamp_style(False)
+        self.addPermanentWidget(self.workflowLamp)
 
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = CustomToolButton(
@@ -58,14 +64,22 @@ class MainStatusBar(QStatusBar):
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.ui.style_dock, button=self.toolButtonRightDock))
 
     def set_capture_status(self, enabled):
-        """Update the capture-status label text.
+        """Update the workflow lamp to reflect whether recording is happening.
 
         Parameters
         ----------
         enabled : bool
             Whether workflow auto-capture is currently on.
         """
-        self.labelCaptureStatus.setText("Capture: On" if enabled else "Capture: Off")
+        self._set_lamp_style(enabled)
+
+    def _set_lamp_style(self, enabled):
+        color = "#e02020" if enabled else "#a0a0a0"
+        self.workflowLamp.setStyleSheet(f"color: {color}; font-size: 14px;")
+        self.workflowLamp.setToolTip(
+            "Recording: workflow actions are being captured" if enabled
+            else "Workflow capture is off"
+        )
 
     def toggle_dock_visibility(self, dock, button=None):
         """Toggles the visibility and checked state of a dock and its controlling button

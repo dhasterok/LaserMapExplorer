@@ -109,6 +109,9 @@ def create_plot(parent, data, app_data, style_data):
                 # Note: cluster performance computation should be done by caller before calling create_plot
                 canvas, plot_info = cluster_performance_plot(parent, data, app_data, style_data)
 
+            case 'roi map':
+                canvas, plot_info = plot_roi(parent, data, app_data, style_data)
+
             case 'isochron':
                 canvas, plot_info = plot_isochron(parent, data, app_data, style_data)
 
@@ -664,19 +667,32 @@ def plot_histogram(parent, data, app_data, style_data):
             cumflag = False
 
     # Check if the algorithm is in the current group and if results are available
-    if app_data.c_field_type.lower() == 'cluster' and app_data.c_field != '':
-        method = app_data.c_field
+    if app_data.c_field_type.lower() in ('cluster', 'roi') and app_data.c_field != '':
+        if app_data.c_field_type.lower() == 'roi':
+            # ROI groups are per-sample (see SampleObj.roi_stack), not a
+            # global algorithm setting like cluster_dict -- populate the same
+            # cluster_color/cluster_label/cluster_group/clusters names the
+            # shared per-group loop below consumes either way. Ids aren't
+            # guaranteed 0-based/contiguous (regions can be removed), so
+            # remap to a dense 0..n-1 index matching get_roi_colormap's
+            # stack-order color/label lists.
+            cluster_color, cluster_label, _ = style_data.get_roi_colormap(data.roi_stack, alpha=style_data.marker_alpha)
+            id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
+            cluster_group = data.processed.loc[data.mask, 'ROI'].map(id_to_index)
+            clusters = list(range(len(data.roi_stack)))
+        else:
+            method = app_data.c_field
 
-        # Get the cluster labels for the data
-        cluster_color, cluster_label, _ = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
-        # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
-        # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
-        cluster_group = data.processed.loc[data.mask, method]
-        clusters = app_data.cluster_dict[method]['selected_clusters']
+            # Get the cluster labels for the data
+            cluster_color, cluster_label, _ = style_data.get_cluster_colormap(app_data.cluster_dict[method],alpha=style_data.marker_alpha)
+            # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
+            # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
+            cluster_group = data.processed.loc[data.mask, method]
+            clusters = app_data.cluster_dict[method]['selected_clusters']
 
-        # fall back to all clusters when none are explicitly selected
-        if not clusters:
-            clusters = sorted(cluster_group.dropna().unique().astype(int).tolist())
+            # fall back to all clusters when none are explicitly selected
+            if not clusters:
+                clusters = sorted(cluster_group.dropna().unique().astype(int).tolist())
 
         hist_dfs = []
         # Plot histogram for all clusters
@@ -1424,6 +1440,35 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
 
         add_colorbar(style_data, canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
         plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], c['array'][ind], cluster_group[ind])).T, columns = ['x','y','c','cluster_group'])
+    elif app_data.c_field_type.lower() == 'roi':
+        # color by ROI (see SampleObj.roi_stack). Ids aren't guaranteed
+        # 0-based/contiguous (regions can be removed), so remap to a dense
+        # 0..n-1 index matching get_roi_colormap's stack-order color/label
+        # lists, and use that remapped series as the color value directly
+        # (rather than c['array'], which would still hold raw, possibly
+        # sparse ids).
+        if not data.roi_stack:
+            return
+
+        cluster_color, cluster_label, cmap = style_data.get_roi_colormap(data.roi_stack, alpha=style_data.marker_alpha)
+        id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
+        roi_group = data.processed.loc[data.mask, 'ROI'].map(id_to_index)
+        selected = [id_to_index[i] for i in data.selected_rois if i in id_to_index] or list(range(len(data.roi_stack)))
+
+        ind = np.isin(roi_group, selected)
+
+        norm = style_data.color_norm(len(data.roi_stack))
+
+        cb = canvas.axes.scatter(x['array'][ind], y['array'][ind], c=roi_group[ind],
+            s=style_data.marker_size,
+            marker=style_data.marker_dict[style_data.marker],
+            edgecolors='none',
+            cmap=cmap,
+            alpha=style_data.marker_alpha/100,
+            norm=norm)
+
+        add_colorbar(style_data, canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+        plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], roi_group[ind], roi_group[ind])).T, columns = ['x','y','c','roi_group'])
     else:
         # color by field
         norm = style_data.color_norm()
@@ -1693,6 +1738,35 @@ def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
 
         add_colorbar(style_data, canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
         plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], cluster_group[ind])).T, columns = ['x','y','z','cluster_group'])
+    elif app_data.c_field_type.lower() == 'roi':
+        # color by ROI -- see the scatter-plot ROI branch above for why ids
+        # are remapped to a dense 0..n-1 index before use as color values.
+        if not data.roi_stack:
+            return
+
+        cluster_color, cluster_label, cmap = style_data.get_roi_colormap(data.roi_stack, alpha=style_data.marker_alpha)
+        id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
+        roi_group = data.processed.loc[data.mask, 'ROI'].map(id_to_index)
+        selected = [id_to_index[i] for i in data.selected_rois if i in id_to_index] or list(range(len(data.roi_stack)))
+
+        ind = np.isin(roi_group, selected)
+
+        norm = style_data.color_norm(len(data.roi_stack))
+
+        _, cb = tp.ternscatter(
+            x['array'][ind], y['array'][ind], z['array'][ind],
+            categories=roi_group[ind],
+            marker=style_data.marker_dict[style_data.marker],
+            size=style_data.marker_size,
+            cmap=cmap,
+            norm=norm,
+            labels=True,
+            alpha=style_data.marker_alpha/100,
+            orientation='None'
+        )
+
+        add_colorbar(style_data, canvas, cb, cbartype='discrete', grouplabels=cluster_label, groupcolors=cluster_color)
+        plot_data = pd.DataFrame(np.vstack((x['array'][ind],y['array'][ind], z['array'][ind], roi_group[ind])).T, columns = ['x','y','z','roi_group'])
     else:
         # color field
         norm = style_data.color_norm()
@@ -2085,6 +2159,7 @@ def plot_ndim(parent, data, app_data, style_data):
     clusters = []
     cluster_color = []
     cluster_label = []
+    id_to_index = {}  # ROI-only: remap raw (possibly sparse) ids to a dense 0..n-1 index
     if app_data.c_field_type.lower() == 'cluster' and app_data.c_field != '':
         method = app_data.c_field
         cluster_dict = app_data.cluster_dict[method]
@@ -2097,6 +2172,18 @@ def plot_ndim(parent, data, app_data, style_data):
             cluster_dict = None
             cluster_flag = False
             print(f'No cluster data found for {method}, recompute?')
+    elif app_data.c_field_type.lower() == 'roi' and app_data.c_field != '' and data.roi_stack:
+        # ROI groups are per-sample (see SampleObj.roi_stack), not a global
+        # algorithm setting like cluster_dict. `method` stays 'ROI' (the
+        # actual column name in data.processed), but the group values used
+        # below are remapped via id_to_index since raw ROI ids aren't
+        # guaranteed 0-based/contiguous the way cluster labels are.
+        method = 'ROI'
+        cluster_dict = None
+        cluster_color, cluster_label, cmap = style_data.get_roi_colormap(data.roi_stack, alpha=style_data.marker_alpha)
+        id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
+        clusters = [id_to_index[i] for i in data.selected_rois if i in id_to_index] or list(range(len(data.roi_stack)))
+        cluster_flag = True
     else:
         cluster_dict = None
         cluster_flag = False
@@ -2111,6 +2198,8 @@ def plot_ndim(parent, data, app_data, style_data):
             if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
                 cluster_group = data.processed[method][data.mask]
+                if id_to_index:
+                    cluster_group = cluster_group.map(id_to_index)
 
                 df_filtered['clusters'] = cluster_group
                 df_filtered = df_filtered[df_filtered['clusters'].isin(clusters)]
@@ -2164,6 +2253,8 @@ def plot_ndim(parent, data, app_data, style_data):
             if cluster_flag and method in data.processed.columns:
                 # Get the cluster labels for the data
                 cluster_group = data.processed[method][data.mask]
+                if id_to_index:
+                    cluster_group = cluster_group.map(id_to_index)
 
                 df_filtered['clusters'] = cluster_group
 
@@ -2889,6 +2980,122 @@ def plot_cluster_map(parent, data, app_data, style_data):
     add_scalebar(data, app_data, style_data, canvas.axes)
 
     return canvas, data.processed[method]
+
+@log_call(logger_key='Plot')
+def plot_roi(parent, data, app_data, style_data):
+    """Wraps `plot_roi_map`, building the plot_info metadata dict.
+
+    Mirrors `plot_clusters`, but ROI has only one map variant (no "score" or
+    "performance" counterpart -- ROIs are user-drawn, not fit by an
+    algorithm), so there's no inner `match` needed.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    style_data : StyleData
+        StyleData object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the ROI map plot.
+    plot_info : dict
+        Dictionary containing information about the plot.
+    """
+    if app_data.sample_id == '' or not data.roi_stack:
+        return None, None
+
+    canvas, plot_data = plot_roi_map(parent, data, app_data, style_data)
+
+    plot_name = "roi_map"
+    update_figure_font(canvas, style_data.font)
+    canvas.data = pd.DataFrame(plot_data)
+    canvas.plot_name = plot_name
+
+    plot_info = {
+        'tree': 'Masking',
+        'sample_id': app_data.sample_id,
+        'plot_name': plot_name,
+        'plot_type': style_data.plot_type,
+        'field_type': 'ROI',
+        'field': 'ROI',
+        'figure': canvas,
+        'style': style_data.style_dict[style_data.plot_type],
+        'roi_groups': data.selected_rois,
+        'view': [True, False],
+        'position': [],
+        'data': plot_data
+    }
+
+    return canvas, plot_info
+
+@log_call(logger_key='Plot')
+def plot_roi_map(parent, data, app_data, style_data):
+    """Produces a map of ROI categories.
+
+    Mirrors `plot_cluster_map`, but reads the single fixed `'ROI'` column and
+    remaps ids to a dense 0..n-1 index -- ROI ids aren't guaranteed
+    contiguous the way algorithm-assigned cluster labels are, since
+    individual regions can be removed (see `SampleObj.remove_roi`).
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent widget for the plot.
+    data : DataHandler
+        DataHandler object containing the processed data.
+    app_data : AppData
+        AppData object containing application settings and user preferences.
+    style_data : StyleData
+        StyleData object containing style settings for the plot.
+
+    Returns
+    -------
+    canvas : MplCanvas
+        The canvas containing the ROI map plot.
+    plot_data : pd.Series
+        Series containing the raw ROI labels for each data point.
+    """
+    canvas = MplCanvas(parent=parent)
+
+    id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
+    groups = data.processed['ROI'].map(id_to_index).values.astype(float)
+    # mask-out points that are excluded by the combined mask (roi, cluster, polygon, filter, crop)
+    groups[~data.mask] = np.nan
+
+    reshaped_array = np.reshape(groups, data.array_size, order=data.order)
+
+    n_rois = len(data.roi_stack)
+    roi_color, roi_label, cmap = style_data.get_roi_colormap(data.roi_stack, alpha=style_data.marker_alpha)
+
+    overlay = style_data.style_dict.get('roi map', {}).get('OverlayColor', '#888888')
+    cmap = cmap.copy()
+    cmap.set_bad(overlay)
+
+    norm = style_data.color_norm(n_rois)
+
+    aspect_ratio = style_data.aspect_ratio if style_data.aspect_ratio is not None else data.aspect_ratio
+    cax = canvas.axes.imshow(reshaped_array, cmap=cmap, norm=norm, aspect=aspect_ratio)
+
+    add_colorbar(style_data, canvas, cax, cbartype='discrete', grouplabels=roi_label, groupcolors=roi_color)
+
+    canvas.fig.subplots_adjust(left=0.05, right=1)
+    canvas.fig.tight_layout()
+
+    canvas.axes.set_title('Regions of Interest')
+    canvas.axes.tick_params(direction=None,
+        labelbottom=False, labeltop=False, labelright=False, labelleft=False,
+        bottom=False, top=False, left=False, right=False)
+
+    # add scalebar
+    add_scalebar(data, app_data, style_data, canvas.axes)
+
+    return canvas, data.processed['ROI']
 
 def update_figure_font(canvas, font_name):
     """updates figure fonts without the need to recreate the figure.

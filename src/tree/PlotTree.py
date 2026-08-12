@@ -1,8 +1,8 @@
 import re, darkdetect
 
-from PyQt6.QtCore import ( Qt, QSize )
-from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction )
-from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar, QMenu )
+from PyQt6.QtCore import ( Qt, QSize, QMimeData )
+from PyQt6.QtGui import ( QColor, QBrush, QStandardItemModel, QStandardItem, QAction, QDrag )
+from PyQt6.QtWidgets import ( QWidget, QVBoxLayout, QSizePolicy, QDockWidget, QWidget, QToolBar, QMenu, QAbstractItemView )
 from lame_core.CustomWidgets import StandardItem, CustomTreeView, CustomDockWidget, CustomAction, CustomActionMenu
 from lame_core.UITheme import default_font
 
@@ -12,9 +12,37 @@ from src.tree.PlotRegistry import PlotRegistry
 
 from lame_core.config import ICONPATH
 
+# MIME type used to drag a plot leaf out of the Plot Selector tree (e.g. onto
+# the Multi View canvas). Payload is "tree\x1fbranch\x1fleaf" (see get_item_path).
+PLOT_TREE_MIME_TYPE = "application/x-lame-plot-leaf"
+
 # -------------------------------
 # Plot Selector (tree) functions
 # -------------------------------
+class PlotTreeView(CustomTreeView):
+    """``CustomTreeView`` that lets a plot leaf be dragged out, e.g. onto the Multi View canvas."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setDragEnabled(True)
+        self.setDragDropMode(QAbstractItemView.DragDropMode.DragOnly)
+
+    def startDrag(self, supportedActions):
+        item = self.treeModel.itemFromIndex(self.currentIndex())
+        if item is None:
+            return
+
+        # only individual plot leaves (tree/sample/field, 3 levels deep) can be dragged
+        path = self.get_item_path(item)
+        if len(path) != 3:
+            return
+
+        mime_data = QMimeData()
+        mime_data.setData(PLOT_TREE_MIME_TYPE, "\x1f".join(path).encode("utf-8"))
+
+        drag = QDrag(self)
+        drag.setMimeData(mime_data)
+        drag.exec(Qt.DropAction.CopyAction)
+
 @auto_log_methods(logger_key='Tree')
 class PlotTree(CustomDockWidget):
     def __init__(self, parent):
@@ -106,7 +134,7 @@ class PlotTree(CustomDockWidget):
         toolbar.addAction(self.action_remove_all)
 
         # TreeView
-        self.treeView = CustomTreeView(parent=self)
+        self.treeView = PlotTreeView(parent=self)
         self.treeView.setFont(font)
         self.treeView.setMouseTracking(True)
         self.treeView.setObjectName("treeView")

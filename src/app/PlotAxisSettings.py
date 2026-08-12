@@ -140,7 +140,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, None, True, True),
         },
-        cfield_type=['Cluster']
+        cfield_type=['Cluster','ROI']
     ),
     "histogram": PlotSettings(
         axes={
@@ -149,7 +149,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, True, True),
         },
-        cfield_type=['Cluster']
+        cfield_type=['Cluster','ROI']
     ),
     "scatter": PlotSettings(
         axes={
@@ -159,7 +159,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "c": AxisControls(True, True, True, 3, True,  True),
         },
         field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster score','Special'],
-        cfield_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special']
+        cfield_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
     ),
     "heatmap": PlotSettings(
         axes={
@@ -191,7 +191,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "c": AxisControls(True, True, True, 3, True, True),
         },
         field_type=['Ratio'],
-        cfield_type=['Cluster']
+        cfield_type=['Cluster','ROI']
     ),
     "TEC": PlotSettings(
         axes={
@@ -201,7 +201,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "c": AxisControls(True, False, False, None, True, True),
         },
         field_type=['Analyte'],
-        cfield_type=['Cluster']
+        cfield_type=['Cluster','ROI']
     ),
     "radar": PlotSettings(
         axes={
@@ -211,7 +211,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "c": AxisControls(True, False, False, None, True, True),
         },
         field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Special'],
-        cfield_type=['Cluster']
+        cfield_type=['Cluster','ROI']
     ),
     "variance": PlotSettings(
         axes={
@@ -256,6 +256,15 @@ axis_settings_dict: Dict[str, PlotSettings] = {
         },
         field_type=['PCA score']
     ),
+    "roi map": PlotSettings(
+        axes={
+            "x": AxisControls(False, False, True, None, False, False, label=False),
+            "y": AxisControls(False, False, True, None, False, False, label=False),
+            "z": AxisControls(False, False, False, None, False, False),
+            "c": AxisControls(True, False, False, 3, False, False),
+        },
+        field_type=['ROI']
+    ),
     "cluster map": PlotSettings(
         axes={
             "x": AxisControls(False, False, True, None, False, False, label=False),
@@ -290,7 +299,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
     ),
     "polygon": PlotSettings(
         axes={
@@ -299,6 +308,6 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
     ),
 }

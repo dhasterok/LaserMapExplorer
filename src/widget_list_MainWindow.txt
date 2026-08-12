@@ -26,7 +26,7 @@ self.lineEditFMax
 self.lineEditDecayConstant
 self.lineEditDecayConstantUncertainty
 self.treeView
-self.tableWidgetNDim
+self.ndim_table
 self.dockWidgetLeftToolbox
 self.dockWidgetStyleToolbox
 self.comboBoxPlotType

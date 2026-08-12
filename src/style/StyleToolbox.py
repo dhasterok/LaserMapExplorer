@@ -261,6 +261,7 @@ class StyleTheme():
             'cluster map': copy.deepcopy(self.default_style_data),
             'cluster score map': copy.deepcopy(self.default_style_data),
             'cluster performance': copy.deepcopy(self.default_style_data),
+            'roi map': copy.deepcopy(self.default_style_data),
             'profile': copy.deepcopy(self.default_style_data),
             'polygon': copy.deepcopy(self.default_style_data)
         }
@@ -301,6 +302,12 @@ class StyleTheme():
         styles['cluster map']['CScale'] = 'discrete'
         styles['cluster map']['MarkerAlpha'] = 100
         styles['cluster map']['FieldType'] = 'Cluster'
+
+        styles['roi map']['CScale'] = 'discrete'
+        styles['roi map']['MarkerAlpha'] = 100
+        styles['roi map']['FieldType'] = 'ROI'
+        styles['roi map']['XField'] = 'Xc'
+        styles['roi map']['YField'] = 'Yc'
 
         styles['cluster performance']['AspectRatio'] = 0.62
 
@@ -536,6 +543,7 @@ class StyleData(QObject, StyleTheme):
             'cluster map',
             'cluster score map',
             'dimension score map',
+            'roi map',
         ]
 
         self._marker_dict = {
@@ -1284,7 +1292,7 @@ class StyleData(QObject, StyleTheme):
             style['CLim'] = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
             style['CLabel'] = data.processed.get_attribute(field,'label')
 
-        if app_data.c_field_type.lower() == 'cluster':
+        if app_data.c_field_type.lower() in ('cluster', 'roi'):
             style['CScale'] = 'discrete'
         else:
             style['CScale'] = 'linear'
@@ -1465,7 +1473,7 @@ class StyleData(QObject, StyleTheme):
     def set_default_cluster_colors(self,n, mask=False):
         """Sets cluster group to default colormap
 
-        Sets the colors in ``self.tableWidgetViewGroups`` to the default colormap in
+        Sets the colors in ``self.cluster_table`` to the default colormap in
         ``self.styles['cluster map']['Colormap'].  Change the default colormap
         by changing ``self.comboBoxColormap``, when ``self.ui.control_dock.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
 
@@ -1498,7 +1506,7 @@ class StyleData(QObject, StyleTheme):
     def get_cluster_colormap(self, cluster_dict, alpha=100):
         """Converts hex colors to a colormap
 
-        Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.tableWidgetViewGroups``.
+        Creates a discrete colormap given a list of hex color strings.  The colors in cluster_dict are set/changed in the ``MainWindow.cluster_table``.
 
         Parameters
         ----------
@@ -1534,6 +1542,44 @@ class StyleData(QObject, StyleTheme):
             cmap = colors.ListedColormap(cluster_color, N=n)
 
         return cluster_color, cluster_label, cmap
+
+    def get_roi_colormap(self, roi_stack, alpha=100):
+        """Converts ROI hex colors to a discrete colormap.
+
+        Mirrors `get_cluster_colormap`, but takes `SampleObj.roi_stack`
+        directly (an ordered list of ``{'id','name','color',...}`` dicts)
+        rather than a dict keyed by contiguous integer ids -- regions of
+        interest are user-defined and removable, so ids aren't guaranteed
+        contiguous the way algorithm-generated cluster labels are.
+
+        Parameters
+        ----------
+        roi_stack : list of dict
+            ``SampleObj.roi_stack`` -- each entry has ``'color'`` (hex str)
+            and ``'name'`` keys.
+        alpha : int, optional
+            Transparency to add to each color, by default 100.
+
+        Returns
+        -------
+        tuple
+            ``(roi_color, roi_label, cmap)`` -- lists of RGBA tuples/names in
+            stack order, and a ``colors.ListedColormap`` built from them.
+        """
+        n = len(roi_stack)
+        if n == 0:
+            return [], [], colors.ListedColormap([(0, 0, 0, 0)], N=1)
+
+        roi_color = [None] * n
+        roi_label = [None] * n
+        for i, entry in enumerate(roi_stack):
+            rgb_color = convert_color(entry['color'], 'hex', 'rgb', norm_out=False)
+            color = rgb_color if rgb_color is not None else [0, 0, 0]
+            roi_color[i] = tuple(float(c) / 255 for c in color) + (float(alpha) / 100,)
+            roi_label[i] = entry['name']
+
+        cmap = colors.ListedColormap(roi_color, N=n)
+        return roi_color, roi_label, cmap
 
     # -------------------------------------
     # Validation functions

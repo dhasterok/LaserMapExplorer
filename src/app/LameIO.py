@@ -14,7 +14,7 @@ from lame_core.config import BASEDIR
 from src.app.config import get_top_parent
 from src.data.DataHandling import LaserSampleObj, XRFSampleObj
 from src.plotting.CustomMplCanvas import MplCanvas
-from src.common.Status import StatusMessageManager
+from src.app.Status import StatusMessageManager
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 from src.project.ProjectModel import load_calibration_sidecar, is_calibration_stale
 # -------------------------------------
@@ -48,6 +48,30 @@ class LameIO():
         self.ui = ui
 
         self.status_manager = StatusMessageManager(self.ui)
+
+    def open_directory(self, path=None):
+        """Add all ``*.lame.csv`` samples in a directory to the current project.
+
+        The Blockly-generated code for the workflow's "Load Directory" block
+        calls this directly (``self.io.open_directory(...)``) -- with no
+        argument it opens a directory picker, with one it adds that
+        directory's samples right away. Delegates to
+        ``ProjectManager.add_samples``/``add_sample_directory_dialog``, the
+        same code path the toolbar/menu "Add Sample Directory" action uses.
+
+        Parameters
+        ----------
+        path : str or Path, optional
+            Directory to add samples from. If None, opens a directory picker.
+
+        Returns
+        -------
+        list of str
+            Sample IDs actually added; ``[]`` if cancelled or none found.
+        """
+        if path is None:
+            return self.ui.project_manager.add_sample_directory_dialog()
+        return self.ui.project_manager.add_samples([Path(path)])
 
     def import_spots(self):
         """Import a data file with spot data."""

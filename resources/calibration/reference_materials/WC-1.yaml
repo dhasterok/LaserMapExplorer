@@ -1,0 +1,151 @@
+standard: WC-1
+description: "WC-1: \_marine calcite cement"
+source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_M. S.\
+  \ A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material for LA-ICP-MS\
+  \ U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_2807\u20132814, doi:10.1002/2016GC006784."
+analytes:
+  Mg24:
+    element: Mg
+    mass: 24
+    value: 663.0
+    uncertainty: 38.5
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., GeoReM 10551, Uncertainty in GEOREM\
+      \ is reported as 2SD, 770 \xB5g/g\_\_\_"
+  V51:
+    element: V
+    mass: 51
+    value: 0.054
+    uncertainty: 0.003
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.06 \xB5g/g\_\_\_"
+  Mn55:
+    element: Mn
+    mass: 55
+    value: 0.65
+    uncertainty: 0.039
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.78 \xB5g/g\_\_\_"
+  Fe57:
+    element: Fe
+    mass: 57
+    value: 5.1
+    uncertainty: 0.1
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 2 \xB5g/g\_\_\_"
+  Cu63:
+    element: Cu
+    mass: 63
+    value: 0.07
+    uncertainty: 0.0018
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.036 \xB5g/g\_\_\_"
+  Zn64:
+    element: Zn
+    mass: 64
+    value: 0.122
+    uncertainty: 0.0015
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.03 \xB5g/g\_\_\_"
+  Sr88:
+    element: Sr
+    mass: 88
+    value: 1500.0
+    uncertainty: 95.0
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 1900 \xB5g/g\_\_\_"
+  Ba138:
+    element: Ba
+    mass: 138
+    value: 0.56
+    uncertainty: 0.0125
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.25 \xB5g/g\_\_\_"
+  Tm169:
+    element: Tm
+    mass: 169
+    value: 0.0043
+    uncertainty: 0.000185
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.0037 \xB5g/g\_\_\_"
+  Pb208:
+    element: Pb
+    mass: 208
+    value: 0.18
+    uncertainty: 0.0008500000000000001
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.017 \xB5g/g\_\_\_"
+  Th232:
+    element: Th
+    mass: 232
+    value: 0.014
+    uncertainty: 0.0005499999999999999
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 0.011 \xB5g/g\_\_\_"
+  U238:
+    element: U
+    mass: 238
+    value: 3.7
+    uncertainty: 0.05
+    uncertainty_type: SEM
+    units: ppm
+    source: "Roberts,\_N. M. W.,\_E. Troy Rasbury,\_R. R. Parrish,\_C. J. Smith,\_\
+      M. S. A. Horstwood, and\_D. J. Condon\_(2017),\_\_A calcite reference material\
+      \ for LA-ICP-MS U-Pb geochronology,\_Geochem. Geophys. Geosyst.,\_\_18,\_\_\
+      2807\u20132814, doi:10.1002/2016GC006784., Uncertainty in GEOREM is reported\
+      \ as 2SD, 1 \xB5g/g\_\_\_"
+isotope_ratios: {}

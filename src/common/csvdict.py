@@ -19,8 +19,8 @@ def import_csv_to_dict(filename):
     with open(filename, 'r', newline='') as csvfile:
         csv_reader = csv.reader(csvfile)
         for row in csv_reader:
-            key = row[0]
-            values = row[1:]
+            key = row[0].strip()
+            values = [v.strip() for v in row[1:]]
             dictionary[key] = values
     return dictionary
 

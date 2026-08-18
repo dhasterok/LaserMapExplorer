@@ -21,10 +21,11 @@ from PyQt6.QtCore import QRect, QSize, Qt, QTimer
 from PyQt6.QtWidgets import (
     QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QListWidget,
     QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
-    QScrollArea, QSizePolicy, QSplitter, QTableWidget, QVBoxLayout, QWidget,
+    QScrollArea, QSizePolicy, QSplitter, QTableWidget, QToolBar, QVBoxLayout,
+    QWidget,
 )
 
-from lame_core.CustomWidgets import CustomDockWidget
+from lame_core.CustomWidgets import CustomDockWidget, CustomAction
 from src.control.FieldLogic import FieldLogicUI
 from src.stoichiometry import pipeline, regionstats
 from src.stoichiometry.config import MineralConfig, MineralConfigError, load_mineral_config
@@ -155,59 +156,68 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         outer = QVBoxLayout(container)
         outer.setContentsMargins(6, 6, 6, 6)
 
-        mineral_row = QHBoxLayout()
-        mineral_row.addWidget(QLabel("Mineral"))
-        self.comboBoxMineral = QComboBox()
-        self._minerals = self._available_minerals()
-        self.comboBoxMineral.addItems(list(self._minerals.keys()))
-        for name, path in self._minerals.items():
-            if Path(path).resolve() == Path(self._config_path).resolve():
-                self.comboBoxMineral.setCurrentText(name)
-                break
-        mineral_row.addWidget(self.comboBoxMineral, stretch=1)
-        outer.addLayout(mineral_row)
+        self.toolbar = QToolBar("Stoichiometry Toolbar", self)
+        self.toolbar.setIconSize(QSize(24, 24))
+        self.run_action = CustomAction(
+            text="Run",
+            light_icon_unchecked="icon-run-64.svg",
+            parent=self,
+        )
+        self.run_action.setToolTip("Calculate")
 
-        self.labelMineral = QLabel(f"Mineral: {self.config.mineral if self.config else '(config failed to load)'}")
-        outer.addWidget(self.labelMineral)
-        self.labelConfigError = QLabel(f"Config error: {self._config_error}" if self._config_error else "")
-        self.labelConfigError.setStyleSheet("color: red;")
-        self.labelConfigError.setVisible(bool(self._config_error))
-        outer.addWidget(self.labelConfigError)
+        self.copy_to_notes_action = CustomAction(
+            text="Copy to Notes",
+            light_icon_unchecked="icon-notes-64.svg",
+            parent=self,
+        )
+        self.copy_to_notes_action.setToolTip("Copy to Notes")
+
+        self.toolbar.addAction(self.run_action)
+        self.toolbar.addAction(self.copy_to_notes_action)
+        outer.addWidget(self.toolbar)
+
+        input_layout = QHBoxLayout()
+
+        outer.addLayout(input_layout)
 
         scope_group = QGroupBox("Compute scope")
         scope_layout = QVBoxLayout(scope_group)
-        scope_note = QLabel(
-            "Restrict this calculation to specific ROIs/clusters (e.g. skip "
-            "pixels that aren't this mineral). Different scopes and minerals "
-            "can be run separately without overwriting each other's results."
-        )
-        scope_note.setWordWrap(True)
-        scope_layout.addWidget(scope_note)
+
         scope_row = QHBoxLayout()
-        scope_row.addWidget(QLabel("Restrict to"))
-        self.comboBoxScopeColumn = QComboBox()
-        self.comboBoxScopeColumn.addItem(self._ALL_PIXELS_LABEL)
-        scope_row.addWidget(self.comboBoxScopeColumn, stretch=1)
+        scope_row.addWidget(QLabel("Filter"))
+        self.filter_combobox = QComboBox()
+        self.filter_combobox.addItem(self._ALL_PIXELS_LABEL)
+        scope_row.addWidget(self.filter_combobox, stretch=1)
         scope_layout.addLayout(scope_row)
         self.listScopeRegions = QListWidget()
         self.listScopeRegions.setMaximumHeight(100)
         self.listScopeRegions.setVisible(False)
         scope_layout.addWidget(self.listScopeRegions)
-        outer.addWidget(scope_group)
+        input_layout.addWidget(scope_group)
 
         settings_group = QGroupBox("Settings")
         form = QFormLayout(settings_group)
 
-        self.comboBoxInputMode = QComboBox()
-        self.comboBoxInputMode.addItems(["ppm", "wt_percent"])
-        form.addRow("Input basis", self.comboBoxInputMode)
+        self.minerals_combobox = QComboBox()
+        self._minerals = self._available_minerals()
+        self.minerals_combobox.addItems(list(self._minerals.keys()))
+        for name, path in self._minerals.items():
+            if Path(path).resolve() == Path(self._config_path).resolve():
+                self.minerals_combobox.setCurrentText(name)
+                break
+        self._update_mineral_combobox_style()
+        form.addRow("Mineral", self.minerals_combobox)
 
-        self.comboBoxRedoxMethod = QComboBox()
+        self.analyte_units_combobox = QComboBox()
+        self.analyte_units_combobox.addItems(["ppm", "wt_percent"])
+        form.addRow("Input basis", self.analyte_units_combobox)
+
+        self.redox_method_combobox = QComboBox()
         if self.config:
-            self.comboBoxRedoxMethod.addItems(self.config.redox.methods)
+            self.redox_method_combobox.addItems(self.config.redox.methods)
             if self.config.redox.default_method:
-                self.comboBoxRedoxMethod.setCurrentText(self.config.redox.default_method)
-        form.addRow("Redox method", self.comboBoxRedoxMethod)
+                self.redox_method_combobox.setCurrentText(self.config.redox.default_method)
+        form.addRow("Redox method", self.redox_method_combobox)
 
         self.checkBoxCompareRedox = QPushButton("Compare all redox methods")
         self.checkBoxCompareRedox.setCheckable(True)
@@ -215,16 +225,9 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self.comboBoxLodTreatment = QComboBox()
         self.comboBoxLodTreatment.addItems(["zero", "half_lod", "exclude"])
-        form.addRow("Below-LOD treatment", self.comboBoxLodTreatment)
+        form.addRow("BDL treatment", self.comboBoxLodTreatment)
 
-        outer.addWidget(settings_group)
-
-        self.labelColumnMapping = QLabel("(load a sample to resolve element columns)")
-        self.labelColumnMapping.setWordWrap(True)
-        outer.addWidget(self.labelColumnMapping)
-
-        self.pushButtonCalculate = QPushButton("Calculate")
-        outer.addWidget(self.pushButtonCalculate)
+        input_layout.addWidget(settings_group)
 
         splitter = QSplitter(Qt.Orientation.Vertical)
 
@@ -255,9 +258,6 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         results_row.addWidget(self.textEditResults)
         outer.addLayout(results_row)
 
-        self.pushButtonCopyToNotes = QPushButton("Copy to Notes")
-        outer.addWidget(self.pushButtonCopyToNotes)
-
         scroll_area.setWidget(container)
         dock_layout = QVBoxLayout()
         dock_layout.setContentsMargins(0, 0, 0, 0)
@@ -267,13 +267,15 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         self.setWidget(wrapper)
 
     def connect_widgets(self):
-        self.pushButtonCalculate.clicked.connect(self.calculate)
-        self.comboBoxMineral.currentIndexChanged.connect(self._on_mineral_changed)
-        self.comboBoxInputMode.currentIndexChanged.connect(self.calculate)
-        self.comboBoxRedoxMethod.currentIndexChanged.connect(self.calculate)
+        self.run_action.triggered.connect(self.calculate)
+        self.copy_to_notes_action.triggered.connect(
+            lambda: self.ui.insert_info_note("stoichiometry results"))
+        self.minerals_combobox.currentIndexChanged.connect(self._on_mineral_changed)
+        self.analyte_units_combobox.currentIndexChanged.connect(self.calculate)
+        self.redox_method_combobox.currentIndexChanged.connect(self.calculate)
         self.comboBoxLodTreatment.currentIndexChanged.connect(self.calculate)
         self.checkBoxCompareRedox.toggled.connect(self.calculate)
-        self.comboBoxScopeColumn.currentIndexChanged.connect(self._on_scope_column_changed)
+        self.filter_combobox.currentIndexChanged.connect(self._on_scope_column_changed)
         # Debounced rather than a direct connection: checking/unchecking a batch of
         # regions fires one itemChanged per click, and calculate() writes with
         # merge=True (never clears stale values) -- an un-debounced recompute on
@@ -285,8 +287,6 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         self._scope_debounce.timeout.connect(self.calculate)
         self.listScopeRegions.itemChanged.connect(lambda *_: self._scope_debounce.start(300))
         self.comboBoxRegionColumn.currentIndexChanged.connect(self._on_region_column_changed)
-        self.pushButtonCopyToNotes.clicked.connect(
-            lambda: self.ui.insert_info_note("stoichiometry results"))
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -300,8 +300,13 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         paths = sorted(Path("resources/minerals").glob("*.yaml"))
         return {p.stem.capitalize(): str(p) for p in paths}
 
+    def _update_mineral_combobox_style(self):
+        """Red combobox text is the only load-failure indicator (no separate error label)."""
+        self.minerals_combobox.setStyleSheet("color: red;" if self._config_error else "")
+        self.minerals_combobox.setToolTip(self._config_error or "")
+
     def _on_mineral_changed(self, *_args):
-        name = self.comboBoxMineral.currentText()
+        name = self.minerals_combobox.currentText()
         path = self._minerals.get(name)
         if not path:
             return
@@ -313,17 +318,15 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             self.config = None
             self._config_error = str(e)
 
-        self.labelMineral.setText(f"Mineral: {self.config.mineral if self.config else '(config failed to load)'}")
-        self.labelConfigError.setText(f"Config error: {self._config_error}" if self._config_error else "")
-        self.labelConfigError.setVisible(bool(self._config_error))
+        self._update_mineral_combobox_style()
 
-        self.comboBoxRedoxMethod.blockSignals(True)
-        self.comboBoxRedoxMethod.clear()
+        self.redox_method_combobox.blockSignals(True)
+        self.redox_method_combobox.clear()
         if self.config:
-            self.comboBoxRedoxMethod.addItems(self.config.redox.methods)
+            self.redox_method_combobox.addItems(self.config.redox.methods)
             if self.config.redox.default_method:
-                self.comboBoxRedoxMethod.setCurrentText(self.config.redox.default_method)
-        self.comboBoxRedoxMethod.blockSignals(False)
+                self.redox_method_combobox.setCurrentText(self.config.redox.default_method)
+        self.redox_method_combobox.blockSignals(False)
 
         self.calculate()
 
@@ -354,7 +357,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         """
         available = self._available_region_columns(self.data)
 
-        for combo, extra in ((self.comboBoxScopeColumn, [self._ALL_PIXELS_LABEL]), (self.comboBoxRegionColumn, [])):
+        for combo, extra in ((self.filter_combobox, [self._ALL_PIXELS_LABEL]), (self.comboBoxRegionColumn, [])):
             current = combo.currentText()
             items = extra + available
             if [combo.itemText(i) for i in range(combo.count())] == items:
@@ -373,9 +376,13 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         Leaves existing check states alone when the available id set hasn't
         changed (e.g. recompute triggered by an unrelated settings change), so
         the user's scope selection survives routine recomputes. New ids default
-        to checked (included); ids that disappear are simply dropped.
+        to unchecked -- a mineral formula usually only applies to specific
+        ROIs/clusters, so the user should opt regions in explicitly rather than
+        accidentally compute over everything -- except when there's only a
+        single region available, where there's no real choice to make and it's
+        checked automatically. Ids that disappear are simply dropped.
         """
-        column = self.comboBoxScopeColumn.currentText()
+        column = self.filter_combobox.currentText()
         data = self.data
 
         if column == self._ALL_PIXELS_LABEL or data is None:
@@ -389,7 +396,16 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             entries = [(0, "Unassigned")] + [(r["id"], r["name"]) for r in data.roi_stack]
         elif column in data.processed.columns:
             ids = sorted(int(v) for v in data.processed[column].dropna().unique() if v != 99)
-            entries = [(i, f"Cluster {i}") for i in ids]
+            # Reuse the same name Masking.ClusterTab shows (1-indexed display,
+            # and picks up any user rename) when available; fall back to the
+            # same "Cluster {1-indexed}" convention AppData.py itself uses
+            # (e.g. MainWindow.py) if this method hasn't been through
+            # AppData.update_cluster_flag yet (e.g. a freshly loaded project).
+            cluster_names = self.app_data.cluster_dict.get(column, {})
+            entries = [
+                (i, cluster_names.get(i, {}).get("name", f"Cluster {i + 1}"))
+                for i in ids
+            ]
         else:
             entries = []
 
@@ -411,10 +427,11 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self.listScopeRegions.blockSignals(True)
         self.listScopeRegions.clear()
+        default_checked = len(entries) == 1
         for region_id, label in entries:
             item = QListWidgetItem(f"{label} (id {region_id})")
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            checked = (region_id in previous_checked) if had_items_before else True
+            checked = (region_id in previous_checked) if had_items_before else default_checked
             item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
             item.setData(Qt.ItemDataRole.UserRole, region_id)
             self.listScopeRegions.addItem(item)
@@ -435,7 +452,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
     def _current_scope_mask(self, data):
         """Boolean array (True = include), or None for '(All pixels)' (no extra restriction)."""
-        column = self.comboBoxScopeColumn.currentText()
+        column = self.filter_combobox.currentText()
         if column == self._ALL_PIXELS_LABEL or column not in data.processed.columns:
             return None
         selected_ids = [
@@ -448,7 +465,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         return np.isin(data.processed[column].to_numpy(), selected_ids)
 
     def _scope_description(self) -> str:
-        column = self.comboBoxScopeColumn.currentText()
+        column = self.filter_combobox.currentText()
         if column == self._ALL_PIXELS_LABEL or not self.listScopeRegions.isVisible():
             return "All pixels"
         checked = [
@@ -469,6 +486,29 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             return _resolve_ppm_columns(self.config, columns)
         return _resolve_oxide_columns(self.config, columns)
 
+    def _display_column_map(self, column_map: dict[str, str], input_mode: str) -> dict[str, str]:
+        """Element-keyed view of ``column_map`` for the "Using columns" summary line.
+
+        ``column_map`` itself must stay oxide-formula-keyed for wt_percent input
+        (``normalize.to_cation_moles`` parses those keys as oxide formulas, e.g.
+        ``'SiO2'``) -- changing that would break the calculation, not just the
+        display. This only relabels the wt_percent case by element (matching
+        the ppm case, which is already element-keyed) for a readable summary;
+        it's never fed back into the pipeline.
+        """
+        if input_mode != "wt_percent":
+            return column_map
+        from src.stoichiometry.normalize import STANDARD_OXIDES
+
+        # STANDARD_OXIDES has both plain ('Fe') and redox-species ('Fe2', 'Fe3')
+        # entries mapping to the same oxide ('FeO') -- setdefault keeps the
+        # first (plain) one, since it's always listed first, so the display
+        # shows a bare element symbol rather than a valence-species label.
+        oxide_to_element: dict[str, str] = {}
+        for el, oxide in STANDARD_OXIDES.items():
+            oxide_to_element.setdefault(oxide, _base_element(el))
+        return {oxide_to_element.get(oxide, oxide): col for oxide, col in column_map.items()}
+
     def calculate(self, *_args):
         """Recompute over the current scope and write results back.
 
@@ -488,13 +528,15 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self._refresh_region_columns()
 
-        input_mode = self.comboBoxInputMode.currentText()
+        input_mode = self.analyte_units_combobox.currentText()
         column_map = self._resolve_columns(input_mode)
         if not column_map:
-            self.labelColumnMapping.setText("No matching element/oxide columns found in this sample.")
+            self.textEditResults.setPlainText("No matching element/oxide columns found in this sample.")
             return
-        self.labelColumnMapping.setText(
-            "Using columns: " + ", ".join(f"{el}→{col}" for el, col in sorted(column_map.items()))
+
+        display_map = self._display_column_map(column_map, input_mode)
+        self._column_mapping_line = "Using columns: " + ", ".join(
+            f"{el}→{col}" for el, col in sorted(display_map.items())
         )
 
         scope_mask = self._current_scope_mask(data)
@@ -502,9 +544,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         mask = base_mask if scope_mask is None else (base_mask & scope_mask)
 
         if not np.any(mask):
-            self.labelColumnMapping.setText(
-                self.labelColumnMapping.text() + "\nNo pixels in the selected region scope."
-            )
+            self.textEditResults.setPlainText(self._column_mapping_line + "\nNo pixels in the selected region scope.")
             self._last_mask = None
             return
 
@@ -512,7 +552,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         rows = data.processed.loc[mask, list(column_map.values())]
         rows.columns = list(column_map.keys())
 
-        redox_methods = self.config.redox.methods if self.checkBoxCompareRedox.isChecked() else [self.comboBoxRedoxMethod.currentText()]
+        redox_methods = self.config.redox.methods if self.checkBoxCompareRedox.isChecked() else [self.redox_method_combobox.currentText()]
         lod_treatment = self.comboBoxLodTreatment.currentText()
 
         per_method_results: dict[str, list] = {m: [] for m in redox_methods}
@@ -531,7 +571,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
                 if method == redox_methods[-1]:
                     last_result = result
 
-        primary_method = self.comboBoxRedoxMethod.currentText()
+        primary_method = self.redox_method_combobox.currentText()
         self._write_results_to_sample(data, mask, per_method_results.get(primary_method, per_method_results[redox_methods[0]]))
         self._populate_results_table(per_method_results, redox_methods)
         self._populate_summary_table(data, mask)
@@ -544,12 +584,30 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             "lod_treatment": lod_treatment,
             "n_pixels": int(mask.sum()) if hasattr(mask, "sum") else len(rows),
             "summary_df": getattr(self, "_last_summary_df", None),
+            "endmember_members": list(self.config.end_members.members),
         }
         self._update_results_text()
         self.ui.schedule_update()
 
     def _write_results_to_sample(self, data, mask, results: list):
-        """Write per-site apfu totals and end-member % back via ``add_columns``.
+        """Write per-site apfu totals, end-member %, and the dominant
+        end-member back via ``add_columns``.
+
+        ``endmember_dominant`` is a 1-indexed code into ``member_names``
+        (matching this project's established 1-indexed *display* convention
+        for a categorical/discrete field, e.g. Masking.ClusterTab's "Cluster
+        N" naming) giving, per pixel, whichever end-member has the largest
+        fraction there -- e.g. a garnet map distinguishing Almandine-rich
+        from Pyrope-rich zones at a glance, in map/scatter/histogram form,
+        the same way a Cluster field already does. NaN (not 0, which would
+        collide with a real 1-indexed code) where every fraction is NaN/
+        missing for that pixel. The numeric code -> name mapping is surfaced
+        in the results text (see ``_update_results_text``) rather than
+        stored as a separate lookup structure -- there's no generic
+        per-column name-lookup mechanism for a non-Cluster field type in
+        this codebase yet (see ``AppData.cluster_dict``'s Cluster-specific
+        equivalent), so this keeps the mapping human-readable without
+        inventing new infrastructure other code doesn't know how to consume.
 
         Uses ``merge=True`` so this scoped run only touches rows inside
         ``mask`` -- pixels outside it (e.g. a different ROI/cluster computed
@@ -563,7 +621,9 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         site_names = list(self.config.site_order)
         member_names = list(self.config.end_members.members)
-        column_names = [f"apfu_{s}" for s in site_names] + [f"endmember_{m}" for m in member_names]
+        column_names = (
+            [f"apfu_{s}" for s in site_names] + [f"endmember_{m}" for m in member_names] + ["endmember_dominant"]
+        )
 
         arrays = []
         for r in results:
@@ -571,7 +631,10 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
                 arrays.append([np.nan] * len(column_names))
                 continue
             row_vals = [r.site_allocation.sites[s].total for s in site_names]
-            row_vals += [r.end_members.get(m, np.nan) for m in member_names]
+            fractions = [r.end_members.get(m, np.nan) for m in member_names]
+            row_vals += fractions
+            finite = [(v, i) for i, v in enumerate(fractions) if np.isfinite(v)]
+            row_vals.append(float(max(finite, key=lambda t: t[0])[1] + 1) if finite else np.nan)
             arrays.append(row_vals)
 
         array_2d = np.array(arrays, dtype=float)
@@ -636,17 +699,39 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self._last_summary_df = summary_df
         from src.app.InfoViewer import update_dataframe
-        if not summary_df.empty:
-            update_dataframe(summary_df, self.tableSummary)
+        if summary_df.empty:
+            return
+
+        # Transposed for display: one column per region, one row per
+        # field/stat -- with as many regions as fields (or more), the
+        # untransposed layout scrolled sideways rather than down.
+        display_df = summary_df.set_index(region_column).T
+        field_labels = [
+            idx.removeprefix("apfu_").removeprefix("endmember_") for idx in display_df.index
+        ]
+        display_df.columns = [f"{region_column} {c}" for c in display_df.columns]
+        update_dataframe(display_df.reset_index(drop=True), self.tableSummary)
+        self.tableSummary.setVerticalHeaderLabels(field_labels)
 
     def _update_results_text(self):
         r = self._last_results
         if not r:
             return
-        lines = [
+        lines = []
+        if getattr(self, "_column_mapping_line", ""):
+            lines.append(self._column_mapping_line)
+        lines += [
             f"Mineral: {r['mineral']}",
             f"Scope: {r.get('scope', 'All pixels')}",
             f"Input basis: {r['input_mode']}, redox method: {r['redox_method']}, LOD: {r['lod_treatment']}",
             f"Pixels calculated: {r['n_pixels']}",
         ]
+        members = r.get("endmember_members")
+        if members:
+            # endmember_dominant's numeric-code -> name mapping (see
+            # _write_results_to_sample) -- surfaced here since there's no
+            # generic per-field name-lookup UI (like AppData.cluster_dict's
+            # Cluster-specific one) to show it instead.
+            codes = ", ".join(f"{i + 1}={name}" for i, name in enumerate(members))
+            lines.append(f"endmember_dominant codes: {codes}")
         self.textEditResults.setPlainText("\n".join(lines))

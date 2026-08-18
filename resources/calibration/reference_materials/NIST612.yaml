@@ -1,0 +1,671 @@
+standard: NIST612
+description: 'NISTSRM612: GeoReM preferred Values'
+source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)
+analytes:
+  H1:
+    element: H
+    mass: 1
+    value: 23.4986522551967
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211, converted from H2O (0.021% m/m)
+  Na23:
+    element: Na
+    mass: 23
+    value: 101634.47340457326
+    uncertainty: 2225.5724103191224
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211, converted from Na2O (13.7% m/m)
+  Al27:
+    element: Al
+    mass: 27
+    value: 10743.789183919715
+    uncertainty: 211.7002794861028
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211, converted from Al2O3 (2.03% m/m)
+  Si29:
+    element: Si
+    mass: 29
+    value: 337020.57775492105
+    uncertainty: 2804.609523619315
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211, converted from SiO2 (72.1% m/m)
+  Ca43:
+    element: Ca
+    mass: 43
+    value: 85048.20123614861
+    uncertainty: 714.6907666903245
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211, converted from CaO (11.9% m/m)
+  Li7:
+    element: Li
+    mass: 7
+    value: 40.2
+    uncertainty: 1.3
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Be9:
+    element: Be
+    mass: 9
+    value: 37.5
+    uncertainty: 1.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  B11:
+    element: B
+    mass: 11
+    value: 34.3
+    uncertainty: 1.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  F19:
+    element: F
+    mass: 19
+    value: 80.0
+    uncertainty: 89.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Mg24:
+    element: Mg
+    mass: 24
+    value: 68.0
+    uncertainty: 5.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  P31:
+    element: P
+    mass: 31
+    value: 46.6
+    uncertainty: 6.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  S32:
+    element: S
+    mass: 32
+    value: 377.0
+    uncertainty: 70.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Cl35:
+    element: Cl
+    mass: 35
+    value: 142.0
+    uncertainty: 58.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  K39:
+    element: K
+    mass: 39
+    value: 62.3
+    uncertainty: 2.4
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Sc45:
+    element: Sc
+    mass: 45
+    value: 39.9
+    uncertainty: 2.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ti49:
+    element: Ti
+    mass: 49
+    value: 44.0
+    uncertainty: 2.3
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  V51:
+    element: V
+    mass: 51
+    value: 38.8
+    uncertainty: 1.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Cr53:
+    element: Cr
+    mass: 53
+    value: 36.4
+    uncertainty: 1.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Mn55:
+    element: Mn
+    mass: 55
+    value: 38.7
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Fe57:
+    element: Fe
+    mass: 57
+    value: 51.0
+    uncertainty: 2.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Co59:
+    element: Co
+    mass: 59
+    value: 35.5
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ni58:
+    element: Ni
+    mass: 58
+    value: 38.8
+    uncertainty: 0.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Cu63:
+    element: Cu
+    mass: 63
+    value: 37.8
+    uncertainty: 1.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Zn64:
+    element: Zn
+    mass: 64
+    value: 39.1
+    uncertainty: 1.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ga69:
+    element: Ga
+    mass: 69
+    value: 36.9
+    uncertainty: 1.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ge74:
+    element: Ge
+    mass: 74
+    value: 36.1
+    uncertainty: 3.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  As75:
+    element: As
+    mass: 75
+    value: 35.7
+    uncertainty: 5.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Se80:
+    element: Se
+    mass: 80
+    value: 16.3
+    uncertainty: 1.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Rb85:
+    element: Rb
+    mass: 85
+    value: 31.4
+    uncertainty: 0.4
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Sr88:
+    element: Sr
+    mass: 88
+    value: 78.4
+    uncertainty: 0.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Y89:
+    element: Y
+    mass: 89
+    value: 38.3
+    uncertainty: 1.4
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Zr90:
+    element: Zr
+    mass: 90
+    value: 37.9
+    uncertainty: 1.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Nb93:
+    element: Nb
+    mass: 93
+    value: 38.9
+    uncertainty: 2.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Mo98:
+    element: Mo
+    mass: 98
+    value: 37.4
+    uncertainty: 1.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Rh103:
+    element: Rh
+    mass: 103
+    value: 0.91
+    uncertainty: 0.02
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Pd106:
+    element: Pd
+    mass: 106
+    value: 1.05
+    uncertainty: 0.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ag107:
+    element: Ag
+    mass: 107
+    value: 22.0
+    uncertainty: 0.3
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Cd114:
+    element: Cd
+    mass: 114
+    value: 28.1
+    uncertainty: 1.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  In115:
+    element: In
+    mass: 115
+    value: 38.9
+    uncertainty: 2.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Sn120:
+    element: Sn
+    mass: 120
+    value: 38.6
+    uncertainty: 1.3
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Sb121:
+    element: Sb
+    mass: 121
+    value: 34.7
+    uncertainty: 1.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Cs133:
+    element: Cs
+    mass: 133
+    value: 42.7
+    uncertainty: 1.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ba138:
+    element: Ba
+    mass: 138
+    value: 39.3
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  La139:
+    element: La
+    mass: 139
+    value: 36.0
+    uncertainty: 0.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ce140:
+    element: Ce
+    mass: 140
+    value: 38.4
+    uncertainty: 0.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Pr141:
+    element: Pr
+    mass: 141
+    value: 37.9
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Nd146:
+    element: Nd
+    mass: 146
+    value: 35.5
+    uncertainty: 0.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Sm147:
+    element: Sm
+    mass: 147
+    value: 37.7
+    uncertainty: 0.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Eu153:
+    element: Eu
+    mass: 153
+    value: 35.6
+    uncertainty: 0.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Gd157:
+    element: Gd
+    mass: 157
+    value: 37.3
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Tb159:
+    element: Tb
+    mass: 159
+    value: 37.6
+    uncertainty: 1.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Dy163:
+    element: Dy
+    mass: 163
+    value: 35.5
+    uncertainty: 0.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ho165:
+    element: Ho
+    mass: 165
+    value: 38.3
+    uncertainty: 0.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Er166:
+    element: Er
+    mass: 166
+    value: 38.0
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Tm169:
+    element: Tm
+    mass: 169
+    value: 36.8
+    uncertainty: 0.6
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Yb172:
+    element: Yb
+    mass: 172
+    value: 39.2
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Lu175:
+    element: Lu
+    mass: 175
+    value: 37.0
+    uncertainty: 0.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Hf178:
+    element: Hf
+    mass: 178
+    value: 36.7
+    uncertainty: 1.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ta181:
+    element: Ta
+    mass: 181
+    value: 37.6
+    uncertainty: 1.9
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  W184:
+    element: W
+    mass: 184
+    value: 38.0
+    uncertainty: 1.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Re187:
+    element: Re
+    mass: 187
+    value: 6.63
+    uncertainty: 0.61
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Ir193:
+    element: Ir
+    mass: 193
+    value: 0.0045
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Pt195:
+    element: Pt
+    mass: 195
+    value: 2.51
+    uncertainty: 0.1
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Au197:
+    element: Au
+    mass: 197
+    value: 4.77
+    uncertainty: 0.31
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Tl205:
+    element: Tl
+    mass: 205
+    value: 14.9
+    uncertainty: 0.5
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Pb208:
+    element: Pb
+    mass: 208
+    value: 38.57
+    uncertainty: 0.2
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Bi209:
+    element: Bi
+    mass: 209
+    value: 30.2
+    uncertainty: 2.3
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  Th232:
+    element: Th
+    mass: 232
+    value: 37.79
+    uncertainty: 0.08
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+  U238:
+    element: U
+    mass: 238
+    value: 37.38
+    uncertainty: 0.08
+    uncertainty_type: 95CI
+    units: ppm
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011), GeoReM
+      5211
+isotope_ratios:
+  Pb206/Pb204:
+    numerator_element: Pb
+    numerator_mass: 206
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 17.094
+    uncertainty: 0.0026
+    uncertainty_type: null
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)
+  Pb207/Pb204:
+    numerator_element: Pb
+    numerator_mass: 207
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 15.51
+    uncertainty: 0.0036
+    uncertainty_type: null
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)
+  Pb208/Pb204:
+    numerator_element: Pb
+    numerator_mass: 208
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 37.0
+    uncertainty: 0.0094
+    uncertainty_type: null
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)
+  Sr87/Sr86:
+    numerator_element: Sr
+    numerator_mass: 87
+    denominator_element: Sr
+    denominator_mass: 86
+    value: 0.709063
+    uncertainty: 2.0e-05
+    uncertainty_type: null
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)
+  Nd143/Nd144:
+    numerator_element: Nd
+    numerator_mass: 143
+    denominator_element: Nd
+    denominator_mass: 144
+    value: 0.51193
+    uncertainty: 4.0e-06
+    uncertainty_type: null
+    source: Jochum et al 2011 (Max-Planck-Institut fuer Chemie) (6/ 2011)

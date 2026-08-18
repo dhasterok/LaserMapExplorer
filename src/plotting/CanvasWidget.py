@@ -5,9 +5,9 @@ from PyQt6.QtWidgets import (
     QLineEdit, QLabel, QToolBar, QTabWidget, QGroupBox, QSpacerItem, QSpinBox, QComboBox,
     QButtonGroup, QDialogButtonBox, QMenu, QPushButton, QScrollArea
 )
-from PyQt6.QtGui import QFont, QIcon, QCursor
+from PyQt6.QtGui import QFont, QCursor
 from lame_core.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
-from lame_core.config import APPDATA_PATH, ICONPATH
+from lame_core.config import APPDATA_PATH
 from src.app.config import get_top_parent
 
 import gc
@@ -18,7 +18,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 
-from src.plotting.CustomMplCanvas import MplCanvas
+from src.plotting.CustomMplCanvas import MplCanvas, make_compact_nav_toolbar
 from src.plotting.LamePlot import plot_small_histogram
 import src.common.csvdict as csvdict
 from src.common.TableFunctions import TableFcn as TableFcn
@@ -1736,26 +1736,9 @@ class PlotWindow(QDialog):
         # Create a QVBoxLayout to hold the canvas and toolbar
         layout = QVBoxLayout(self)
 
-        # Create a NavigationToolbar and add it to the layout
-        self.toolbar = NavigationToolbar(canvas, self)
-
-        # use custom buttons
-        unwanted_buttons = ["Back", "Forward", "Customize", "Subplots"]
-
-        icons_buttons = {
-            "Home": QIcon(str(ICONPATH / "icon-home-64.svg")),
-            "Pan": QIcon(str(ICONPATH / "icon-move-64.svg")),
-            "Zoom": QIcon(str(ICONPATH / "icon-zoom-64.svg")),
-            "Save": QIcon(str(ICONPATH / "icon-save-file-64.svg"))
-        }
-        for action in self.toolbar.actions():
-            if action.text() in unwanted_buttons:
-                self.toolbar.removeAction(action)
-            if action.text() in icons_buttons:
-                action.setIcon(icons_buttons.get(action.text(), QIcon()))
-
-        self.toolbar.setMaximumHeight(int(32))
-        self.toolbar.setIconSize(QSize(24,24))
+        # Compact home/pan/zoom/save toolbar, re-iconed with LaME's icon set
+        # (shared with any other lightweight canvas via make_compact_nav_toolbar).
+        self.toolbar = make_compact_nav_toolbar(canvas, self)
 
         # Add toolbar to self.layout
         layout.addWidget(self.toolbar,0)

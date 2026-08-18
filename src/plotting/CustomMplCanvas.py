@@ -13,9 +13,76 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt import FigureManagerQT
 from matplotlib.figure import Figure
 import pandas as pd
-from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt import NavigationToolbar2QT as _NavigationToolbar2QT
+from matplotlib.backend_bases import MouseButton
 import matplotlib as mpl
 from lame_core.config import ICONPATH
+
+
+class NavigationToolbar(_NavigationToolbar2QT):
+    """``NavigationToolbar2QT`` with one addition: holding Control while
+    clicking the zoom tool acts like a right-click (zoom OUT) instead of a
+    left-click (zoom IN) -- convenient wherever a right-click gesture isn't
+    always at hand (e.g. a one-button mouse/trackpad on macOS).
+
+    Matplotlib's Qt backend already compensates for macOS's Control/Command
+    modifier swap at the ``SPECIAL_KEYS`` level (see
+    ``matplotlib.backends.backend_qt``), so ``event.modifiers`` reporting
+    ``"ctrl"`` here always means the physical Control key, on every
+    platform including macOS -- no platform-specific branching needed.
+    If a platform/trackpad configuration already delivers Ctrl+click as an
+    actual right-click (``event.button`` is already ``MouseButton.RIGHT``),
+    this is a no-op -- it only steps in for the common case of Ctrl+click
+    arriving as a left click with the Control modifier held.
+    """
+
+    def press_zoom(self, event):
+        super().press_zoom(event)
+        if (self._zoom_info is not None and self._zoom_info.button == MouseButton.LEFT
+                and "ctrl" in event.modifiers):
+            self._zoom_info = self._zoom_info._replace(button=MouseButton.RIGHT)
+
+
+def make_compact_nav_toolbar(canvas, parent=None) -> NavigationToolbar:
+    """Compact matplotlib navigation toolbar (home/pan/zoom/save only),
+    re-iconed with LaME's icon set.
+
+    Shared by ``CanvasWidget.PlotWindow`` and any other lightweight canvas
+    that wants the same minimal toolbar without ``CanvasWidget``'s app-level
+    coupling (``current_canvas``, ``ui.io.save_plot``, etc.) -- just a plain
+    ``NavigationToolbar2QT`` bound to whatever ``canvas`` is passed in.
+
+    Parameters
+    ----------
+    canvas : FigureCanvasQTAgg
+        Any matplotlib Qt canvas (``SimpleMplCanvas``, ``MplCanvas``, or a
+        bare ``FigureCanvasQTAgg``).
+    parent : QWidget, optional
+        Toolbar's Qt parent.
+
+    Returns
+    -------
+    NavigationToolbar2QT
+    """
+    toolbar = NavigationToolbar(canvas, parent)
+
+    unwanted_actions = {"Back", "Forward", "Customize", "Subplots"}
+    icons_by_action = {
+        "Home": QIcon(str(ICONPATH / "icon-home-64.svg")),
+        "Pan": QIcon(str(ICONPATH / "icon-move-64.svg")),
+        "Zoom": QIcon(str(ICONPATH / "icon-zoom-64.svg")),
+        "Save": QIcon(str(ICONPATH / "icon-save-file-64.svg")),
+    }
+    for action in toolbar.actions():
+        if action.text() in unwanted_actions:
+            toolbar.removeAction(action)
+        elif action.text() in icons_by_action:
+            action.setIcon(icons_by_action[action.text()])
+
+    toolbar.setMaximumHeight(32)
+    toolbar.setIconSize(QSize(24, 24))
+    return toolbar
+
 
 # Matplotlib Canvas object
 # -------------------------------

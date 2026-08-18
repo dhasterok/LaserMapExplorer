@@ -1,0 +1,24 @@
+# Scapolite: (Na,Ca)4Al3(Al,Si)3Si6O24(Cl,CO3,SO4) -- MinPlotX's own model has
+# no T/M site split at all (every cation reported directly, unconditional),
+# so this is a single site. No Fe-redox option in MinPlotX either (Fe is
+# reported as a single total, no Fe2+/Fe3+ split) -- no redox: block, 'Fe'
+# used as a plain (non-split) cation species.
+#
+# ideal_oxygens=27 matches MinPlotX's "CO2 measured" branch; the "CO2
+# unmeasured" branch's different target (24) plus its CO2-by-difference
+# back-calculation are anion/volatile bookkeeping (see Stage 3 plan) and
+# aren't ported.
+mineral: scapolite
+formula: (Na,Ca)4Al3(Al,Si)3Si6O24(Cl,CO3,SO4)
+normalization:
+  basis: oxygen
+  ideal_oxygens: 27
+  ideal_cations: 16
+sites:
+  M:
+    target: 16.0
+    elements: [Si, Al, Fe, Mn, Mg, Ca, Ba, Sr, Na, K]
+    priority: [Si, Al, Fe, Mn, Mg, Ca, Ba, Sr, Na, K]
+end_members:
+  method: scapolite_ratio
+  members: [eq_anorthite, meionite_divalent]

@@ -1,0 +1,37 @@
+# Titanite: CaTiSiO5 (tetrahedral T, octahedral Oct, decahedral Dec)
+#
+# MinPlotX has no Fe2+/Fe3+ split for titanite at all (forces all Fe to
+# Fe3+ via a conversion step the Stage 3 research flagged as likely buggy in
+# the source) -- rather than replicate a suspected bug, no redox: block here;
+# 'Fe' is used as a plain, non-split cation species.
+#
+# MinPlotX's own normalization rescales cations by a factor computed from
+# only the T+Oct pool (Si+Ti+Al+Fe+Mn+Mg -> 2), applied uniformly to every
+# cation including Ca/Y/Na/K. That's a site-specific normalizer this engine
+# doesn't support (see the Stage 3 plan / scapolite's config for the same
+# simplification); ported instead as plain whole-analysis cation-basis
+# normalization to ideal_cations=3 (Si+Ti+Ca, the formula's full cation
+# count) -- identical to MinPlotX's result for a stoichiometric analysis,
+# a minor deviation only for non-ideal ones.
+mineral: titanite
+formula: CaTiSiO5
+normalization:
+  basis: cation
+  ideal_oxygens: 5
+  ideal_cations: 3
+sites:
+  T:
+    target: 1.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  Oct:
+    target: 1.0
+    elements: [Al, Ti, Fe, Mn, Mg]
+    priority: [Al, Ti, Fe, Mn, Mg]
+  Dec:
+    target: 1.0
+    elements: [Ca, Y, Na, K]
+    priority: [Ca, Y, Na, K]
+end_members:
+  method: titanite_ratio
+  members: [titanite_ss]

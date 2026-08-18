@@ -1,0 +1,21 @@
+# Ilmenite: FeTiO3 (single octahedral site, no T/M split in MinPlotX's own model)
+mineral: ilmenite
+formula: FeTiO3
+normalization:
+  basis: cation
+  ideal_oxygens: 3
+  ideal_cations: 2
+sites:
+  M:
+    target: 2.0
+    elements: [Ti, Si, Al, Cr, V, Fe3, Fe2, Mn, Mg, Ca]
+    priority: [Ti, Si, Al, Cr, V, Fe3, Fe2, Mn, Mg, Ca]
+redox:
+  # Reuses droop_1987 unchanged -- ilmenite_Fe3unknown.m has the identical
+  # oxygen-deficiency charge-balance loop already ported for garnet.
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: ilmenite_ratio
+  members: [hematite, ilmenite, pyrophanite, geikielite]

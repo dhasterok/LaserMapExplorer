@@ -1,0 +1,49 @@
+# Glaucophane (sodic amphibole group -- glaucophane-ferroglaucophane-
+# riebeckite-magnesio-riebeckite): Na2(Mg,Fe2+)3(Al,Fe3+)2Si8O22(OH)2, same
+# 23-oxygen anhydrous basis and T/C/B/A site engine as amphibole.yaml (see
+# that file's comment for the full site-allocation rationale) -- the only
+# structural difference from the calcic group is which cations dominate B
+# (Na here instead of Ca) and C (Al/Fe3+ instead of the calcic group's
+# Al/Mg/Fe2+ mix), which the shared generic priority-fill engine handles
+# automatically from each analysis's own composition, not from anything
+# hardcoded per mineral.
+#
+# No reference workbook exists for this mineral (see the per-mineral test
+# file's docstring), and -- same caveat as amphibole.yaml -- no
+# charge-balance Fe3+ estimator is implemented (fixed_ratio only, default
+# 0.0). Since the glaucophane/riebeckite distinction hinges on C-site
+# Al-vs-Fe3+ dominance, riebeckite/magnesio-riebeckite compositions won't
+# be distinguished from glaucophane/ferroglaucophane unless the analysis is
+# run with a nonzero fixed Fe3+ ratio -- see endmembers.py's
+# ``_amphibole_na_ratio`` docstring.
+mineral: glaucophane
+formula: Na2(Mg,Fe2+)3(Al,Fe3+)2Si8O22(OH)2
+normalization:
+  basis: oxygen
+  ideal_oxygens: 23
+  ideal_cations: 15
+sites:
+  T:
+    target: 8.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  C:
+    target: 5.0
+    elements: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+    priority: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+  B:
+    target: 2.0
+    elements: [Ca, Mg, Fe2, Mn, Na]
+    priority: [Ca, Mg, Fe2, Mn, Na]
+  A:
+    target: 1.0
+    elements: [Na, K]
+    priority: [Na, K]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 0.0   # conservative default: assume all Fe is Fe2+ unless a ratio is supplied
+end_members:
+  method: amphibole_na_ratio
+  members: [mg_number, fe3_c_fraction]

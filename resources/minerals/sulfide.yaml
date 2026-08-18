@@ -1,0 +1,34 @@
+# Sulfide (generic): metal sulfide phases (pyrite, chalcopyrite, sphalerite,
+# galena, pyrrhotite, pentlandite, etc.). Unlike every other mineral in this
+# library, MinPlotX's sulfide calculator is a fully generic, runtime-
+# configurable tool (any cation-normalization target), not a fixed formula
+# -- ported as one generic config to match, with ideal_cations replaced
+# per-analysis via pipeline.calculate()'s ideal_cations_override (same
+# pattern already used for redox_method).
+#
+# S is normalized alongside the metals (scaled by the same factor) but
+# excluded from the *target* sum (normalization.excludes) -- it's the
+# anion, not counted toward "how many cations to normalize to" -- matching
+# MinPlotX's cation-basis convention (its own default). MinPlotX also
+# offers anion-basis normalization (target a S count instead) and treating
+# As as an anion rather than a cation; neither is ported here (cation-basis
+# + As-as-cation are MinPlotX's own defaults) -- deliberately out of scope.
+#
+# Input is element wt% (not oxide, not ppm) -- input_mode='element_wt_percent'.
+mineral: sulfide
+formula: (Fe,Ni,Cu,Co,Pb,Zn)xSy
+normalization:
+  basis: cation
+  ideal_oxygens: 0   # unused -- sulfide never normalizes on an oxygen basis
+  ideal_cations: 2   # nominal default (MinPlotX's own default); override per-analysis
+  excludes: [S]
+sites:
+  M:
+    # target reflects the metal-only ideal_cations; S is included in this
+    # site's elements (so it's reported/QC'd) but -- per normalization.excludes
+    # above -- doesn't count toward the target, so this site's total will
+    # normally run past its target by however much S apfu there is. Not a
+    # bug: apfu values themselves are correct regardless.
+    target: 2.0
+    elements: [Fe, Ni, Cu, Co, Pb, Zn, As, S]
+    priority: [Fe, Ni, Cu, Co, Pb, Zn, As, S]

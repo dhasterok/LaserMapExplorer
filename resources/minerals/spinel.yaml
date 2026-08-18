@@ -1,0 +1,36 @@
+# Spinel: AB2O4 (tetrahedral A, octahedral D)
+mineral: spinel
+formula: AD2O4
+normalization:
+  basis: cation
+  ideal_oxygens: 4
+  ideal_cations: 3
+site_allocation:
+  # Fe2+/Mg are equipartitioned between D and A by the bulk XFe/XMg ratio,
+  # scaled by how much Si+Ti occupies A -- see sites.py's
+  # _allocate_spinel_xmg docstring. The elements/priority lists below are
+  # still used for QC/validation and reporting; the actual apportionment
+  # logic is dedicated.
+  method: spinel_xmg
+sites:
+  D:
+    target: 2.0
+    elements: [Al, V, Cr, Fe3, Fe2, Mg]
+    priority: [Al, V, Cr, Fe3, Fe2, Mg]
+  A:
+    target: 1.0
+    elements: [Si, Ti, Ni, Zn, Co, Mn, Fe2, Mg]
+    priority: [Si, Ti, Ni, Zn, Co, Mn, Fe2, Mg]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: spinel_xmg
+  members: [
+    chromite, magnesiochromite, cr_mn, cr_ni, cr_zn, cr_co,
+    magnetite, magnesioferrite, jacobsite, trevorite, franklinite, fe3_co,
+    hercynite, spinel, galaxite, al_ni, gahnite, al_co,
+    coulsonite, magnesiocoulsonite, v_mn, v_ni, v_zn, v_co,
+    ahrensite, ringwoodite, ulvospinel, qandilite,
+  ]

@@ -10,12 +10,13 @@ from lame_core.UITheme import default_font
 import math
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import HDBSCAN, KMeans
 from sklearn.metrics import silhouette_score
 #from sklearn_extra.cluster import KMedoids
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from global_geochemistry.geochem.coda import clr, closure, multiplicative_replacement
 from src.control.Logger import log, auto_log_methods
 from lame_core.config import ICONPATH
 
@@ -25,7 +26,7 @@ class Clustering():
         self.logger_key = "Analysis"
 
         self._distance_metrics = ['euclidean', 'manhattan', 'mahalanobis', 'cosine']
-        self._cluster_methods = ['k-means', 'fuzzy c-means']
+        self._cluster_methods = ['k-means', 'fuzzy c-means', 'HDBSCAN']
 
     def compute_clusters(self,data, app_data, max_clusters = None):
         """Computes cluster results
@@ -152,6 +153,75 @@ class Clustering():
                         data.cluster_results[method] = cluster_results
                         data.silhouette_scores[method] = silhouette_scores
 
+            # HDBSCAN (density-based, run in clr/log-ratio space)
+            case 'HDBSCAN':
+                if max_clusters is not None:
+                    # density-based clustering has no "target k" to sweep --
+                    # skip the cluster-performance path rather than crash
+                    return
+
+                clr_array = self._clr_feature_matrix(data)[data.mask]
+                model = HDBSCAN(
+                    min_cluster_size=app_data.cluster_min_size,
+                    min_samples=app_data.cluster_min_samples,
+                    copy=True,
+                ).fit(clr_array)
+
+                # HDBSCAN labels noise points -1; remap to this app's existing
+                # "id 99 = unclustered/Mask" convention (see AppData.cluster_group_changed,
+                # ClusterTab, cluster_percentages, stoichiometry/dock.py's region-scope
+                # exclude list) so noise pixels get correct display/exclusion behavior
+                # everywhere with no changes to any of that code. Real clusters are
+                # already 0-indexed and contiguous, matching k-means/fuzzy c-means.
+                labels = model.labels_.copy()
+                labels[labels == -1] = 99
+                data.add_columns('Cluster', method, labels, data.mask)
+
+    def _clr_feature_matrix(self, data):
+        """Builds a linear-scale (undisplayed-norm) Analyte/Ratio feature
+        matrix and clr-transforms it, for clustering methods (HDBSCAN) that
+        need genuine linear-scale concentrations rather than whatever
+        display norm ('log'/'logit'/'symlog') a field happens to be set to.
+
+        Mirrors ``DataHandling.get_processed_data``'s own column-selection
+        logic (same ``use``/``use_normalized`` match_attributes calls, same
+        '(normalized)'-suffix disambiguation) but hardcodes ``norm='linear'``
+        instead of reusing each field's stored display norm -- kept as a
+        small local duplication rather than adding a norm-override parameter
+        to that widely-used shared method.
+
+        NaN handling is inherited for free: ``compute_clusters`` always calls
+        ``data.get_processed_data()`` (with this exact same field selection)
+        before dispatching to a method, and that call's own NaN-masking
+        already narrowed ``data.mask`` for these columns as a side effect.
+
+        LA-ICP-MS analyte values are routinely zero, and background-
+        subtracted/calibrated values can go slightly negative near the
+        detection limit (a background-subtraction artifact, not a real
+        negative concentration -- the same "below LOD" case the
+        stoichiometry pipeline's own ``lod_treatment='zero'`` convention
+        treats as zero; see ``src/stoichiometry/normalize.py``). ``clr``
+        alone (plain ``log(x / geometric_mean(x))``) produces inf/nan for a
+        zero, and ``closure`` rejects negatives outright -- so values are
+        floored at zero, closed, and zeros multiplicatively replaced
+        (``closure`` + ``multiplicative_replacement``, both from
+        ``global_geochemistry.geochem.coda``) before the clr transform.
+        """
+        columns = {}
+        for field_type in ('Analyte', 'Ratio'):
+            for field in data.processed.match_attributes({'data_type': field_type, 'use': True}):
+                columns[field] = data.get_map_data(field, field_type=field_type, norm='linear')['array'].values
+
+            normalized_field_type = f'{field_type} (normalized)'
+            for field in data.processed.match_attributes({'data_type': field_type, 'use_normalized': True}):
+                array = data.get_map_data(field, field_type=normalized_field_type, norm='linear')['array'].values
+                col_name = f'{field} (normalized)' if field in columns else field
+                columns[col_name] = array
+
+        df = pd.DataFrame(columns, index=data.processed.index)
+        closed = closure(np.clip(df.values, 0.0, None))
+        replaced = multiplicative_replacement(closed)
+        return clr(replaced)
 
 
 @auto_log_methods(logger_key="Analysis")
@@ -237,6 +307,28 @@ class ClusterPage(CustomPage, Clustering):
         self.comboBoxClusterDistance.setObjectName("comboBoxClusterDistance")
         self.cluster_form_layout.addRow("Distance", self.comboBoxClusterDistance)
 
+        self.spinBoxMinClusterSize = QSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxMinClusterSize.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxMinClusterSize.setFont(default_font())
+        self.spinBoxMinClusterSize.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxMinClusterSize.setKeyboardTracking(False)
+        self.spinBoxMinClusterSize.setMinimum(2)
+        self.spinBoxMinClusterSize.setMaximum(1000000)
+        self.spinBoxMinClusterSize.setProperty("value", 25)
+        self.spinBoxMinClusterSize.setObjectName("spinBoxMinClusterSize")
+        self.cluster_form_layout.addRow("Min. cluster size", self.spinBoxMinClusterSize)
+
+        self.spinBoxMinSamples = QSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxMinSamples.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxMinSamples.setFont(default_font())
+        self.spinBoxMinSamples.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxMinSamples.setKeyboardTracking(False)
+        self.spinBoxMinSamples.setMinimum(1)
+        self.spinBoxMinSamples.setMaximum(1000000)
+        self.spinBoxMinSamples.setProperty("value", 10)
+        self.spinBoxMinSamples.setObjectName("spinBoxMinSamples")
+        self.cluster_form_layout.addRow("Min. samples", self.spinBoxMinSamples)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
 
@@ -298,6 +390,10 @@ class ClusterPage(CustomPage, Clustering):
         # cluster exponent
         self.sliderClusterExponent.sliderReleased.connect(lambda: self.update_cluster_exponent())
 
+        # HDBSCAN parameters
+        self.spinBoxMinClusterSize.valueChanged.connect(lambda _: self.update_cluster_min_size())
+        self.spinBoxMinSamples.valueChanged.connect(lambda _: self.update_cluster_min_samples())
+
         # starting seed
         self.lineEditSeed.editingFinished.connect(lambda: self.update_cluster_seed())
         self.toolButtonRandomSeed.clicked.connect(lambda _: self.dock.ui.app_data.generate_random_seed())
@@ -325,6 +421,8 @@ class ClusterPage(CustomPage, Clustering):
         self.dock.ui.app_data.clusterSeedChanged.connect(self.update_cluster_seed)
         self.dock.ui.app_data.clusterExponentChanged.connect(self.update_cluster_exponent)
         self.dock.ui.app_data.clusterDistanceChanged.connect(self.update_cluster_distance)
+        self.dock.ui.app_data.clusterMinSizeChanged.connect(self.update_cluster_min_size)
+        self.dock.ui.app_data.clusterMinSamplesChanged.connect(self.update_cluster_min_samples)
         self.dock.ui.app_data.clusterPreconditionChanged.connect(self.update_dim_red_precondition)
         self.dock.ui.app_data.numBasisChanged.connect(self.update_num_basis_for_precondition)
 
@@ -334,6 +432,8 @@ class ClusterPage(CustomPage, Clustering):
         self.spinBoxNClusters.valueChanged.connect(lambda: log(f"spinBoxNClusters value=[{self.spinBoxNClusters.value()}]", prefix="UI"))
         self.sliderClusterExponent.valueChanged.connect(lambda: log(f"horizontalSliderClusterExponent value=[{self.sliderClusterExponent.value()}]", prefix="UI"))
         self.comboBoxClusterDistance.activated.connect(lambda: log(f"comboBoxClusterDistance value=[{self.comboBoxClusterDistance.currentText()}]", prefix="UI"))
+        self.spinBoxMinClusterSize.valueChanged.connect(lambda: log(f"spinBoxMinClusterSize value=[{self.spinBoxMinClusterSize.value()}]", prefix="UI"))
+        self.spinBoxMinSamples.valueChanged.connect(lambda: log(f"spinBoxMinSamples value=[{self.spinBoxMinSamples.value()}]", prefix="UI"))
         self.lineEditSeed.editingFinished.connect(lambda: log(f"lineEditSeed value=[{self.lineEditSeed.value}]", prefix="UI"))
         self.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
         self.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.checkBoxWithPCA.isChecked()}]", prefix="UI"))
@@ -366,15 +466,40 @@ class ClusterPage(CustomPage, Clustering):
                 self.spinBoxClusterMax.setEnabled(True)
                 self.comboBoxClusterDistance.setEnabled(True)
                 self.sliderClusterExponent.setEnabled(False)
+                self.spinBoxMinClusterSize.setEnabled(False)
+                self.spinBoxMinSamples.setEnabled(False)
+                self.lineEditSeed.setEnabled(True)
+                self.toolButtonRandomSeed.setEnabled(True)
             case 'fuzzy c-means':
                 self.spinBoxNClusters.setEnabled(True)
                 self.spinBoxClusterMax.setEnabled(True)
                 self.comboBoxClusterDistance.setEnabled(False)
                 self.sliderClusterExponent.setEnabled(True)
+                self.spinBoxMinClusterSize.setEnabled(False)
+                self.spinBoxMinSamples.setEnabled(False)
+                self.lineEditSeed.setEnabled(True)
+                self.toolButtonRandomSeed.setEnabled(True)
+            case 'HDBSCAN':
+                # density-based -- no target cluster count, no distance
+                # metric/fuzzy exponent choice, and no seed (deterministic)
+                self.spinBoxNClusters.setEnabled(False)
+                self.spinBoxClusterMax.setEnabled(False)
+                self.comboBoxClusterDistance.setEnabled(False)
+                self.sliderClusterExponent.setEnabled(False)
+                self.spinBoxMinClusterSize.setEnabled(True)
+                self.spinBoxMinSamples.setEnabled(True)
+                self.lineEditSeed.setEnabled(False)
+                self.toolButtonRandomSeed.setEnabled(False)
             case _:
                 ValueError(f"Unknown clustering method {self.dock.ui.app_data.cluster_method}")
-        
-        if 'PCA score' in self.dock.ui.app_data.field_dict:
+
+        if self.dock.ui.app_data.cluster_method == 'HDBSCAN':
+            # existing PCA scores aren't computed from clr-transformed data,
+            # so clustering on them here would mix an untransformed basis
+            # into a method whose whole point is running in clr-space
+            self.checkBoxWithPCA.setEnabled(False)
+            #self.labelClusterWithPCA.setEnabled(False)
+        elif 'PCA score' in self.dock.ui.app_data.field_dict:
             self.checkBoxWithPCA.setEnabled(True)
             #self.labelClusterWithPCA.setEnabled(True)
         else:
@@ -521,6 +646,48 @@ class ClusterPage(CustomPage, Clustering):
             self.dock.ui.app_data.cluster_distance = self.comboBoxClusterDistance.currentText()
         else:
             self.comboBoxClusterDistance.setCurrentText(new_distance)
+
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
+
+    def update_cluster_min_size(self, new_value=None):
+        """Update HDBSCAN's minimum cluster size.
+
+        Parameters
+        ----------
+        new_value : int or None, optional
+            The new minimum cluster size. If not provided, the current value of the spin box is used.
+            If provided, the spin box is updated with the new value.
+        """
+        if new_value is None:
+            self.dock.ui.app_data.cluster_min_size = self.spinBoxMinClusterSize.value()
+        else:
+            if new_value == self.spinBoxMinClusterSize.value():
+                return
+            self.spinBoxMinClusterSize.blockSignals(True)
+            self.spinBoxMinClusterSize.setValue(new_value)
+            self.spinBoxMinClusterSize.blockSignals(False)
+
+        if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
+            self.dock.ui.schedule_update()
+
+    def update_cluster_min_samples(self, new_value=None):
+        """Update HDBSCAN's min_samples.
+
+        Parameters
+        ----------
+        new_value : int or None, optional
+            The new min_samples value. If not provided, the current value of the spin box is used.
+            If provided, the spin box is updated with the new value.
+        """
+        if new_value is None:
+            self.dock.ui.app_data.cluster_min_samples = self.spinBoxMinSamples.value()
+        else:
+            if new_value == self.spinBoxMinSamples.value():
+                return
+            self.spinBoxMinSamples.blockSignals(True)
+            self.spinBoxMinSamples.setValue(new_value)
+            self.spinBoxMinSamples.blockSignals(False)
 
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()

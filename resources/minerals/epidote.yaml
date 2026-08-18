@@ -1,0 +1,38 @@
+# Epidote: Ca2(Al,Fe3+)3(SiO4)3(OH) (tetrahedral T, octahedral M, large-cation A)
+#
+# Fe2+/Mn2+/Mg are equipartitioned between M and A by their bulk ratio,
+# scaled by whatever M-space remains after Al/Ti/Cr/Fe3+ (unconditional) --
+# see sites.py's _allocate_equipart docstring (a generic T/M/A pattern
+# shared with allanite, the 3-way analogue of pyroxene's Mg/Fe2+ M1/M2
+# split). Mn3+ isn't modeled in this batch (all Mn is Mn2+, consistent with
+# every fixed_ratio-only mineral here) -- so piemontite (the Mn3+
+# end-member) is dropped from the end-member list.
+mineral: epidote
+formula: Ca2(Al,Fe3+)3(SiO4)3(OH)
+normalization:
+  basis: oxygen
+  ideal_oxygens: 12.5
+  ideal_cations: 8
+site_allocation:
+  method: equipart
+sites:
+  T:
+    target: 3.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  M:
+    target: 3.0
+    elements: [Al, Ti, Cr, Fe3, Fe2, Mn, Mg]
+    priority: [Al, Ti, Cr, Fe3, Fe2, Mn, Mg]
+  A:
+    target: 2.0
+    elements: [Fe2, Mn, Mg, Ca, Sr, Na, K]
+    priority: [Fe2, Mn, Mg, Ca, Sr, Na, K]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 1.0   # MinPlotX default: assume all Fe is Fe3+ unless a ratio is supplied
+end_members:
+  method: epidote_ratio
+  members: [clinozoisite, epidote, cr_epidote]

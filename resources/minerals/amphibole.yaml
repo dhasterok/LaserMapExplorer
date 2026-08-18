@@ -1,0 +1,58 @@
+# Amphibole (calcic/subcalcic group -- tremolite-actinolite-ferro-
+# actinolite through hornblende): (Ca,Na)2-3(Mg,Fe,Al)5Si6-8Al0-2O22(OH)2,
+# recalculated on the standard 23-oxygen anhydrous basis (Leake et al.
+# 1997's convention). No reference workbook exists for this mineral (see
+# the per-mineral test file's docstring) -- this is a deliberately
+# simplified port, not the full Leake classification; see the caveats
+# below and in endmembers.py's ``_amphibole_ca_ratio`` docstring.
+#
+# Four sites reuse the *generic* priority-fill engine (no dedicated
+# site-allocation function needed): T (tetrahedral, target 8: Si then
+# Al(iv) filling the remainder), C (octahedral M1+M2+M3, target 5: trivalent
+# + Ti first, then Mg/Fe2+/Mn filling the remainder -- shared with B, so it
+# spills over once C reaches target), B (M4, target 2: Ca first, then
+# leftover Mg/Fe2+/Mn, then Na filling whatever B space remains -- Na is
+# shared with A, so excess spills there), A (interstitial, target <=1,
+# last/uncapped: leftover Na plus all K). This is the same shared-pool
+# spillover mechanism already used for garnet's Z/Y/X and pyroxene's
+# T/M1/M2, just with one more site.
+#
+# No charge-balance Fe3+ estimator ("13eCNK"/"15eNK") is implemented --
+# that needs a bespoke formula this port can't validate without a
+# reference, unlike droop_1987's generic oxygen-deficiency formula (which
+# also doesn't apply here: droop_1987 requires basis: cation, and
+# amphibole's 23-oxygen convention is basis: oxygen -- see redox.py's
+# module docstring). Fe is split by a fixed user ratio only (fixed_ratio,
+# default 0.0 = all ferrous), the same fallback convention already used for
+# mica/cordierite/staurolite/serpentine in this library.
+mineral: amphibole
+formula: (Ca,Na)2-3(Mg,Fe,Al)5Si6-8Al0-2O22(OH)2
+normalization:
+  basis: oxygen
+  ideal_oxygens: 23
+  ideal_cations: 15
+sites:
+  T:
+    target: 8.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  C:
+    target: 5.0
+    elements: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+    priority: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+  B:
+    target: 2.0
+    elements: [Ca, Mg, Fe2, Mn, Na]
+    priority: [Ca, Mg, Fe2, Mn, Na]
+  A:
+    target: 1.0
+    elements: [Na, K]
+    priority: [Na, K]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 0.0   # conservative default: assume all Fe is Fe2+ unless a ratio is supplied
+end_members:
+  method: amphibole_ca_ratio
+  members: [mg_number, tschermak_fraction]

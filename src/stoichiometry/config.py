@@ -37,6 +37,7 @@ class RedoxConfig:
     elements: list[str] = field(default_factory=list)
     methods: list[str] = field(default_factory=list)
     default_method: str = ""
+    fixed_ratio: float = 0.0  # Fe3+/FeTotal for the 'fixed_ratio' method
 
 
 @dataclass
@@ -63,6 +64,9 @@ class MineralConfig:
     trace_elements: TraceElementConfig
     end_members: EndMemberConfig
     qc_checks: list[str] = field(default_factory=list)
+    site_method: str = "priority_fill"
+    tetra_fe3_ratio: float = 0.0  # fixed Fe3+ fraction routed to the first site, for the 'tetra_fe3_ratio' site method
+    normalization_excludes: list[str] = field(default_factory=list)  # species excluded from the cation-basis target sum (e.g. ['S'] for sulfides)
 
     @property
     def site_order(self) -> list[str]:
@@ -73,8 +77,14 @@ class MineralConfig:
         return {el for site in self.sites.values() for el in site.elements}
 
 
-VALID_REDOX_METHODS = {"all_2plus", "all_3plus", "droop_1987"}
-VALID_END_MEMBER_METHODS = {"locock_2008"}
+VALID_REDOX_METHODS = {"all_2plus", "all_3plus", "droop_1987", "fixed_ratio"}
+VALID_END_MEMBER_METHODS = {
+    "locock_2008", "olivine_ratio", "feldspar_ratio", "pyroxene_quad", "spinel_xmg",
+    "xmg_ratio", "ilmenite_ratio", "lawsonite_ratio", "epidote_ratio", "scapolite_ratio", "titanite_ratio",
+    "monazite_huttonite_ratio", "mica_cascade", "amphibole_ca_ratio", "amphibole_na_ratio", "carbonate_ratio",
+}
+VALID_SITE_METHODS = {"priority_fill", "pyroxene_quad", "spinel_xmg", "tetra_fe3_ratio", "equipart"}
+VALID_BASES = {"oxygen", "cation"}
 
 
 def _require(d: dict, key: str, context: str) -> object:
@@ -115,6 +125,7 @@ def _parse_redox(raw: dict | None) -> RedoxConfig:
     elements = raw.get("elements", [])
     methods = raw.get("methods", [])
     default_method = raw.get("default_method", "")
+    fixed_ratio = raw.get("fixed_ratio", 0.0)
 
     for m in methods:
         if m not in VALID_REDOX_METHODS:
@@ -125,7 +136,13 @@ def _parse_redox(raw: dict | None) -> RedoxConfig:
         raise MineralConfigError(
             f"{context} 'default_method' ({default_method!r}) must be one of 'methods' ({methods})."
         )
-    return RedoxConfig(elements=list(elements), methods=list(methods), default_method=default_method)
+    try:
+        fixed_ratio = float(fixed_ratio)
+    except (TypeError, ValueError):
+        raise MineralConfigError(f"{context} 'fixed_ratio' must be numeric, got {fixed_ratio!r}.")
+    if "fixed_ratio" in methods and not (0.0 <= fixed_ratio <= 1.0):
+        raise MineralConfigError(f"{context} 'fixed_ratio' must be in [0, 1], got {fixed_ratio!r}.")
+    return RedoxConfig(elements=list(elements), methods=list(methods), default_method=default_method, fixed_ratio=fixed_ratio)
 
 
 def _parse_trace_elements(raw: dict | None) -> TraceElementConfig:
@@ -152,6 +169,27 @@ def _parse_end_members(raw: dict | None) -> EndMemberConfig:
     return EndMemberConfig(method=method, members=list(members))
 
 
+def _parse_site_method(raw: dict | None) -> tuple[str, float]:
+    if raw is None:
+        return "priority_fill", 0.0
+    context = "site_allocation"
+    if not isinstance(raw, dict):
+        raise MineralConfigError(f"'{context}' must be a mapping, got {type(raw).__name__}.")
+    method = raw.get("method", "priority_fill")
+    if method not in VALID_SITE_METHODS:
+        raise MineralConfigError(
+            f"{context} 'method' ({method!r}) is unknown; valid methods are {sorted(VALID_SITE_METHODS)}."
+        )
+    tetra_fe3_ratio = raw.get("tetra_fe3_ratio", 0.0)
+    try:
+        tetra_fe3_ratio = float(tetra_fe3_ratio)
+    except (TypeError, ValueError):
+        raise MineralConfigError(f"{context} 'tetra_fe3_ratio' must be numeric, got {tetra_fe3_ratio!r}.")
+    if method == "tetra_fe3_ratio" and not (0.0 <= tetra_fe3_ratio <= 1.0):
+        raise MineralConfigError(f"{context} 'tetra_fe3_ratio' must be in [0, 1], got {tetra_fe3_ratio!r}.")
+    return method, tetra_fe3_ratio
+
+
 def parse_mineral_config(raw: dict) -> MineralConfig:
     """Parse an already-loaded dict (e.g. from ``yaml.safe_load``) into a
     validated :class:`MineralConfig`.
@@ -174,6 +212,8 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
     if not isinstance(normalization, dict):
         raise MineralConfigError("'normalization' must be a mapping.")
     basis = _require(normalization, "basis", "normalization")
+    if basis not in VALID_BASES:
+        raise MineralConfigError(f"'normalization.basis' ({basis!r}) must be one of {sorted(VALID_BASES)}.")
     ideal_oxygens = _require(normalization, "ideal_oxygens", "normalization")
     ideal_cations = _require(normalization, "ideal_cations", "normalization")
     try:
@@ -181,6 +221,7 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
         ideal_cations = float(ideal_cations)
     except (TypeError, ValueError):
         raise MineralConfigError("'ideal_oxygens'/'ideal_cations' must be numeric.")
+    normalization_excludes = list(normalization.get("excludes", []))
 
     sites_raw = _require(raw, "sites", "config")
     if not isinstance(sites_raw, dict) or not sites_raw:
@@ -191,6 +232,7 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
     trace_elements = _parse_trace_elements(raw.get("trace_elements"))
     end_members = _parse_end_members(raw.get("end_members"))
     qc_checks = list(raw.get("qc_checks", []))
+    site_method, tetra_fe3_ratio = _parse_site_method(raw.get("site_allocation"))
 
     config = MineralConfig(
         mineral=mineral,
@@ -203,6 +245,9 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
         trace_elements=trace_elements,
         end_members=end_members,
         qc_checks=qc_checks,
+        site_method=site_method,
+        tetra_fe3_ratio=tetra_fe3_ratio,
+        normalization_excludes=normalization_excludes,
     )
 
     # Cross-field validation: every element assigned to a site must not also

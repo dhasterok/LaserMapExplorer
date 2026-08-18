@@ -27,6 +27,13 @@ STANDARD_OXIDES: dict[str, str] = {
     "Ni": "NiO", "Co": "CoO", "Zn": "ZnO", "Sc": "Sc2O3",
     "Y": "Y2O3", "REE": "Y2O3",  # trivalent REE assumed to behave like Y at the X-site
     "Zr": "ZrO2", "Hf": "HfO2", "Nb": "Nb2O5", "V": "V2O3",
+    "Ba": "BaO", "Sr": "SrO",
+    # Individual lanthanides (allanite, monazite-adjacent trace chemistry) --
+    # 'REE' above is a generic fallback for anything not listed individually.
+    "La": "La2O3", "Ce": "Ce2O3", "Pr": "Pr2O3", "Nd": "Nd2O3", "Sm": "Sm2O3",
+    "Eu": "Eu2O3", "Gd": "Gd2O3", "Tb": "Tb2O3", "Dy": "Dy2O3", "Ho": "Ho2O3",
+    "Er": "Er2O3", "Tm": "Tm2O3", "Yb": "Yb2O3", "Lu": "Lu2O3",
+    "Th": "ThO2", "U": "UO2", "Pb": "PbO",
 }
 
 _OXIDE_RE = re.compile(r"^([A-Z][a-z]?)(\d*)O(\d*)$")
@@ -64,9 +71,11 @@ def to_cation_moles(
     Parameters
     ----------
     analysis : dict[str, float]
-        Element symbol -> ppm (``input_mode='ppm'``), or oxide formula ->
-        wt.% (``input_mode='wt_percent'``).
-    input_mode : {'ppm', 'wt_percent'}
+        Element symbol -> ppm (``input_mode='ppm'``), oxide formula -> wt.%
+        (``input_mode='wt_percent'``), or element symbol -> wt.%
+        (``input_mode='element_wt_percent'`` -- sulfide/metal analyses,
+        reported as elements rather than oxides, e.g. 'S', 'Fe', 'Cu').
+    input_mode : {'ppm', 'wt_percent', 'element_wt_percent'}
     config : MineralConfig
     lod : dict[str, float], optional
         Detection-limit value per input key, required for 'half_lod' treatment.
@@ -87,8 +96,8 @@ def to_cation_moles(
         which input keys were dropped as non-structural/contamination
         (``config.trace_elements.excluded``) or LOD-excluded, for QC/audit.
     """
-    if input_mode not in ("ppm", "wt_percent"):
-        raise ValueError(f"Unknown input_mode {input_mode!r}; expected 'ppm' or 'wt_percent'.")
+    if input_mode not in ("ppm", "wt_percent", "element_wt_percent"):
+        raise ValueError(f"Unknown input_mode {input_mode!r}; expected 'ppm', 'wt_percent', or 'element_wt_percent'.")
     if lod_treatment not in ("zero", "half_lod", "exclude"):
         raise ValueError(f"Unknown lod_treatment {lod_treatment!r}; expected 'zero', 'half_lod', or 'exclude'.")
 
@@ -131,7 +140,10 @@ def to_cation_moles(
         if input_mode == "wt_percent":
             oxide_mw = mwc.molecular_weight(key)
             cation_moles = (v / oxide_mw) * n_cation
-        else:
+        elif input_mode == "element_wt_percent":
+            atomic_mw = mwc.molecular_weight(cation)
+            cation_moles = v / atomic_mw
+        else:  # ppm
             atomic_mw = mwc.molecular_weight(cation)
             cation_moles = (v * 1e-6) / atomic_mw
 
@@ -143,30 +155,30 @@ def to_cation_moles(
 def normalize_to_oxygen(
     moles: dict[str, float],
     config: MineralConfig,
-    redox_oxide_overrides: dict[str, str] | None = None,
 ) -> dict[str, float]:
     """Scale cation moles so total oxygen-equivalent equals ``config.ideal_oxygens``.
+
+    Used only as intermediate scaffolding for Droop's (1987) charge-balance
+    formula (see ``redox.py``) -- the resulting total (Droop's "S") is what
+    that formula is defined in terms of. Not the basis final apfu are
+    reported on; see :func:`normalize_to_cations` for that.
 
     Parameters
     ----------
     moles : dict[str, float]
         Output of :func:`to_cation_moles`.
     config : MineralConfig
-    redox_oxide_overrides : dict[str, str], optional
-        Element -> oxide formula, overriding :data:`STANDARD_OXIDES` for
-        this call (e.g. ``{'Fe': 'Fe2O3'}`` for an all-Fe3+ hypothesis).
 
     Returns
     -------
     dict[str, float]
-        Cation element -> apfu (cations per formula unit).
+        Cation element -> apfu (cations per formula unit), oxygen-basis.
     """
-    redox_oxide_overrides = redox_oxide_overrides or {}
     total_o_equiv = 0.0
     o_per_cation: dict[str, float] = {}
 
     for el, mol in moles.items():
-        oxide = redox_oxide_overrides.get(el) or STANDARD_OXIDES.get(el)
+        oxide = STANDARD_OXIDES.get(el)
         if oxide is None:
             raise ValueError(f"No standard oxide form known for element '{el}' -- cannot compute its oxygen contribution.")
         _, n_cation, n_oxygen = _parse_simple_oxide(oxide)
@@ -181,8 +193,51 @@ def normalize_to_oxygen(
     return {el: mol * k for el, mol in moles.items()}
 
 
+def normalize_to_cations(
+    moles: dict[str, float],
+    config: MineralConfig,
+    ideal_cations: float | None = None,
+) -> dict[str, float]:
+    """Scale cation moles so total cations equal ``config.ideal_cations`` (T)
+    -- the basis final apfu are reported on (the Droop 1987 / MinPlotX
+    convention).
+
+    Valence-independent: moles don't encode charge, so this same T-basis
+    apfu is the correct reference regardless of which redox hypothesis
+    (all-2+/all-3+/Droop) is ultimately chosen for a redox-sensitive element.
+
+    ``config.normalization_excludes`` (e.g. ``['S']`` for sulfides) removes
+    those species from the *sum* used to compute the scale factor -- they're
+    anions, not part of "how many cations to normalize to" -- but they're
+    still scaled and included in the returned dict, same as everything else.
+
+    Parameters
+    ----------
+    moles : dict[str, float]
+        Output of :func:`to_cation_moles`.
+    config : MineralConfig
+    ideal_cations : float, optional
+        Overrides ``config.ideal_cations`` for this call -- lets a caller
+        pick a different normalization target per analysis (e.g. sulfide's
+        generic config, where the target isn't tied to one fixed formula;
+        see ``pipeline.calculate``'s ``ideal_cations_override``).
+
+    Returns
+    -------
+    dict[str, float]
+        Cation element -> apfu (cations per formula unit), cation-basis.
+    """
+    excludes = set(config.normalization_excludes)
+    total = sum(v for el, v in moles.items() if el not in excludes)
+    if total <= 0:
+        raise ValueError("Total cation moles is zero or negative; check the input analysis.")
+
+    k = (ideal_cations if ideal_cations is not None else config.ideal_cations) / total
+    return {el: mol * k for el, mol in moles.items()}
+
+
 def oxide_total_percent(analysis: dict[str, float], input_mode: str) -> float | None:
-    """Sum of input oxide wt.% (QC diagnostic) -- ``None`` for ppm-basis input."""
-    if input_mode != "wt_percent":
+    """Sum of input oxide/element wt.% (QC diagnostic) -- ``None`` for ppm-basis input."""
+    if input_mode not in ("wt_percent", "element_wt_percent"):
         return None
     return float(sum(analysis.values()))

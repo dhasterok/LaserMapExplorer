@@ -1,0 +1,528 @@
+standard: BHVO-2G
+description: 'BHVO-2G: GeoReM preferred Values'
+source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009)
+analytes:
+  Na23:
+    element: Na
+    mass: 23
+    value: 17804.57928255298
+    uncertainty: 741.8574701063742
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from Na2O (2.4% m/m)
+  Mg24:
+    element: Mg
+    mass: 24
+    value: 42996.45944363394
+    uncertainty: 120.6071793650321
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from MgO (7.13% m/m)
+  Al27:
+    element: Al
+    mass: 27
+    value: 71978.09502527495
+    uncertainty: 529.2506987152569
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from Al2O3 (13.6% m/m)
+  Si29:
+    element: Si
+    mass: 29
+    value: 230445.41585738707
+    uncertainty: 467.43492060321915
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from SiO2 (49.3% m/m)
+  P31:
+    element: P
+    mass: 31
+    value: 1265.6199375468686
+    uncertainty: 87.28413362392197
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from P2O5 (0.29% m/m)
+  K39:
+    element: K
+    mass: 39
+    value: 4270.0
+    uncertainty: 50.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Ca43:
+    element: Ca
+    mass: 43
+    value: 81474.74740269699
+    uncertainty: 714.6907666903245
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from CaO (11.4% m/m)
+  Ti49:
+    element: Ti
+    mass: 49
+    value: 16300.0
+    uncertainty: 900.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  Mn55:
+    element: Mn
+    mass: 55
+    value: 1316.5779582278444
+    uncertainty: 232.33728674609017
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from MnO (0.17% m/m)
+  Fe57:
+    element: Fe
+    mass: 57
+    value: 87835.44716080863
+    uncertainty: 777.3048421310499
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, EPMA,
+      converted from FeO(t) (11.3% m/m)
+  Li7:
+    element: Li
+    mass: 7
+    value: 4.4
+    uncertainty: 0.8
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Be9:
+    element: Be
+    mass: 9
+    value: 1.3
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS data
+  Sc45:
+    element: Sc
+    mass: 45
+    value: 33.0
+    uncertainty: 2.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  V51:
+    element: V
+    mass: 51
+    value: 308.0
+    uncertainty: 19.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  Cr53:
+    element: Cr
+    mass: 53
+    value: 293.0
+    uncertainty: 12.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS data
+  Co59:
+    element: Co
+    mass: 59
+    value: 44.0
+    uncertainty: 2.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS data
+  Ni58:
+    element: Ni
+    mass: 58
+    value: 116.0
+    uncertainty: 7.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  Cu63:
+    element: Cu
+    mass: 63
+    value: 127.0
+    uncertainty: 11.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS data
+  Zn64:
+    element: Zn
+    mass: 64
+    value: 102.0
+    uncertainty: 6.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  Ga69:
+    element: Ga
+    mass: 69
+    value: 22.0
+    uncertainty: 3.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS data
+  Ge74:
+    element: Ge
+    mass: 74
+    value: 1.6
+    uncertainty: 0.1
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, LA-ICPMS
+  Rb85:
+    element: Rb
+    mass: 85
+    value: 9.2
+    uncertainty: 0.04
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of ID-TIMS
+  Sr88:
+    element: Sr
+    mass: 88
+    value: 396.0
+    uncertainty: 1.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of ID-TIMS
+  Y89:
+    element: Y
+    mass: 89
+    value: 26.0
+    uncertainty: 2.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Zr90:
+    element: Zr
+    mass: 90
+    value: 170.0
+    uncertainty: 7.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Nb93:
+    element: Nb
+    mass: 93
+    value: 18.3
+    uncertainty: 0.8
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Mo98:
+    element: Mo
+    mass: 98
+    value: 3.8
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, LA-ICPMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Cd114:
+    element: Cd
+    mass: 114
+    value: 0.1
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean LA-ICPMS data
+  In115:
+    element: In
+    mass: 115
+    value: 0.1
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, LA-ICPMS
+  Sn120:
+    element: Sn
+    mass: 120
+    value: 2.6
+    uncertainty: 0.6
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 66, LA-ICPMS
+  Sb121:
+    element: Sb
+    mass: 121
+    value: 0.3
+    uncertainty: 0.13
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of LA-ICPMS
+  Cs133:
+    element: Cs
+    mass: 133
+    value: 0.1
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Ba138:
+    element: Ba
+    mass: 138
+    value: 131.0
+    uncertainty: 2.0
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  La139:
+    element: La
+    mass: 139
+    value: 15.2
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Ce140:
+    element: Ce
+    mass: 140
+    value: 37.6
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Pr141:
+    element: Pr
+    mass: 141
+    value: 5.35
+    uncertainty: 0.22
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Nd146:
+    element: Nd
+    mass: 146
+    value: 24.5
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Sm147:
+    element: Sm
+    mass: 147
+    value: 6.1
+    uncertainty: 0.03
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Eu153:
+    element: Eu
+    mass: 153
+    value: 2.07
+    uncertainty: 0.01
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Gd157:
+    element: Gd
+    mass: 157
+    value: 6.16
+    uncertainty: 0.05
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Tb159:
+    element: Tb
+    mass: 159
+    value: 0.92
+    uncertainty: 0.04
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Dy163:
+    element: Dy
+    mass: 163
+    value: 5.28
+    uncertainty: 0.05
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Ho165:
+    element: Ho
+    mass: 165
+    value: 0.98
+    uncertainty: 0.04
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Er166:
+    element: Er
+    mass: 166
+    value: 2.56
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+  Tm169:
+    element: Tm
+    mass: 169
+    value: 0.34
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Yb172:
+    element: Yb
+    mass: 172
+    value: 2.01
+    uncertainty: 0.02
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Lu175:
+    element: Lu
+    mass: 175
+    value: 0.279
+    uncertainty: 0.003
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, ID-TIMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Hf178:
+    element: Hf
+    mass: 178
+    value: 4.32
+    uncertainty: 0.18
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Ta181:
+    element: Ta
+    mass: 181
+    value: 1.15
+    uncertainty: 0.1
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  W184:
+    element: W
+    mass: 184
+    value: 0.23
+    uncertainty: 0.04
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, LA-ICPMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Re187:
+    element: Re
+    mass: 187
+    value: 0.00047
+    uncertainty: 0.00013
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 684, LA-ICPMS
+  Pt195:
+    element: Pt
+    mass: 195
+    value: 0.46
+    uncertainty: 0.09
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 684, LA-ICPMS
+  Pb208:
+    element: Pb
+    mass: 208
+    value: 1.7
+    uncertainty: 0.2
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  Bi209:
+    element: Bi
+    mass: 209
+    value: 0.01
+    uncertainty: 0.002
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 492, LA-ICPMS
+      (original uncertainty type 'UNCERT' unrecognized -- treated as 1SD)
+  Th232:
+    element: Th
+    mass: 232
+    value: 1.22
+    uncertainty: 0.05
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), mean of new data
+  U238:
+    element: U
+    mass: 238
+    value: 0.403
+    uncertainty: 0.003
+    uncertainty_type: 1SD
+    units: ppm
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 24, ID-ICPMS
+isotope_ratios:
+  Sr87/Sr86:
+    numerator_element: Sr
+    numerator_mass: 87
+    denominator_element: Sr
+    denominator_mass: 86
+    value: 0.703469
+    uncertainty: 7.0e-06
+    uncertainty_type: 1SD
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 480, TIMS
+  Pb206/Pb204:
+    numerator_element: Pb
+    numerator_mass: 206
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 18.733
+    uncertainty: 0.064
+    uncertainty_type: 1SD
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 480, MC-ICPMS
+  Pb207/Pb204:
+    numerator_element: Pb
+    numerator_mass: 207
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 15.571
+    uncertainty: 0.028
+    uncertainty_type: 1SD
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 480, MC-ICPMS
+  Pb208/Pb204:
+    numerator_element: Pb
+    numerator_mass: 208
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 38.27
+    uncertainty: 0.004
+    uncertainty_type: 1SD
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 480, MC-ICPMS
+  Th230/Th232:
+    numerator_element: Th
+    numerator_mass: 230
+    denominator_element: Th
+    denominator_mass: 232
+    value: 5.87e-06
+    uncertainty: null
+    uncertainty_type: null
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 3629, TIMS,
+      original uncertainty reported as 2RSE(%) (relative) -- not converted, needs
+      manual handling
+  U234/U238:
+    numerator_element: U
+    numerator_mass: 234
+    denominator_element: U
+    denominator_mass: 238
+    value: 5.49e-05
+    uncertainty: null
+    uncertainty_type: null
+    source: Jochum (Max-Planck-Institut fuer Chemie) (1/ 2009), GeoReM 3629, TIMS,
+      original uncertainty reported as 2RSE(%) (relative) -- not converted, needs
+      manual handling

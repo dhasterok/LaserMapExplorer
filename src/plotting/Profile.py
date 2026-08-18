@@ -106,14 +106,21 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
         # edit profile button
         self.actionEdit = QAction()
         self.actionEdit.setIcon(QIcon(":resources/icons/icon-edit-64.svg"))
-        self.actionEdit.setToolTip("Toggle profile editing mode")
+        self.actionEdit.setToolTip(
+            "Edit mode: click a point to mask it (excludes it from the viewed profile), "
+            "click again to un-mask it"
+        )
         self.actionEdit.setCheckable(True)
         self.actionEdit.setChecked(False)
 
         # point toggle button
         self.actionTogglePoint = QAction()
         self.actionTogglePoint.setIcon(QIcon(":resources/icons/icon-show-hide-64.svg"))
-        self.actionTogglePoint.setToolTip("Toggle point visibility")
+        self.actionTogglePoint.setToolTip(
+            "Masked points are shown in light gray by default; check this to hide them from "
+            "the plot entirely instead (they stay masked either way -- this only changes the "
+            "display, independent of Edit mode)"
+        )
         self.actionTogglePoint.setCheckable(True)
         self.actionTogglePoint.setChecked(False)
 
@@ -338,8 +345,11 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
         self.actionPointAdd.triggered.connect(lambda: self._set_mode(self.actionPointAdd, 'add'))
         self.actionPointRemove.triggered.connect(lambda: self._set_mode(self.actionPointRemove, 'remove'))
 
-        # Connect toolButtonProfilePointToggle's clicked signal to toggle point visibility
-        self.actionEdit.triggered.connect(lambda: self.actionTogglePoint.setEnabled(self.actionEdit.isChecked()))
+        # actionTogglePoint (masked-point display: light gray vs hidden) is
+        # independent of actionEdit (whether clicking arms mask-toggling) --
+        # both enabled/disabled together by toggle_profile_actions based on
+        # whether a profile with points exists, not on each other's checked
+        # state.
         self.actionEdit.setChecked(False)
         self.actionEdit.triggered.connect(lambda: self.profiling.toggle_edit_mode())
         self.actionTogglePoint.triggered.connect(lambda: self.profiling.toggle_point_visibility())
@@ -524,6 +534,15 @@ class Profile:
         list is parallel/indexed the same as every other entry (one element per control point).
     i_points : dict
         Same shape as ``points``, but for the interpolated path.
+    excluded : dict
+        ``{field_name: [bool, ...]}``, parallel to ``points[field_name]`` (or
+        ``i_points[field_name]`` when interpolation is active -- see
+        ``Profiling.plot_profiles``) -- ``True`` marks a point the user has
+        manually excluded via click/drag masking (``Profiling.on_pick``).
+        Persists across redraws/profile switches, unlike the transient
+        plotting-widget state in ``Profiling`` itself, so it survives to be
+        read by anything downstream that only wants the still-viewed points
+        (e.g. a future diffusion misfit fit).
     marker_artists, line_artist : matplotlib artist references
         Transient references to what's currently drawn on the live map canvas; never
         persisted (rebuilt fresh by ``Profiling._draw_profile`` whenever needed).
@@ -538,6 +557,7 @@ class Profile:
 
         self.points = {}
         self.i_points = {}
+        self.excluded = {}
 
         self.marker_artists = []
         self.line_artist = None
@@ -574,8 +594,12 @@ class Profiling:
         # profile line-chart state
         self.fig = None
         self.all_errorbars = []
-        self.selected_points = {}
         self.edit_mode_enabled = False
+        # Persistent view preference (not per-profile -- applies to whichever
+        # profile is active): masked points show in light gray when False
+        # (the default), or are hidden entirely (alpha 0) when True. The
+        # actual exclusion mask itself lives on Profile.excluded, not here.
+        self.hide_masked_points_enabled = False
         self.original_colors = {}
         self.fields_per_subplot = {}
         self.new_plot = False
@@ -1026,7 +1050,6 @@ class Profiling:
 
         self.selected_point_idx = -1
         self.all_errorbars = []
-        self.selected_points = {}
         self.edit_mode_enabled = False
         self.original_colors = {}
         self.profile_name = None
@@ -1228,7 +1251,15 @@ class Profiling:
                                                 capsize=0)
                 self.all_errorbars.append((scatter, barlinecols[0]))
                 self.original_colors[field] = color
-                self.selected_points[field] = [False] * len(points)
+
+                # Reconcile the persistent exclusion mask to this redraw's
+                # point count (radius/control-point changes can add or
+                # remove points) -- previously-excluded points stay
+                # excluded, new points default to included.
+                prev_excluded = profile.excluded.get(field, [])
+                excluded_mask = (prev_excluded + [False] * len(points))[:len(points)]
+                profile.excluded[field] = excluded_mask
+                self._apply_mask_display(scatter, barlinecols[0], excluded_mask, color)
 
             if subplot_idx == num_subplots - 1:
                 ax.set_xlabel('Distance')
@@ -1331,6 +1362,7 @@ class Profiling:
                 'point_type': profile.point_type,
                 'points': profile.points,
                 'i_points': profile.i_points,
+                'excluded': profile.excluded,
             }
             with open(file_name, 'wb') as file:
                 pickle.dump(data, file)
@@ -1353,6 +1385,7 @@ class Profiling:
                 )
                 profile.points = data['points']
                 profile.i_points = data.get('i_points', {})
+                profile.excluded = data.get('excluded', {})
                 self.profiles[sample_id][data['name']] = profile
         self.populate_combobox()
         print("All profiles loaded successfully.")
@@ -1400,83 +1433,83 @@ class Profiling:
     # -------------------------------------------------------------------------
     # Point selection / visibility (operates on artists created by plot_profiles)
     # -------------------------------------------------------------------------
-    def on_pick(self, event):
-        """Handle pick events on the profile plot, toggling point selection."""
-        style = self.main_window.style_data
+    _MASKED_COLOR = (0.75, 0.75, 0.75, 1.0)  # light gray, shown for a masked point unless hidden
 
-        if self.edit_mode_enabled and isinstance(event.artist, PathCollection):
-            picked_scatter = event.artist
-            ind = event.ind[0]
-            field = picked_scatter.get_gid()
-            facecolors = picked_scatter.get_facecolors().copy()
-            original_color = colors.to_rgba(self.original_colors[field])
+    def _apply_mask_display(self, scatter, barlinecol, excluded_mask, original_color):
+        """Recolors an already-drawn scatter/errorbar pair to reflect
+        ``excluded_mask`` (one bool per point, ``True`` = masked): light
+        gray when masked and ``hide_masked_points_enabled`` is False (the
+        default), fully transparent (alpha 0) when masked and it's True,
+        or the field's own color when not masked. Shared by the initial
+        draw (``plot_profiles``) and interactive updates (``on_pick``/
+        ``toggle_point_visibility``) so both stay in sync."""
+        num_points = len(scatter.get_offsets())
+        if num_points == 0:
+            return
+        facecolors = scatter.get_facecolors().copy()
+        if len(facecolors) == 1 and num_points > 1:
+            facecolors = np.tile(facecolors, (num_points, 1))
+        line_colors = barlinecol.get_colors().copy()
+        if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
+            line_colors = np.tile(line_colors, (num_points, 1))
 
-            self.selected_points[field][ind] = not self.selected_points[field][ind]
-
-            num_points = len(picked_scatter.get_offsets())
-            if len(facecolors) == 1 and num_points > 1:
-                facecolors = np.tile(facecolors, (num_points, 1))
-
-            if not self.selected_points[field][ind]:
-                facecolors[ind] = colors.to_rgba(original_color)
+        original_rgba = colors.to_rgba(original_color)
+        hidden_rgba = (original_rgba[0], original_rgba[1], original_rgba[2], 0.0)
+        for idx, excluded in enumerate(excluded_mask):
+            if not excluded:
+                new_color = original_rgba
+            elif self.hide_masked_points_enabled:
+                new_color = hidden_rgba
             else:
-                facecolors[ind] = (0.75, 0.75, 0.75, 1)
+                new_color = self._MASKED_COLOR
+            facecolors[idx] = new_color
+            line_colors[idx] = new_color
 
-            picked_scatter.set_facecolors(facecolors)
-            picked_scatter.set_sizes(np.full(num_points, style.marker_size))
-            self.fig.canvas.draw_idle()
+        scatter.set_facecolors(facecolors)
+        barlinecol.set_colors(line_colors)
+
+    def on_pick(self, event):
+        """Handle pick events on the profile plot: in Edit mode, a click
+        toggles that point's exclusion mask (``Profile.excluded``) and
+        redraws it accordingly (see ``_apply_mask_display``)."""
+        if not self.edit_mode_enabled or not isinstance(event.artist, PathCollection):
+            return
+        profile = self._current_profile()
+        if profile is None:
+            return
+
+        picked_scatter = event.artist
+        ind = event.ind[0]
+        field = picked_scatter.get_gid()
+        _, barlinecol = self.get_scatter_errorbar_by_gid(field)
+        if barlinecol is None:
+            return
+
+        excluded_mask = profile.excluded.setdefault(field, [False] * len(picked_scatter.get_offsets()))
+        excluded_mask[ind] = not excluded_mask[ind]
+
+        self._apply_mask_display(picked_scatter, barlinecol, excluded_mask, self.original_colors[field])
+        self.fig.canvas.draw_idle()
 
     def toggle_edit_mode(self):
-        """Toggle the profile editing mode (used to select/hide points on the chart)."""
+        """Toggle whether clicking a profile point arms mask-toggling (see
+        ``on_pick``) -- purely an input-mode switch, doesn't touch display."""
         self.edit_mode_enabled = not self.edit_mode_enabled
 
-        for field in self.selected_points.keys():
-            scatter, barlinecol = self.get_scatter_errorbar_by_gid(field)
-            if scatter is None:
-                continue
-
-            facecolors = scatter.get_facecolors().copy()
-            num_points = len(scatter.get_offsets())
-            if len(facecolors) == 1 and num_points > 1:
-                facecolors = np.tile(facecolors, (num_points, 1))
-
-            line_colors = barlinecol.get_colors().copy()
-            if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
-                line_colors = np.tile(line_colors, (num_points, 1))
-
-            for idx, selected in enumerate(self.selected_points[field]):
-                if selected:
-                    new_alpha = 0.0 if facecolors[idx][-1] > 0 else 1.0
-                    line_colors[idx][-1] = new_alpha
-                    facecolors[idx][-1] = new_alpha
-            barlinecol.set_colors(line_colors)
-            scatter.set_facecolors(facecolors)
-        if self.fig is not None:
-            self.fig.canvas.draw_idle()
-
     def toggle_point_visibility(self):
-        """Hide or show selected profile points on the plot without removing them."""
-        for field in self.selected_points.keys():
+        """Toggle whether masked points are hidden entirely (alpha 0) or
+        shown in light gray -- a persistent display preference applied to
+        every masked point across every field on the active profile, not
+        just whichever were most recently clicked."""
+        self.hide_masked_points_enabled = not self.hide_masked_points_enabled
+        profile = self._current_profile()
+        if profile is None:
+            return
+        for field, excluded_mask in profile.excluded.items():
             scatter, barlinecol = self.get_scatter_errorbar_by_gid(field)
             if scatter is None:
                 continue
-
-            facecolors = scatter.get_facecolors().copy()
-            num_points = len(scatter.get_offsets())
-            if len(facecolors) == 1 and num_points > 1:
-                facecolors = np.tile(facecolors, (num_points, 1))
-
-            line_colors = barlinecol.get_colors().copy()
-            if len(line_colors) == 1 and len(barlinecol.get_segments()) > 1:
-                line_colors = np.tile(line_colors, (num_points, 1))
-
-            for idx, selected in enumerate(self.selected_points[field]):
-                if selected:
-                    new_alpha = 0.0 if facecolors[idx][-1] > 0 else 1.0
-                    line_colors[idx][-1] = new_alpha
-                    facecolors[idx][-1] = new_alpha
-            barlinecol.set_colors(line_colors)
-            scatter.set_facecolors(facecolors)
+            self._apply_mask_display(scatter, barlinecol, excluded_mask, self.original_colors.get(field, 'gray'))
         if self.fig is not None:
             self.fig.canvas.draw_idle()
 

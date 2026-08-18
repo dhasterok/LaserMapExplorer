@@ -1,0 +1,36 @@
+# carbonate (generic rhombohedral carbonate): (Ca,Mg,Fe,Mn)CO3 --
+# no reference workbook exists for this mineral (see the per-mineral test
+# file's docstring); no CO2/C is normalized on since LA-ICP-MS input has no
+# carbon channel -- cations are recalculated to a single 1-cation
+# rhombohedral site, the standard convention for the calcite-magnesite-
+# siderite-rhodochrosite solid solution.
+#
+# Dolomite (CaMg(CO3)2) and ankerite (CaFe(CO3)2) aren't distinct sites in
+# this port -- their true ordered two-site structure isn't modeled; a
+# dolomite/ankerite analysis instead shows up as a ~50:50 calcite:magnesite
+# (or calcite:siderite) blend in the calcite_ratio end-members below, same
+# "continuous percentage, not a binned species name" convention this
+# package already uses for plagioclase (An-Ab-Or) and olivine (Fo-Fa).
+#
+# No redox: block -- carbonate Fe is conventionally reported as total Fe2+
+# (siderite/ankerite Fe is essentially always ferrous), same as scapolite/
+# titanite's plain, unsplit 'Fe'.
+#
+# 'C' is excluded from the cation-basis target sum (like 'S' for sulfides)
+# in case an analysis does supply a CO2 wt.% column -- it's the anion, not
+# a site cation.
+mineral: carbonate
+formula: (Ca,Mg,Fe,Mn)CO3
+normalization:
+  basis: cation
+  ideal_oxygens: 3
+  ideal_cations: 1
+  excludes: [C]
+sites:
+  M:
+    target: 1.0
+    elements: [Ca, Mg, Fe, Mn, Sr, Ba]
+    priority: [Ca, Mg, Fe, Mn, Sr, Ba]
+end_members:
+  method: carbonate_ratio
+  members: [calcite, magnesite, siderite, rhodochrosite]

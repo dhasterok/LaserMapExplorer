@@ -98,3 +98,6 @@ CLAUDE.md
 
 # LaME files
 *.pkl
+
+# Manual/local-only dev output (see scripts/calibration_manual_check.py)
+scratch/

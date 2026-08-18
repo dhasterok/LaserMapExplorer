@@ -31,6 +31,7 @@ def calculate(
     lod: dict[str, float] | None = None,
     below_lod: set[str] | None = None,
     mwc: MolecularWeightCalculator | None = None,
+    ideal_cations_override: float | None = None,
 ) -> StoichiometryResult:
     """Run the full pipeline for one analysis (one spot/pixel/EPMA point).
 
@@ -39,7 +40,7 @@ def calculate(
     analysis : dict[str, float]
         Element ppm or oxide wt.% -- see :func:`normalize.to_cation_moles`.
     config : MineralConfig
-    input_mode : {'ppm', 'wt_percent'}
+    input_mode : {'ppm', 'wt_percent', 'element_wt_percent'}
     redox_method : str, optional
         Defaults to ``config.redox.default_method``.
     lod_treatment : {'zero', 'half_lod', 'exclude'}
@@ -48,6 +49,11 @@ def calculate(
     mwc : MolecularWeightCalculator, optional
         Reused instance for bulk (many-pixel) calls, to avoid rebuilding
         the atomic-weight table per analysis.
+    ideal_cations_override : float, optional
+        Overrides ``config.ideal_cations`` for this call, for minerals
+        without one fixed formula (e.g. sulfide's generic config, where the
+        normalization target is a per-analysis choice, not a config
+        constant -- see :func:`normalize.normalize_to_cations`).
 
     Returns
     -------
@@ -64,7 +70,10 @@ def calculate(
         apfu = redox_result.apfu
     else:
         redox_result = None
-        apfu = normalize.normalize_to_oxygen(moles, config)
+        apfu = (
+            normalize.normalize_to_cations(moles, config, ideal_cations=ideal_cations_override) if config.basis == "cation"
+            else normalize.normalize_to_oxygen(moles, config)
+        )
 
     site_allocation = sites.allocate_sites(apfu, config)
     end_member_result = endmembers.compute_end_members(site_allocation, config)

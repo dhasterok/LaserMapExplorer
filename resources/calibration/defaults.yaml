@@ -1,0 +1,11 @@
+# Module-level defaults for the calibration pipeline. All are overridable per
+# run (CLI argument or GUI control) -- these are just starting points.
+drift_order: 1
+accuracy_threshold_multiple: 2.0
+split_odd_even: false
+background:
+  window: 10
+  threshold_ratio: 100.0
+  fallback_n_rows: 20
+  search_margin: 5
+  tail_margin: 20

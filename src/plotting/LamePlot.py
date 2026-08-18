@@ -20,7 +20,7 @@ from src.plotting.CustomMplCanvas import MplCanvas, SimpleMplCanvas
 import lame_core.format as fmt
 # Removed deprecated imports: get_hex_color, get_rgb_color - now using ColorManager
 from lame_core.ColorManager import convert_color
-from global_geochemistry.plotting.spider import plot_spider_norm
+from global_geochemistry.geochem.plotting.spider import plot_spider_norm
 from global_geochemistry.plotting.radar import radar_prep, radarplot
 from src.plotting.scalebar import scalebar
 from global_geochemistry.plotting.ternary import ternary

@@ -1,0 +1,32 @@
+# Staurolite: (Fe,Mg,Zn)4Al18Si8O46(OH)2 -- MinPlotX's own model has no site
+# partitioning at all (every cation reported directly, unconditional), so
+# this is a single site, like scapolite/ilmenite. OH assumed present at its
+# ideal amount (2 per formula unit) but not fed into the oxygen-basis
+# normalization. No charge-balance-derived "O on X site"/vacancy
+# substitution either (per user decision, assume the ideal/undisturbed
+# formula). Not MinPlotX's own oxygen-basis normalization (its alternate
+# Si+Al=25.53 cation-basis convention isn't ported either).
+#
+# ideal_oxygens=47 -- not the naive "framework O count minus OH's 2
+# oxygens" (48-2=46, tried first and found to under-fill by ~2%); the
+# correct target is whatever this engine's own O-per-cation accounting
+# (STANDARD_OXIDES ratios: FeO->1, Al2O3->1.5, SiO2->2) gives for the ideal
+# formula: 4*1 + 18*1.5 + 8*2 = 47 for Fe4Al18Si8. See mica.yaml's comment
+# for the general derivation (same mistake, same fix, found across this
+# batch).
+mineral: staurolite
+formula: (Fe,Mg,Zn)4Al18Si8O46(OH)2
+normalization:
+  basis: oxygen
+  ideal_oxygens: 47
+  ideal_cations: 30
+sites:
+  M:
+    target: 30.0
+    elements: [Si, Ti, Al, Fe3, Cr, Fe2, Mn, Mg, Zn, Ca, Na, K]
+    priority: [Si, Ti, Al, Fe3, Cr, Fe2, Mn, Mg, Zn, Ca, Na, K]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 0.035   # MinPlotX default

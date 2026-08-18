@@ -1,0 +1,53 @@
+# Monazite-huttonite solid solution: (REE,Th,U,Ca)(P,Si)O4 -- two sites,
+# neither shared with the other (A = REE+actinide+Ca dodecahedral site, T =
+# P/Si tetrahedral site), so the generic priority_fill site method (the
+# default -- no site_allocation: block needed) already does the right thing:
+# each site's element list is simply taken in full.
+#
+# ideal_oxygens=4 -- not a naive "4 O in PO4" shortcut; verified to hold
+# across the whole solid solution under this engine's own O-per-cation
+# convention (STANDARD_OXIDES ratios; see apatite.yaml/mica.yaml for the
+# general derivation): REE2O3-type ratio 1.5 + P2O5 ratio 2.5 = 4 for pure
+# monazite (1 REE + 1 P), and ThO2 ratio 2 + SiO2 ratio 2 = 4 for pure
+# huttonite (1 Th + 1 Si) -- both end-members land on the same O target, so
+# ideal_oxygens=4 is valid for any REE:Th:Si:P mix in between. ideal_cations=2
+# (A=1 + T=1) for the cation-basis fallback.
+#
+# Only the huttonite substitution (REE3+ + P5+ = Th4+ + Si4+) is modeled.
+# Cheralite (2REE3+ = Ca2+ + Th4+, i.e. Th paired with Ca rather than Si) is
+# a separate, real substitution in natural monazite but isn't disentangled
+# here -- doing so from bulk apfu alone (splitting A-site Th into a
+# Si-paired "huttonite Th" share and a Ca-paired "cheralite Th" share) needs
+# an end-member formula this port has no validated reference for (same
+# "don't invent an unvalidated scheme" rule as epidote.yaml dropping
+# piemontite or pyroxene.yaml dropping the Na-pyroxene branch). Ca/U/Pb/Sr
+# are still tracked as A-site cations (real trace substituents, and Pb is
+# routinely used for monazite U-Th-Pb dating) -- just not resolved into a
+# separate end-member.
+#
+# No redox: block -- monazite has no Fe2+/Fe3+ split to model (Fe isn't a
+# structural cation here at all).
+mineral: monazite
+formula: (REE,Th,U,Ca)(P,Si)O4
+normalization:
+  basis: oxygen
+  ideal_oxygens: 4
+  ideal_cations: 2
+sites:
+  A:
+    target: 1.0
+    elements: [
+      La, Ce, Pr, Nd, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Y, REE,
+      Th, U, Ca, Pb, Sr,
+    ]
+    priority: [
+      La, Ce, Pr, Nd, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Y, REE,
+      Th, U, Ca, Pb, Sr,
+    ]
+  T:
+    target: 1.0
+    elements: [P, Si]
+    priority: [P, Si]
+end_members:
+  method: monazite_huttonite_ratio
+  members: [monazite, huttonite]

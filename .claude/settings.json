@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m pytest tests/test_calibration_background.py tests/test_calibration_rawfile.py tests/test_calibration_drift.py -q)",
+      "Bash(python3 -m py_compile src/stoichiometry/sites.py src/stoichiometry/config.py)",
+      "Bash(python3 -m pytest tests/test_calibration_pipeline.py -q)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_plagioclase_workbook_reference.py -v)",
+      "Bash(python3 -m pytest tests/test_calibration_*.py -q)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_backend.py tests/test_stoichiometry_config.py tests/test_stoichiometry_garnet_workbook_reference.py tests/test_stoichiometry_olivine_workbook_reference.py tests/test_stoichiometry_plagioclase_workbook_reference.py -q)",
+      "Bash(python3 -m pytest tests/test_calibration_standards.py tests/test_calibration_pipeline.py -q)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -m pytest tests/test_calibration_io_export.py -q)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_pyroxene_workbook_reference.py -v)",
+      "Bash(python3 -m pytest tests/test_stoichiometry*.py -v)",
+      "Bash(python3 -m pytest tests/ -q)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_gui.py -q)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_*.py -q)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3)",
+      "Bash(time python3 scripts/calibration_manual_check.py)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -c ' *)",
+      "Bash(python3)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_diagnostics.py tests/test_calibration_gui.py -q)",
+      "Bash(cat -A /dev/null; ls -la /Users/dhasterok/Documents/GitHub/MinPlotX/Functions/mineral_functions/MinplotX_Mineral_Fun/ | grep -iE 'serpentine|staurolite|talc|titanite')",
+      "Read(//dev/**)",
+      "Bash(python3 -m pytest tests/test_stoichiometry*.py -q)",
+      "Bash(python3 -)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_chloritoid.py tests/test_stoichiometry_lawsonite.py -v)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_background.py -q)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_drift.py -q)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_serpentine.py tests/test_stoichiometry_talc.py -v)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_background.py::test_assemble_occurrences_uses_included_region_for_statistics -q)",
+      "Bash(python3 -m py_compile src/stoichiometry/normalize.py)",
+      "Bash(python3 -m py_compile src/stoichiometry/config.py)",
+      "Bash(python3 -m py_compile src/stoichiometry/pipeline.py)",
+      "Bash(python3 -m pytest tests/test_stoichiometry_sulfide.py -v)",
+      "Bash(QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_calibration_background.py -k \"order0\" -q)",
+      "Bash(find / -iname \"*CustomWidgets*\" -path \"*lame_core*\")",
+      "Bash(find / -iname \"*lame*core*\" -type d)",
+      "Bash(python3 -c \"from lame_core.CustomWidgets import SpinComboBox; print\\('ok'\\)\")"
+    ]
+  }
+}

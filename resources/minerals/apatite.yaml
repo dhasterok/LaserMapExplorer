@@ -1,0 +1,31 @@
+# Apatite: Ca5(PO4)3(F,Cl,OH) -- MinPlotX's own model has no T/M site split
+# (every cation reported directly), so this is a single site, like
+# scapolite/ilmenite. No Fe-redox in MinPlotX (Fe is a single total, no
+# Fe2+/Fe3+ split) -- no redox: block, 'Fe' used as a plain cation.
+#
+# F/Cl/OH (the anion site) aren't tracked at all -- per user decision, OH is
+# assumed present at its ideal amount rather than estimated, and since this
+# tool's real inputs (LA-ICP-MS/EPMA) can't measure F/Cl/OH anyway, tracking
+# them wouldn't be populated in practice.
+#
+# ideal_oxygens=12.5 -- not the naive "framework O count minus OH's 1
+# oxygen" (13-1=12, tried first and found to under-fill by ~4%); the
+# correct target is whatever this engine's own O-per-cation accounting
+# (STANDARD_OXIDES ratios: CaO->1, P2O5->2.5) gives for the ideal formula:
+# 5*1 + 3*2.5 = 12.5 for Ca5(PO4)3. Verified by hand: reproduces exactly
+# Ca=5, P=3 for a stoichiometric composition (see mica.yaml's comment for
+# the general derivation -- this and staurolite had the identical mistake
+# in this batch, same fix). Also NOT MinPlotX's own 25/26 target, which is
+# a different, larger reference basis specific to its own algorithm (folds
+# in S/C-substituent accounting this port doesn't replicate).
+mineral: apatite
+formula: Ca5(PO4)3(F,Cl,OH)
+normalization:
+  basis: oxygen
+  ideal_oxygens: 12.5
+  ideal_cations: 8
+sites:
+  M:
+    target: 8.0
+    elements: [P, Si, S, Ti, Al, Fe, Mn, Mg, Ca, Ba, Sr, Na, K, La, Ce, REE]
+    priority: [P, Si, S, Ti, Al, Fe, Mn, Mg, Ca, Ba, Sr, Na, K, La, Ce, REE]

@@ -1,0 +1,37 @@
+# Chloritoid: (Fe,Mg,Mn)2(Al,Fe3+)4O2(SiO4)2(OH)4 (tetrahedral T, two
+# octahedral layers L2/L1)
+#
+# Ports chloritoid_Fe3unknown.m (cation-basis normalization + the same
+# oxygen-deficiency charge-balance loop already implemented as droop_1987
+# for garnet -- reused unchanged). MinPlotX hard-truncates Si if it exceeds
+# T's target (no spillover recipient, excess simply discarded); per this
+# codebase's "never silently discard" rule (see sites.py's module
+# docstring), Si is left uncapped here instead (no site claims it, so the
+# existing generic engine already does the right thing without any
+# mineral-specific code).
+mineral: chloritoid
+formula: (Fe,Mg,Mn)2(Al,Fe3+)4O2(SiO4)2(OH)4
+normalization:
+  basis: cation
+  ideal_oxygens: 12
+  ideal_cations: 8
+sites:
+  T:
+    target: 2.0
+    elements: [Si]
+    priority: [Si]
+  L2:
+    target: 3.0
+    elements: [Al]
+    priority: [Al]
+  L1:
+    target: 3.0
+    elements: [Al, Ti, Fe3, Fe2, Mn, Mg, Ca, Na]
+    priority: [Al, Ti, Fe3, Fe2, Mn, Mg, Ca, Na]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: xmg_ratio
+  members: [mg_number]

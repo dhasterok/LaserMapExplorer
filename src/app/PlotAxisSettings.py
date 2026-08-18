@@ -131,7 +131,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','Special']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','Special','Stoichiometry']
     ),
     "correlation": PlotSettings(
         axes={
@@ -158,8 +158,8 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(True, True, True, 3, True,  True),
             "c": AxisControls(True, True, True, 3, True,  True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster score','Special'],
-        cfield_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster score','Special','Stoichiometry'],
+        cfield_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI','Stoichiometry']
     ),
     "heatmap": PlotSettings(
         axes={
@@ -168,7 +168,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(True, True, True, 3, True,  True),
             "c": AxisControls(False, True, True, 3, False,  False),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster score','Special']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster score','Special','Stoichiometry']
     ),
     "ternary map": PlotSettings(
         axes={
@@ -177,7 +177,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(True, False, True, None, False, True),
             "c": AxisControls(False, False, False, 3, False, False),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Special']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Special','Stoichiometry']
     ),
     "isochron": PlotSettings(
         # x/y are the two ratio fields chosen in the Dating tab (P-T-t
@@ -210,7 +210,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, False, None, True, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Special'],
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Special','Stoichiometry'],
         cfield_type=['Cluster','ROI']
     ),
     "variance": PlotSettings(
@@ -299,7 +299,7 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI','Stoichiometry']
     ),
     "polygon": PlotSettings(
         axes={
@@ -308,6 +308,6 @@ axis_settings_dict: Dict[str, PlotSettings] = {
             "z": AxisControls(False, False, False, None, False, False),
             "c": AxisControls(True, False, True, 3, False, True),
         },
-        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI']
+        field_type=['Analyte','Ratio','Calculated','Diffusion model','PCA score','Cluster','Cluster score','Special','ROI','Stoichiometry']
     ),
 }

@@ -641,8 +641,7 @@ class MainActions(QObject):
 
         self.Stoichiometry = CustomAction(
             text="Stoichiometry",
-            light_icon_unchecked="icon-calculator-64.svg",
-            dark_icon_unchecked="icon-calculator-dark-64.svg",
+            light_icon_unchecked="icon-silicate-64.svg",
             parent=self.ui,
         )
         self.Stoichiometry.setCheckable(True)

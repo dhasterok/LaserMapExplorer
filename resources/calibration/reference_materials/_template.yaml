@@ -1,0 +1,316 @@
+# Template for adding a new reference material. Copy this file to
+# <STANDARD_NAME>.yaml (matching the filename label used by the raw data files,
+# e.g. 'NIST612.yaml' for files named 'NIST612 - N.csv'), fill in 'standard' and
+# the analyte value/uncertainty/uncertainty_type/source fields you have data for.
+# Analytes with value: null are treated as legitimately unpopulated -- the
+# calibration pipeline skips and warns on them rather than crashing, so you only
+# need to fill in the analytes this standard actually certifies.
+# Files starting with '_' (like this one) are skipped when loading the library.
+#
+# Certified isotope RATIOS (for mass-bias/radiogenic-ratio and cross-element
+# dating-ratio calibration -- distinct from the elemental concentrations
+# below) are entered under an `isotope_ratios:` block, e.g.:
+#   isotope_ratios:
+#     Pb206/Pb204:
+#       numerator_element: Pb
+#       numerator_mass: 206
+#       denominator_element: Pb
+#       denominator_mass: 204
+#       value: 17.0
+#       uncertainty: 0.01
+#       uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM | 2SE, or omit if unknown
+#       source: "TODO"
+# Easiest to add via the "Edit reference standards" GUI dialog's Isotope
+# ratios table (Add row / fill in / Save) rather than hand-editing YAML.
+standard: STANDARD_NAME
+description: "Description of this reference material"
+source: "TODO: citation/source for the values below"
+analytes:
+  Li7:
+    element: Li
+    mass: 7
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Na23:
+    element: Na
+    mass: 23
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Mg24:
+    element: Mg
+    mass: 24
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Al27:
+    element: Al
+    mass: 27
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Si29:
+    element: Si
+    mass: 29
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  P31:
+    element: P
+    mass: 31
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Ca43:
+    element: Ca
+    mass: 43
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Ti49:
+    element: Ti
+    mass: 49
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  V51:
+    element: V
+    mass: 51
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Cr53:
+    element: Cr
+    mass: 53
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Mn55:
+    element: Mn
+    mass: 55
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Fe57:
+    element: Fe
+    mass: 57
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Sr88:
+    element: Sr
+    mass: 88
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Y89:
+    element: Y
+    mass: 89
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Zr90:
+    element: Zr
+    mass: 90
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  La139:
+    element: La
+    mass: 139
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Ce140:
+    element: Ce
+    mass: 140
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Pr141:
+    element: Pr
+    mass: 141
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Nd146:
+    element: Nd
+    mass: 146
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Sm147:
+    element: Sm
+    mass: 147
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Eu153:
+    element: Eu
+    mass: 153
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Gd157:
+    element: Gd
+    mass: 157
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Tb159:
+    element: Tb
+    mass: 159
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Dy163:
+    element: Dy
+    mass: 163
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Ho165:
+    element: Ho
+    mass: 165
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Er166:
+    element: Er
+    mass: 166
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Tm169:
+    element: Tm
+    mass: 169
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Yb172:
+    element: Yb
+    mass: 172
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Lu175:
+    element: Lu
+    mass: 175
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Hf178:
+    element: Hf
+    mass: 178
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Pb204:
+    element: Pb
+    mass: 204
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Pb206:
+    element: Pb
+    mass: 206
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Pb207:
+    element: Pb
+    mass: 207
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Pb208:
+    element: Pb
+    mass: 208
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  Th232:
+    element: Th
+    mass: 232
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"
+  U238:
+    element: U
+    mass: 238
+    value: null            # ppm -- TODO, user-populated
+    uncertainty: null
+    uncertainty_type: "1SD"   # one of 1SD | 2SD | 95CI | SEM
+    units: ppm
+    source: "TODO"

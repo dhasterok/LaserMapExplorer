@@ -1,0 +1,925 @@
+standard: NIST610
+description: 'NISTSRM610: GeoReM preferred Values'
+source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead, J.D.\
+  \ and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses of NIST\
+  \ Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards Newsletter,\
+  \ 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x (6/ 2011)"
+analytes:
+  H1:
+    element: H
+    mass: 1
+    value: 15.0
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  C12:
+    element: C
+    mass: 12
+    value: 0.5458230609300264
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211, converted from CO2 (0.0002% m/m)"
+  Na23:
+    element: Na
+    mass: 23
+    value: 99408.90099425413
+    uncertainty: 2225.5724103191224
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211, converted from Na2O (13.4% m/m)"
+  Al27:
+    element: Al
+    mass: 27
+    value: 10320.38862494751
+    uncertainty: 211.7002794861028
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211, converted from Al2O3 (1.95% m/m)"
+  Si29:
+    element: Si
+    mass: 29
+    value: 325802.13966044376
+    uncertainty: 2337.1746030160957
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211, converted from SiO2 (69.7% m/m)"
+  Ca43:
+    element: Ca
+    mass: 43
+    value: 81474.74740269699
+    uncertainty: 1429.381533380649
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211, converted from CaO (11.4% m/m)"
+  Li7:
+    element: Li
+    mass: 7
+    value: 468.0
+    uncertainty: 24.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Be9:
+    element: Be
+    mass: 9
+    value: 476.0
+    uncertainty: 31.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  B11:
+    element: B
+    mass: 11
+    value: 350.0
+    uncertainty: 56.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  F19:
+    element: F
+    mass: 19
+    value: 304.0
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Mg24:
+    element: Mg
+    mass: 24
+    value: 432.0
+    uncertainty: 29.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  P31:
+    element: P
+    mass: 31
+    value: 413.0
+    uncertainty: 46.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  S32:
+    element: S
+    mass: 32
+    value: 575.0
+    uncertainty: 32.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Cl35:
+    element: Cl
+    mass: 35
+    value: 274.0
+    uncertainty: 67.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  K39:
+    element: K
+    mass: 39
+    value: 464.0
+    uncertainty: 21.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Sc45:
+    element: Sc
+    mass: 45
+    value: 455.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ti49:
+    element: Ti
+    mass: 49
+    value: 452.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  V51:
+    element: V
+    mass: 51
+    value: 450.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Cr53:
+    element: Cr
+    mass: 53
+    value: 408.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Mn55:
+    element: Mn
+    mass: 55
+    value: 444.0
+    uncertainty: 13.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Fe57:
+    element: Fe
+    mass: 57
+    value: 458.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Co59:
+    element: Co
+    mass: 59
+    value: 410.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ni58:
+    element: Ni
+    mass: 58
+    value: 458.7
+    uncertainty: 4.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Cu63:
+    element: Cu
+    mass: 63
+    value: 441.0
+    uncertainty: 15.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Zn64:
+    element: Zn
+    mass: 64
+    value: 460.0
+    uncertainty: 18.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ga69:
+    element: Ga
+    mass: 69
+    value: 433.0
+    uncertainty: 13.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ge74:
+    element: Ge
+    mass: 74
+    value: 447.0
+    uncertainty: 78.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  As75:
+    element: As
+    mass: 75
+    value: 325.0
+    uncertainty: 18.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Se80:
+    element: Se
+    mass: 80
+    value: 138.0
+    uncertainty: 42.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Br79:
+    element: Br
+    mass: 79
+    value: 93.0
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Rb85:
+    element: Rb
+    mass: 85
+    value: 425.7
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Sr88:
+    element: Sr
+    mass: 88
+    value: 515.5
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Y89:
+    element: Y
+    mass: 89
+    value: 462.0
+    uncertainty: 11.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Zr90:
+    element: Zr
+    mass: 90
+    value: 448.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Nb93:
+    element: Nb
+    mass: 93
+    value: 465.0
+    uncertainty: 34.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Mo98:
+    element: Mo
+    mass: 98
+    value: 417.0
+    uncertainty: 21.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Rh103:
+    element: Rh
+    mass: 103
+    value: 1.29
+    uncertainty: 0.07
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Pd106:
+    element: Pd
+    mass: 106
+    value: 1.21
+    uncertainty: 0.44
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ag107:
+    element: Ag
+    mass: 107
+    value: 251.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Cd114:
+    element: Cd
+    mass: 114
+    value: 270.0
+    uncertainty: 16.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  In115:
+    element: In
+    mass: 115
+    value: 434.0
+    uncertainty: 19.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Sn120:
+    element: Sn
+    mass: 120
+    value: 430.0
+    uncertainty: 29.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Sb121:
+    element: Sb
+    mass: 121
+    value: 396.0
+    uncertainty: 19.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Te130:
+    element: Te
+    mass: 130
+    value: 302.0
+    uncertainty: null
+    uncertainty_type: 1SD
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Cs133:
+    element: Cs
+    mass: 133
+    value: 366.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ba138:
+    element: Ba
+    mass: 138
+    value: 452.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  La139:
+    element: La
+    mass: 139
+    value: 440.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ce140:
+    element: Ce
+    mass: 140
+    value: 453.0
+    uncertainty: 8.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Pr141:
+    element: Pr
+    mass: 141
+    value: 448.0
+    uncertainty: 7.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Nd146:
+    element: Nd
+    mass: 146
+    value: 430.0
+    uncertainty: 8.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Sm147:
+    element: Sm
+    mass: 147
+    value: 453.0
+    uncertainty: 11.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Eu153:
+    element: Eu
+    mass: 153
+    value: 447.0
+    uncertainty: 12.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Gd157:
+    element: Gd
+    mass: 157
+    value: 449.0
+    uncertainty: 12.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Tb159:
+    element: Tb
+    mass: 159
+    value: 437.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Dy163:
+    element: Dy
+    mass: 163
+    value: 437.0
+    uncertainty: 11.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ho165:
+    element: Ho
+    mass: 165
+    value: 449.0
+    uncertainty: 12.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Er166:
+    element: Er
+    mass: 166
+    value: 455.0
+    uncertainty: 14.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Tm169:
+    element: Tm
+    mass: 169
+    value: 435.0
+    uncertainty: 10.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Yb172:
+    element: Yb
+    mass: 172
+    value: 450.0
+    uncertainty: 9.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Lu175:
+    element: Lu
+    mass: 175
+    value: 439.0
+    uncertainty: 8.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Hf178:
+    element: Hf
+    mass: 178
+    value: 435.0
+    uncertainty: 12.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Ta181:
+    element: Ta
+    mass: 181
+    value: 446.0
+    uncertainty: 33.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  W184:
+    element: W
+    mass: 184
+    value: 444.0
+    uncertainty: 29.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Re187:
+    element: Re
+    mass: 187
+    value: 49.9
+    uncertainty: 3.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Pt195:
+    element: Pt
+    mass: 195
+    value: 3.12
+    uncertainty: 0.08
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Au197:
+    element: Au
+    mass: 197
+    value: 23.6
+    uncertainty: 1.7
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Tl205:
+    element: Tl
+    mass: 205
+    value: 59.6
+    uncertainty: 2.8
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Pb208:
+    element: Pb
+    mass: 208
+    value: 426.0
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Bi209:
+    element: Bi
+    mass: 209
+    value: 384.0
+    uncertainty: 26.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  Th232:
+    element: Th
+    mass: 232
+    value: 457.2
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+  U238:
+    element: U
+    mass: 238
+    value: 461.5
+    uncertainty: 1.0
+    uncertainty_type: 95CI
+    units: ppm
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), GeoReM 5211"
+isotope_ratios:
+  Pb206/Pb204:
+    numerator_element: Pb
+    numerator_mass: 206
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 17.047
+    uncertainty: 0.0018
+    uncertainty_type: 2SD
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), Woodhead & Hergt, 2007"
+  Pb207/Pb204:
+    numerator_element: Pb
+    numerator_mass: 207
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 15.509
+    uncertainty: 0.001
+    uncertainty_type: 2SD
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), Woodhead & Hergt, 2007"
+  Pb208/Pb204:
+    numerator_element: Pb
+    numerator_mass: 208
+    denominator_element: Pb
+    denominator_mass: 204
+    value: 36.975
+    uncertainty: 0.0026
+    uncertainty_type: 2SD
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), Woodhead & Hergt, 2007"
+  Sr87/Sr86:
+    numerator_element: Sr
+    numerator_mass: 87
+    denominator_element: Sr
+    denominator_mass: 86
+    value: 0.709699
+    uncertainty: 1.8e-05
+    uncertainty_type: 2SD
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), Woodhead & Hergt, 2007"
+  Nd143/Nd144:
+    numerator_element: Nd
+    numerator_mass: 143
+    denominator_element: Nd
+    denominator_mass: 144
+    value: 0.511927
+    uncertainty: 4.0e-06
+    uncertainty_type: 2SE
+    source: "GEOREM: Jochum et al 2011 (Max-Planck-Institut fuer Chemie); Woodhead,\
+      \ J.D. and Hergt, J.M. (2001), Strontium, Neodymium and Lead Isotope Analyses\
+      \ of NIST Glass Certified Reference Materials: SRM 610, 612, 614. Geostandards\
+      \ Newsletter, 25: 261-266.\_https://doi.org/10.1111/j.1751-908X.2001.tb00601.x\
+      \ (6/ 2011), Woodhead & Hergt, 2007"

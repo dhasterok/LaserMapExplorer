@@ -1,0 +1,29 @@
+# Serpentine: Mg3Si2O5(OH)4 (double formula unit basis: tetrahedral T, octahedral M)
+#
+# Fe3+ is split between T and M by a *fixed* ratio (tetra_fe3_ratio), not by
+# remaining site space -- see sites.py's _allocate_tetra_fe3_ratio
+# docstring. No end-member scheme in MinPlotX for this mineral (no
+# end_members: block).
+mineral: serpentine
+formula: Mg3Si2O5(OH)4
+normalization:
+  basis: oxygen
+  ideal_oxygens: 14
+  ideal_cations: 10
+site_allocation:
+  method: tetra_fe3_ratio
+  tetra_fe3_ratio: 0.0   # conservative default: no Fe3+ routed to T unless configured otherwise
+sites:
+  T:
+    target: 4.0
+    elements: [Si, Fe3, Al]
+    priority: [Si, Fe3, Al]
+  M:
+    target: 6.0
+    elements: [Al, Fe3, Ti, Cr, Ni, Fe2, Mn, Mg, Ca]
+    priority: [Al, Fe3, Ti, Cr, Ni, Fe2, Mn, Mg, Ca]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 0.0   # conservative default: serpentine Fe is typically ferrous-dominant

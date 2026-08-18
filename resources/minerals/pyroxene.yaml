@@ -1,0 +1,35 @@
+# Pyroxene (ortho/calcic): M2 M1 T2 O6 (tetrahedral T, octahedral M1, M2)
+mineral: pyroxene
+formula: M2M1T2O6
+normalization:
+  basis: cation
+  ideal_oxygens: 6
+  ideal_cations: 4
+site_allocation:
+  # Mg/Fe2+ are split between M1 and M2 by the bulk Mg/(Mg+Fe2) ratio, not
+  # simple priority-fill capping -- see sites.py's _allocate_pyroxene_quad
+  # docstring. The elements/priority lists below are still used for QC/
+  # validation and reporting; the actual apportionment logic is dedicated.
+  method: pyroxene_quad
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al, Fe3]
+    priority: [Si, Al, Fe3]
+  M1:
+    target: 1.0
+    elements: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+    priority: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+  M2:
+    target: 1.0
+    elements: [Mg, Fe2, Ca, Na, K]
+    priority: [Mg, Fe2, Ca, Na, K]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  # Wo/En/Fs quadrilateral only -- the Na-endmember (jadeite/aegirine/
+  # kosmochlor) branch isn't implemented, see endmembers.py's docstring.
+  method: pyroxene_quad
+  members: [wollastonite, enstatite, ferrosilite]

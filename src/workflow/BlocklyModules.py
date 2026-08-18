@@ -22,7 +22,7 @@ import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from global_geochemistry.plotting.ternary import ternary
-from global_geochemistry.plotting.spider import plot_spider_norm
+from global_geochemistry.geochem.plotting.spider import plot_spider_norm
 from src.plotting.scalebar import scalebar
 from src.app.LameIO import LameIO
 import src.common.csvdict as csvdict

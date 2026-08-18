@@ -1,0 +1,34 @@
+# Lawsonite: CaAl2Si2O7(OH)2*H2O (tetrahedral T, octahedral M, large-cation A)
+#
+# Fits the generic engine exactly as-is: Al spills T->M (capped-then-
+# spillover); Mg->Fe2+->Mn2+ are filled into M *in that priority order*,
+# each capped by whatever M-space remains -- MinPlotX's own sequential
+# capped-fill, which is exactly what a priority list already expresses, not
+# equipartition. No mineral-specific site code needed.
+mineral: lawsonite
+formula: CaAl2Si2O7(OH)2*H2O
+normalization:
+  basis: oxygen
+  ideal_oxygens: 8
+  ideal_cations: 5
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  M:
+    target: 2.0
+    elements: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+    priority: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn]
+  A:
+    target: 1.0
+    elements: [Mg, Fe2, Mn, Ca, Sr, Na, K]
+    priority: [Mg, Fe2, Mn, Ca, Sr, Na, K]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 0.0   # conservative default (all Fe2+); lawsonite Fe3+ is typically minor
+end_members:
+  method: lawsonite_ratio
+  members: [lawsonite]

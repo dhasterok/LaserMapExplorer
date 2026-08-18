@@ -1,0 +1,34 @@
+# Sapphirine: granulite-facies Mg-Al silicate, idealized (Mg,Fe)3.5Al9Si1.5O20
+# (the common "7:9:3" polytype) through (Mg,Fe)4Al8Si2O20 (the "2:2:1"
+# polytype) -- both sum to 14 cations / 20 oxygens, so that basis is robust
+# across polytypes even though this port can't distinguish which polytype
+# an analysis belongs to (that needs structural/XRD data, out of scope; no
+# reference workbook exists for this mineral -- see the per-mineral test
+# file's docstring).
+#
+# Two generic sites (tetrahedral T, octahedral M), reusing the same
+# priority-fill Al-spillover pattern as garnet/olivine: Si fills T first
+# (capped at T's target, since Al is shared with M), remaining Al plus the
+# other trivalent/divalent cations fill M.
+mineral: sapphirine
+formula: (Mg,Fe)3.5Al9Si1.5O20
+normalization:
+  basis: cation
+  ideal_oxygens: 20
+  ideal_cations: 14
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  M:
+    target: 12.0
+    elements: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn, Zn]
+    priority: [Al, Ti, Cr, Fe3, Mg, Fe2, Mn, Zn]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: xmg_ratio
+  members: [mg_number]

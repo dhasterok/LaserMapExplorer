@@ -490,21 +490,19 @@ class FilterTab(QWidget):
 
         self.action_add_to_workflow = CustomAction(
             text="Add to workflow",
-            light_icon_unchecked="icon-workflow-design-64.svg",
+            light_icon_unchecked="icon-camera-64.svg",
             parent=self )
-        self.action_add_to_workflow.setToolTip("Record the current filter settings for the Workflow report")
+        self.action_add_to_workflow.setToolTip("Add current filter settings to the Workflow")
 
         self.action_add_roi = CustomAction(
             text="Add ROI",
-            light_icon_unchecked="icon-polygon-select-64.svg",
-            dark_icon_unchecked="icon-polygon-select-dark-64.svg",
+            light_icon_unchecked="icon-roi-add-64.svg",
             parent=self )
         self.action_add_roi.setToolTip("Commit the current filter definition as a new region of interest")
 
         self.action_delete_roi = CustomAction(
             text="Delete ROI",
-            light_icon_unchecked="icon-delete-64.svg",
-            dark_icon_unchecked="icon-delete-dark-64.svg",
+            light_icon_unchecked="icon-roi-remove-64.svg",
             parent=self )
         self.action_delete_roi.setToolTip("Delete the selected region of interest")
 

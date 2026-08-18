@@ -1222,7 +1222,7 @@ class ControlDock(CustomDockWidget):
                         return self.comboBoxFieldY.currentText()
                     case 'z':
                         return self.comboBoxFieldZ.currentText()
-            case 'field map' | 'gradient map' | 'cluster map' | 'cluster score map' | 'dimension score map':
+            case 'field map' | 'gradient map' | 'cluster map' | 'cluster score map' | 'dimension score map' | 'roi map':
                 # X/Y are always the coordinate columns Xc/Yc for these spatial maps --
                 # return them directly rather than reading comboBoxFieldX/Y. AppData's
                 # field_dict deliberately excludes 'coordinate' fields (they aren't

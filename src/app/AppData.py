@@ -228,6 +228,8 @@ class AppData(QObject):
     clusterSeedChanged = pyqtSignal(int)
     clusterExponentChanged = pyqtSignal(float)
     clusterDistanceChanged = pyqtSignal(str)
+    clusterMinSizeChanged = pyqtSignal(int)
+    clusterMinSamplesChanged = pyqtSignal(int)
     selectedClustersChanged = pyqtSignal(list)
     clusterPreconditionChanged = pyqtSignal(bool)
     numBasisChanged = pyqtSignal(int)
@@ -430,9 +432,14 @@ class AppData(QObject):
                 'seed':23,
                 'selected_clusters':[]
             },
+            'HDBSCAN':{
+                'min_cluster_size':25,
+                'min_samples':10,
+                'selected_clusters':[],
+            },
         }
         self._max_clusters = 10
-        self._num_clusters = self.cluster_dict[self._cluster_method]['n_clusters']
+        self._num_clusters = self.cluster_dict[self._cluster_method].get('n_clusters', 0)
         if 'distance' in self.cluster_dict[self._cluster_method]:
             self._cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         else:
@@ -441,7 +448,9 @@ class AppData(QObject):
             self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
             self._cluster_exponent = 0
-        self._cluster_seed = self.cluster_dict[self._cluster_method]['seed']
+        self._cluster_min_size = self.cluster_dict[self._cluster_method].get('min_cluster_size', 25)
+        self._cluster_min_samples = self.cluster_dict[self._cluster_method].get('min_samples', 10)
+        self._cluster_seed = self.cluster_dict[self._cluster_method].get('seed', 23)
         self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
         self._dim_red_precondition = False
         self._num_basis_for_precondition = 0
@@ -1201,6 +1210,38 @@ class AppData(QObject):
         self.clusterDistanceChanged.emit(new_value)
 
     @property
+    def cluster_min_size(self):
+        """int : HDBSCAN's minimum cluster size (smallest number of pixels that can form its own cluster)."""
+        return self._cluster_min_size
+
+    @cluster_min_size.setter
+    def cluster_min_size(self, new_value):
+        if new_value == self._cluster_min_size:
+            return
+
+        self._cluster_min_size = new_value
+        # update cluster dict with new min cluster size
+        self.cluster_dict[self._cluster_method]['min_cluster_size'] = self._cluster_min_size
+        self.update_cluster_flag = True
+        self.clusterMinSizeChanged.emit(new_value)
+
+    @property
+    def cluster_min_samples(self):
+        """int : HDBSCAN's min_samples (neighborhood size used to judge how dense a point's neighborhood is)."""
+        return self._cluster_min_samples
+
+    @cluster_min_samples.setter
+    def cluster_min_samples(self, new_value):
+        if new_value == self._cluster_min_samples:
+            return
+
+        self._cluster_min_samples = new_value
+        # update cluster dict with new min samples
+        self.cluster_dict[self._cluster_method]['min_samples'] = self._cluster_min_samples
+        self.update_cluster_flag = True
+        self.clusterMinSamplesChanged.emit(new_value)
+
+    @property
     def selected_clusters(self):
         """list : The list of selected clusters for masking."""
         return self._selected_clusters
@@ -1549,6 +1590,10 @@ class AppData(QObject):
             self.cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         if 'exponent' in self.cluster_dict[self._cluster_method]:
             self.cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
+        if 'min_cluster_size' in self.cluster_dict[self._cluster_method]:
+            self.cluster_min_size = self.cluster_dict[self._cluster_method]['min_cluster_size']
+        if 'min_samples' in self.cluster_dict[self._cluster_method]:
+            self.cluster_min_samples = self.cluster_dict[self._cluster_method]['min_samples']
 
     def generate_random_seed(self):
         """Generates a random seed for clustering.

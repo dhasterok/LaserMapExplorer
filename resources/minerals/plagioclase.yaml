@@ -1,0 +1,23 @@
+# Plagioclase feldspar: (Ca,Na,K)(Al,Si)4O8 (tetrahedral T, A-site)
+mineral: plagioclase
+formula: XT4O8
+normalization:
+  basis: cation
+  ideal_oxygens: 8
+  ideal_cations: 5
+sites:
+  T:
+    target: 4.0
+    elements: [Si, Al, Ti, Fe3]
+    priority: [Si, Al, Ti, Fe3]     # fill order when site is under-occupied
+  A:
+    target: 1.0
+    elements: [Ca, Na, K, Mg, Fe2, Mn, Ba, Sr]
+    priority: [Ca, Na, K, Mg, Fe2, Mn, Ba, Sr]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: feldspar_ratio
+  members: [anorthite, albite, orthoclase]

@@ -1,0 +1,50 @@
+# Allanite: CaCe(Fe2+,Fe3+)(Al,Fe3+)2(SiO4)(Si2O7)O(OH) -- a REE-rich,
+# epidote-group mineral (same T/M/A crystal-chemical shape as epidote,
+# reusing the generic 'equipart' site method -- see sites.py's
+# _allocate_equipart docstring). Site targets (T=3, M=3, A=2) match
+# epidote's, since allanite is structurally the same epidote-group formula
+# with REE+Fe2+ substituting into the A/M sites.
+#
+# OH assumed present at its ideal amount (1 per formula unit) but excluded
+# from the oxygen-basis normalization entirely -- ideal_oxygens=12.5 is the
+# anhydrous framework total (matching epidote's own anhydrous target; see
+# chlorite.yaml's comment for why an OH-inclusive target would silently
+# inflate apfu here).
+#
+# Mn3+ isn't modeled (all Mn is Mn2+, consistent with every fixed_ratio-only
+# mineral in this batch). No end-members -- MinPlotX computes none for
+# allanite either.
+mineral: allanite
+formula: CaCe(Fe2+,Fe3+)(Al,Fe3+)2(SiO4)(Si2O7)O(OH)
+normalization:
+  basis: oxygen
+  ideal_oxygens: 12.5
+  ideal_cations: 8
+site_allocation:
+  method: equipart
+sites:
+  T:
+    target: 3.0
+    elements: [Si, P, Zr, Al]
+    priority: [Si, P, Zr, Al]
+  M:
+    target: 3.0
+    elements: [Al, Ti, Cr, Fe3, Fe2, Mn, Mg]
+    priority: [Al, Ti, Cr, Fe3, Fe2, Mn, Mg]
+  A:
+    target: 2.0
+    elements: [
+      Fe2, Mn, Mg, Ca, Sr, Na, K,
+      La, Ce, Pr, Nd, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Y,
+      Pb, U, Th,
+    ]
+    priority: [
+      Fe2, Mn, Mg, Ca, Sr, Na, K,
+      La, Ce, Pr, Nd, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Y,
+      Pb, U, Th,
+    ]
+redox:
+  elements: [Fe]
+  methods: [fixed_ratio]
+  default_method: fixed_ratio
+  fixed_ratio: 1.0   # MinPlotX default: assume all Fe is Fe3+ unless a ratio is supplied

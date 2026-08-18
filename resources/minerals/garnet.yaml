@@ -2,7 +2,7 @@
 mineral: garnet
 formula: X3Y2Z3O12
 normalization:
-  basis: oxygen
+  basis: cation
   ideal_oxygens: 12
   ideal_cations: 8
 sites:
@@ -14,6 +14,12 @@ sites:
     target: 2.0
     elements: [Al, Cr, Fe3, Ti]
     priority: [Al, Cr, Fe3, Ti]
+    # MinPlotX's reference garnet model also lets Mg/Fe2/Mn spill into Y if
+    # Al/Cr/Fe3/Ti don't fill it (rare -- Mg-rich or vacant garnets). Not
+    # modeled here: would need elements/priority semantics that let an
+    # element belong to a site only as a last-resort fallback. Small effect
+    # where it applies (~0.2% of X-site total in the one reference analysis
+    # checked so far, tests/test_stoichiometry_garnet_workbook_reference.py).
   X:
     target: 3.0
     elements: [Ca, Mg, Fe2, Mn, Y, REE]

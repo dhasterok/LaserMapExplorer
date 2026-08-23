@@ -17,6 +17,7 @@
 # run with a nonzero fixed Fe3+ ratio -- see endmembers.py's
 # ``_amphibole_na_ratio`` docstring.
 mineral: glaucophane
+abbreviation: Gln
 formula: Na2(Mg,Fe2+)3(Al,Fe3+)2Si8O22(OH)2
 normalization:
   basis: oxygen

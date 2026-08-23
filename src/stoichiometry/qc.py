@@ -16,6 +16,7 @@ from src.stoichiometry.sites import SiteAllocationResult
 
 
 def check_hydrogarnet_substitution(
+    config: MineralConfig,
     apfu: dict[str, float],
     site_allocation: SiteAllocationResult,
     redox_result: RedoxResult | None,
@@ -44,8 +45,33 @@ def check_hydrogarnet_substitution(
     }
 
 
+def check_cation_anion_ratio(
+    config: MineralConfig,
+    apfu: dict[str, float],
+    site_allocation: SiteAllocationResult,
+    redox_result: RedoxResult | None,
+) -> dict[str, Any]:
+    """Real measured cation-total : anion-total apfu ratio (``config.
+    normalization_excludes``' elements, e.g. S/As/Sb, vs everything else).
+
+    Basis-invariant -- ``apfu`` is a uniformly-scaled dict regardless of
+    which basis produced it, so this ratio is the same real physical value
+    whether ``apfu`` came from cation-, oxygen-, or anion-basis
+    normalization. That's what makes it useful as a first-pass mineral
+    classifier on the generic ``sulfide.yaml`` config, *before* committing
+    to any specific formula's target: ~1:1 suggests a monosulfide, ~1:2
+    pyrite-type, ~9:8 pentlandite-type, etc.
+    """
+    excludes = set(config.normalization_excludes)
+    anion_total = sum(v for el, v in apfu.items() if el in excludes)
+    cation_total = sum(v for el, v in apfu.items() if el not in excludes)
+    ratio = cation_total / anion_total if anion_total > 0 else float("nan")
+    return {"cation_total": cation_total, "anion_total": anion_total, "cation_to_anion_ratio": ratio}
+
+
 _CHECKS = {
     "hydrogarnet_substitution": check_hydrogarnet_substitution,
+    "cation_anion_ratio": check_cation_anion_ratio,
 }
 
 
@@ -79,6 +105,6 @@ def run_qc_checks(
         fn = _CHECKS.get(name)
         if fn is None:
             raise ValueError(f"Unknown QC check {name!r}; expected one of {sorted(_CHECKS)}.")
-        result[name] = fn(apfu, site_allocation, redox_result)
+        result[name] = fn(config, apfu, site_allocation, redox_result)
 
     return result

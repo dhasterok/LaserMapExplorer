@@ -19,6 +19,7 @@
 # a different, larger reference basis specific to its own algorithm (folds
 # in S/C-substituent accounting this port doesn't replicate).
 mineral: apatite
+abbreviation: Ap
 formula: Ca5(PO4)3(F,Cl,OH)
 normalization:
   basis: oxygen

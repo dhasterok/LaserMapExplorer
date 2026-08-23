@@ -15,6 +15,7 @@
 # Structurally identical to serpentine/talc (same tetra_fe3_ratio site
 # method, same T/M pattern) -- see sites.py's _allocate_tetra_fe3_ratio.
 mineral: chlorite
+abbreviation: Chl
 formula: (Mg,Fe,Al)6(Si,Al)4O10(OH)8
 normalization:
   basis: oxygen

@@ -27,6 +27,7 @@
 # same batch had the analogous mistake (naive anhydrous-O-count instead of
 # this ratio-sum) and needed the identical fix.
 mineral: mica
+abbreviation: Mca
 formula: K(Mg,Fe,Al)2-3(Si,Al)4O10(OH)2
 normalization:
   basis: oxygen

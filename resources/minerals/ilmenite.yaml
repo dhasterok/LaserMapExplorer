@@ -1,5 +1,6 @@
 # Ilmenite: FeTiO3 (single octahedral site, no T/M split in MinPlotX's own model)
 mineral: ilmenite
+abbreviation: Ilm
 formula: FeTiO3
 normalization:
   basis: cation

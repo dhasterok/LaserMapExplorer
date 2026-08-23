@@ -437,6 +437,71 @@ def plot_index_map(
     return im
 
 
+def plot_categorical_map(
+    ax, labels: pd.Series, grid_index: pd.DataFrame, category_names: list[str], title: str = "",
+) -> None:
+    """Index-based 2D map of a categorical field (mineral classification --
+    ``src/classification/``) -- same line/sweep-index grid as
+    :func:`plot_index_map`, but a discrete swatch-per-category legend
+    instead of a continuous colorbar, since a category code has no
+    meaningful magnitude ordering. Mirrors the generic-discrete-field path
+    ``src/plotting/LamePlot.py``'s ``plot_map_mpl`` already uses for
+    ``SampleObj``-backed maps (e.g. the stoichiometry dock's
+    ``{abbrev}_dominant``); this app's own maps aren't ``SampleObj``-backed
+    (see ``pipeline.SampleCalibratedResult``), so that generic path isn't
+    reachable here and this is a standalone reimplementation of the same
+    idea against this app's own ``grid_index`` grid.
+
+    ``labels`` : per-pixel category string (or NaN/None for unclassified),
+    aligned with ``grid_index``'s index. ``category_names`` fixes the
+    code->color assignment (same list every redraw, e.g. the full selected
+    mineral subset) so a category's color doesn't shift between redraws
+    just because a different subset happened to be present in the frame.
+    """
+    if labels.empty or grid_index.empty or not category_names:
+        ax.set_title(f"{title}: no data")
+        return
+
+    n_lines = int(grid_index["line_number"].max()) + 1
+    n_sweeps = int(grid_index["sweep_index"].max()) + 1
+    name_to_code = {name: i for i, name in enumerate(category_names)}
+    codes = labels.map(name_to_code)  # NaN for unclassified or a name outside category_names
+
+    array = np.full((n_lines, n_sweeps), np.nan)
+    for (line_number, sweep_index), code in zip(
+        zip(grid_index["line_number"], grid_index["sweep_index"]), codes.to_numpy()
+    ):
+        array[int(line_number), int(sweep_index)] = code
+
+    colors = _qualitative_colors_for_diagnostics(len(category_names))
+    cmap = mcolors.ListedColormap(colors).with_extremes(bad="white")  # white = unclassified pixels
+    norm = mcolors.BoundaryNorm(np.arange(-0.5, len(category_names) + 0.5, 1.0), cmap.N)
+
+    ax.imshow(np.ma.masked_invalid(array), aspect="auto", origin="lower", cmap=cmap, norm=norm)
+    ax.set_xlabel("Sweep index (within line)")
+    ax.set_ylabel("Line number")
+    ax.set_title(title)
+
+    from matplotlib.patches import Patch
+    handles = [Patch(facecolor=colors[i], label=name) for i, name in enumerate(category_names)]
+    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize="small", borderaxespad=0.0)
+
+
+def _qualitative_colors_for_diagnostics(n: int) -> list[str]:
+    """Same qualitative-colormap convention as
+    ``src.stoichiometry.dock._qualitative_colors``/
+    ``src.calibration.dock_widgets._qualitative_colors`` (categories have
+    no natural ordering, so a perceptually-sequential colormap would
+    mislead) -- reimplemented locally since this module has no PyQt/dock
+    dependency to import it from.
+    """
+    import matplotlib.pyplot as plt
+
+    cmap_name = "tab10" if n <= 10 else "tab20"
+    cmap = plt.get_cmap(cmap_name, n)
+    return [mcolors.to_hex(cmap(i)) for i in range(n)]
+
+
 def cbar_label_for_stage(stage: str) -> str:
     """Colorbar unit label for a map correction stage: ppm for calibrated,
     CPS for anything still in instrument-counts-like units."""

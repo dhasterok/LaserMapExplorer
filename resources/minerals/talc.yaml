@@ -5,6 +5,7 @@
 # M's extra Na/K. No end-member scheme in MinPlotX for this mineral (no
 # end_members: block).
 mineral: talc
+abbreviation: Tlc
 formula: Mg3Si4O10(OH)2
 normalization:
   basis: oxygen

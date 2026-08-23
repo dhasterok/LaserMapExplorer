@@ -28,6 +28,7 @@
 # No redox: block -- monazite has no Fe2+/Fe3+ split to model (Fe isn't a
 # structural cation here at all).
 mineral: monazite
+abbreviation: Mnz
 formula: (REE,Th,U,Ca)(P,Si)O4
 normalization:
   basis: oxygen

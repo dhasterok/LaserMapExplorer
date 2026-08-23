@@ -1,0 +1,36 @@
+# Pyroxenoid (rhodonite-pyroxmangite): MnSiO3-(Mn,Fe)SiO3 chain silicate,
+# structurally distinct from true pyroxene (a 3- or 7-tetrahedral chain
+# repeat vs pyroxene's 2, hence its own mineral class) but chemically a
+# simple single-site Mn-Fe substitution -- same "shared calculation,
+# different mineral name" shape as carbonate_ratio/monosulfide_ratio.
+# Bustamite ((Ca,Mn)SiO3), the Ca-rich pyroxenoid, isn't a separate axis --
+# Ca is tracked in the site but reported as part of the generic apfu, not
+# a third named member, same "trace substituent, not a full axis"
+# treatment as pyrite_group_ratio's As.
+#
+# No redox split -- plain 'Fe' (assumed Fe2+), same convention as
+# carbonate.yaml/monosulfide.yaml.
+#
+# Two sites: M (metal: Mn/Fe/Ca/Mg) and T (Si), same shape as clinopyroxene
+# but without the M1/M2 split MinPlotX's pyroxene_quad engine needs (that
+# engine ports specific pyroxene-only allocation rules; pyroxenoid uses the
+# generic priority_fill site method instead).
+mineral: pyroxenoid
+abbreviation: Pxd
+formula: (Mn,Fe)SiO3
+normalization:
+  basis: cation
+  ideal_oxygens: 3
+  ideal_cations: 2
+sites:
+  M:
+    target: 1.0
+    elements: [Mn, Fe, Ca, Mg]
+    priority: [Mn, Fe, Ca, Mg]
+  T:
+    target: 1.0
+    elements: [Si]
+    priority: [Si]
+end_members:
+  method: pyroxenoid_ratio
+  members: [rhodonite, pyroxmangite]

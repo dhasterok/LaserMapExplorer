@@ -203,17 +203,6 @@ class MainActions(QObject):
         self.SpotData.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SpotData.setObjectName("actionSpotData")
 
-        self.FilterToggle = CustomAction(
-            text="Filter",
-            light_icon_unchecked="icon-filter-64.svg",
-            light_icon_checked="icon-filter-dark-64.png",
-            parent=self.ui,
-        )
-        self.FilterToggle.setCheckable(True)
-        self.FilterToggle.setMenuRole(QAction.MenuRole.TextHeuristicRole)
-        self.FilterToggle.setObjectName("actionFilterToggle")
-        self.FilterToggle.setToolTip("Open the filter dock")
-
         self.Profiles = CustomAction(
             text="Profiles",
             light_icon_unchecked="icon-profile-64.svg",
@@ -231,6 +220,7 @@ class MainActions(QObject):
             parent=self.ui,
         )
         self.PolygonMask.setCheckable(True)
+        self.PolygonMask.setChecked(True)
         self.PolygonMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.PolygonMask.setObjectName("actionPolygonMask")
         self.PolygonMask.setToolTip("Turn filtering by polygon on/off")
@@ -242,20 +232,28 @@ class MainActions(QObject):
             parent=self.ui,
         )
         self.ClusterMask.setCheckable(True)
+        self.ClusterMask.setChecked(True)
         self.ClusterMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ClusterMask.setObjectName("actionClusterMask")
         self.ClusterMask.setToolTip("Turn filter by cluster on/off")
 
+        # Absorbs the old standalone FilterToggle action -- an ROI's
+        # definition IS a filter definition (see SampleObj.add_roi), so
+        # this toggle now gates both the live filter-table preview and
+        # committed/selected ROIs together (see MainWindow.toggle_roi_mask).
+        # Uses the filter icon (not the generic mask icon) since users think
+        # of this as "the filter" toggle.
         self.ROIMask = CustomAction(
             text="ROI",
-            light_icon_unchecked="icon-mask-light-64.svg",
-            light_icon_checked="icon-mask-dark-64.svg",
+            light_icon_unchecked="icon-filter-64.svg",
+            light_icon_checked="icon-filter-dark-64.png",
             parent=self.ui,
         )
         self.ROIMask.setCheckable(True)
+        self.ROIMask.setChecked(True)
         self.ROIMask.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ROIMask.setObjectName("actionROIMask")
-        self.ROIMask.setToolTip("Turn filter by region of interest on/off")
+        self.ROIMask.setToolTip("Turn filtering by ROI/filter on/off")
 
         self.Correlation = CustomAction(
             text="Correlation",
@@ -725,6 +723,13 @@ class MainActions(QObject):
         self.Clusters.triggered.connect(lambda _: self.ui.open_mask_dock('cluster'))
         self.Profiles.triggered.connect(lambda _: self.ui.open_profile())
 
+        # Restrict/unrestrict the analyzed dataset by each mask type (see
+        # SampleObj.recompute_mask). ROIMask covers both the live filter-
+        # table preview and committed/selected ROIs.
+        self.PolygonMask.toggled.connect(self.ui.toggle_polygon_mask)
+        self.ClusterMask.toggled.connect(self.ui.toggle_cluster_mask)
+        self.ROIMask.toggled.connect(self.ui.toggle_roi_mask)
+
         self.Calculator.triggered.connect(lambda _: self.ui.open_calculator())
         self.Notes.triggered.connect(lambda _: self.ui.open_notes())
         self.Logger.triggered.connect(lambda _: self.ui.open_logger())
@@ -931,6 +936,8 @@ class MainMenubar(QMenuBar):
         self.menuWorkflow.setObjectName("menuWorkflow")
         self.menuWorkflow.setTitle("Workflow")
 
+        self.menuWorkflow.addAction(lame_action.WorkflowTool)
+        self.menuWorkflow.addSeparator()
         self.menuWorkflow.addAction(lame_action.NewWorkflow)
         self.menuWorkflow.addAction(lame_action.OpenWorkflow)
         self.menuWorkflow.addAction(lame_action.SaveWorkflow)
@@ -958,7 +965,6 @@ class MainMenubar(QMenuBar):
         self.menuAnalyze.setObjectName("menuAnalyze")
         self.menuAnalyze.setTitle("Analyze")
 
-        self.menuAnalyze.addAction(lame_action.FilterToggle)
         self.menuAnalyze.addAction(lame_action.PolygonMask)
         self.menuAnalyze.addAction(lame_action.ClusterMask)
         self.menuAnalyze.addAction(lame_action.ROIMask)
@@ -990,8 +996,6 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.Logger)
         self.menuTools.addAction(lame_action.Calculator)
         self.menuTools.addAction(lame_action.Notes)
-        self.menuTools.addSeparator()
-        self.menuTools.addAction(lame_action.WorkflowTool)
 
         # View Menu -- the toolbar is now a single paged widget (pinned row +
         # page tabs + one swappable content row), so there's nothing left to
@@ -1091,6 +1095,7 @@ class MainToolbar(QToolBar):
         pinned.addAction(lame_action.SelectAnalytes)
         pinned.addSeparator()
         pinned.addAction(lame_action.UpdatePlot)
+        pinned.addAction(lame_action.SavePlotToTree)
         pinned.addAction(lame_action.SaveProject)
         pinned.addSeparator()
 
@@ -1154,7 +1159,6 @@ class MainToolbar(QToolBar):
             The configured toolbar.
         """
         toolbar = self._styled_page_toolbar()
-        toolbar.addAction(lame_action.SavePlotToTree)
         toolbar.addAction(lame_action.FullMap)
         toolbar.addAction(lame_action.Crop)
         toolbar.addAction(lame_action.SwapAxes)
@@ -1182,10 +1186,9 @@ class MainToolbar(QToolBar):
         toolbar = self._styled_page_toolbar()
         toolbar.addAction(lame_action.NoiseReduction)
         toolbar.addAction(lame_action.ClearFilters)
-        toolbar.addAction(lame_action.FilterToggle)
+        toolbar.addAction(lame_action.ROIMask)
         toolbar.addAction(lame_action.PolygonMask)
         toolbar.addAction(lame_action.ClusterMask)
-        toolbar.addAction(lame_action.ROIMask)
         return toolbar
 
     def _build_log_page(self, lame_action):

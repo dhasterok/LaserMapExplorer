@@ -24,6 +24,7 @@ def base_garnet_dict():
     """A valid, minimal garnet-shaped config dict, for mutating in tests."""
     return {
         "mineral": "garnet",
+        "abbreviation": "Grt",
         "formula": "X3Y2Z3O12",
         "normalization": {"basis": "oxygen", "ideal_oxygens": 12, "ideal_cations": 8},
         "sites": {
@@ -123,3 +124,40 @@ def test_empty_yaml_file_raises(tmp_path):
 def test_non_mapping_root_raises():
     with pytest.raises(MineralConfigError, match="mapping"):
         parse_mineral_config(["not", "a", "mapping"])
+
+
+def test_missing_abbreviation_raises():
+    d = base_garnet_dict()
+    del d["abbreviation"]
+    with pytest.raises(MineralConfigError, match="abbreviation"):
+        parse_mineral_config(d)
+
+
+def test_malformed_abbreviation_raises():
+    """Must be a plain letters/digits string starting with a letter -- it
+    becomes an output column-name prefix (e.g. 'Grt_apfu_X'), so spaces/
+    punctuation would break column naming.
+    """
+    d = base_garnet_dict()
+    d["abbreviation"] = "Grt 1"
+    with pytest.raises(MineralConfigError, match="abbreviation"):
+        parse_mineral_config(d)
+
+
+def test_anion_basis_parses(tmp_path):
+    """basis: 'anion' (sulfide's anion-anchored normalization -- see
+    normalize.normalize_to_measured_anion) is a valid basis, alongside
+    'oxygen'/'cation'.
+    """
+    d = base_garnet_dict()
+    d["normalization"]["basis"] = "anion"
+    d["normalization"]["excludes"] = ["S"]
+    config = parse_mineral_config(d)
+    assert config.basis == "anion"
+
+
+def test_unknown_basis_raises():
+    d = base_garnet_dict()
+    d["normalization"]["basis"] = "made_up_basis"
+    with pytest.raises(MineralConfigError, match="basis"):
+        parse_mineral_config(d)

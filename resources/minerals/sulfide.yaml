@@ -15,7 +15,18 @@
 # + As-as-cation are MinPlotX's own defaults) -- deliberately out of scope.
 #
 # Input is element wt% (not oxide, not ppm) -- input_mode='element_wt_percent'.
+#
+# qc_checks includes cation_anion_ratio -- with this config's basis staying
+# 'cation' (an arbitrary default target, not tied to any specific formula),
+# it doubles as a first-pass classifier: the reported cation:anion apfu
+# ratio is basis-invariant (the same real physical ratio regardless of
+# which side is pinned to its target), so running an unknown composition
+# through this generic config and reading that ratio tells you which
+# specific formula-type config to switch to for full end-member detail --
+# ~1:1 -> monosulfide.yaml, ~1:2 -> pyrite.yaml, ~1:1 (Cu+Fe:S 2:2) ->
+# chalcopyrite.yaml, ~9:8 -> pentlandite.yaml. See those configs' comments.
 mineral: sulfide
+abbreviation: Sul
 formula: (Fe,Ni,Cu,Co,Pb,Zn)xSy
 normalization:
   basis: cation
@@ -32,3 +43,5 @@ sites:
     target: 2.0
     elements: [Fe, Ni, Cu, Co, Pb, Zn, As, S]
     priority: [Fe, Ni, Cu, Co, Pb, Zn, As, S]
+qc_checks:
+  - cation_anion_ratio

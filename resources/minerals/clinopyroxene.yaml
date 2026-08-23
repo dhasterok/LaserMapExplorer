@@ -1,0 +1,51 @@
+# Clinopyroxene (augite-diopside-hedenbergite-pigeonite-jadeite-aegirine):
+# M2M1T2O6 -- the Ca-bearing, monoclinic branch of the pyroxene
+# quadrilateral, plus the Na-pyroxene branch. Site allocation reuses the
+# exact same engine as the generic pyroxene.yaml (site_allocation.method:
+# pyroxene_quad), but end-member computation uses the extended
+# pyroxene_quad_jd_ae method instead of pyroxene.yaml's plain pyroxene_quad
+# -- kept as its own top-level entry (not merged into pyroxene.yaml, unlike
+# e.g. spinel/magnetite) per user request: field/petrographic workflows
+# select orthopyroxene and clinopyroxene as distinct phases, even though
+# the site-allocation engine underneath is identical. See
+# orthopyroxene.yaml, which instead reports a dedicated 2-member
+# enstatite/ferrosilite ratio, since Wo isn't a meaningful axis for that
+# (low-Ca) branch, and never carries Na-pyroxene either (M2 in
+# orthopyroxene is Mg/Fe2+ only, no significant Na).
+#
+# The Ca-Mg-Fe quadrilateral (Wo/En/Fs) plus jadeite/aegirine are modeled
+# via a Morimoto (1988) Q-J split -- see endmembers.py's
+# _pyroxene_quad_jd_ae docstring for the exact math (Na in M2
+# charge-balanced against Al3+/Fe3+ in M1). Kosmochlor (Na-Cr-pyroxene)
+# still isn't implemented -- Cr in M1 isn't routed to a third Na-pyroxene
+# member, same "scope it out rather than guess" precedent as everything
+# else this file's comments flag as unimplemented.
+mineral: clinopyroxene
+abbreviation: Cpx
+formula: M2M1T2O6
+normalization:
+  basis: cation
+  ideal_oxygens: 6
+  ideal_cations: 4
+site_allocation:
+  method: pyroxene_quad
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al, Fe3]
+    priority: [Si, Al, Fe3]
+  M1:
+    target: 1.0
+    elements: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+    priority: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+  M2:
+    target: 1.0
+    elements: [Mg, Fe2, Ca, Na, K]
+    priority: [Mg, Fe2, Ca, Na, K]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: pyroxene_quad_jd_ae
+  members: [wollastonite, enstatite, ferrosilite, jadeite, aegirine]

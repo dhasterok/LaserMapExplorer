@@ -228,8 +228,8 @@ class AppData(QObject):
     clusterSeedChanged = pyqtSignal(int)
     clusterExponentChanged = pyqtSignal(float)
     clusterDistanceChanged = pyqtSignal(str)
-    clusterMinSizeChanged = pyqtSignal(int)
-    clusterMinSamplesChanged = pyqtSignal(int)
+    clusterMinSizePctChanged = pyqtSignal(float)
+    clusterMinSamplesFactorChanged = pyqtSignal(float)
     selectedClustersChanged = pyqtSignal(list)
     clusterPreconditionChanged = pyqtSignal(bool)
     numBasisChanged = pyqtSignal(int)
@@ -433,8 +433,8 @@ class AppData(QObject):
                 'selected_clusters':[]
             },
             'HDBSCAN':{
-                'min_cluster_size':25,
-                'min_samples':10,
+                'min_cluster_size_pct':0.5,
+                'min_samples_factor':0.1,
                 'selected_clusters':[],
             },
         }
@@ -448,8 +448,8 @@ class AppData(QObject):
             self._cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
         else:
             self._cluster_exponent = 0
-        self._cluster_min_size = self.cluster_dict[self._cluster_method].get('min_cluster_size', 25)
-        self._cluster_min_samples = self.cluster_dict[self._cluster_method].get('min_samples', 10)
+        self._cluster_min_size_pct = self.cluster_dict[self._cluster_method].get('min_cluster_size_pct', 0.5)
+        self._cluster_min_samples_factor = self.cluster_dict[self._cluster_method].get('min_samples_factor', 0.1)
         self._cluster_seed = self.cluster_dict[self._cluster_method].get('seed', 23)
         self._selected_clusters = self.cluster_dict[self._cluster_method]['selected_clusters']
         self._dim_red_precondition = False
@@ -1210,36 +1210,36 @@ class AppData(QObject):
         self.clusterDistanceChanged.emit(new_value)
 
     @property
-    def cluster_min_size(self):
-        """int : HDBSCAN's minimum cluster size (smallest number of pixels that can form its own cluster)."""
-        return self._cluster_min_size
+    def cluster_min_size_pct(self):
+        """float : HDBSCAN's minimum cluster size, as a percentage of the number of pixels being clustered (the smallest useful cluster -- e.g. 0.5 means a cluster must contain at least 0.5% of the clustered pixels)."""
+        return self._cluster_min_size_pct
 
-    @cluster_min_size.setter
-    def cluster_min_size(self, new_value):
-        if new_value == self._cluster_min_size:
+    @cluster_min_size_pct.setter
+    def cluster_min_size_pct(self, new_value):
+        if new_value == self._cluster_min_size_pct:
             return
 
-        self._cluster_min_size = new_value
-        # update cluster dict with new min cluster size
-        self.cluster_dict[self._cluster_method]['min_cluster_size'] = self._cluster_min_size
+        self._cluster_min_size_pct = new_value
+        # update cluster dict with new min cluster size percentage
+        self.cluster_dict[self._cluster_method]['min_cluster_size_pct'] = self._cluster_min_size_pct
         self.update_cluster_flag = True
-        self.clusterMinSizeChanged.emit(new_value)
+        self.clusterMinSizePctChanged.emit(new_value)
 
     @property
-    def cluster_min_samples(self):
-        """int : HDBSCAN's min_samples (neighborhood size used to judge how dense a point's neighborhood is)."""
-        return self._cluster_min_samples
+    def cluster_min_samples_factor(self):
+        """float : HDBSCAN's min_samples, as a multiplicative factor on the (pixel-count) min_cluster_size -- e.g. 0.1 means min_samples is 10% of min_cluster_size."""
+        return self._cluster_min_samples_factor
 
-    @cluster_min_samples.setter
-    def cluster_min_samples(self, new_value):
-        if new_value == self._cluster_min_samples:
+    @cluster_min_samples_factor.setter
+    def cluster_min_samples_factor(self, new_value):
+        if new_value == self._cluster_min_samples_factor:
             return
 
-        self._cluster_min_samples = new_value
-        # update cluster dict with new min samples
-        self.cluster_dict[self._cluster_method]['min_samples'] = self._cluster_min_samples
+        self._cluster_min_samples_factor = new_value
+        # update cluster dict with new min samples factor
+        self.cluster_dict[self._cluster_method]['min_samples_factor'] = self._cluster_min_samples_factor
         self.update_cluster_flag = True
-        self.clusterMinSamplesChanged.emit(new_value)
+        self.clusterMinSamplesFactorChanged.emit(new_value)
 
     @property
     def selected_clusters(self):
@@ -1590,10 +1590,10 @@ class AppData(QObject):
             self.cluster_distance = self.cluster_dict[self._cluster_method]['distance']
         if 'exponent' in self.cluster_dict[self._cluster_method]:
             self.cluster_exponent = self.cluster_dict[self._cluster_method]['exponent']
-        if 'min_cluster_size' in self.cluster_dict[self._cluster_method]:
-            self.cluster_min_size = self.cluster_dict[self._cluster_method]['min_cluster_size']
-        if 'min_samples' in self.cluster_dict[self._cluster_method]:
-            self.cluster_min_samples = self.cluster_dict[self._cluster_method]['min_samples']
+        if 'min_cluster_size_pct' in self.cluster_dict[self._cluster_method]:
+            self.cluster_min_size_pct = self.cluster_dict[self._cluster_method]['min_cluster_size_pct']
+        if 'min_samples_factor' in self.cluster_dict[self._cluster_method]:
+            self.cluster_min_samples_factor = self.cluster_dict[self._cluster_method]['min_samples_factor']
 
     def generate_random_seed(self):
         """Generates a random seed for clustering.

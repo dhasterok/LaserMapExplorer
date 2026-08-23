@@ -1,12 +1,13 @@
-"""Cross-checks the plagioclase stoichiometry pipeline against
+"""Cross-checks the feldspar stoichiometry pipeline against
 ``tests/normalization.v17.xlsx``'s 'Plagioclase' sheet -- a hand-built,
 cell-by-cell recalculation of a real EPMA labradorite analysis that solves
 for Fe3+ by charge balance.
 
-Pure Python -- no PyQt/QApplication needed. ``resources/minerals/plagioclase.yaml``
-uses the generic priority-fill engine unchanged (no mineral-specific site code
-needed, see the Stage 2 plan) -- everything below matches the workbook to
-within ~0.1%.
+Pure Python -- no PyQt/QApplication needed. ``resources/minerals/
+feldspar.yaml`` (a single generic config covering both plagioclase and
+alkali feldspar -- see that file's comment) uses the generic priority-fill
+engine unchanged (no mineral-specific site code needed, see the Stage 2
+plan) -- everything below matches the workbook to within ~0.1%.
 
 Per user decision, this config includes Fe-redox estimation (``droop_1987``,
 reusing the already-generic ``redox.py`` unchanged) even though MinPlotX's
@@ -25,7 +26,7 @@ sys.path.insert(0, str(project_root))
 from src.stoichiometry import pipeline
 from src.stoichiometry.config import load_mineral_config
 
-PLAGIOCLASE_YAML_PATH = project_root / "resources" / "minerals" / "plagioclase.yaml"
+FELDSPAR_YAML_PATH = project_root / "resources" / "minerals" / "feldspar.yaml"
 WORKBOOK_PATH = project_root / "tests" / "normalization.v17.xlsx"
 
 _OXIDE_TO_CATION = {
@@ -36,8 +37,8 @@ _WORKBOOK_TO_MEMBER = {"An": "anorthite", "Ab": "albite", "Or": "orthoclase"}
 
 
 @pytest.fixture(scope="module")
-def plagioclase_config():
-    return load_mineral_config(PLAGIOCLASE_YAML_PATH)
+def feldspar_config():
+    return load_mineral_config(FELDSPAR_YAML_PATH)
 
 
 @pytest.fixture(scope="module")
@@ -73,9 +74,9 @@ def workbook_reference():
 
 
 @pytest.fixture(scope="module")
-def result(plagioclase_config, workbook_reference):
+def result(feldspar_config, workbook_reference):
     return pipeline.calculate(
-        workbook_reference["analysis"], plagioclase_config,
+        workbook_reference["analysis"], feldspar_config,
         input_mode="wt_percent", redox_method="droop_1987",
     )
 

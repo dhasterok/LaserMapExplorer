@@ -67,8 +67,14 @@ class FakeAppData:
         self.cluster_distance = 'euclidean'
         self.num_clusters = 2
         self.max_clusters = 10
-        self.cluster_min_size = 5
-        self.cluster_min_samples = 3
+        # min_cluster_size/min_samples are derived as
+        # max(2, round(n_pixels * pct/100)) / max(1, round(min_cluster_size * factor));
+        # with the 189-pixel synthetic dataset below (180 majority + 6 minority
+        # + 3 boundary), 2.65% -> round(189*0.0265)=5 pixels, and a 0.6 factor
+        # -> round(5*0.6)=3 -- reproducing the min_cluster_size=5/min_samples=3
+        # pixel counts this test suite was originally verified against.
+        self.cluster_min_size_pct = 2.65
+        self.cluster_min_samples_factor = 0.6
 
 
 def _make_sample_dataframe():

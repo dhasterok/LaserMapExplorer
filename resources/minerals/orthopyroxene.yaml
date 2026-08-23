@@ -1,0 +1,45 @@
+# Orthopyroxene: (Mg,Fe)2Si2O6 -- the low-Ca (Wo <~5 mol%), orthorhombic
+# branch of the pyroxene quadrilateral. Uses the exact same M2M1T2O6
+# framework and pyroxene_quad site-allocation method as the generic
+# pyroxene.yaml (Mg/Fe2+ split between M1/M2 by bulk XMg ratio, see
+# sites.py's _allocate_pyroxene_quad docstring) -- kept as its own
+# top-level entry (not merged into pyroxene.yaml, unlike e.g. spinel/
+# magnetite) per user request: field/petrographic workflows select
+# orthopyroxene and clinopyroxene as distinct phases, even though the
+# stoichiometric engine underneath is identical. See clinopyroxene.yaml.
+#
+# end_members uses a dedicated enstatite/ferrosilite-only scheme (the
+# series' own two-member Mg# classification) rather than the generic
+# pyroxene_quad wollastonite/enstatite/ferrosilite ternary -- Wo is
+# negligible by definition for this branch, so a 3-member ternary would
+# always read ~0% wollastonite; clinopyroxene.yaml keeps the full ternary
+# since Wo *is* its primary classification axis.
+mineral: orthopyroxene
+abbreviation: Opx
+formula: (Mg,Fe)2Si2O6
+normalization:
+  basis: cation
+  ideal_oxygens: 6
+  ideal_cations: 4
+site_allocation:
+  method: pyroxene_quad
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al, Fe3]
+    priority: [Si, Al, Fe3]
+  M1:
+    target: 1.0
+    elements: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+    priority: [Al, Ti, Cr, Fe3, Mn, Mg, Fe2]
+  M2:
+    target: 1.0
+    elements: [Mg, Fe2, Ca, Na, K]
+    priority: [Mg, Fe2, Ca, Na, K]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: orthopyroxene_ratio
+  members: [enstatite, ferrosilite]

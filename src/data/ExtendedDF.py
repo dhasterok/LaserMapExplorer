@@ -272,16 +272,25 @@ class AttributeDataFrame(pd.DataFrame):
         # Single column, single attribute value
         df.set_attribute('Temperature', 'units', 'Celsius')
 
+        # Single column, list-valued attribute (e.g. category labels for a
+        # discrete field) -- stored as one value on that one column, not
+        # distributed across columns, since `columns` is a single str
+        df.set_attribute('Cluster', 'category_labels', ['Low', 'Medium', 'High'])
+
         # Multiple columns, same attribute value
         df.set_attribute(['Temperature', 'Pressure'], 'source', 'Sensor')
 
         # Multiple columns, different attribute values
         df.set_attribute(['Temperature', 'Pressure'], 'units', ['Celsius', 'Pascal'])
         """
-        # Case where a single column and a single value are provided
-        if isinstance(columns, str) and not isinstance(values, list):
+        # Case where a single column is provided -- `values` is stored as-is
+        # as that one column's attribute value, whatever its type (including
+        # a list, e.g. category_labels/category_colors on a single column).
+        # A scalar `columns` always means "one column," regardless of what
+        # shape `values` happens to be.
+        if isinstance(columns, str):
             self._set_attribute(columns, attribute, values)
-        
+
         # Case where multiple columns and a list of values are provided
         elif isinstance(values, list):
             if len(columns) != len(values):

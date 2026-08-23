@@ -13,6 +13,7 @@
 # No end_members block -- a single near-pure phase, same as
 # allanite/serpentine/talc (no end-member concept ported for those either).
 mineral: hematite
+abbreviation: Hem
 formula: Fe2O3
 normalization:
   basis: cation

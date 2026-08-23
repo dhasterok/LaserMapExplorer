@@ -513,6 +513,7 @@ class StyleData(QObject, StyleTheme):
     scaleLengthChanged = pyqtSignal(float)
     overlayColorChanged = pyqtSignal(str)
     showMassChanged = pyqtSignal(bool)
+    showMineralPrefixChanged = pyqtSignal(bool)
     markerChanged = pyqtSignal(str)
     markerSizeChanged = pyqtSignal(float)
     markerColorChanged = pyqtSignal(str)
@@ -558,6 +559,7 @@ class StyleData(QObject, StyleTheme):
 
         self._plot_type = ''
         self._show_mass = False
+        self._show_mineral_prefix = True
 
         # colormaps
         # matplotlib colormaps
@@ -863,6 +865,21 @@ class StyleData(QObject, StyleTheme):
         self._show_mass = flag
 
         self.showMassChanged.emit(flag)
+
+    @property
+    def show_mineral_prefix(self):
+        """bool : Flag indicating whether to show the mineral abbreviation
+        prefix (e.g. 'Grt_') on stoichiometry field labels"""
+        return self._show_mineral_prefix
+
+    @show_mineral_prefix.setter
+    def show_mineral_prefix(self, flag: bool):
+        if flag == self._show_mineral_prefix:
+            return
+
+        self._show_mineral_prefix = flag
+
+        self.showMineralPrefixChanged.emit(flag)
 
     @property
     def marker(self):
@@ -1212,6 +1229,36 @@ class StyleData(QObject, StyleTheme):
 
         return labels
 
+    def toggle_mineral_prefix(self, labels: list[str]):
+        """Removes the mineral abbreviation prefix from stoichiometry labels
+
+        Removes the leading '{Abbrev}_' (e.g. 'Grt_' off 'Grt_X'/'Grt_pyrope')
+        if ``self.show_mineral_prefix`` is False -- same "strip a redundant
+        leading tag from a batch of tick labels" role as ``toggle_mass``, for
+        stoichiometry's mineral-prefixed columns (see src/stoichiometry/
+        dock.py's ``_write_results_to_sample``) instead of isotope mass
+        numbers. Non-stoichiometry labels (no leading '{letters}_' prefix,
+        e.g. 'Fe57', 'PC1', 'El1 / El2') are left unchanged.
+
+        Parameters
+        ----------
+        labels : list of str
+            Input labels.
+
+        Returns
+        -------
+        list
+            Output labels with or without the mineral prefix.
+        """
+        if not self.show_mineral_prefix:
+            # None-safe (unlike toggle_mass) -- also used on single-field
+            # axis/colorbar labels via set_axis_and_scale_by_field, where
+            # get_attribute(field, 'label') can be None for a field with no
+            # stored label yet.
+            labels = [re.sub(r'^[A-Za-z][A-Za-z0-9]*_', '', label) if label is not None else label for label in labels]
+
+        return labels
+
     def default_scale_length(self) -> float|None:
         """Sets default length of a scale bar for map-type plots
 
@@ -1355,7 +1402,7 @@ class StyleData(QObject, StyleTheme):
                 xmin = data.processed.get_attribute(field,'plot_min')
                 xmax = data.processed.get_attribute(field,'plot_max')
                 self.xlim = [xmin, xmax]
-                self.xlabel = data.processed.get_attribute(field,'label')
+                self.xlabel = self.toggle_mineral_prefix([data.processed.get_attribute(field,'label')])[0]
                 self.xscale = data.processed.get_attribute(field,'norm')
             case 'y':
                 if self.plot_type == 'histogram':
@@ -1368,14 +1415,14 @@ class StyleData(QObject, StyleTheme):
                     ymin = data.processed.get_attribute(field,'plot_min')
                     ymax = data.processed.get_attribute(field,'plot_max')
                     self.ylim = [ymin, ymax]
-                    self.ylabel = data.processed.get_attribute(field,'label')
+                    self.ylabel = self.toggle_mineral_prefix([data.processed.get_attribute(field,'label')])[0]
                     self.yscale = data.processed.get_attribute(field,'norm')
             case 'z':
                 zmin = data.processed.get_attribute(field,'plot_min')
                 zmax = data.processed.get_attribute(field,'plot_max')
                 self.zlim = [zmin, zmax]
-                self.zlabel = data.processed.get_attribute(field,'label')
-                self.zscale = data.processed.get_attribute(field,'norm')   
+                self.zlabel = self.toggle_mineral_prefix([data.processed.get_attribute(field,'label')])[0]
+                self.zscale = data.processed.get_attribute(field,'norm')
     
     # color functions 
     def color_norm(self, N=None):
@@ -1402,8 +1449,8 @@ class StyleData(QObject, StyleTheme):
             case 'discrete':
                 if N is None:
                     if hasattr(self,'ui'):
-                        QMessageBox(self.ui, "Warning","N must not be None when color scale is discrete.")
-                    return
+                        QMessageBox.warning(self.ui, "Warning", "N must not be None when color scale is discrete.")
+                    return None
                 boundaries = np.arange(-0.5, N, 1)
                 norm = colors.BoundaryNorm(boundaries, N, clip=True)
 
@@ -1520,7 +1567,15 @@ class StyleData(QObject, StyleTheme):
         matplotlib.colormap
             A discrete (colors.ListedColormap) colormap
         """
-        n = cluster_dict['n_clusters']
+        # Derived from the actual per-cluster entries AppData.cluster_group_changed
+        # populates (int keys 0..n-1, plus 99 for the mask/noise group), rather
+        # than cluster_dict['n_clusters'] -- that key is k-means/fuzzy c-means'
+        # *requested* cluster count (the spin box setting), which a
+        # density-based method like HDBSCAN doesn't have at all (its cluster
+        # count is discovered from the data, not chosen upfront), and even for
+        # k-means/fuzzy c-means the requested count isn't guaranteed to match
+        # how many non-empty clusters actually came out.
+        n = len([k for k in cluster_dict.keys() if isinstance(k, int) and k != 99])
         cluster_color = [None]*n
         cluster_label = [None]*n
         
@@ -1580,6 +1635,47 @@ class StyleData(QObject, StyleTheme):
 
         cmap = colors.ListedColormap(roi_color, N=n)
         return roi_color, roi_label, cmap
+
+    def get_discrete_colormap(self, labels, hexcolors, alpha=100):
+        """Converts hex colors to a discrete colormap for a generic
+        categorical field.
+
+        Mirrors `get_cluster_colormap`/`get_roi_colormap`'s shape, but for
+        any field carrying its own `category_labels`/`category_colors`
+        column attributes (e.g. the stoichiometry dock's `{abbrev}_dominant`
+        end-member field -- see `src/stoichiometry/dock.py`) rather than a
+        specific keyed structure like `AppData.cluster_dict` or
+        `SampleObj.roi_stack`.
+
+        Parameters
+        ----------
+        labels : list of str
+            Category names, in code order (index 0 = code 1, matching this
+            project's 1-indexed categorical-field display convention).
+        hexcolors : list of str
+            Hex color per category, same order as `labels`.
+        alpha : int, optional
+            Transparency to add to each color, by default 100.
+
+        Returns
+        -------
+        tuple
+            ``(group_color, group_label, cmap)`` -- lists of RGBA tuples/
+            names in category order, and a ``colors.ListedColormap`` built
+            from them.
+        """
+        n = len(labels)
+        if n == 0:
+            return [], [], colors.ListedColormap([(0, 0, 0, 0)], N=1)
+
+        group_color = [None] * n
+        for i, hexcolor in enumerate(hexcolors):
+            rgb_color = convert_color(hexcolor, 'hex', 'rgb', norm_out=False)
+            color = rgb_color if rgb_color is not None else [0, 0, 0]
+            group_color[i] = tuple(float(c) / 255 for c in color) + (float(alpha) / 100,)
+
+        cmap = colors.ListedColormap(group_color, N=n)
+        return group_color, list(labels), cmap
 
     # -------------------------------------
     # Validation functions

@@ -113,6 +113,102 @@ def _pyroxene_quad(site_allocation: SiteAllocationResult, config: MineralConfig)
     return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
 
 
+def _pyroxene_quad_jd_ae(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Wo/En/Fs quadrilateral plus the Na-pyroxene branch (jadeite/
+    aegirine), following the Morimoto (1988) Q-J pyroxene classification:
+    Na in M2 must charge-balance with a trivalent cation in M1 (Al3+ ->
+    jadeite, Fe3+ -> aegirine/acmite). Extends ``_pyroxene_quad`` (which
+    explicitly scoped this branch out, see its docstring) rather than
+    replacing it -- pyroxene.yaml/orthopyroxene.yaml keep using the
+    quad-only method; only clinopyroxene.yaml opts into this one.
+
+    Jd is capped at ``min(Na, Al_M1)``, Ae at ``min(remaining Na, Fe3_M1)``
+    -- any M1 Fe3+ left over after satisfying Ae (Na insufficient to
+    charge-balance all of it) falls back into the quad's pooled Fe, same
+    "never discard real composition" convention as ``_pyroxene_quad``'s
+    own Fe2+Mn+Fe3 pooling.
+    """
+    m1 = site_allocation.sites.get("M1")
+    if m1 is None:
+        raise ValueError("pyroxene_quad_jd_ae end-member calculation requires an 'M1' site in the config.")
+
+    na = _site_total(site_allocation, "Na")
+    al_m1 = m1.elements.get("Al", 0.0)
+    fe3_m1 = m1.elements.get("Fe3", 0.0)
+
+    jadeite = min(na, al_m1)
+    remaining_na = na - jadeite
+    aegirine = min(remaining_na, fe3_m1)
+    fe3_leftover = fe3_m1 - aegirine
+
+    ca = _site_total(site_allocation, "Ca")
+    mg = _site_total(site_allocation, "Mg")
+    fe_quad = _site_total(site_allocation, "Fe2") + _site_total(site_allocation, "Mn") + fe3_leftover
+
+    fractions = {
+        "wollastonite": ca, "enstatite": mg, "ferrosilite": fe_quad,
+        "jadeite": jadeite, "aegirine": aegirine,
+    }
+    total = sum(fractions.values())
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
+def _nepheline_kalsilite_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Nepheline/kalsilite fractions from the Na:K ratio at the single
+    alkali (A) site -- same shape as ``_carbonate_ratio``/
+    ``_monosulfide_ratio`` (a different site, different member names,
+    identical single-site-ratio math). Minor Ca tracked in the site isn't a
+    third axis here (no established third end-member name for Ca-nepheline
+    in this port), same "trace substituent, not a full axis" treatment as
+    ``_pyrite_group_ratio``'s As.
+    """
+    na = _site_total(site_allocation, "Na")
+    k = _site_total(site_allocation, "K")
+    total = na + k
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    fractions = {"nepheline": na, "kalsilite": k}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
+def _pyroxenoid_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Rhodonite/pyroxmangite fractions from the Mn:Fe ratio at the single
+    metal (M) site -- same shape as ``_carbonate_ratio``/
+    ``_monosulfide_ratio``. Bustamite (``(Ca,Mn)SiO3``), the Ca-rich
+    pyroxenoid, isn't a separate axis here -- Ca is tracked in the site but
+    reported as part of the generic apfu, not a third named member.
+    """
+    mn = _site_total(site_allocation, "Mn")
+    fe = _site_total(site_allocation, "Fe")
+    total = mn + fe
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    fractions = {"rhodonite": mn, "pyroxmangite": fe}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
+def _orthopyroxene_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Enstatite/ferrosilite fractions from the Mg:(Fe2+Mn+Fe3) ratio --
+    orthopyroxene's own two-member classification (effectively its Mg#),
+    not the full Wo-En-Fs ternary ``_pyroxene_quad`` computes for
+    clinopyroxene -- Wo is negligible by definition for this (low-Ca)
+    branch of the quadrilateral, so reporting it as a third member would
+    always read ~0% rather than add real information. Same Fe2+Mn+Fe3
+    pooling convention as ``_pyroxene_quad`` (Mn2+ commonly substitutes for
+    Fe2+ in pyroxene).
+    """
+    mg = _site_total(site_allocation, "Mg")
+    fe = _site_total(site_allocation, "Fe2") + _site_total(site_allocation, "Mn") + _site_total(site_allocation, "Fe3")
+    total = mg + fe
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+
+    fractions = {"enstatite": mg, "ferrosilite": fe}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
 def _spinel_xmg(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
     """Ports ``spinel_Fe3unknown.m``'s end-member scheme: D-site trivalent
     fraction (Cr/Fe3+/Al/V) times A-site divalent fraction (Fe2+/Mg/Mn/Ni/
@@ -478,11 +574,86 @@ def _carbonate_ratio(site_allocation: SiteAllocationResult, config: MineralConfi
     return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
 
 
+def _monosulfide_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Sphalerite/galena/alabandite/greenockite/troilite fractions from the
+    single metal site -- same shape as ``_carbonate_ratio`` (a different
+    site, different member names, identical single-site-ratio math).
+    Structurally distinct in nature (zinc-blende sphalerite vs halite-type
+    galena, etc.) despite sharing this one MS-formula engine -- same
+    "shared calculation, not shared natural solid solution" precedent as
+    plagioclase/alkali-feldspar's merged ``feldspar.yaml``.
+    """
+    zn = _site_total(site_allocation, "Zn")
+    fe = _site_total(site_allocation, "Fe")  # no redox split -- monosulfide.yaml has no redox: block
+    mn = _site_total(site_allocation, "Mn")
+    cd = _site_total(site_allocation, "Cd")
+    pb = _site_total(site_allocation, "Pb")
+    total = zn + fe + mn + cd + pb
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    fractions = {"sphalerite": zn, "troilite": fe, "alabandite": mn, "greenockite": cd, "galena": pb}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
+def _pyrite_group_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Pyrite/cattierite/vaesite fractions from the Fe:Co:Ni ratio at the
+    single metal site (the isostructural MS2 pyrite-group series). As
+    (arsenian pyrite) is tracked in the site but not part of this named-
+    species axis, same "trace substituent, not a separate member" treatment
+    as e.g. ``_epidote_ratio`` excluding Mn3+/piemontite.
+    """
+    fe = _site_total(site_allocation, "Fe")
+    co = _site_total(site_allocation, "Co")
+    ni = _site_total(site_allocation, "Ni")
+    total = fe + co + ni
+    if total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    fractions = {"pyrite": fe, "cattierite": co, "vaesite": ni}
+    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+
+
+def _pentlandite_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Cobalt-pentlandite fraction (Co's share of the M9S8 metal site) vs.
+    ordinary pentlandite (Fe+Ni). Fe:Ni itself isn't a separate accepted
+    IMA species split the way e.g. forsterite/fayalite is -- it stays
+    visible directly in the reported apfu rather than forced into a member
+    name, same reasoning as ``_amphibole_ca_ratio``'s continuous
+    ``mg_number`` (a ratio, not a discrete species boundary).
+    """
+    m = site_allocation.sites.get("M")
+    if m is None:
+        raise ValueError("pentlandite_ratio end-member calculation requires an 'M' site in the config.")
+    if m.total <= 0:
+        return {member: 0.0 for member in config.end_members.members}
+    co_fraction = m.elements.get("Co", 0.0) / m.total
+    fractions = {"pentlandite": 100.0 * (1.0 - co_fraction), "cobalt_pentlandite": 100.0 * co_fraction}
+    return {member: fractions.get(member, 0.0) for member in config.end_members.members}
+
+
+def _pyrrhotite_vacancy_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Fe(1-x)S's vacancy fraction x, straight off the metal site's
+    deficiency from its 1.0 apfu target -- only meaningful because
+    ``pyrrhotite.yaml`` uses ``basis: "anion"`` (anchored on measured S),
+    which lets the metal site float rather than being forced to exactly
+    1.0 the way cation-basis normalization would produce (see
+    ``normalize.normalize_to_measured_anion``'s docstring).
+    """
+    m = site_allocation.sites.get("M")
+    if m is None:
+        raise ValueError("pyrrhotite_vacancy_ratio end-member calculation requires an 'M' site in the config.")
+    vacancy_fraction = 100.0 * (m.target - m.total) / m.target
+    return {member: vacancy_fraction for member in config.end_members.members}
+
+
 _METHODS = {
     "locock_2008": _locock_2008_garnet,
     "olivine_ratio": _olivine_ratio,
     "feldspar_ratio": _feldspar_ratio,
     "pyroxene_quad": _pyroxene_quad,
+    "pyroxene_quad_jd_ae": _pyroxene_quad_jd_ae,
+    "orthopyroxene_ratio": _orthopyroxene_ratio,
+    "nepheline_kalsilite_ratio": _nepheline_kalsilite_ratio,
+    "pyroxenoid_ratio": _pyroxenoid_ratio,
     "spinel_xmg": _spinel_xmg,
     "xmg_ratio": _xmg_ratio,
     "ilmenite_ratio": _ilmenite_ratio,
@@ -495,6 +666,10 @@ _METHODS = {
     "amphibole_ca_ratio": _amphibole_ca_ratio,
     "amphibole_na_ratio": _amphibole_na_ratio,
     "carbonate_ratio": _carbonate_ratio,
+    "monosulfide_ratio": _monosulfide_ratio,
+    "pyrite_group_ratio": _pyrite_group_ratio,
+    "pentlandite_ratio": _pentlandite_ratio,
+    "pyrrhotite_vacancy_ratio": _pyrrhotite_vacancy_ratio,
 }
 
 

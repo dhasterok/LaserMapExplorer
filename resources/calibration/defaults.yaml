@@ -9,3 +9,14 @@ background:
   fallback_n_rows: 20
   search_margin: 5
   tail_margin: 20
+# Deconvolution (src/deconvolution/) -- both correction flags default off,
+# so an existing pipeline run's behavior is unchanged unless explicitly
+# enabled. washout_tau_s is manual-entry only in this pass (per-analyte tau
+# estimation from real edge/pulse data is Stage 2, not yet implemented) --
+# an analyte with no entry here simply isn't washout-corrected.
+# (Bidirectional-scan handling is InstrumentSettings.bidirectional_scan, not
+# here -- it's acquisition geometry, not a correction toggle.)
+deconvolution:
+  apply_shift: false
+  apply_washout: false
+  washout_tau_s: {}

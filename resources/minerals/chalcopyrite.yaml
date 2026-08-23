@@ -1,0 +1,27 @@
+# Chalcopyrite: CuFeS2 (single metal site here, though Cu and Fe actually
+# occupy distinct ordered sites in the real tetragonal structure). No
+# end_members: block -- Cu and Fe don't form a continuous cation-ratio
+# solid solution the way pentlandite's Fe:Ni or monosulfide's Zn:Fe:Mn:Cd:Pb
+# do (chalcopyrite is close to a single, near-stoichiometric phase, with
+# Zn/Ag/In/Sn only as minor trace substituents) -- same "single near-pure
+# phase" precedent as allanite.yaml/hematite.yaml.
+#
+# basis: anion -- S is directly measured (see monosulfide.yaml's comment
+# for the general rationale); anchoring on it (target 2.0) still gives real
+# value here even without a solid-solution axis, since any deviation from
+# ideal 1:1:2 (e.g. a bornite-adjacent, Cu-excess zone) becomes directly
+# visible in the Cu/Fe apfu rather than forced to exactly 1:1. Falls back
+# to cation-basis automatically if S wasn't measured.
+mineral: chalcopyrite
+abbreviation: Ccp
+formula: CuFeS2
+normalization:
+  basis: anion
+  ideal_oxygens: 2.0   # ideal S (anion) total under basis: anion
+  ideal_cations: 2.0   # fallback target if S wasn't measured
+  excludes: [S]
+sites:
+  M:
+    target: 2.0
+    elements: [Cu, Fe, Zn, Ag]
+    priority: [Cu, Fe, Zn, Ag]

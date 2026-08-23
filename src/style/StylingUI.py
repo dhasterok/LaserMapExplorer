@@ -265,9 +265,14 @@ class AnnotationsPage(CustomPage):
         self.checkBoxShowMass.setObjectName("checkBoxShowMass")
         self.checkBoxShowMass.setChecked(True)
 
+        self.checkBoxShowMineralPrefix = QCheckBox(parent=self)
+        self.checkBoxShowMineralPrefix.setObjectName("checkBoxShowMineralPrefix")
+        self.checkBoxShowMineralPrefix.setChecked(True)
+
         form_layout.addRow("Font family", self.fontComboBox)
         form_layout.addRow("Font size", self.doubleSpinBoxFontSize)
         form_layout.addRow("Show mass", self.checkBoxShowMass)
+        form_layout.addRow("Show mineral prefix", self.checkBoxShowMineralPrefix)
 
         self.addLayout(form_layout)
 
@@ -709,6 +714,7 @@ class StylingDock(CustomDockWidget):
 
         # overlay and annotation properties
         self.annotations.checkBoxShowMass.stateChanged.connect(lambda _: self.update_show_mass())
+        self.annotations.checkBoxShowMineralPrefix.stateChanged.connect(lambda _: self.update_show_mineral_prefix())
         self.annotations.colorButtonOverlayColor.colorChanged.connect(self.update_overlay_color)
         self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: white;")
 
@@ -770,6 +776,7 @@ class StylingDock(CustomDockWidget):
         self.ui.style_data.scaleLengthChanged.connect(lambda value: self.update_scale_length(value))
         self.ui.style_data.overlayColorChanged.connect(lambda new_color: self.update_overlay_color(new_color))
         self.ui.style_data.showMassChanged.connect(lambda state: self.update_show_mass(state))
+        self.ui.style_data.showMineralPrefixChanged.connect(lambda state: self.update_show_mineral_prefix(state))
         self.ui.style_data.markerChanged.connect(lambda new_text: self.update_marker_symbol(new_text))
         self.ui.style_data.markerSizeChanged.connect(lambda value: self.update_marker_size(value))
         self.ui.style_data.markerColorChanged.connect(lambda new_color: self.update_marker_color(new_color))
@@ -814,6 +821,7 @@ class StylingDock(CustomDockWidget):
         self.annotations.fontComboBox.activated.connect(lambda: log(f"fontComboBox value=[{self.annotations.fontComboBox.currentText()}]", prefix="UI"))
         self.annotations.doubleSpinBoxFontSize.valueChanged.connect(lambda: log(f"doubleSpinBoxFontSize value=[{self.annotations.doubleSpinBoxFontSize.value()}]", prefix="UI"))
         self.annotations.checkBoxShowMass.checkStateChanged.connect(lambda: log(f"checkBoxShowMass value=[{self.annotations.checkBoxShowMass.isChecked()}]", prefix="UI"))
+        self.annotations.checkBoxShowMineralPrefix.checkStateChanged.connect(lambda: log(f"checkBoxShowMineralPrefix value=[{self.annotations.checkBoxShowMineralPrefix.isChecked()}]", prefix="UI"))
 
         # markers and lines
         self.elements.comboBoxMarker.activated.connect(lambda: log(f"comboBoxMarker value=[{self.elements.comboBoxMarker.currentText()}]", prefix="UI"))
@@ -891,6 +899,7 @@ class StylingDock(CustomDockWidget):
         self.annotations.fontComboBox.blockSignals(self._signal_state)
         self.annotations.doubleSpinBoxFontSize.blockSignals(self._signal_state)
         self.annotations.checkBoxShowMass.blockSignals(self._signal_state)
+        self.annotations.checkBoxShowMineralPrefix.blockSignals(self._signal_state)
 
         # scale
         self.annotations.comboBoxScaleDirection.blockSignals(self._signal_state)
@@ -1188,6 +1197,32 @@ class StylingDock(CustomDockWidget):
             self.annotations.checkBoxShowMass.blockSignals(True)
             self.annotations.checkBoxShowMass.setChecked(new_state)
             self.annotations.checkBoxShowMass.blockSignals(False)
+
+        self.ui.schedule_update()
+
+    def update_show_mineral_prefix(self, new_state=None):
+        """
+        Updates show mineral prefix checkbox and triggers plot update.
+
+        If `new_state` is None, it uses the current state of the checkbox to set `self.checkBoxShowMineralPrefix`.
+        If `new_state` is provided, it updates the `annotations.checkBoxShowMineralPrefix` state accordingly.
+
+        Parameters
+        ----------
+        new_state : bool, optional
+            New state for the checkbox, by default None
+        """
+        if new_state is None:
+            self.ui.style_data.blockSignals(True)
+            self.ui.style_data.show_mineral_prefix = self.annotations.checkBoxShowMineralPrefix.isChecked()
+            self.ui.style_data.blockSignals(False)
+        else:
+            if new_state == self.annotations.checkBoxShowMineralPrefix.isChecked():
+                return
+
+            self.annotations.checkBoxShowMineralPrefix.blockSignals(True)
+            self.annotations.checkBoxShowMineralPrefix.setChecked(new_state)
+            self.annotations.checkBoxShowMineralPrefix.blockSignals(False)
 
         self.ui.schedule_update()
 
@@ -1583,6 +1618,11 @@ class StylingDock(CustomDockWidget):
     def _toggle_common(self, show_mass=True, tick_dir=False, aspect=False, heatmap_res=False):
         """Enable/disable commonly used widgets using flag values directly"""
         self.annotations.checkBoxShowMass.setEnabled(show_mass)
+        # Same plot types as show_mass -- both strip a redundant leading tag
+        # (isotope mass / mineral prefix) from the same tick-label lists
+        # (correlation matrix, PCA loadings heatmap, ndim/TEC diagram; see
+        # toggle_mass/toggle_mineral_prefix in StyleToolbox.py).
+        self.annotations.checkBoxShowMineralPrefix.setEnabled(show_mass)
         self.axes.comboBoxTickDirection.setEnabled(tick_dir)
         self.axes.lineEditAspectRatio.setEnabled(aspect)
         self.caxes.spinBoxHeatmapResolution.setEnabled(heatmap_res)
@@ -1915,7 +1955,7 @@ class StylingDock(CustomDockWidget):
         field = self.ui.app_data.c_field
         if field in list(data.processed.column_attributes.keys()):
             self.ui.style_data.clim = [data.processed.get_attribute(field,'plot_min'), data.processed.get_attribute(field,'plot_max')]
-            self.ui.style_data.clabel = data.processed.get_attribute(field,'label')
+            self.ui.style_data.clabel = self.ui.style_data.toggle_mineral_prefix([data.processed.get_attribute(field,'label')])[0]
         # else:
         #     self.ui.style_data.clim = style.clim
         #     self.ui.style_data.clabel = style.clabel
@@ -2150,9 +2190,9 @@ class StylingDock(CustomDockWidget):
             self.caxes.comboBoxCScale.setCurrentText(data.processed.get_attribute(field,'norm'))
             
             # Update color axis label
-            label = data.processed.get_attribute(field,'label')
+            label = self.ui.style_data.toggle_mineral_prefix([data.processed.get_attribute(field,'label')])[0]
             self.caxes.lineEditCLabel.setText(label)
-            
+
             # Update style data
             self.ui.style_data.clabel = label
 

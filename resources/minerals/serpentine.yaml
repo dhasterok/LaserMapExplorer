@@ -5,6 +5,7 @@
 # docstring. No end-member scheme in MinPlotX for this mineral (no
 # end_members: block).
 mineral: serpentine
+abbreviation: Srp
 formula: Mg3Si2O5(OH)4
 normalization:
   basis: oxygen

@@ -24,6 +24,11 @@ class InstrumentSettings:
     scan_axis: str = "Xc"                        # 'Xc' or 'Yc' -- which axis is the fast/continuous scan
     reverse_x: bool = False
     reverse_y: bool = False
+    bidirectional_scan: bool = False               # alternate lines scanned in opposite directions --
+                                                    # src/deconvolution/'s washout correction must flip the
+                                                    # causal tail's direction on alternate lines when this is
+                                                    # set, or it produces "herringbone" artifacts (see
+                                                    # plans/laicpms_map_correction_spec.md Sec 3.2)
     dwell_time_ms: float | None = None            # per-analyte dwell time -- combined with
     sweeps_per_reading: int | None = None          # sweeps_per_reading gives tau = dwell*sweeps for
                                                     # src/calibration/counts.py's Poisson count recovery

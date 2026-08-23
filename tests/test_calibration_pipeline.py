@@ -23,7 +23,9 @@ from src.calibration.pipeline import (
     discover_sample_directories,
     run,
     run_batch,
+    run_from_parsed,
 )
+from src.calibration.rawfile import list_line_files, parse_line_file
 from src.calibration.pooling import PooledElementSpec, combined_abundance_fraction
 from src.calibration.reflib import parse_reference_material
 
@@ -106,6 +108,64 @@ def test_run_end_to_end_produces_calibrated_ppm(tmp_path):
     assert result.provenance["drift_order"] == 0
     assert result.provenance["raw_dir"] == str(sample_dir)
     assert "NIST610" in result.standard_results
+
+
+def test_ablation_onset_trim_shortens_every_line(tmp_path):
+    """Each synthetic line has 20 ablation rows at dt=0.30s -- trimming
+    0.9s (3 rows) should drop every line (standards and samples alike,
+    the ramp is a physical artifact affecting both) to 17 rows, and the
+    calibrated_ppm/grid_index row counts should shrink to match."""
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    baseline = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )["SAMPLE"]
+    trimmed = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0, ablation_onset_trim_s=0.9,
+    )["SAMPLE"]
+
+    assert len(baseline.calibrated_ppm) == len(trimmed.calibrated_ppm) + 3 * 2  # 2 sample lines
+    for line_number in trimmed.grid_index["line_number"].unique():
+        n_baseline = int((baseline.grid_index["line_number"] == line_number).sum())
+        n_trimmed = int((trimmed.grid_index["line_number"] == line_number).sum())
+        assert n_trimmed == n_baseline - 3
+    # sweep_index is re-based to 0 for the trimmed line, not shifted
+    assert trimmed.grid_index["sweep_index"].min() == 0
+
+
+def test_run_from_parsed_matches_run(tmp_path):
+    """Regression test for the run()/run_from_parsed() extraction
+    (_run_from_files): given the exact files run() would have parsed
+    itself, run_from_parsed() must produce identical calibrated_ppm/
+    grid_index/qc_report -- proves the refactor changed nothing about
+    run()'s own behavior, only added a second entry point."""
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    kwargs = dict(
+        standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+    run_results = run(sample_dir, **kwargs)
+
+    files = [
+        parse_line_file(p, standard_names={"NIST610"})
+        for p in list_line_files(sample_dir)
+    ]
+    parsed_kwargs = dict(kwargs)
+    parsed_kwargs.pop("standard_names")
+    parsed_results = run_from_parsed(files, sample_dir, **parsed_kwargs)
+
+    assert set(run_results.keys()) == set(parsed_results.keys()) == {"SAMPLE"}
+    run_sample, parsed_sample = run_results["SAMPLE"], parsed_results["SAMPLE"]
+    pd.testing.assert_frame_equal(run_sample.calibrated_ppm, parsed_sample.calibrated_ppm)
+    pd.testing.assert_frame_equal(run_sample.grid_index, parsed_sample.grid_index)
+    assert run_sample.qc_report == parsed_sample.qc_report
 
 
 def test_run_calibrates_sibling_isotope_with_no_reference_key(tmp_path):

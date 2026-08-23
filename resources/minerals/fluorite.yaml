@@ -1,0 +1,30 @@
+# Fluorite: CaF2 -- a halide, not an oxide, so unlike every other config in
+# this directory it has no oxygen at all. basis: cation (Ca normalized to
+# its ideal 1 apfu) is used instead of basis: oxygen -- there's no
+# STANDARD_OXIDES-derived O-per-cation route for a halide. ideal_oxygens is
+# unused by this path (no redox, basis != 'oxygen') but kept at 0 rather
+# than a fabricated non-zero value, for schema completeness only.
+#
+# F itself isn't tracked as a site element -- anions are never
+# site-allocated in this schema (sites hold cations only), same convention
+# as apatite.yaml's identical F/Cl/OH omission.
+#
+# Trace substituents: Y3+ and REE3+ substitute for Ca2+ in some fluorite
+# (yttrofluorite), typically charge-balanced by a coupled Na+ or a vacancy
+# -- included directly in the M site since they're real structural
+# cations, not contamination, same convention as rutile.yaml's Nb/Ta/Zr.
+#
+# No end_members block -- a single near-pure phase, same as
+# allanite/serpentine/talc/hematite/rutile.
+mineral: fluorite
+abbreviation: Fl
+formula: CaF2
+normalization:
+  basis: cation
+  ideal_oxygens: 0
+  ideal_cations: 1
+sites:
+  M:
+    target: 1.0
+    elements: [Ca, Y, REE, Na]
+    priority: [Ca, Y, REE, Na]

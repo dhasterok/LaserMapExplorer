@@ -10,13 +10,16 @@ import os
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+import random
 import shutil
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
+from PyQt6.QtCore import Qt
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
@@ -118,6 +121,427 @@ def test_run_pipeline_end_to_end_via_gui(tmp_path, qtbot, main_window):
     assert not result.calibrated_ppm.empty
     assert main_window.tableTiming.rowCount() == len(result.files)
     assert main_window.tableAccuracyFit.rowCount() > 0
+
+
+def test_deconvolution_settings_reach_run_and_populate_qc_tab(tmp_path, qtbot, main_window):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    # tableWashoutTau is populated at Scan time, one row per analyte.
+    assert main_window.tableWashoutTau.rowCount() > 0
+    analytes = {main_window.tableWashoutTau.item(r, 0).text() for r in range(main_window.tableWashoutTau.rowCount())}
+    assert "Ca43" in analytes
+    ca_row = next(r for r in range(main_window.tableWashoutTau.rowCount()) if main_window.tableWashoutTau.item(r, 0).text() == "Ca43")
+    main_window.tableWashoutTau.item(ca_row, 1).setText("2.0")
+
+    main_window.checkBoxApplyShift.setChecked(True)
+    main_window.checkBoxApplyWashout.setChecked(True)
+    main_window.spinSweep.setValue(0.5)
+    main_window.spinDwellTime.setValue(10.0)
+
+    material = parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {
+            "Al27": {"element": "Al", "mass": 27, "value": 500.0, "uncertainty": 5.0, "uncertainty_type": "1SD"},
+            "Ca43": {"element": "Ca", "mass": 43, "value": 300.0, "uncertainty": 3.0, "uncertainty_type": "1SD"},
+        },
+    })
+    main_window.reference_library["NIST610"] = material
+    main_window.spinDriftOrder.setValue(0)
+
+    main_window._on_run()
+    qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+
+    result = main_window._current_result()
+    assert result is not None
+    assert result.deconvolution_provenance  # non-empty: at least one line was corrected
+    any_line = next(iter(result.deconvolution_provenance.values()))
+    assert any_line["Ca43"]["washout_applied"] is True
+    assert any_line["Ca43"]["tau_s"] == pytest.approx(2.0)
+
+    assert main_window.tableDeconvolutionReport.rowCount() > 0
+
+    # "deconvolution correction" map stage: shows the per-pixel delta the
+    # washout correction introduced (corrected minus pre-deconvolution),
+    # recomputed on demand from result.deconvolution_settings.
+    assert "deconvolution correction" in [main_window.comboMapStage.itemText(i) for i in range(main_window.comboMapStage.count())]
+    series = main_window._stage_series(result, "deconvolution correction", "Ca43")
+    assert not series.empty
+    assert not np.allclose(series.to_numpy(), 0.0)  # washout was actually applied to Ca43
+
+    main_window.comboMapStage.setCurrentText("deconvolution correction")
+    main_window._refresh_map_tab()  # must not raise
+
+
+def test_deconvolution_correction_map_stage_is_all_zero_when_not_applied(tmp_path, qtbot, main_window):
+    """Without any deconvolution settings configured, the 'deconvolution
+    correction' stage should show no change (all zero), not NaN or raise --
+    result.deconvolution_settings falls back to an all-off
+    DeconvolutionSettings() (see _stage_series's docstring)."""
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    material = parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {
+            "Al27": {"element": "Al", "mass": 27, "value": 500.0, "uncertainty": 5.0, "uncertainty_type": "1SD"},
+            "Ca43": {"element": "Ca", "mass": 43, "value": 300.0, "uncertainty": 3.0, "uncertainty_type": "1SD"},
+        },
+    })
+    main_window.reference_library["NIST610"] = material
+    main_window.spinDriftOrder.setValue(0)
+
+    main_window._on_run()
+    qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+
+    result = main_window._current_result()
+    assert result is not None
+    series = main_window._stage_series(result, "deconvolution correction", "Ca43")
+    assert not series.empty
+    assert np.allclose(series.to_numpy(), 0.0)
+
+
+def _write_decay_raw_file(directory: Path, label: str, index: int, acquired_at: datetime, tau_s: float = 2.0):
+    """A raw file with a genuine single-exponential decay in Al27 (peak at
+    t=3s decaying with the given tau), for the kernel-estimation ("Fit from
+    reference data") GUI test below -- test_calibration_pipeline.py's
+    _write_raw_file only produces flat plateau data, unsuitable for that.
+    """
+    rng = random.Random(0)
+    lines = [
+        rf"S:\Data\Synthetic\SyntheticBatch.b\{label} - {index}.d",
+        "Intensity Vs Time,CPS",
+        f"Acquired      : {acquired_at.strftime('%d/%m/%Y %H:%M:%S')} using Batch SyntheticBatch.b",
+        "Time [Sec],Al27,Ca43",
+    ]
+    t = 0.0
+    dt = 0.1
+    for _ in range(80):
+        peak_t = 3.0
+        al = 300.0 + (2000.0 * np.exp(-max(t - peak_t, 0) / tau_s) if t >= peak_t else 0.0)
+        ca = 500.0 + rng.uniform(-10, 10)
+        lines.append(f"{t:.4f},{al:.2f},{ca:.2f}")
+        t += dt
+    lines.append("")
+    lines.append("")
+    printed = (acquired_at + timedelta(seconds=t)).strftime("%d/%m/%Y %H:%M:%S")
+    lines.append(f"          Printed:{printed}")
+    (directory / f"{label} - {index}.csv").write_bytes(("\r\n".join(lines) + "\r\n").encode("ascii"))
+
+
+def test_kernel_estimation_fits_tau_and_fills_washout_table(tmp_path, main_window):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    base = datetime(2026, 3, 1, 10, 0, 0)
+    _write_decay_raw_file(sample_dir, "NIST610", 1, base, tau_s=2.0)
+
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    assert "NIST610 - 1.csv" in main_window._scanned_files
+
+    main_window._on_add_kernel_reference_row()
+    row = main_window.tableKernelReferences.rowCount() - 1
+    main_window.tableKernelReferences.cellWidget(row, 0).setCurrentText("NIST610 - 1.csv")
+    main_window.tableKernelReferences.item(row, 1).setText("3.0")   # decay starts at t=3s
+    main_window.tableKernelReferences.item(row, 2).setText("8.0")
+    main_window.tableKernelReferences.cellWidget(row, 3).setCurrentText("Pulse")
+
+    main_window._on_fit_kernels()
+
+    assert "Al27" in main_window.textKernelFitReport.toPlainText()
+    tau_rows = {
+        main_window.tableWashoutTau.item(r, 0).text(): main_window.tableWashoutTau.item(r, 1).text()
+        for r in range(main_window.tableWashoutTau.rowCount())
+    }
+    assert tau_rows["Al27"] != ""
+    assert float(tau_rows["Al27"]) == pytest.approx(2.0, rel=0.2)
+    assert "Al27" in main_window._auto_filled_tau
+
+    # A hand-edit to that cell must survive a second Fit click.
+    al_row = next(r for r in range(main_window.tableWashoutTau.rowCount()) if main_window.tableWashoutTau.item(r, 0).text() == "Al27")
+    main_window.tableWashoutTau.item(al_row, 1).setText("99.0")
+    assert "Al27" not in main_window._auto_filled_tau
+    main_window._on_fit_kernels()
+    assert main_window.tableWashoutTau.item(al_row, 1).text() == "99.0"
+
+
+def test_classification_settings_are_wired(main_window):
+    """Mineral list is populated at construction time (the reference
+    library loads in __init__, not at Scan/Run time), and the search
+    filter / Select All / Select None controls work mechanically --
+    doesn't need a completed pipeline Run."""
+    assert main_window.listMinerals.count() > 0
+    assert main_window.listMinerals.item(0).checkState() == Qt.CheckState.Checked
+
+    main_window._set_all_minerals_checked(False)
+    assert all(
+        main_window.listMinerals.item(i).checkState() == Qt.CheckState.Unchecked
+        for i in range(main_window.listMinerals.count())
+    )
+    main_window._set_all_minerals_checked(True)
+    assert all(
+        main_window.listMinerals.item(i).checkState() == Qt.CheckState.Checked
+        for i in range(main_window.listMinerals.count())
+    )
+
+    main_window.filterMinerals.search_input.setText("Anorthite")
+    visible = [
+        main_window.listMinerals.item(i).text()
+        for i in range(main_window.listMinerals.count())
+        if not main_window.listMinerals.item(i).isHidden()
+    ]
+    assert visible == ["Anorthite"]
+    main_window.filterMinerals.clear()
+
+
+def _visible_mineral_names(main_window):
+    return [
+        main_window.listMinerals.item(i).text()
+        for i in range(main_window.listMinerals.count())
+        if not main_window.listMinerals.item(i).isHidden()
+    ]
+
+
+def test_mineral_class_filter_combo_is_populated(main_window):
+    items = [main_window.comboMineralClassFilter.itemText(i) for i in range(main_window.comboMineralClassFilter.count())]
+    assert items[0] == "All"
+    assert "Carbonate" in items
+    assert "Feldspar" in items
+    # "All" (no filtering) does not hide anything.
+    assert len(_visible_mineral_names(main_window)) == main_window.listMinerals.count()
+
+
+def test_mineral_class_filter_combines_with_text_search(main_window):
+    main_window.comboMineralClassFilter.setCurrentText("Carbonate")
+    visible = set(_visible_mineral_names(main_window))
+    assert "Calcite" in visible
+    assert "Anorthite" not in visible  # a Feldspar, excluded by the class filter
+
+    main_window.filterMinerals.search_input.setText("Mag")
+    visible = _visible_mineral_names(main_window)
+    assert visible == ["Magnesite"]  # class AND text both narrow the list
+
+    main_window.filterMinerals.clear()
+    main_window.comboMineralClassFilter.setCurrentText("All")
+
+
+def test_mineral_live_preview_reflects_checked_set_before_classify(main_window):
+    """Checking/unchecking minerals refreshes tableClassificationSummary
+    immediately, with blank score/gap/pixel-count columns, even though
+    nothing has been classified yet -- lets the user see what's in play
+    without scrolling the (long) mineral list."""
+    main_window._set_all_minerals_checked(False)
+    assert main_window.tableClassificationSummary.rowCount() == 0
+
+    item = next(
+        main_window.listMinerals.item(i)
+        for i in range(main_window.listMinerals.count())
+        if main_window.listMinerals.item(i).text() == "Calcite"
+    )
+    item.setCheckState(Qt.CheckState.Checked)
+
+    assert main_window.tableClassificationSummary.rowCount() == 1
+    headers = [
+        main_window.tableClassificationSummary.horizontalHeaderItem(i).text()
+        for i in range(main_window.tableClassificationSummary.columnCount())
+    ]
+    assert headers == ["mineral", "pixel_count", "mean_score", "mean_gap", "n_ambiguous"]
+    assert main_window.tableClassificationSummary.item(0, 0).text() == "Calcite"
+    assert main_window.tableClassificationSummary.item(0, 1).text() == ""  # no score yet
+
+    main_window._set_all_minerals_checked(True)
+
+
+def test_mineral_preset_save_and_load_round_trips_check_states(tmp_path, main_window, monkeypatch):
+    """Save writes exactly the checked subset to disk; loading a different
+    subset later checks exactly those minerals and unchecks everything
+    else, restoring the saved state through the real list-widget checkboxes."""
+    presets_path = tmp_path / "classification_presets.csv"
+    monkeypatch.setattr(dw, "DEFAULT_PRESETS_PATH", presets_path)
+
+    main_window._set_all_minerals_checked(False)
+    for name in ("Calcite", "Magnesite"):
+        item = next(
+            main_window.listMinerals.item(i)
+            for i in range(main_window.listMinerals.count())
+            if main_window.listMinerals.item(i).text() == name
+        )
+        item.setCheckState(Qt.CheckState.Checked)
+
+    monkeypatch.setattr(dw.QInputDialog, "getText", staticmethod(lambda *a, **k: ("Carbonates", True)))
+    main_window._on_save_mineral_preset()
+
+    assert presets_path.exists()
+    assert main_window.comboMineralPresets.findText("Carbonates") >= 0
+
+    # Change the checked set, then load the preset back and confirm it's restored.
+    main_window._set_all_minerals_checked(True)
+    main_window.comboMineralPresets.setCurrentText("Carbonates")
+    main_window._on_load_mineral_preset()
+
+    checked = {
+        main_window.listMinerals.item(i).text()
+        for i in range(main_window.listMinerals.count())
+        if main_window.listMinerals.item(i).checkState() == Qt.CheckState.Checked
+    }
+    assert checked == {"Calcite", "Magnesite"}
+
+    main_window._set_all_minerals_checked(True)
+
+
+def test_reprocess_toolbar_action_blocked_in_batch_mode(main_window, mocker):
+    mock_info = mocker.patch.object(dw.QMessageBox, "information")
+    main_window.checkBoxBatchMode.setChecked(True)
+    main_window.actionReprocess.trigger()
+    mock_info.assert_called_once()
+    main_window.checkBoxBatchMode.setChecked(False)
+
+
+def test_reprocess_toolbar_action_reruns_without_rescanning(tmp_path, qtbot, main_window):
+    """actionReprocess (run_from_parsed) must reuse self._scanned_files --
+    not re-read raw files from disk -- while still reflecting settings
+    changed after the original Run (here: ablation_onset_trim_s)."""
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    material = parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {"Al27": {"element": "Al", "mass": 27, "value": 500.0, "uncertainty": 5.0, "uncertainty_type": "1SD"}},
+    })
+    main_window.reference_library["NIST610"] = material
+    main_window._reference_combos["NIST610"].addItem("NIST610")
+    main_window._reference_combos["NIST610"].setCurrentText("NIST610")
+    main_window._primary_checkboxes["NIST610"].setChecked(True)
+    main_window.spinDriftOrder.setValue(0)
+
+    main_window._on_run()
+    qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+    baseline_rows = len(main_window._current_result().calibrated_ppm)
+
+    main_window.spinAblationOnsetTrim.setValue(0.9)  # 3 rows/line at dt=0.30s, 2 sample lines
+    main_window.actionReprocess.trigger()
+    qtbot.waitUntil(lambda: len(main_window._current_result().calibrated_ppm) == baseline_rows - 6, timeout=10000)
+
+    main_window.spinAblationOnsetTrim.setValue(0.0)
+
+
+def test_classify_toolbar_action_triggers_on_classify(main_window, mocker):
+    # No pipeline result yet, so _on_classify's own first-branch warning
+    # fires -- proves the toolbar action reaches _on_classify without
+    # relying on mocker.spy (which can't see calls Qt's C++ signal/slot
+    # dispatch makes through the pre-connect()-time bound method).
+    mock_warning = mocker.patch.object(dw.QMessageBox, "warning")
+    main_window.actionClassify.trigger()
+    mock_warning.assert_called_once()
+
+
+def test_ablation_onset_trim_spinbox_reaches_run(tmp_path, qtbot, main_window):
+    """Setting the spinbox to 0.9s (3 rows at dt=0.30s) should reach
+    pipeline.run() and shorten every line's grid rows by exactly 3,
+    regardless of the auto-detected ablation window's own length (which
+    depends on the analyte set/drift settings, so isn't hardcoded here --
+    see tests/test_calibration_pipeline.py's test_ablation_onset_trim_
+    shortens_every_line for the fixed-window-length version of this
+    check)."""
+    assert main_window.spinAblationOnsetTrim.value() == 0.0
+
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    material = parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {"Al27": {"element": "Al", "mass": 27, "value": 500.0, "uncertainty": 5.0, "uncertainty_type": "1SD"}},
+    })
+    main_window.reference_library["NIST610"] = material
+    main_window._reference_combos["NIST610"].addItem("NIST610")
+    main_window._reference_combos["NIST610"].setCurrentText("NIST610")
+    main_window._primary_checkboxes["NIST610"].setChecked(True)
+    main_window.spinDriftOrder.setValue(0)
+
+    main_window._on_run()
+    qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+    baseline_counts = {
+        ln: int((main_window._current_result().grid_index["line_number"] == ln).sum())
+        for ln in main_window._current_result().grid_index["line_number"].unique()
+    }
+
+    main_window.spinAblationOnsetTrim.setValue(0.9)
+    main_window._on_run()
+    qtbot.waitUntil(
+        lambda: len(main_window._current_result().grid_index) == sum(baseline_counts.values()) - 3 * len(baseline_counts),
+        timeout=10000,
+    )
+
+    result = main_window._current_result()
+    for line_number, n_baseline in baseline_counts.items():
+        assert int((result.grid_index["line_number"] == line_number).sum()) == n_baseline - 3
+
+    main_window.spinAblationOnsetTrim.setValue(0.0)
+
+
+def test_classify_populates_map_and_summary_tab(tmp_path, qtbot, main_window):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    material = parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {
+            "Al27": {"element": "Al", "mass": 27, "value": 500.0, "uncertainty": 5.0, "uncertainty_type": "1SD"},
+            "Ca43": {"element": "Ca", "mass": 43, "value": 300.0, "uncertainty": 3.0, "uncertainty_type": "1SD"},
+        },
+    })
+    main_window.reference_library["NIST610"] = material
+    main_window.spinDriftOrder.setValue(0)
+
+    main_window._on_run()
+    qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+
+    result = main_window._current_result()
+    assert result is not None
+    assert result.classification.empty  # nothing classified until Classify is clicked
+
+    main_window._on_classify()
+
+    result = main_window._current_result()
+    assert not result.classification.empty
+    assert set(result.classification.columns) == {"label", "score", "gap", "ambiguous"}
+    assert result.classification_categories  # the full checked subset, stable order
+    # Only 2 analytes (Al27, Ca43) exist in this synthetic sample -- below
+    # cosine_similarity's default n_min=3, so nothing actually scores. That's
+    # expected here (real match accuracy is covered by
+    # tests/test_classification_cosine.py); this test is about the GUI
+    # wiring, not matching quality.
+    assert result.classification["label"].isna().all()
+
+    # Tab refresh (normally triggered by _on_classify itself) must not raise,
+    # and the map placeholder/summary table must reflect "ran, nothing matched".
+    main_window._refresh_classification_tab()
+    assert main_window.tableClassificationSummary.rowCount() == 0
 
 
 def test_scan_populates_time_series_lines_and_override_table(tmp_path, main_window):
@@ -387,6 +811,8 @@ def test_tab_constants_match_actual_tab_order(main_window):
         dw.CalibrationMainWindow.TAB_ISOTOPE_RATIOS: "Isotope Ratios",
         dw.CalibrationMainWindow.TAB_MAPS: "Maps",
         dw.CalibrationMainWindow.TAB_DATA: "Data",
+        dw.CalibrationMainWindow.TAB_DECONVOLUTION: "Deconvolution QC",
+        dw.CalibrationMainWindow.TAB_CLASSIFICATION: "Classification",
     }
     for index, label in expected_labels.items():
         assert main_window.tabs.tabText(index) == label, f"index {index} expected {label!r}"

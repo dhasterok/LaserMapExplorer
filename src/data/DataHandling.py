@@ -795,12 +795,23 @@ class SampleObj(QObject):
         self.polygon_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.cluster_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
         self.roi_selection_mask = np.ones_like(self.raw['Xc'].values, dtype=bool)
-        self.mask = \
-            self.crop_mask & \
-            self.filter_mask & \
-            self.polygon_mask & \
-            self.cluster_mask & \
-            self.roi_selection_mask
+
+        # Whether each mask component actually restricts self.mask -- driven
+        # by the toolbar's PolygonMask/ClusterMask/ROIMask toggle actions
+        # (see MainWindow.toggle_polygon_mask/toggle_cluster_mask/
+        # toggle_roi_mask). Default True (all components active) matches
+        # this class's own long-standing default of an unrestricted,
+        # all-True mask array for each component, so a freshly loaded
+        # sample behaves exactly as before these toggles did anything.
+        # ROI absorbs the old standalone "filter toggle" (an ROI's
+        # definition IS a filter definition -- see `add_roi`), so
+        # roi_mask_enabled gates both filter_mask and roi_selection_mask
+        # together rather than filter_mask having its own toggle.
+        self.polygon_mask_enabled = True
+        self.cluster_mask_enabled = True
+        self.roi_mask_enabled = True
+
+        self.recompute_mask()
 
         # Regions of interest: an ordered stack of named, colored, filter-defined
         # groups (see `add_roi`). Each entry remembers the filter definition that
@@ -1429,6 +1440,29 @@ class SampleObj(QObject):
             del self.processed.column_attributes[column_name]
 
 
+    def recompute_mask(self):
+        """Recomputes the combined ``self.mask`` from ``crop_mask`` and each
+        optional mask component (filter/polygon/cluster/ROI), respecting
+        whichever mask-type toggle actions are currently enabled.
+
+        A *disabled* component contributes an all-True (no restriction)
+        array to the AND chain rather than being dropped from it -- so
+        toggling a mask type back on later doesn't require recomputing
+        anything else, just calling this again. ``polygon_mask_enabled``/
+        ``cluster_mask_enabled``/``roi_mask_enabled`` are set by
+        ``MainWindow.toggle_polygon_mask``/``toggle_cluster_mask``/
+        ``toggle_roi_mask`` (the PolygonMask/ClusterMask/ROIMask toolbar
+        actions). ``roi_mask_enabled`` also gates ``filter_mask`` -- ROI
+        absorbed the old standalone filter toggle, since an ROI's
+        definition IS a filter definition (see ``add_roi``).
+        """
+        n = len(self.crop_mask)
+        filter_component = self.filter_mask if self.roi_mask_enabled else np.ones(n, dtype=bool)
+        polygon_component = self.polygon_mask if self.polygon_mask_enabled else np.ones(n, dtype=bool)
+        cluster_component = self.cluster_mask if self.cluster_mask_enabled else np.ones(n, dtype=bool)
+        roi_component = self.roi_selection_mask if self.roi_mask_enabled else np.ones(n, dtype=bool)
+        self.mask = self.crop_mask & filter_component & polygon_component & cluster_component & roi_component
+
     def _compute_filter_mask(self, filter_df):
         """Evaluate a filter table (min/max/operator rows) into a boolean mask.
 
@@ -1479,7 +1513,7 @@ class SampleObj(QObject):
         Field-based filters are stored in ``self.filter_df``.  This method updates ``self.filter_mask``.
         """
         self.filter_mask = self._compute_filter_mask(self.filter_df)
-        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask & self.roi_selection_mask
+        self.recompute_mask()
         log(f"apply_field_filters: filter_mask={self.filter_mask.sum()}/{len(self.filter_mask)} True, mask={self.mask.sum()}/{len(self.mask)} True", prefix='Mask')
 
     # -------------------------------------
@@ -1585,7 +1619,7 @@ class SampleObj(QObject):
         self.selected_rois = [i for i in self.selected_rois if i in ids]
         selected = self.selected_rois if self.selected_rois else ids
         self.roi_selection_mask = np.isin(roi_values, selected) if selected else np.ones(n, dtype=bool)
-        self.mask = self.crop_mask & self.filter_mask & self.polygon_mask & self.cluster_mask & self.roi_selection_mask
+        self.recompute_mask()
 
     def roi_percentages(self):
         """Computes, per ROI, what fraction of the map it occupies.

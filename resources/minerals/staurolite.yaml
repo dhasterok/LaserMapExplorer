@@ -15,6 +15,7 @@
 # for the general derivation (same mistake, same fix, found across this
 # batch).
 mineral: staurolite
+abbreviation: St
 formula: (Fe,Mg,Zn)4Al18Si8O46(OH)2
 normalization:
   basis: oxygen

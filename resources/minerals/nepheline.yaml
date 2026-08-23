@@ -1,0 +1,32 @@
+# Nepheline-kalsilite: (Na,K)AlSiO4, a true framework-silicate solid
+# solution (the feldspathoid analogue of feldspar's An-Ab-Or), despite the
+# large natural miscibility gap between the Na- and K-rich compositions --
+# same "report the continuous ratio regardless of whether nature usually
+# shows a gap" convention as carbonate_ratio's calcite-magnesite-siderite-
+# rhodochrosite axis.
+#
+# Two sites, same shape as feldspar.yaml: T (tetrahedral, Al+Si, always
+# 1:1 by charge balance) and A (alkali, Na/K + minor Ca). No redox
+# (no Fe-bearing site). Ca is tracked in A for QC/reporting but isn't a
+# third end-member axis here -- no established third nepheline-group name
+# for Ca-substitution in this port, same "trace substituent, not a full
+# axis" treatment as pyrite_group_ratio's As.
+mineral: nepheline
+abbreviation: Nph
+formula: (Na,K)AlSiO4
+normalization:
+  basis: cation
+  ideal_oxygens: 4
+  ideal_cations: 3
+sites:
+  T:
+    target: 2.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  A:
+    target: 1.0
+    elements: [Na, K, Ca]
+    priority: [Na, K, Ca]
+end_members:
+  method: nepheline_kalsilite_ratio
+  members: [nepheline, kalsilite]

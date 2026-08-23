@@ -1,0 +1,29 @@
+# Pyrite group: generic MS2 formula (single metal site) -- the
+# isostructural pyrite (Fe) - cattierite (Co) - vaesite (Ni) series. As
+# (arsenian pyrite, common in orogenic gold systems) is tracked as a
+# possible cation substituent -- same convention as the generic
+# sulfide.yaml's "As-as-cation" default -- but isn't part of the named
+# pyrite/cattierite/vaesite end-member axis (a coupled substitution this
+# port doesn't disentangle, same "trace substituent, not a separate member"
+# treatment as epidote.yaml dropping piemontite).
+#
+# basis: anion -- S is directly measured (see monosulfide.yaml's comment
+# for the general rationale); anchoring on it (target 2.0) lets the metal
+# site float rather than being pinned to exactly 1.0. Falls back to
+# cation-basis automatically if S wasn't measured.
+mineral: pyrite
+abbreviation: Py
+formula: (Fe,Co,Ni)S2
+normalization:
+  basis: anion
+  ideal_oxygens: 2.0   # ideal S (anion) total under basis: anion
+  ideal_cations: 1.0   # fallback target if S wasn't measured
+  excludes: [S]
+sites:
+  M:
+    target: 1.0
+    elements: [Fe, Co, Ni, As]
+    priority: [Fe, Co, Ni, As]
+end_members:
+  method: pyrite_group_ratio
+  members: [pyrite, cattierite, vaesite]

@@ -9,6 +9,7 @@
 # back-calculation are anion/volatile bookkeeping (see Stage 3 plan) and
 # aren't ported.
 mineral: scapolite
+abbreviation: Scp
 formula: (Na,Ca)4Al3(Al,Si)3Si6O24(Cl,CO3,SO4)
 normalization:
   basis: oxygen

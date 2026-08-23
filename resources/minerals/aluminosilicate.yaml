@@ -1,0 +1,31 @@
+# Al2SiO5 polymorphs: kyanite, sillimanite, andalusite. Compositionally
+# IDENTICAL (same formula, same apfu) -- they differ only in Al
+# coordination/crystal structure (triclinic 6-6 kyanite, orthorhombic 6-4
+# sillimanite, orthorhombic 6-5 andalusite), which stoichiometry from
+# element concentrations alone cannot distinguish. This config computes
+# correct Al/Si apfu for any of the three; polymorph identity has to come
+# from structural/textural context (XRD, EBSD, or petrographic
+# association), not from this calculation -- see
+# resources/mineral_reference_compositions/webmineral_compositions.csv's
+# matching 'aluminosilicate' group note, and the cosine-distance
+# classification spec's caveat about the same limitation.
+#
+# Single site (no T/M split -- Al and Si never compete for a shared,
+# capped site the way e.g. pyroxene's T does), like apatite/scapolite/
+# ilmenite. No redox -- Fe3+ (viridine-type substitution) and Mn3+
+# (manganandalusite/viridine) are minor trace substituents here, tracked
+# as plain, non-split cations, same treatment as rutile.yaml's plain Fe.
+# No end_members -- nothing to compute a fraction of when all three
+# "members" share one indistinguishable composition.
+mineral: aluminosilicate
+abbreviation: Als
+formula: Al2SiO5
+normalization:
+  basis: cation
+  ideal_oxygens: 5
+  ideal_cations: 3
+sites:
+  M:
+    target: 3.0
+    elements: [Al, Si, Fe3, Mn]
+    priority: [Al, Si, Fe3, Mn]

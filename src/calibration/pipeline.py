@@ -28,6 +28,8 @@ from src.calibration.background import (
 from src.calibration.despike import noise_despike
 from src.calibration.drift import DriftFitLike
 from src.calibration.geometry import InstrumentSettings, compute_pixel_spacing
+from src.deconvolution.config import DeconvolutionSettings
+from src.deconvolution.pipeline import correct_line
 from src.calibration.dating_ratios import DatingRatioFit, DatingRatioSpec, corrected_dating_ratio, fit_session_dating_ratios
 from src.calibration.isotope_apportion import IsotopeShareSpec, apportion_from_spec
 from src.calibration.massbias import BiasFit, BiasSpec, DEFAULT_ISOTOPE_TABLE_PATH, corrected_ratio, fit_session_bias
@@ -69,6 +71,10 @@ class SampleCalibratedResult:
     isotopic_ppm: pd.DataFrame = field(default_factory=pd.DataFrame)  # same analyte-string columns as calibrated_ppm (e.g. "Pb206"), but a SEPARATE frame -- see isotope_apportion.py
     isotopic_ppm_provenance: dict[str, dict] = field(default_factory=dict)  # "Pb" -> {"included_masses":..., "missing_masses":..., "normalizer_mass":...}
     dating_ratio_fits: dict[str, DatingRatioFit] = field(default_factory=dict)  # "Pb206/U238" -> session cross-element dating-ratio fit, see dating_ratios.py
+    deconvolution_provenance: dict[int, dict] = field(default_factory=dict)  # line_number -> {analyte -> {shift_applied, washout_applied, tau_s, noise_amplification, negative_count, flags}}, see src/deconvolution/pipeline.py
+    deconvolution_settings: DeconvolutionSettings | None = None  # the settings actually used -- kept (not just the resulting provenance) so a "deconvolution correction" map stage can recompute the per-pixel delta on demand, same recompute-don't-store convention as the "background+drift correction" map stage (see dock_widgets._stage_series)
+    classification: pd.DataFrame = field(default_factory=pd.DataFrame)  # columns label/score/gap/ambiguous, same (file_index, row_in_ablation) index as calibrated_ppm -- set by dock_widgets._on_classify (Stage 3, src/classification/), not by run() itself; empty until the user runs it
+    classification_categories: list[str] = field(default_factory=list)  # the selected mineral-name subset, in stable sorted order -- fixes the discrete colormap's code->name mapping regardless of which minerals actually got assigned
 
 
 def _group_by_label(files: list[LineFileData]) -> dict[str, list[LineFileData]]:
@@ -101,23 +107,56 @@ def _build_calibrated_ppm_and_grid(
     instrument_settings: InstrumentSettings,
     multi_result: MultiStandardCalibrationResult | None = None,
     standard_results: dict[str, StandardCalibrationResult] | None = None,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+    deconvolution_settings: DeconvolutionSettings | None = None,
+    ablation_onset_trim_s: float = 0.0,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[int, dict]]:
     """``multi_result``/``standard_results`` (both required together) route
     calibration through :func:`~src.calibration.standards.apply_multi_point_calibration`
     instead of the single-standard ``standard_result``/``apply_calibration``
-    path -- used when 2+ primary standards were configured (see ``run()``)."""
+    path -- used when 2+ primary standards were configured (see ``run()``).
+
+    ``deconvolution_settings``, when given, applies
+    :func:`src.deconvolution.pipeline.correct_line` to each line's
+    background-corrected signal (still pre-calibration counts) immediately
+    before calibration -- this is the ordering the design spec requires
+    (Sec 7.1: deconvolve before ratioing/calibration). ``None`` (the
+    default) skips deconvolution entirely, identical to this function's
+    behavior before deconvolution existed.
+
+    ``ablation_onset_trim_s`` (default 0.0, off) drops that many seconds'
+    worth of leading rows from *every* line's ablation window -- the
+    aerosol-transport ramp-up after the laser starts firing takes a few
+    sweeps to reach steady-state, so the first several pixels of a raw
+    ablation interval aren't representative of the true sample composition.
+    This is deliberately separate from ``BackgroundWindowOverride.
+    edge_trim_lead_s`` (see that field's docstring): the edge-trim override
+    only narrows the region used for a *standard's own* calibration-factor
+    statistics, never touching ``background_corrected_signal`` itself --
+    exactly why the ramp still showed up in samples' per-pixel maps and
+    classification despite edge_trim_lead_s existing. Applied here, before
+    deconvolution and calibration both see the signal, and to standards and
+    samples alike (the ramp is a physical aerosol-onset artifact, not
+    sample-specific).
+    """
     dx, dy = compute_pixel_spacing(instrument_settings)
     ordered = sorted(pairs, key=lambda p: p[0].meta.acquired_at)
 
     ppm_frames = []
     grid_rows = []
     index_tuples = []
+    deconvolution_provenance: dict[int, dict] = {}
     for line_number, (line_data, bg) in enumerate(ordered):
-        abl_time = line_data.absolute_time[bg.ablation.start_idx:bg.ablation.end_idx]
+        onset_trim_rows = int(round(ablation_onset_trim_s / line_data.dt_s)) if ablation_onset_trim_s > 0 else 0
+        abl_time = line_data.absolute_time[bg.ablation.start_idx + onset_trim_rows:bg.ablation.end_idx]
+        signal = bg.background_corrected_signal.iloc[onset_trim_rows:].reset_index(drop=True)
+        if deconvolution_settings is not None:
+            line_result = correct_line(signal, line_data.analytes, deconvolution_settings, instrument_settings, line_number)
+            signal = line_result.corrected
+            deconvolution_provenance[line_number] = line_result.provenance
         if multi_result is not None:
-            calibrated = apply_multi_point_calibration(bg.background_corrected_signal, abl_time, multi_result, standard_results)
+            calibrated = apply_multi_point_calibration(signal, abl_time, multi_result, standard_results)
         else:
-            calibrated = apply_calibration(bg.background_corrected_signal, abl_time, standard_result)
+            calibrated = apply_calibration(signal, abl_time, standard_result)
         calibrated = calibrated.reset_index(drop=True)
         n = len(calibrated)
         for sweep_index in range(n):
@@ -134,14 +173,14 @@ def _build_calibrated_ppm_and_grid(
         ppm_frames.append(calibrated)
 
     if not ppm_frames:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), deconvolution_provenance
 
     calibrated_ppm = pd.concat(ppm_frames, ignore_index=True)
     multi_index = pd.MultiIndex.from_tuples(index_tuples, names=["file_index", "row_in_ablation"])
     calibrated_ppm.index = multi_index
     grid_index = pd.DataFrame(grid_rows)
     grid_index.index = multi_index
-    return calibrated_ppm, grid_index
+    return calibrated_ppm, grid_index, deconvolution_provenance
 
 
 def _build_calibrated_ratios(
@@ -273,9 +312,25 @@ def run(
     dating_ratio_drift_order: int = 1,
     dating_ratio_drift_method: str = "fixed",
     dating_ratio_max_order: int = 3,
+    deconvolution_settings: DeconvolutionSettings | None = None,
+    ablation_onset_trim_s: float = 0.0,
 ) -> dict[str, SampleCalibratedResult]:
     """Runs the full background/drift/calibration pipeline over one self-contained
     raw-data folder (one or more sample labels, bracketed by standard files).
+
+    ``deconvolution_settings``, when given, applies dwell-offset shift and/or
+    washout-tailing correction (``src/deconvolution/``) to each line's
+    background-corrected counts before standard calibration -- see
+    ``_build_calibrated_ppm_and_grid``'s docstring for the ordering
+    rationale. Defaults to ``None`` (no deconvolution), so existing callers
+    see unchanged behavior.
+
+    ``ablation_onset_trim_s`` (default 0.0, off) drops that many seconds of
+    leading rows from every line's ablation window before deconvolution/
+    calibration -- see ``_build_calibrated_ppm_and_grid``'s docstring for
+    why this is separate from ``BackgroundWindowOverride.edge_trim_lead_s``
+    (that one only affects a standard's own calibration-factor statistics,
+    never the per-pixel data itself).
 
     ``drift_method``/``background_drift_method`` select between ``"fixed"``
     (OLS at ``drift_order``/``background_drift_order``, the original
@@ -441,6 +496,89 @@ def run(
         parse_line_file(p, standard_names=standard_names, acquired_time_format=acquired_time_format)
         for p in paths
     ]
+
+    return _run_from_files(
+        files=files, sample_dir=sample_dir, reference_library=reference_library,
+        drift_order=drift_order, background_drift_order=background_drift_order,
+        split_odd_even=split_odd_even, accuracy_threshold=accuracy_threshold,
+        primary_standards=primary_standards, instrument_settings=instrument_settings,
+        background_detection_kwargs=background_detection_kwargs,
+        reference_channel_top_n=reference_channel_top_n, drift_method=drift_method,
+        background_drift_method=background_drift_method, max_order=max_order,
+        background_override=background_override, per_file_overrides=per_file_overrides,
+        excluded_files=excluded_files, manual_row_exclusions=manual_row_exclusions,
+        manual_occurrence_exclusions=manual_occurrence_exclusions, detrend=detrend,
+        despike_noise=despike_noise, force_zero_intercept=force_zero_intercept,
+        bias_specs=bias_specs, bias_drift_order=bias_drift_order, bias_drift_method=bias_drift_method,
+        bias_max_order=bias_max_order, isotope_table=isotope_table_resolved,
+        isotope_share_specs=isotope_share_specs, pool_specs=pool_specs,
+        dating_ratio_specs=dating_ratio_specs, dating_ratio_drift_order=dating_ratio_drift_order,
+        dating_ratio_drift_method=dating_ratio_drift_method, dating_ratio_max_order=dating_ratio_max_order,
+        deconvolution_settings=deconvolution_settings, ablation_onset_trim_s=ablation_onset_trim_s,
+    )
+
+
+def _run_from_files(
+    files: list[LineFileData],
+    sample_dir,
+    reference_library: dict[str, ReferenceMaterial],
+    drift_order: int = 1,
+    background_drift_order: int = 1,
+    split_odd_even: bool = False,
+    accuracy_threshold: float = 2.0,
+    primary_standards: list[str] | None = None,
+    instrument_settings: InstrumentSettings | None = None,
+    background_detection_kwargs: dict | None = None,
+    reference_channel_top_n: int = 5,
+    drift_method: str = "fixed",
+    background_drift_method: str = "fixed",
+    max_order: int = 3,
+    background_override: BackgroundWindowOverride | None = None,
+    per_file_overrides: dict[str, BackgroundWindowOverride] | None = None,
+    excluded_files: set[str] | None = None,
+    manual_row_exclusions: dict[str, dict[str, set[int]]] | None = None,
+    manual_occurrence_exclusions: dict[str, set[str]] | None = None,
+    detrend: bool = False,
+    despike_noise: bool = False,
+    force_zero_intercept: bool = False,
+    bias_specs: list[BiasSpec] | None = None,
+    bias_drift_order: int = 1,
+    bias_drift_method: str = "fixed",
+    bias_max_order: int = 3,
+    isotope_table: pd.DataFrame | str | Path | None = None,
+    isotope_share_specs: list[IsotopeShareSpec] | None = None,
+    pool_specs: list[PooledElementSpec] | None = None,
+    dating_ratio_specs: list[DatingRatioSpec] | None = None,
+    dating_ratio_drift_order: int = 1,
+    dating_ratio_drift_method: str = "fixed",
+    dating_ratio_max_order: int = 3,
+    deconvolution_settings: DeconvolutionSettings | None = None,
+    ablation_onset_trim_s: float = 0.0,
+) -> dict[str, SampleCalibratedResult]:
+    """Shared implementation behind both ``run()`` (parses ``files`` fresh
+    from ``sample_dir``) and ``run_from_parsed()`` (reuses already-parsed
+    ``files``, e.g. from a prior Scan) -- everything from despike/pooling
+    through per-sample grid building is identical either way; the only
+    difference between the two public entry points is where ``files`` came
+    from. ``sample_dir`` is used only as a label (provenance/error
+    messages) here, not for any file I/O -- both callers have already
+    finished reading files before this runs.
+
+    See ``run()``'s own docstring for what every parameter does -- kept
+    there rather than duplicated here since both entry points share it
+    via the same parameter names.
+    """
+    instrument_settings = instrument_settings or InstrumentSettings()
+    background_detection_kwargs = background_detection_kwargs or {}
+    per_file_overrides = per_file_overrides or {}
+    excluded_files = excluded_files or set()
+    manual_row_exclusions = manual_row_exclusions or {}
+    manual_occurrence_exclusions = manual_occurrence_exclusions or {}
+    bias_specs = bias_specs or []
+    isotope_share_specs = isotope_share_specs or []
+    pool_specs = pool_specs or []
+    dating_ratio_specs = dating_ratio_specs or []
+    isotope_table_resolved = isotope_table if isotope_table is not None else DEFAULT_ISOTOPE_TABLE_PATH
 
     if despike_noise:
         for f in files:
@@ -616,12 +754,14 @@ def run(
         pairs = list(zip(sample_files, sample_backgrounds))
 
         if multi_result is not None:
-            calibrated_ppm, grid_index = _build_calibrated_ppm_and_grid(
+            calibrated_ppm, grid_index, deconvolution_provenance = _build_calibrated_ppm_and_grid(
                 pairs, None, instrument_settings, multi_result=multi_result, standard_results=standard_results,
+                deconvolution_settings=deconvolution_settings, ablation_onset_trim_s=ablation_onset_trim_s,
             )
         else:
-            calibrated_ppm, grid_index = _build_calibrated_ppm_and_grid(
+            calibrated_ppm, grid_index, deconvolution_provenance = _build_calibrated_ppm_and_grid(
                 pairs, standard_results[chosen_standards[0]], instrument_settings,
+                deconvolution_settings=deconvolution_settings, ablation_onset_trim_s=ablation_onset_trim_s,
             )
 
         calibrated_ratios = _build_calibrated_ratios(pairs, bias_fits, dating_ratio_fits)
@@ -685,10 +825,51 @@ def run(
             bias_fits=bias_fits, calibrated_ratios=calibrated_ratios,
             isotopic_ppm=isotopic_ppm, isotopic_ppm_provenance=isotopic_ppm_provenance,
             dating_ratio_fits=dating_ratio_fits,
+            deconvolution_provenance=deconvolution_provenance,
+            deconvolution_settings=deconvolution_settings,
         )
 
     return results
 
+
+def run_from_parsed(
+    files: list[LineFileData],
+    sample_dir: str | Path,
+    reference_library: dict[str, ReferenceMaterial],
+    excluded_files: set[str] | None = None,
+    **kwargs,
+) -> dict[str, SampleCalibratedResult]:
+    """Same as :func:`run`, but starting from already-parsed ``LineFileData``
+    (e.g. ``dock_widgets.py``'s ``self._scanned_files``, populated at Scan
+    time) instead of re-reading/re-parsing every raw file from disk --
+    ``run()`` currently re-parses unconditionally even when the exact same
+    files were already parsed once for the Scan preview. Useful for
+    quickly re-applying changed deconvolution/calibration settings without
+    waiting on file I/O again for a large session.
+
+    Every ``LineFileData.meta.is_standard`` must already correctly reflect
+    which labels are standards under the *current* UI selection -- unlike
+    ``run()``, this function never calls ``parse_line_file`` itself, so it
+    has no ``standard_names`` criterion to (re)apply. A cache populated by
+    ``dock_widgets.py:_on_scan`` does NOT already satisfy this (see that
+    method's docstring) and must be corrected by the caller first (see
+    ``dock_widgets.py:_on_reprocess``).
+
+    ``excluded_files`` is applied here (matched by ``f.meta.path.name``),
+    same semantics as ``run()``'s pre-parse filtering. ``**kwargs`` accepts
+    every other ``run()``/``_run_from_files`` parameter (drift_order,
+    instrument_settings, deconvolution_settings, ablation_onset_trim_s,
+    etc.) -- not re-listed here to avoid the two signatures drifting out of
+    sync; see ``run()``'s docstring for what each one does.
+    """
+    excluded_files = excluded_files or set()
+    files = [f for f in files if f.meta.path.name not in excluded_files]
+    if not files:
+        raise PipelineError("All provided files were excluded via excluded_files.")
+    return _run_from_files(
+        files=files, sample_dir=sample_dir, reference_library=reference_library,
+        excluded_files=excluded_files, **kwargs,
+    )
 
 def discover_sample_directories(parent_dir: str | Path) -> list[Path]:
     """Subfolders of ``parent_dir`` that look like self-contained raw-file sets

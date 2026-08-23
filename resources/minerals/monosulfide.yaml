@@ -1,0 +1,33 @@
+# Monosulfide group: generic MS formula (single metal site, single S
+# anion site) -- covers sphalerite (Zn), galena (Pb), alabandite (Mn),
+# greenockite (Cd), troilite (Fe). Structurally distinct in nature
+# (zinc-blende sphalerite vs halite-type galena, etc.) despite sharing this
+# identical 1 metal : 1 S calculation -- same "shared math, not a shared
+# natural solid solution" precedent as the merged spinel-magnetite.yaml/
+# feldspar.yaml configs.
+#
+# basis: anion -- S is directly measured by this tool's real inputs
+# (LA-ICP-MS/EPMA element wt%, input_mode='element_wt_percent'), unlike
+# oxide O which is essentially never measured and must be inferred via
+# STANDARD_OXIDES valence assumptions. Anchoring on the measured S lets the
+# metal site float and directly reveal any real deficiency/excess, rather
+# than forcing it to exactly 1.0 apfu by construction the way cation-basis
+# normalization would (see normalize.normalize_to_measured_anion's
+# docstring). Falls back to cation-basis automatically (pipeline.calculate)
+# if an analysis doesn't include S at all.
+mineral: monosulfide
+abbreviation: Mss
+formula: (Zn,Fe,Mn,Cd,Pb)S
+normalization:
+  basis: anion
+  ideal_oxygens: 1.0   # reused as the ideal S (anion) total under basis: anion
+  ideal_cations: 1.0   # fallback target if S wasn't measured
+  excludes: [S]
+sites:
+  M:
+    target: 1.0
+    elements: [Zn, Fe, Mn, Cd, Pb]
+    priority: [Zn, Fe, Mn, Cd, Pb]
+end_members:
+  method: monosulfide_ratio
+  members: [sphalerite, troilite, alabandite, greenockite, galena]

@@ -1,0 +1,28 @@
+# Sodalite: Na4Al3Si3O12Cl -- a cage feldspathoid, chemically and
+# structurally distinct from nepheline/leucite (Cl occupies the cage
+# center, not a coupled charge-balance site the way apatite's F/Cl/OH
+# anion column works). Related cage minerals with a different anion
+# (nosean: SO4, hauyne: SO4+Ca, cancrinite: CO3) aren't included -- out of
+# scope for this pass.
+#
+# Cl isn't tracked as a site element -- anions are never site-allocated in
+# this schema (sites hold cations only), same convention as apatite.yaml's
+# F/Cl/OH omission and fluorite.yaml's F omission.
+#
+# Single site (no T/A split -- unlike nepheline/leucite, sodalite's Na
+# doesn't occupy a separate alkali site from Al/Si in this simplified
+# port; all cations normalize together against the 10-cation formula
+# total), like apatite/scapolite/ilmenite. No redox. No end_members -- a
+# single near-pure phase in this mineral set.
+mineral: sodalite
+abbreviation: Sdl
+formula: Na4Al3Si3O12Cl
+normalization:
+  basis: cation
+  ideal_oxygens: 12
+  ideal_cations: 10
+sites:
+  M:
+    target: 10.0
+    elements: [Na, Al, Si, Ca, K]
+    priority: [Na, Al, Si, Ca, K]

@@ -1,0 +1,39 @@
+# Feldspar group (plagioclase + alkali feldspar): (Ca,Na,K)(Al,Si)4O8
+# (tetrahedral T, A-site). A single generic config covers the whole group --
+# plagioclase and alkali feldspar (orthoclase/microcline/sanidine) use
+# identical site definitions and the identical feldspar_ratio end-member
+# method here, so there was never a real calculation difference between
+# them, only which cation happens to dominate the A site in a given
+# analysis. The A-site element order below is arbitrary (it never affects
+# the result, since A is a single, uncapped site -- nothing else claims its
+# elements): whichever cation is most abundant in the analysis simply
+# dominates the reported An/Ab/Or split.
+#
+# Ba can be a significant trace substituent in alkali-rich compositions
+# (celsian component) -- it's tracked in the A site's apfu for QC/reporting,
+# but feldspar_ratio only computes An/Ab/Or from Ca/Na/K, matching the
+# workbook's own "*based on Ca, Na, K ratios only" convention -- no separate
+# celsian fraction is reported.
+mineral: feldspar
+abbreviation: Fsp
+formula: (Ca,Na,K)(Al,Si)4O8
+normalization:
+  basis: cation
+  ideal_oxygens: 8
+  ideal_cations: 5
+sites:
+  T:
+    target: 4.0
+    elements: [Si, Al, Ti, Fe3]
+    priority: [Si, Al, Ti, Fe3]     # fill order when site is under-occupied
+  A:
+    target: 1.0
+    elements: [Ca, Na, K, Ba, Sr, Mg, Fe2, Mn]
+    priority: [Ca, Na, K, Ba, Sr, Mg, Fe2, Mn]
+redox:
+  elements: [Fe]
+  methods: [all_2plus, all_3plus, droop_1987]
+  default_method: droop_1987
+end_members:
+  method: feldspar_ratio
+  members: [anorthite, albite, orthoclase]

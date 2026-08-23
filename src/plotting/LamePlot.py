@@ -168,6 +168,13 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     #scale = data.processed.get_attribute(field, 'norm')
     map_df = data.get_map_data(field, field_type)
 
+    # A categorical/discrete field (e.g. the stoichiometry dock's
+    # '{abbrev}_dominant' end-member field -- see src/stoichiometry/dock.py)
+    # is a code with no meaningful magnitude ordering, so it renders with a
+    # swatch-per-category legend (mirrors plot_cluster_map/plot_roi_map)
+    # instead of the usual continuous colormap/colorbar.
+    is_discrete = bool(data.processed.get_attribute(field, 'discrete'))
+
     array_size = data.array_size
     # style_data.aspect_ratio is None until first synced (see
     # StylingUI.set_style_widgets) or once a user has overridden it via the
@@ -178,8 +185,9 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     # store map_df to save_data if data needs to be exported
     canvas.data = map_df.copy()
 
-    # equalized color bins to CDF function
-    if app_data.equalize_color_scale:
+    # equalized color bins to CDF function -- not meaningful for a
+    # categorical code, so skipped for discrete fields.
+    if app_data.equalize_color_scale and not is_discrete:
         sorted_data = map_df['array'].sort_values()
         cum_sum = sorted_data.cumsum()
         cdf = cum_sum / cum_sum.iloc[-1]
@@ -187,32 +195,58 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
 
     # plot map
     reshaped_array = np.reshape(map_df['array'].values, array_size, order=data.order)
-        
-    norm = style_data.color_norm()
 
-    cax = canvas.axes.imshow(reshaped_array,
-                            cmap=style_data.get_colormap(),
-                            aspect=aspect_ratio, interpolation='none',
-                            norm=norm)
-    canvas.array = reshaped_array
-    canvas.dx = app_data.current_data.dx
-    canvas.dy = app_data.current_data.dy
-    canvas.color_units = data.processed.column_attributes[field]['units']
-    canvas.distance_units = data.processed.column_attributes['Xc']['units']
+    if is_discrete:
+        # Codes are 1-indexed (see dock.py's _write_results_to_sample);
+        # shift to 0-indexed to match Cluster/ROI maps' own convention.
+        reshaped_array = reshaped_array - 1.0
+        labels = data.processed.get_attribute(field, 'category_labels') or []
+        hexcolors = data.processed.get_attribute(field, 'category_colors') or []
+        group_color, group_label, cmap = style_data.get_discrete_colormap(labels, hexcolors, alpha=style_data.marker_alpha)
+        n = max(len(labels), 1)
+        norm = colors.BoundaryNorm(np.arange(-0.5, n, 1), n, clip=True)
 
-    add_colorbar(style_data, canvas, cax)
-    match style_data.cscale:
-        case 'linear':
-            clim = style_data.clim
-        case 'log':
-            clim = style_data.clim
-            #clim = np.log10(style_data.clim)
-        case 'logit':
-            print('Color limits for logit are not currently implemented')
-        case 'symlog':
-            print('Color limits for symlog are not currently implemented')
+        cax = canvas.axes.imshow(reshaped_array, cmap=cmap, norm=norm, aspect=aspect_ratio, interpolation='none')
+        canvas.array = reshaped_array
+        canvas.dx = app_data.current_data.dx
+        canvas.dy = app_data.current_data.dy
+        canvas.color_units = None
+        canvas.distance_units = data.processed.column_attributes['Xc']['units']
 
-    cax.set_clim(clim[0], clim[1])
+        add_colorbar(style_data, canvas, cax, cbartype='discrete', grouplabels=group_label, groupcolors=group_color)
+    else:
+        norm = style_data.color_norm()
+
+        cax = canvas.axes.imshow(reshaped_array,
+                                cmap=style_data.get_colormap(),
+                                aspect=aspect_ratio, interpolation='none',
+                                norm=norm)
+        canvas.array = reshaped_array
+        canvas.dx = app_data.current_data.dx
+        canvas.dy = app_data.current_data.dy
+        canvas.color_units = data.processed.column_attributes[field]['units']
+        canvas.distance_units = data.processed.column_attributes['Xc']['units']
+
+        add_colorbar(style_data, canvas, cax)
+        # Default to style_data.clim so any cscale this match doesn't
+        # explicitly handle (e.g. 'discrete' reaching this generic/
+        # continuous branch, which shouldn't normally happen but crashed
+        # here with an UnboundLocalError when it did -- see color_norm's
+        # own 'discrete'-with-no-N warning path) still has a value to call
+        # set_clim with, rather than crashing.
+        clim = style_data.clim
+        match style_data.cscale:
+            case 'linear':
+                clim = style_data.clim
+            case 'log':
+                clim = style_data.clim
+                #clim = np.log10(style_data.clim)
+            case 'logit':
+                print('Color limits for logit are not currently implemented')
+            case 'symlog':
+                print('Color limits for symlog are not currently implemented')
+
+        cax.set_clim(clim[0], clim[1])
 
     # use mask to create an alpha layer — grey RGBA overlay on masked pixels
     mask = data.mask.astype(float)
@@ -1162,7 +1196,7 @@ def plot_correlation(parent, data, app_data, style_data):
     canvas.axes.set_yticks(ticks, minor=False)
     canvas.axes.set_xticks(ticks, minor=False)
 
-    labels = style_data.toggle_mass(columns)
+    labels = style_data.toggle_mineral_prefix(style_data.toggle_mass(columns))
 
     canvas.axes.set_xticklabels(labels, rotation=90, ha='center', va='bottom', fontproperties=font)
     canvas.axes.set_yticklabels(labels, ha='left', va='center', fontproperties=font)
@@ -1428,7 +1462,11 @@ def biplot(canvas, data, app_data, style_data, x, y, c):
 
         ind = np.isin(cluster_group, selected_clusters)
 
-        norm = style_data.color_norm(app_data.cluster_dict[method]['n_clusters'])
+        # actual non-mask cluster count, not cluster_dict[method]['n_clusters']
+        # (k-means/fuzzy c-means' requested-k setting -- HDBSCAN has no such key
+        # at all; see StyleToolbox.get_cluster_colormap's identical fix for why)
+        n_clusters_actual = len([k for k in app_data.cluster_dict[method].keys() if isinstance(k, int) and k != 99])
+        norm = style_data.color_norm(n_clusters_actual)
 
         cb = canvas.axes.scatter(x['array'][ind], y['array'][ind], c=c['array'][ind],
             s=style_data.marker_size,
@@ -1722,7 +1760,11 @@ def ternary_scatter(canvas, data, app_data, style_data, x, y, z, c):
 
         ind = np.isin(cluster_group, selected_clusters)
 
-        norm = style_data.color_norm(app_data.cluster_dict[method]['n_clusters'])
+        # actual non-mask cluster count, not cluster_dict[method]['n_clusters']
+        # (k-means/fuzzy c-means' requested-k setting -- HDBSCAN has no such key
+        # at all; see StyleToolbox.get_cluster_colormap's identical fix for why)
+        n_clusters_actual = len([k for k in app_data.cluster_dict[method].keys() if isinstance(k, int) and k != 99])
+        norm = style_data.color_norm(n_clusters_actual)
 
         _, cb = tp.ternscatter(
             x['array'][ind], y['array'][ind], z['array'][ind],

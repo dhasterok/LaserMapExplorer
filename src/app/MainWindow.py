@@ -1033,10 +1033,13 @@ class MainWindow(QMainWindow):
     def update_mask_and_profile_widgets(self):
         #update filters, polygon, profiles with existing data
         self.lame_action.ClearFilters.setEnabled(False)
-        if np.all(self.app_data.current_data.filter_mask):
-            self.lame_action.FilterToggle.setEnabled(False)
+        # ROIMask covers both the live filter-table preview (filter_mask)
+        # and committed/selected ROIs (roi_selection_mask) -- it absorbed
+        # the old standalone FilterToggle action (see toggle_roi_mask).
+        if np.all(self.app_data.current_data.filter_mask) and np.all(self.app_data.current_data.roi_selection_mask):
+            self.lame_action.ROIMask.setEnabled(False)
         else:
-            self.lame_action.FilterToggle.setEnabled(True)
+            self.lame_action.ROIMask.setEnabled(True)
             self.lame_action.ClearFilters.setEnabled(True)
 
         if np.all(self.app_data.current_data.polygon_mask):
@@ -1401,7 +1404,8 @@ class MainWindow(QMainWindow):
             # No clusters selected → cluster filter is off; let everything through.
             d = self.data[sample_id]
             d.cluster_mask = np.ones(len(d.mask), dtype=bool)
-            d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask & d.roi_selection_mask
+            d.cluster_mask_enabled = False
+            d.recompute_mask()
             self.lame_action.ClusterMask.setChecked(False)
             self.schedule_update()
             return
@@ -1417,12 +1421,63 @@ class MainWindow(QMainWindow):
 
         # recompute combined mask
         d = self.data[sample_id]
-        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask & d.roi_selection_mask
+        d.cluster_mask_enabled = True
+        d.recompute_mask()
 
         self.lame_action.ClearFilters.setEnabled(True)
         self.lame_action.ClusterMask.setEnabled(True)
         self.lame_action.ClusterMask.setChecked(True)
 
+        self.schedule_update()
+
+    def toggle_polygon_mask(self, checked):
+        """Enables/disables restricting analysis by the polygon mask.
+
+        Connected to the PolygonMask toolbar action. Leaves the underlying
+        ``polygon_mask`` array untouched -- toggling back on immediately
+        restores whatever polygons were selected, without needing to
+        re-apply them in the Polygon tab.
+        """
+        sample_id = self.app_data.sample_id
+        if not sample_id or sample_id not in self.data:
+            return
+        d = self.data[sample_id]
+        d.polygon_mask_enabled = checked
+        d.recompute_mask()
+        self.schedule_update()
+
+    def toggle_cluster_mask(self, checked):
+        """Enables/disables restricting analysis by the cluster mask.
+
+        Connected to the ClusterMask toolbar action. Leaves the underlying
+        ``cluster_mask`` array untouched -- toggling back on immediately
+        restores whatever cluster selection was applied via
+        ``apply_cluster_mask``, without needing to reselect it.
+        """
+        sample_id = self.app_data.sample_id
+        if not sample_id or sample_id not in self.data:
+            return
+        d = self.data[sample_id]
+        d.cluster_mask_enabled = checked
+        d.recompute_mask()
+        self.schedule_update()
+
+    def toggle_roi_mask(self, checked):
+        """Enables/disables restricting analysis by the filter/ROI mask.
+
+        Connected to the ROIMask toolbar action. Gates both
+        ``filter_mask`` (the live filter-table preview) and
+        ``roi_selection_mask`` (committed, selected ROIs) together -- ROI
+        absorbed the standalone filter toggle this app used to have, since
+        an ROI's definition IS a filter definition (see
+        ``SampleObj.add_roi``).
+        """
+        sample_id = self.app_data.sample_id
+        if not sample_id or sample_id not in self.data:
+            return
+        d = self.data[sample_id]
+        d.roi_mask_enabled = checked
+        d.recompute_mask()
         self.schedule_update()
 
     # -------------------------------------
@@ -1529,6 +1584,11 @@ class MainWindow(QMainWindow):
             self.mask_dock.setFloating(False)
 
             self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.statusbar.toolButtonBottomDock))
+            # Keep the toggle button in sync when the dock is closed via its
+            # own title-bar close button (DockWidgetClosable) rather than the
+            # status bar toggle -- toggle_dock_visibility only updates the
+            # button when the button itself is what triggered the change.
+            self.mask_dock.visibilityChanged.connect(self.statusbar.toolButtonBottomDock.setChecked)
 
             self.mask_dock.filter_tab.filtersApplied.connect(self._record_filters_applied)
 
@@ -1629,6 +1689,15 @@ class MainWindow(QMainWindow):
 
             if self.stoichiometry_dock not in self.help_mapping:
                 self.help_mapping[self.stoichiometry_dock] = 'stoichiometry'
+
+            # The dock's "Compute scope" filter/region combos are otherwise
+            # only refreshed on showEvent or when calculate() runs -- if
+            # clustering finishes while this dock is already open, neither
+            # of those fires, so the new cluster column silently doesn't
+            # show up as a scope option. Refreshing on clusteringComputed
+            # keeps it in sync regardless of dock visibility/open order.
+            self.control_dock.clustering.clusteringComputed.connect(
+                lambda _payload: self.stoichiometry_dock._refresh_region_columns())
 
             self.stoichiometry_dock.show()
             self.lame_action.Stoichiometry.setChecked(True)

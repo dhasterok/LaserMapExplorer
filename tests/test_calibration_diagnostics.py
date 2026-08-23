@@ -25,6 +25,7 @@ from src.calibration.diagnostics import (
     plot_all_stage_maps,
     plot_background_drift,
     plot_bias_fit,
+    plot_categorical_map,
     plot_dating_ratio_fit,
     plot_index_map,
     plot_multi_point_calibration,
@@ -399,6 +400,32 @@ def test_plot_index_map_handles_empty_data():
     fig, ax = plt.subplots()
     plot_index_map(ax, pd.Series(dtype=float), pd.DataFrame(), title="empty")
     assert "no data" in ax.get_title()
+    plt.close(fig)
+
+
+def test_plot_categorical_map_handles_empty_data():
+    import pandas as pd
+    fig, ax = plt.subplots()
+    plot_categorical_map(ax, pd.Series(dtype=object), pd.DataFrame(), [], title="empty")
+    assert "no data" in ax.get_title()
+    plt.close(fig)
+
+
+def test_plot_categorical_map_draws_swatch_legend_for_real_labels(sample_result):
+    import numpy as np
+    import pandas as pd
+
+    n = len(sample_result.grid_index)
+    rng = np.random.default_rng(0)
+    categories = ["Anorthite", "Albite", "Quartz"]
+    labels = pd.Series(rng.choice(categories + [None], size=n), index=sample_result.grid_index.index)
+
+    fig, ax = plt.subplots()
+    plot_categorical_map(ax, labels, sample_result.grid_index, categories, title="mineral map")
+    assert ax.get_title() == "mineral map"
+    legend = ax.get_legend()
+    assert legend is not None
+    assert {t.get_text() for t in legend.get_texts()} == set(categories)
     plt.close(fig)
 
 

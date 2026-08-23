@@ -10,6 +10,7 @@
 # existing generic engine already does the right thing without any
 # mineral-specific code).
 mineral: chloritoid
+abbreviation: Cld
 formula: (Fe,Mg,Mn)2(Al,Fe3+)4O2(SiO4)2(OH)4
 normalization:
   basis: cation

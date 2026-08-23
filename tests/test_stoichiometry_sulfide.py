@@ -96,3 +96,20 @@ def test_ideal_cations_override_changes_the_target(sulfide_config):
     r2 = pipeline.calculate(analysis, sulfide_config, input_mode="element_wt_percent", ideal_cations_override=2.0)
     assert r2.apfu["Fe"] == pytest.approx(2.0 * r1.apfu["Fe"], rel=1e-6)
     assert r2.apfu["S"] == pytest.approx(2.0 * r1.apfu["S"], rel=1e-6)
+
+
+def test_cation_anion_ratio_classifies_pyrite_type(sulfide_config):
+    """The generic config's cation_anion_ratio QC check is basis-invariant
+    -- it should read ~0.5 (1 metal : 2 S) for a pyrite-type composition
+    regardless of which ideal_cations_override was used to compute apfu.
+    """
+    analysis = {"Fe": 46.55, "S": 53.45}
+    result = pipeline.calculate(analysis, sulfide_config, input_mode="element_wt_percent", ideal_cations_override=1.0)
+    assert result.qc["cation_anion_ratio"]["cation_to_anion_ratio"] == pytest.approx(0.5, rel=1e-2)
+
+
+def test_cation_anion_ratio_classifies_pentlandite_type(sulfide_config):
+    """~9:8 (1.125) for a pentlandite-type composition."""
+    analysis = {"Fe": 32.0, "Ni": 34.2, "S": 33.8}
+    result = pipeline.calculate(analysis, sulfide_config, input_mode="element_wt_percent", ideal_cations_override=9.0)
+    assert result.qc["cation_anion_ratio"]["cation_to_anion_ratio"] == pytest.approx(9.0 / 8.0, rel=0.03)

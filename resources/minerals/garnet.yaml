@@ -1,5 +1,6 @@
 # Garnet: X3Y2Z3O12 (dodecahedral X, octahedral Y, tetrahedral Z)
 mineral: garnet
+abbreviation: Grt
 formula: X3Y2Z3O12
 normalization:
   basis: cation

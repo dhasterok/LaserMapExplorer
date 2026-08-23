@@ -6,8 +6,10 @@ independent ``QMainWindow`` (not a ``CustomDockWidget`` bound to LaME's
 """
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 
+import re
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
@@ -20,7 +22,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QTabWidget, QToolBar, QToolBox, QVBoxLayout, QWidget, QGridLayout, QStatusBar,
 )
 
-from lame_core.CustomWidgets import CustomAction, SpinComboBox
+from lame_core.CustomWidgets import CustomAction, CustomSlider, ListFilterWidget, SpinComboBox
 
 from src.calibration import diagnostics, io_export, pipeline, reflib, standards
 from src.calibration.background import BackgroundWindowOverride
@@ -31,6 +33,16 @@ from src.calibration.massbias import BiasSpec, most_abundant_mass, natural_abund
 from src.calibration.pipeline import PipelineError, SampleCalibratedResult
 from src.calibration.pooling import PooledElementSpec
 from src.calibration.rawfile import LineFileData, list_line_files, parse_filename_label, parse_line_file
+from src.classification.cosine import classify_batch
+from src.classification.presets import DEFAULT_PRESETS_PATH, load_presets, save_preset
+from src.classification.reference import (
+    MineralReference, ReferenceLibraryError, load_reference_library,
+)
+from src.deconvolution import diagnostics as deconv_diagnostics
+from src.deconvolution import esf
+from src.deconvolution.config import DeconvolutionSettings
+from src.deconvolution.esf import SinglePulseFit
+from src.deconvolution.pipeline import correct_line
 from src.plotting.CustomMplCanvas import SimpleMplCanvas, make_compact_nav_toolbar
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -61,6 +73,31 @@ def _populate_table(table_widget: QTableWidget, df: pd.DataFrame) -> None:
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             table_widget.setItem(row_idx, col_idx, item)
     table_widget.resizeColumnsToContents()
+
+
+_ELEMENT_COL_RE = re.compile(r"^([A-Z][a-z]?)(\d+)$")
+
+
+def _resolve_element_columns(references: list[MineralReference], available_columns) -> dict[str, str]:
+    """Map each element symbol any reference needs to a matching isotope-
+    style analyte column in ``calibrated_ppm`` (e.g. 'Ca' -> 'Ca43'), by
+    prefix match -- same problem/approach as
+    ``src.stoichiometry.dock._resolve_ppm_columns``, reimplemented locally
+    rather than importing that sibling package's private helper (same
+    "duplicate a small private helper" precedent already used for
+    ``_mad_outlier_mask``/deconvolution's shift-offset math elsewhere in
+    this codebase).
+    """
+    needed = {el for ref in references for el in ref.composition}
+    resolved: dict[str, str] = {}
+    for col in available_columns:
+        m = _ELEMENT_COL_RE.match(str(col))
+        if not m:
+            continue
+        el = m.group(1)
+        if el in needed and el not in resolved:
+            resolved[el] = col
+    return resolved
 
 
 class _PipelineWorker(QThread):
@@ -342,6 +379,8 @@ class CalibrationMainWindow(QMainWindow):
     TAB_ISOTOPE_RATIOS = 5
     TAB_MAPS = 6
     TAB_DATA = 7
+    TAB_DECONVOLUTION = 8
+    TAB_CLASSIFICATION = 9
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -350,6 +389,13 @@ class CalibrationMainWindow(QMainWindow):
 
         self._data_dir: Path | None = None
         self._batch_sample_dirs: list[Path] = []
+        # Analytes whose tableWashoutTau cell was last written by
+        # _fill_washout_tau_from_fits (Kernel estimation's "Fit" button),
+        # not typed by the user -- lets a later Fit click refresh its own
+        # earlier output without ever overwriting a hand-typed value (see
+        # _on_washout_tau_item_changed, which discards an analyte from this
+        # set the moment the user edits that cell).
+        self._auto_filled_tau: set[str] = set()
         # tableStandardLabels' Primary/Secondary checkbox and Reference
         # combo cell widgets, keyed by label -- source of truth for
         # _primary_standard_names/_secondary_standard_names/_reference_overrides.
@@ -371,6 +417,16 @@ class CalibrationMainWindow(QMainWindow):
         # by _gather_dating_ratio_specs.
         self._dating_system_checkboxes: dict[str, QCheckBox] = {}
         self.reference_library: dict[str, reflib.ReferenceMaterial] = {}
+        # Mineral composition library for Classification (src/classification/,
+        # webmineral_compositions.csv) -- distinct from reference_library
+        # above (that's calibration standards' certified concentrations, an
+        # unrelated concept that happens to share the word "reference").
+        try:
+            self.mineral_references = load_reference_library()
+            self._mineral_library_error = None
+        except ReferenceLibraryError as e:
+            self.mineral_references = []
+            self._mineral_library_error = str(e)
         self.results: dict[str, SampleCalibratedResult] = {}
         self._worker: _PipelineWorker | None = None
         # Eagerly parsed at Scan time (before any pipeline Run) so the Time
@@ -416,6 +472,7 @@ class CalibrationMainWindow(QMainWindow):
         self._reload_reference_library()
         self._setup_ui()
         self._connect_widgets()
+        self._refresh_mineral_preview()
 
     # ------------------------------------------------------------------
     # UI construction
@@ -486,7 +543,7 @@ class CalibrationMainWindow(QMainWindow):
         self.labelMapStage = QLabel("Stage")
         row.addWidget(self.labelMapStage)
         self.comboMapStage = QComboBox()
-        self.comboMapStage.addItems(["raw", "background+drift correction", "calibrated"])
+        self.comboMapStage.addItems(["raw", "background+drift correction", "deconvolution correction", "calibrated"])
         self.comboMapStage.setCurrentText("calibrated")
         row.addWidget(self.comboMapStage)
 
@@ -555,6 +612,15 @@ class CalibrationMainWindow(QMainWindow):
         self.actionRun = CustomAction(text="Run", light_icon_unchecked="icon-run-64.svg", parent=self)
         self.actionRun.setToolTip("Run pipeline")
 
+        self.actionReprocess = CustomAction(text="Reprocess", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionReprocess.setToolTip(
+            "Fast re-run from already-scanned files (re-applies deconvolution/calibration "
+            "settings without re-parsing raw files from disk). Single-folder mode only."
+        )
+
+        self.actionClassify = CustomAction(text="Classify", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionClassify.setToolTip("Classify the current sample's calibrated pixels against the selected reference minerals.")
+
         self.actionExportCsv = CustomAction(text="Save Data", light_icon_unchecked="icon-save-file-64.svg", parent=self)
         self.actionExportCsv.setToolTip("Save calibrated CSV...")
 
@@ -565,6 +631,8 @@ class CalibrationMainWindow(QMainWindow):
         self.actionOpenRefLibrary.setToolTip("Open the reference library of standards to view, edit or add.")
 
         toolbar.addAction(self.actionRun)
+        toolbar.addAction(self.actionReprocess)
+        toolbar.addAction(self.actionClassify)
         toolbar.addSeparator()
         toolbar.addAction(self.actionExportCsv)
         toolbar.addAction(self.actionExportJson)
@@ -574,11 +642,14 @@ class CalibrationMainWindow(QMainWindow):
         return toolbar
 
     def _build_input_data_toolbox(self) -> QToolBox:
-        """Groups the left-panel controls onto two QToolBox pages so the user
-        scrolls through one at a time instead of five stacked group boxes:
+        """Groups the left-panel controls onto five QToolBox pages so the user
+        scrolls through one at a time instead of stacking every group box:
         "Input Data" (data source / standard configuration / instrument
-        settings) and "Calibration Settings" (drift/calibration and
-        background/edge-trim overrides)."""
+        settings), "Analyte Settings" (isotope calibration / dating ratios),
+        "Calibration Settings" (drift/calibration and background/edge-trim
+        overrides), "Deconvolution" (along-line shift/washout correction,
+        src/deconvolution/), and "Classification" (cosine-distance mineral
+        matching, src/classification/)."""
         toolbox = QToolBox()
         # Matches the spacing set on the app's other two production
         # QToolBoxes (see MainWindow.py's control_dock/mask_dock toolboxes).
@@ -608,6 +679,18 @@ class CalibrationMainWindow(QMainWindow):
         calibration_layout.addWidget(self._build_background_override_group())
         calibration_layout.addStretch(1)
         toolbox.addItem(calibration_page, "Calibration Settings")
+
+        deconvolution_page = QWidget()
+        deconvolution_layout = QVBoxLayout(deconvolution_page)
+        deconvolution_layout.setContentsMargins(3, 3, 3, 3)
+        deconvolution_layout.addWidget(self._build_deconvolution_group())
+        toolbox.addItem(deconvolution_page, "Deconvolution")
+
+        classification_page = QWidget()
+        classification_layout = QVBoxLayout(classification_page)
+        classification_layout.setContentsMargins(3, 3, 3, 3)
+        classification_layout.addWidget(self._build_classification_group())
+        toolbox.addItem(classification_page, "Classification")
 
         return toolbox
 
@@ -699,6 +782,18 @@ class CalibrationMainWindow(QMainWindow):
         self.spinSpeed.setSpecialValueText("(unset)")
         form_layout.addRow("Speed (µm/s)", self.spinSpeed)
 
+        self.spinDwellTime = QDoubleSpinBox()
+        self.spinDwellTime.setRange(0, 1e5)
+        self.spinDwellTime.setDecimals(3)
+        self.spinDwellTime.setSpecialValueText("(unset)")
+        self.spinDwellTime.setToolTip(
+            "Per-analyte dwell time -- feeds counts.py's Poisson tau recovery and, "
+            "combined with each analyte's position in the sweep read-out order, the "
+            "Deconvolution page's dwell-offset shift correction (assumes uniform "
+            "per-analyte dwell)."
+        )
+        form_layout.addRow("Dwell time (ms)", self.spinDwellTime)
+
         self.spinLaserWavelength = QDoubleSpinBox()
         self.spinLaserWavelength.setRange(0, 1e5)
         self.spinLaserWavelength.setSpecialValueText("(unset)")
@@ -727,6 +822,13 @@ class CalibrationMainWindow(QMainWindow):
         xy_layout.addWidget(self.checkReverseX)
         self.checkReverseY = QCheckBox("Y")
         xy_layout.addWidget(self.checkReverseY)
+        self.checkBidirectionalScan = QCheckBox("Bidirectional scan")
+        self.checkBidirectionalScan.setToolTip(
+            "Alternate lines scanned in opposite directions -- the Deconvolution "
+            "page's washout correction flips the causal tail's direction on odd "
+            "lines when this is set, avoiding 'herringbone' artifacts."
+        )
+        xy_layout.addWidget(self.checkBidirectionalScan)
 
         notes_layout = QHBoxLayout()
         group_layout.addLayout(notes_layout)
@@ -900,6 +1002,22 @@ class CalibrationMainWindow(QMainWindow):
         layout.addWidget(QLabel("Trailing (s)"),3,2)
         layout.addWidget(self.spinEdgeTrimTrail,3,3)
 
+        label_onset_trim = QLabel("Ablation onset trim (s)")
+        label_onset_trim.setToolTip(
+            "Drops this many seconds of leading rows from every line's actual per-pixel data "
+            "(background_corrected_signal/calibrated_ppm), before deconvolution and calibration -- "
+            "not the same as 'Trim ablation edge effect' above, which only narrows the region used "
+            "for a STANDARD's own calibration-factor statistics and never touches the displayed/"
+            "exported/classified per-pixel data. Use this one to actually remove the aerosol-onset "
+            "ramp (the first few pixels taking time to reach true sample values) from maps."
+        )
+        layout.addWidget(label_onset_trim, 4, 0, 1, 2)
+        self.spinAblationOnsetTrim = QDoubleSpinBox()
+        self.spinAblationOnsetTrim.setRange(0, 1e4)
+        self.spinAblationOnsetTrim.setDecimals(2)
+        self.spinAblationOnsetTrim.setToolTip(label_onset_trim.toolTip())
+        layout.addWidget(self.spinAblationOnsetTrim, 4, 2, 1, 2)
+
         group_layout.addWidget(QLabel("Per-line overrides (optional; blank = use the settings above)"))
         self.tablePerLineOverrides = QTableWidget(0, 5)
         self.tablePerLineOverrides.setHorizontalHeaderLabels(
@@ -909,6 +1027,502 @@ class CalibrationMainWindow(QMainWindow):
         group_layout.addWidget(self.tablePerLineOverrides)
 
         return group
+
+    def _build_deconvolution_group(self) -> QGroupBox:
+        """Along-line dwell-offset shift and washout-tailing correction
+        (src/deconvolution/, Stages 0/1/3 of
+        plans/laicpms_map_correction_spec.md). Both flags default off, so
+        an existing Run is unaffected unless explicitly enabled here. Tau
+        can be entered by hand in the table below, or fitted from real
+        reference data via the Kernel estimation section (spec Stage 2,
+        src/deconvolution/esf.py) -- an analyte with no tau (manual or
+        fitted) simply isn't washout-corrected."""
+        group = QGroupBox("Deconvolution")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(3, 3, 3, 3)
+
+        note = QLabel(
+            "Corrects along-line spot-mixing/smearing artifacts before standard "
+            "calibration. Shift uses each analyte's position in the sweep read-out "
+            "order (Instrument settings' Dwell time); washout needs a tau (s) per "
+            "analyte below, either typed in or fitted from reference data (Kernel "
+            "estimation, below). Both are off by default."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        self.checkBoxApplyShift = QCheckBox("Apply dwell-offset shift")
+        layout.addWidget(self.checkBoxApplyShift)
+        self.checkBoxApplyWashout = QCheckBox("Apply washout correction")
+        layout.addWidget(self.checkBoxApplyWashout)
+
+        self.tableWashoutTau = QTableWidget(0, 2)
+        self.tableWashoutTau.setHorizontalHeaderLabels(["Analyte", "Tau (s)"])
+        self.tableWashoutTau.horizontalHeader().setStretchLastSection(True)
+        self.tableWashoutTau.setToolTip(
+            "Populated with every measured analyte at Scan time. Leave Tau blank to "
+            "skip washout correction for that analyte even when the checkbox above is on. "
+            "Values in italic-free black were typed by hand or fitted; 'Fit' below only "
+            "ever fills a blank cell or refreshes a value it fitted earlier -- it never "
+            "overwrites a value you typed yourself."
+        )
+        self.tableWashoutTau.itemChanged.connect(self._on_washout_tau_item_changed)
+        layout.addWidget(self.tableWashoutTau)
+
+        layout.addWidget(self._build_kernel_estimation_group())
+
+        return group
+
+    def _build_kernel_estimation_group(self) -> QGroupBox:
+        """Fits washout tau (and a validating edge-spread tau) from real
+        reference data already in the scanned session (spec Sec 6.1 routes
+        a/b, src/deconvolution/esf.py) -- Pulse rows fit every analyte's
+        decay (single- vs double-exponential, AIC/BIC-gated) and feed
+        tableWashoutTau; Edge rows fit one representative analyte (the
+        highest-signal one in the window) to the analytic EMG curve and,
+        when at least one Pulse row was also fitted, cross-check its tau
+        against the pulse fit (the "closure check", spec's mandatory
+        Sec 6.1 test). Route (c), in-situ estimation, needs the
+        classification/unmixing stage (not built yet) and isn't offered
+        here.
+        """
+        group = QGroupBox("Kernel estimation")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(3, 3, 3, 3)
+
+        note = QLabel(
+            "Designate a time window in an already-scanned file as either an isolated "
+            "single-pulse decay (Pulse) or a sharp material-couple edge (Edge), then Fit. "
+            "Pulse rows estimate washout tau per analyte and fill the table above; Edge "
+            "rows validate that tau against an independent edge-spread fit."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        self.tableKernelReferences = QTableWidget(0, 4)
+        self.tableKernelReferences.setHorizontalHeaderLabels(["File", "Start (s)", "End (s)", "Kind"])
+        self.tableKernelReferences.horizontalHeader().setStretchLastSection(True)
+        layout.addWidget(self.tableKernelReferences)
+
+        row_buttons = QHBoxLayout()
+        button_add_reference = QPushButton("Add row")
+        button_add_reference.clicked.connect(self._on_add_kernel_reference_row)
+        row_buttons.addWidget(button_add_reference)
+        button_remove_reference = QPushButton("Delete selected row")
+        button_remove_reference.clicked.connect(self._on_delete_selected_kernel_reference_row)
+        row_buttons.addWidget(button_remove_reference)
+        row_buttons.addStretch(1)
+        layout.addLayout(row_buttons)
+
+        self.buttonFitKernels = QPushButton("Fit")
+        self.buttonFitKernels.clicked.connect(self._on_fit_kernels)
+        layout.addWidget(self.buttonFitKernels)
+
+        self.textKernelFitReport = QPlainTextEdit()
+        self.textKernelFitReport.setReadOnly(True)
+        self.textKernelFitReport.setMaximumHeight(150)
+        layout.addWidget(self.textKernelFitReport)
+
+        return group
+
+    def _on_add_kernel_reference_row(self):
+        row = self.tableKernelReferences.rowCount()
+        self.tableKernelReferences.insertRow(row)
+        file_combo = QComboBox()
+        file_combo.addItems(sorted(self._scanned_files))
+        self.tableKernelReferences.setCellWidget(row, 0, file_combo)
+        self.tableKernelReferences.setItem(row, 1, QTableWidgetItem("0.0"))
+        self.tableKernelReferences.setItem(row, 2, QTableWidgetItem("1.0"))
+        kind_combo = QComboBox()
+        kind_combo.addItems(["Pulse", "Edge"])
+        self.tableKernelReferences.setCellWidget(row, 3, kind_combo)
+
+    def _on_delete_selected_kernel_reference_row(self):
+        rows = sorted({idx.row() for idx in self.tableKernelReferences.selectedIndexes()}, reverse=True)
+        for row in rows:
+            self.tableKernelReferences.removeRow(row)
+
+    def _on_washout_tau_item_changed(self, item: QTableWidgetItem):
+        """A cell edit (by the user -- programmatic fills below block
+        signals first) means that analyte's tau is no longer "just
+        something Fit filled in" -- drop it from _auto_filled_tau so a
+        later Fit click won't silently overwrite what the user just typed.
+        """
+        if item.column() != 1:
+            return
+        analyte_item = self.tableWashoutTau.item(item.row(), 0)
+        if analyte_item is not None:
+            self._auto_filled_tau.discard(analyte_item.text())
+
+    def _on_fit_kernels(self):
+        report_lines = []
+        pulse_fits_by_analyte: dict[str, "esf.SinglePulseFit"] = {}
+        edge_fits: list["esf.EdgeSpreadFit"] = []
+
+        for row in range(self.tableKernelReferences.rowCount()):
+            file_combo = self.tableKernelReferences.cellWidget(row, 0)
+            kind_combo = self.tableKernelReferences.cellWidget(row, 3)
+            start_item = self.tableKernelReferences.item(row, 1)
+            end_item = self.tableKernelReferences.item(row, 2)
+            if file_combo is None or kind_combo is None or start_item is None or end_item is None:
+                continue
+            filename = file_combo.currentText()
+            line_data = self._scanned_files.get(filename)
+            if line_data is None:
+                report_lines.append(f"Row {row + 1}: file {filename!r} not found (re-scan?) -- skipped.")
+                continue
+            try:
+                start_s, end_s = float(start_item.text()), float(end_item.text())
+            except ValueError:
+                report_lines.append(f"Row {row + 1}: Start/End must be numeric -- skipped.")
+                continue
+            mask = (line_data.time_s >= start_s) & (line_data.time_s <= end_s)
+            if mask.sum() < 6:
+                report_lines.append(f"Row {row + 1} ({filename}): fewer than 6 points in [{start_s}, {end_s}]s -- skipped.")
+                continue
+            window_time = line_data.time_s[mask] - line_data.time_s[mask][0]
+            window_signal = line_data.signal.loc[mask]
+
+            if kind_combo.currentText() == "Pulse":
+                fits = esf.fit_single_pulse_decay_per_analyte(window_time, window_signal, model="auto")
+                pulse_fits_by_analyte.update(fits)
+                report_lines.append(f"Row {row + 1} ({filename}, Pulse): fitted {len(fits)} analyte(s).")
+            else:
+                analyte = window_signal.mean().idxmax()
+                try:
+                    fit = esf.fit_edge_spread(window_time, window_signal[analyte].to_numpy())
+                    edge_fits.append(fit)
+                    report_lines.append(
+                        f"Row {row + 1} ({filename}, Edge, analyte {analyte}): "
+                        f"tau={fit.tau_s:.3g}s sigma={fit.sigma_s:.3g}s R2={fit.r_squared:.3f}"
+                    )
+                except ValueError as e:
+                    report_lines.append(f"Row {row + 1} ({filename}, Edge): {e}")
+
+        if pulse_fits_by_analyte:
+            outlier_flags = esf.flag_tau_outliers(pulse_fits_by_analyte)
+            report_lines.append("")
+            report_lines.append("Per-analyte pulse fits:")
+            for analyte, fit in sorted(pulse_fits_by_analyte.items()):
+                flag = " [OUTLIER]" if outlier_flags.get(analyte) else ""
+                status = "" if fit.success else " [fit did not converge]"
+                report_lines.append(
+                    f"  {analyte}: model={fit.model} tau={fit.tau_s:.3g}s R2={fit.r_squared:.3f}{flag}{status}"
+                )
+            self._fill_washout_tau_from_fits(
+                {a: f.tau_s for a, f in pulse_fits_by_analyte.items() if f.success and not outlier_flags.get(a)}
+            )
+
+        if edge_fits and pulse_fits_by_analyte:
+            median_pulse_tau = float(np.median([f.tau_s for f in pulse_fits_by_analyte.values() if f.success]))
+            report_lines.append("")
+            report_lines.append("Closure check (edge tau vs. median pulse tau):")
+            for fit in edge_fits:
+                reference = SinglePulseFit(model="single", tau_s=median_pulse_tau, amplitude=0.0, baseline=0.0, success=True)
+                closure = esf.check_closure(reference, fit)
+                verdict = "PASS" if closure.within_tolerance else "FAIL"
+                report_lines.append(
+                    f"  edge tau={closure.edge_tau_s:.3g}s vs pulse tau={closure.pulse_tau_s:.3g}s "
+                    f"(rel. diff {closure.relative_difference:.1%}) -- {verdict}"
+                )
+
+        self.textKernelFitReport.setPlainText("\n".join(report_lines) if report_lines else "No reference rows to fit.")
+
+    def _fill_washout_tau_from_fits(self, tau_by_analyte: dict[str, float]):
+        """Only overwrites a tableWashoutTau cell that's blank or was
+        previously filled by this same mechanism (_auto_filled_tau) -- a
+        value the user typed by hand is never touched (see
+        _on_washout_tau_item_changed)."""
+        self.tableWashoutTau.blockSignals(True)
+        for row in range(self.tableWashoutTau.rowCount()):
+            analyte_item = self.tableWashoutTau.item(row, 0)
+            tau_item = self.tableWashoutTau.item(row, 1)
+            if analyte_item is None or tau_item is None:
+                continue
+            analyte = analyte_item.text()
+            if analyte not in tau_by_analyte:
+                continue
+            if tau_item.text().strip() and analyte not in self._auto_filled_tau:
+                continue
+            tau_item.setText(f"{tau_by_analyte[analyte]:.4g}")
+            self._auto_filled_tau.add(analyte)
+        self.tableWashoutTau.blockSignals(False)
+
+    def _populate_washout_tau_table(self):
+        """(Re)builds tableWashoutTau from the analytes seen at Scan time --
+        same "populated at Scan time" pattern as
+        _populate_isotope_calibration_table, but one row per analyte (no
+        element grouping, since washout tau is a per-analyte/per-isotope
+        physical property, not something isotopes of one element share).
+        Existing Tau entries are preserved across a re-scan (e.g. after
+        adding more files under the same labels) rather than wiped.
+        """
+        existing_tau = {}
+        for row in range(self.tableWashoutTau.rowCount()):
+            analyte_item = self.tableWashoutTau.item(row, 0)
+            tau_item = self.tableWashoutTau.item(row, 1)
+            if analyte_item is not None and tau_item is not None and tau_item.text().strip():
+                existing_tau[analyte_item.text()] = tau_item.text()
+
+        self.tableWashoutTau.blockSignals(True)
+        self.tableWashoutTau.setRowCount(0)
+        analytes = sorted(next(iter(self._scanned_files.values())).analytes) if self._scanned_files else []
+        for analyte in analytes:
+            row = self.tableWashoutTau.rowCount()
+            self.tableWashoutTau.insertRow(row)
+            analyte_item = QTableWidgetItem(analyte)
+            analyte_item.setFlags(analyte_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            self.tableWashoutTau.setItem(row, 0, analyte_item)
+            self.tableWashoutTau.setItem(row, 1, QTableWidgetItem(existing_tau.get(analyte, "")))
+        self.tableWashoutTau.blockSignals(False)
+
+    def _current_deconvolution_settings(self) -> DeconvolutionSettings:
+        washout_tau_s = {}
+        for row in range(self.tableWashoutTau.rowCount()):
+            analyte_item = self.tableWashoutTau.item(row, 0)
+            tau_item = self.tableWashoutTau.item(row, 1)
+            if analyte_item is None or tau_item is None:
+                continue
+            text = tau_item.text().strip()
+            if not text:
+                continue
+            try:
+                tau = float(text)
+            except ValueError:
+                continue
+            if tau > 0:
+                washout_tau_s[analyte_item.text()] = tau
+
+        return DeconvolutionSettings(
+            apply_shift=self.checkBoxApplyShift.isChecked(),
+            apply_washout=self.checkBoxApplyWashout.isChecked(),
+            washout_tau_s=washout_tau_s,
+        )
+
+    def _build_classification_group(self) -> QGroupBox:
+        """Mineral classification by cosine-distance matching
+        (src/classification/, design spec
+        plans/mineral_classification_calibration_spec.md Sec 3) against
+        ``calibrated_ppm`` -- unlike Deconvolution (a per-line correction
+        threaded into the Run pipeline itself), classification runs
+        on-demand, after a Run has already produced calibrated data, via
+        its own Classify button -- there's nothing to correct upstream of
+        it, and re-classifying with a different threshold/mineral subset
+        shouldn't require re-running background/drift/standards from
+        scratch.
+        """
+        group = QGroupBox("Classification")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(3, 3, 3, 3)
+
+        self.labelMineralLibraryStatus = QLabel(
+            f"{len(self.mineral_references)} minerals loaded from webmineral_compositions.csv"
+            if not self._mineral_library_error else f"Reference library failed to load: {self._mineral_library_error}"
+        )
+        self.labelMineralLibraryStatus.setWordWrap(True)
+        if self._mineral_library_error:
+            self.labelMineralLibraryStatus.setStyleSheet("color: red;")
+        layout.addWidget(self.labelMineralLibraryStatus)
+
+        note = QLabel(
+            "Cosine-similarity match against the selected reference minerals' element "
+            "composition, restricted to whichever analytes this sample and a given "
+            "reference both report. Pixels below the match threshold are left "
+            "unclassified rather than forced to their best (poor) match."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        self.sliderMatchThreshold = CustomSlider(
+            min_value=0.0, max_value=1.0, step=0.01, initial_value=0.95,
+            precision=2, fixed_point=True, orientation="horizontal", label_position="low",
+        )
+        self.sliderMatchThreshold.setToolTip("Minimum cosine similarity (tau_min) for a pixel to be assigned a mineral.")
+        layout.addWidget(QLabel("Match threshold"))
+        layout.addWidget(self.sliderMatchThreshold)
+
+        self.sliderAmbiguityGap = CustomSlider(
+            min_value=0.0, max_value=0.5, step=0.005, initial_value=0.02,
+            precision=3, fixed_point=True, orientation="horizontal", label_position="low",
+        )
+        self.sliderAmbiguityGap.setToolTip(
+            "Minimum gap (g_min) between the best cross-group match and the runner-up "
+            "for a pixel to be considered confidently, not ambiguously, classified."
+        )
+        layout.addWidget(QLabel("Ambiguity gap"))
+        layout.addWidget(self.sliderAmbiguityGap)
+
+        layout.addWidget(QLabel("Reference minerals"))
+        self.comboMineralClassFilter = QComboBox()
+        self.comboMineralClassFilter.addItem("All")
+        self.comboMineralClassFilter.addItems(
+            sorted({r.mineral_class for r in self.mineral_references if r.mineral_class})
+        )
+        self.comboMineralClassFilter.setToolTip(
+            "Filter the list below to one broad mineral class (e.g. Carbonate, Feldspar) -- "
+            "combines with the text search below it. Does not affect which minerals are checked."
+        )
+        layout.addWidget(self.comboMineralClassFilter)
+        self.listMinerals = QListWidget()
+        self.filterMinerals = ListFilterWidget(self.listMinerals, placeholder="Search minerals...")
+        layout.addWidget(self.filterMinerals)
+        layout.addWidget(self.listMinerals)
+        self._populate_mineral_list()
+
+        select_row = QHBoxLayout()
+        self.buttonSelectAllMinerals = QPushButton("Select All")
+        self.buttonSelectAllMinerals.clicked.connect(lambda: self._set_all_minerals_checked(True))
+        select_row.addWidget(self.buttonSelectAllMinerals)
+        self.buttonSelectNoneMinerals = QPushButton("Select None")
+        self.buttonSelectNoneMinerals.clicked.connect(lambda: self._set_all_minerals_checked(False))
+        select_row.addWidget(self.buttonSelectNoneMinerals)
+        select_row.addStretch(1)
+        layout.addLayout(select_row)
+
+        preset_row = QHBoxLayout()
+        self.buttonSavePreset = QPushButton("Save Preset...")
+        self.buttonSavePreset.setToolTip("Save the currently checked minerals as a named, reusable subset.")
+        self.buttonSavePreset.clicked.connect(self._on_save_mineral_preset)
+        preset_row.addWidget(self.buttonSavePreset)
+        self.comboMineralPresets = QComboBox()
+        self._populate_mineral_preset_combo()
+        preset_row.addWidget(self.comboMineralPresets, stretch=1)
+        self.buttonLoadPreset = QPushButton("Load")
+        self.buttonLoadPreset.clicked.connect(self._on_load_mineral_preset)
+        preset_row.addWidget(self.buttonLoadPreset)
+        layout.addLayout(preset_row)
+
+        self.buttonClassify = QPushButton("Classify")
+        self.buttonClassify.clicked.connect(self._on_classify)
+        layout.addWidget(self.buttonClassify)
+
+        # Connected after the list/combo above are fully populated, so the
+        # initial population doesn't spuriously trigger a filter/preview
+        # refresh before the rest of the group (e.g. self.tableClassification-
+        # Summary, built later in _build_results_tabs) even exists yet.
+        self.filterMinerals.filterChanged.connect(self._apply_mineral_filters)
+        self.comboMineralClassFilter.currentTextChanged.connect(self._apply_mineral_filters)
+        self.listMinerals.itemChanged.connect(self._refresh_mineral_preview)
+
+        return group
+
+    def _populate_mineral_list(self):
+        self.listMinerals.clear()
+        for ref in sorted(self.mineral_references, key=lambda r: r.mineral_name):
+            item = QListWidgetItem(ref.mineral_name)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked)
+            self.listMinerals.addItem(item)
+
+    def _set_all_minerals_checked(self, checked: bool):
+        state = Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
+        for i in range(self.listMinerals.count()):
+            self.listMinerals.item(i).setCheckState(state)
+
+    def _selected_mineral_references(self) -> list[MineralReference]:
+        checked_names = {
+            self.listMinerals.item(i).text()
+            for i in range(self.listMinerals.count())
+            if self.listMinerals.item(i).checkState() == Qt.CheckState.Checked
+        }
+        return [r for r in self.mineral_references if r.mineral_name in checked_names]
+
+    def _apply_mineral_filters(self, *_args):
+        """Combines (ANDs) the class-filter combo with the text search --
+        neither ListFilterWidget's own text-only hiding nor a class-only
+        pass is sufficient alone, so this recomputes visibility for both
+        conditions together on every change to either one."""
+        query = self.filterMinerals.filter_text().strip().lower()
+        selected_class = self.comboMineralClassFilter.currentText()
+        class_by_name = {r.mineral_name: r.mineral_class for r in self.mineral_references}
+        for i in range(self.listMinerals.count()):
+            item = self.listMinerals.item(i)
+            name = item.text()
+            matches_text = not query or query in name.lower()
+            matches_class = selected_class == "All" or class_by_name.get(name) == selected_class
+            item.setHidden(not (matches_text and matches_class))
+        self._refresh_mineral_preview()
+
+    def _refresh_mineral_preview(self, *_args):
+        """Live preview: shows the currently checked mineral names in
+        tableClassificationSummary with blank score/gap columns, even
+        before Classify has ever been run -- _on_classify overwrites this
+        with the real per-pixel stats once it runs."""
+        if not hasattr(self, "tableClassificationSummary"):
+            return
+        selected_refs = self._selected_mineral_references()
+        preview = pd.DataFrame({
+            "mineral": sorted(r.mineral_name for r in selected_refs),
+        })
+        preview["pixel_count"] = ""
+        preview["mean_score"] = ""
+        preview["mean_gap"] = ""
+        preview["n_ambiguous"] = ""
+        _populate_table(self.tableClassificationSummary, preview)
+
+    def _populate_mineral_preset_combo(self, select: str | None = None):
+        self.comboMineralPresets.blockSignals(True)
+        self.comboMineralPresets.clear()
+        presets = load_presets(DEFAULT_PRESETS_PATH)
+        self.comboMineralPresets.addItems(sorted(presets))
+        if select is not None:
+            idx = self.comboMineralPresets.findText(select)
+            if idx >= 0:
+                self.comboMineralPresets.setCurrentIndex(idx)
+        self.comboMineralPresets.blockSignals(False)
+
+    def _on_save_mineral_preset(self):
+        selected_refs = self._selected_mineral_references()
+        if not selected_refs:
+            QMessageBox.warning(self, "Save Preset", "No reference minerals selected.")
+            return
+        name, ok = QInputDialog.getText(self, "Save Preset", "Preset name:")
+        if not ok or not name.strip():
+            return
+        name = name.strip()
+        save_preset(DEFAULT_PRESETS_PATH, name, sorted(r.mineral_name for r in selected_refs))
+        self._populate_mineral_preset_combo(select=name)
+
+    def _on_load_mineral_preset(self):
+        name = self.comboMineralPresets.currentText()
+        if not name:
+            QMessageBox.warning(self, "Load Preset", "No saved presets yet.")
+            return
+        names = set(load_presets(DEFAULT_PRESETS_PATH).get(name, []))
+        if not names:
+            QMessageBox.warning(self, "Load Preset", f"Preset '{name}' is empty or no longer exists.")
+            return
+        for i in range(self.listMinerals.count()):
+            item = self.listMinerals.item(i)
+            item.setCheckState(Qt.CheckState.Checked if item.text() in names else Qt.CheckState.Unchecked)
+
+    def _on_classify(self):
+        result = self._current_result()
+        if result is None:
+            QMessageBox.warning(self.ui if hasattr(self, "ui") else self, "Classify", "Run the pipeline first.")
+            return
+        if not self.mineral_references:
+            QMessageBox.warning(self, "Classify", f"Reference library failed to load: {self._mineral_library_error}")
+            return
+
+        selected_refs = self._selected_mineral_references()
+        if not selected_refs:
+            QMessageBox.warning(self, "Classify", "No reference minerals selected.")
+            return
+
+        element_columns = _resolve_element_columns(selected_refs, result.calibrated_ppm.columns)
+        if not element_columns:
+            QMessageBox.warning(self, "Classify", "No matching analyte columns found in this sample.")
+            return
+
+        tau_min = self.sliderMatchThreshold.value()
+        g_min = self.sliderAmbiguityGap.value()
+        result.classification = classify_batch(
+            result.calibrated_ppm, selected_refs, element_columns, tau_min=tau_min, g_min=g_min,
+        )
+        result.classification_categories = sorted({r.mineral_name for r in selected_refs})
+
+        self._refresh_classification_tab()
 
     def _build_results_tabs(self) -> QTabWidget:
         self.tabs = QTabWidget()
@@ -1038,6 +1652,30 @@ class CalibrationMainWindow(QMainWindow):
         data_layout.addWidget(self.tableData)
         self.tabs.addTab(data_widget, "Data")
 
+        # -- Deconvolution QC --
+        deconvolution_widget = QWidget()
+        deconvolution_qc_layout = QVBoxLayout(deconvolution_widget)
+        self.canvasDeconvolution = SimpleMplCanvas(width=8, height=4)
+        self.toolbarDeconvolution = make_compact_nav_toolbar(self.canvasDeconvolution, deconvolution_widget)
+        deconvolution_qc_layout.addWidget(self.toolbarDeconvolution)
+        deconvolution_qc_layout.addWidget(self.canvasDeconvolution)
+        self.tableDeconvolutionReport = QTableWidget()
+        self.tableDeconvolutionReport.setMaximumHeight(200)
+        deconvolution_qc_layout.addWidget(self.tableDeconvolutionReport)
+        self.tabs.addTab(deconvolution_widget, "Deconvolution QC")
+
+        # -- Classification --
+        classification_widget = QWidget()
+        classification_result_layout = QVBoxLayout(classification_widget)
+        self.canvasClassification = SimpleMplCanvas(width=8, height=5)
+        self.toolbarClassification = make_compact_nav_toolbar(self.canvasClassification, classification_widget)
+        classification_result_layout.addWidget(self.toolbarClassification)
+        classification_result_layout.addWidget(self.canvasClassification)
+        self.tableClassificationSummary = QTableWidget()
+        self.tableClassificationSummary.setMaximumHeight(200)
+        classification_result_layout.addWidget(self.tableClassificationSummary)
+        self.tabs.addTab(classification_widget, "Classification")
+
         return self.tabs
 
     # ------------------------------------------------------------------
@@ -1049,6 +1687,8 @@ class CalibrationMainWindow(QMainWindow):
         self.buttonScan.clicked.connect(self._on_scan)
         self.actionOpenRefLibrary.triggered.connect(self._on_edit_standard)
         self.actionRun.triggered.connect(self._on_run)
+        self.actionReprocess.triggered.connect(self._on_reprocess)
+        self.actionClassify.triggered.connect(self._on_classify)
         self.comboBoxSampleResult.currentIndexChanged.connect(self._on_sample_selected)
         # The analyte selector is shared across every results tab, but only
         # the currently-visible tab's plot needs to redraw when it changes
@@ -1143,6 +1783,7 @@ class CalibrationMainWindow(QMainWindow):
         self._populate_per_line_override_table()
         self._populate_isotope_calibration_table()
         self._populate_dating_systems_table()
+        self._populate_washout_tau_table()
 
     def _populate_focus_combo(self, labels: set[str]):
         """Populates comboBoxSampleResult with every label found at Scan
@@ -1784,9 +2425,11 @@ class CalibrationMainWindow(QMainWindow):
             spot_size_um=_or_none(self.spinSpotSize),
             sweep_s=_or_none(self.spinSweep),
             speed_um_s=_or_none(self.spinSpeed),
+            dwell_time_ms=_or_none(self.spinDwellTime),
             scan_axis=self.comboScanAxis.currentText(),
             reverse_x=self.checkReverseX.isChecked(),
             reverse_y=self.checkReverseY.isChecked(),
+            bidirectional_scan=self.checkBidirectionalScan.isChecked(),
             laser_wavelength_nm=_or_none(self.spinLaserWavelength),
             fluence_j_cm2=_or_none(self.spinFluence),
             pulse_rate_hz=_or_none(self.spinPulseRate),
@@ -1857,6 +2500,8 @@ class CalibrationMainWindow(QMainWindow):
             isotope_share_specs=isotope_share_specs,
             pool_specs=pool_specs,
             dating_ratio_specs=dating_ratio_specs,
+            deconvolution_settings=self._current_deconvolution_settings(),
+            ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
         )
 
         if self.checkBoxBatchMode.isChecked():
@@ -1867,19 +2512,107 @@ class CalibrationMainWindow(QMainWindow):
             kwargs = dict(sample_dir=self._data_dir, **common_kwargs)
 
         self.actionRun.setEnabled(False)
+        self.actionReprocess.setEnabled(False)
         self.labelRunStatus.setText("Running...")
         self._worker = _PipelineWorker(fn, kwargs, parent=self)
         self._worker.finished_ok.connect(self._on_run_finished)
         self._worker.failed.connect(self._on_run_failed)
         self._worker.start()
 
+    def _on_reprocess(self):
+        """Fast reprocess-only re-run: reuses files already parsed by the
+        last Scan (self._scanned_files) instead of re-reading every raw
+        file from disk -- for quickly re-applying changed deconvolution/
+        calibration settings. Batch mode isn't supported here (unlike
+        _on_run/run_batch) since self._scanned_files doesn't track which
+        subdirectory each file came from -- see run_from_parsed's
+        docstring; use the main Run button for batch mode instead.
+        """
+        if self.checkBoxBatchMode.isChecked():
+            QMessageBox.information(
+                self, "Reprocess",
+                "Reprocess (fast re-run) isn't available in batch mode -- use Run instead.",
+            )
+            return
+        if not self._scanned_files:
+            QMessageBox.warning(self, "Reprocess", "Scan a raw data directory first.")
+            return
+        standard_names = self._checked_standard_names()
+        if not standard_names:
+            QMessageBox.warning(self, "Reprocess", "Mark at least one label as a standard.")
+            return
+
+        # self._scanned_files was parsed at Scan time with every label
+        # treated as a standard (see _on_scan's docstring) -- correct
+        # is_standard here to reflect what's actually checked now, since
+        # run_from_parsed never re-parses and so never re-derives this.
+        files = [
+            dataclasses.replace(f, meta=dataclasses.replace(f.meta, is_standard=f.meta.label in standard_names))
+            for f in self._scanned_files.values()
+        ]
+
+        primary_standards = self._primary_standard_names()
+        overrides = self._reference_overrides()
+        remapped_library = {
+            label: self.reference_library[overrides[label]]
+            for label in standard_names
+            if overrides.get(label) in self.reference_library
+        }
+
+        bias_specs, isotope_share_specs = self._gather_isotope_specs(remapped_library)
+        pool_specs = self._gather_pool_specs()
+        dating_bias_specs, dating_ratio_specs = self._gather_dating_ratio_specs()
+        bias_spec_by_key = {(s.element, s.numerator_mass, s.denominator_mass): s for s in bias_specs}
+        for s in dating_bias_specs:
+            bias_spec_by_key.setdefault((s.element, s.numerator_mass, s.denominator_mass), s)
+        bias_specs = list(bias_spec_by_key.values())
+
+        kwargs = dict(
+            files=files,
+            sample_dir=self._data_dir,
+            reference_library=remapped_library,
+            drift_order=self.spinDriftOrder.value(),
+            background_drift_order=self.spinDriftOrder.value(),
+            drift_method=DRIFT_METHOD_LABELS[self.comboDriftMethod.currentText()],
+            background_drift_method=DRIFT_METHOD_LABELS[self.comboBackgroundDriftMethod.currentText()],
+            max_order=self.spinDriftOrder.value(),
+            split_odd_even=self.checkSplitOddEven.isChecked(),
+            accuracy_threshold=self.spinAccuracyThreshold.value(),
+            primary_standards=primary_standards,
+            instrument_settings=self._current_instrument_settings(),
+            background_override=self._current_background_override(),
+            per_file_overrides=self._gather_per_file_overrides(),
+            excluded_files={name for name, used in self._file_use_state.items() if not used},
+            manual_row_exclusions=self._manual_row_exclusions,
+            manual_occurrence_exclusions=self._manual_occurrence_exclusions,
+            detrend=self.checkDetrend.isChecked(),
+            despike_noise=self.checkDespikeNoise.isChecked(),
+            force_zero_intercept=self.checkForceZeroIntercept.isChecked(),
+            bias_specs=bias_specs,
+            isotope_share_specs=isotope_share_specs,
+            pool_specs=pool_specs,
+            dating_ratio_specs=dating_ratio_specs,
+            deconvolution_settings=self._current_deconvolution_settings(),
+            ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
+        )
+
+        self.actionRun.setEnabled(False)
+        self.actionReprocess.setEnabled(False)
+        self.labelRunStatus.setText("Reprocessing...")
+        self._worker = _PipelineWorker(pipeline.run_from_parsed, kwargs, parent=self)
+        self._worker.finished_ok.connect(self._on_run_finished)
+        self._worker.failed.connect(self._on_run_failed)
+        self._worker.start()
+
     def _on_run_failed(self, message: str):
         self.actionRun.setEnabled(True)
+        self.actionReprocess.setEnabled(True)
         self.labelRunStatus.setText(f"Failed: {message}")
         QMessageBox.critical(self, "Run pipeline", message)
 
     def _on_run_finished(self, raw_results: dict):
         self.actionRun.setEnabled(True)
+        self.actionReprocess.setEnabled(True)
         self.results = {}
         if self.checkBoxBatchMode.isChecked():
             for folder_name, folder_results in raw_results.items():
@@ -1979,6 +2712,8 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_isotope_ratios_tab()
         self._refresh_map_tab()
         self._refresh_data_tab()
+        self._refresh_deconvolution_tab()
+        self._refresh_classification_tab()
 
     def _refresh_timing_tab(self):
         result = self._current_result()
@@ -2322,6 +3057,14 @@ class CalibrationMainWindow(QMainWindow):
         isolates the correction's spatial/temporal pattern (background level
         plus the standard-drift adjustment) instead of being swamped by the
         sample signal's own huge dynamic range.
+
+        "deconvolution correction" follows the same "show the change, not
+        the corrected value" convention, recomputing src/deconvolution/'s
+        shift+washout correction from ``result.deconvolution_settings`` (the
+        settings actually used for this run -- falls back to an all-off
+        ``DeconvolutionSettings()`` if the run predates that field or
+        deconvolution wasn't configured, in which case the map is all
+        zeros rather than raising).
         """
         if stage == "calibrated":
             return result.calibrated_ppm[analyte] if analyte in result.calibrated_ppm.columns else pd.Series(dtype=float)
@@ -2336,9 +3079,10 @@ class CalibrationMainWindow(QMainWindow):
         drift_reference_value = float(drift_fit.predict([drift_fit.t0])[0]) if drift_fit is not None else None
 
         ordered = sorted(zip(result.files, result.backgrounds), key=lambda p: p[0].meta.acquired_at)
+        deconvolution_settings = result.deconvolution_settings or DeconvolutionSettings()
         values = []
         index_tuples = []
-        for line_data, bg in ordered:
+        for line_number, (line_data, bg) in enumerate(ordered):
             if analyte not in bg.background_corrected_signal.columns:
                 continue
             n = len(bg.background_corrected_signal)
@@ -2355,6 +3099,19 @@ class CalibrationMainWindow(QMainWindow):
                 else:
                     combined = bg_corrected
                 series = combined - raw
+            elif stage == "deconvolution correction":
+                # Recomputed on demand from the stored settings (same
+                # "recompute, don't store every intermediate stage"
+                # convention as "background+drift correction" above) --
+                # shows what shift/washout changed, not the corrected value
+                # itself, since the correction is usually small relative to
+                # the signal's own dynamic range.
+                bg_corrected = bg.background_corrected_signal[analyte].to_numpy()
+                line_result = correct_line(
+                    bg.background_corrected_signal, line_data.analytes, deconvolution_settings,
+                    result.instrument_settings, line_number,
+                )
+                series = line_result.corrected[analyte].to_numpy() - bg_corrected
             else:
                 series = np.full(n, np.nan)
             values.extend(series.tolist())
@@ -2400,6 +3157,59 @@ class CalibrationMainWindow(QMainWindow):
             self.labelDataNote.setText(f"{len(df)} rows.")
         display_df = df.reset_index()
         _populate_table(self.tableData, display_df)
+
+    def _refresh_deconvolution_tab(self):
+        """Not analyte-dependent (summarizes every analyte at once, same as
+        _refresh_data_tab) -- called once per sample-result selection, not
+        wired into _refresh_active_tab's per-analyte-change dict."""
+        result = self._current_result()
+        if result is None:
+            return
+        df = deconv_diagnostics.build_deconvolution_report_df(result.deconvolution_provenance)
+        self.canvasDeconvolution.axes.clear()
+        if df.empty:
+            self.canvasDeconvolution.axes.set_title("No deconvolution applied for this run")
+        else:
+            deconv_diagnostics.plot_noise_amplification_summary(self.canvasDeconvolution.axes, df)
+        self._draw(self.canvasDeconvolution)
+        _populate_table(self.tableDeconvolutionReport, df)
+
+    def _refresh_classification_tab(self):
+        """Not analyte-dependent (classification's own map is a single
+        categorical field, not one-per-analyte) -- called once per sample-
+        result selection, not wired into _refresh_active_tab's per-analyte-
+        change dict. classification is populated by the Classify button
+        (_on_classify), not by a pipeline Run, so this is commonly empty
+        immediately after a fresh Run -- that's expected, not an error.
+        """
+        result = self._current_result()
+        self.canvasClassification.axes.clear()
+        if result is None or result.classification.empty:
+            self.canvasClassification.axes.set_title("No classification run yet for this sample")
+            self._draw(self.canvasClassification)
+            self.tableClassificationSummary.clear()
+            self.tableClassificationSummary.setRowCount(0)
+            return
+
+        diagnostics.plot_categorical_map(
+            self.canvasClassification.axes, result.classification["label"], result.grid_index,
+            result.classification_categories, title=f"{result.sample_label}: mineral classification",
+        )
+        self._draw(self.canvasClassification)
+
+        classified = result.classification[result.classification["label"].notna()]
+        if classified.empty:
+            self.tableClassificationSummary.clear()
+            self.tableClassificationSummary.setRowCount(0)
+            return
+        summary = classified.groupby("label").agg(
+            pixel_count=("label", "size"), mean_score=("score", "mean"),
+            mean_gap=("gap", "mean"), n_ambiguous=("ambiguous", "sum"),
+        ).reset_index().rename(columns={"label": "mineral"})
+        summary["mean_score"] = summary["mean_score"].round(4)
+        summary["mean_gap"] = summary["mean_gap"].round(4)
+        summary = summary.sort_values("pixel_count", ascending=False)
+        _populate_table(self.tableClassificationSummary, summary)
 
     # ------------------------------------------------------------------
     # Export

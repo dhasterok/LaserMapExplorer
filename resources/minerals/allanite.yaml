@@ -15,6 +15,7 @@
 # mineral in this batch). No end-members -- MinPlotX computes none for
 # allanite either.
 mineral: allanite
+abbreviation: Aln
 formula: CaCe(Fe2+,Fe3+)(Al,Fe3+)2(SiO4)(Si2O7)O(OH)
 normalization:
   basis: oxygen

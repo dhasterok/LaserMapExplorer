@@ -1,9 +1,12 @@
-"""Characterization test for magnetite -- reuses the same spinel_xmg engine
-as ``resources/minerals/spinel.yaml`` (see ``resources/minerals/
-magnetite.yaml``'s comment); no workbook reference sheet exists for
-magnetite specifically. A self-consistency check on a hand-picked
-near-pure Fe3O4 analysis rather than a cross-check against an authoritative
-external value.
+"""Characterization test for a magnetite-dominant composition, run through
+the shared ``resources/minerals/spinel-magnetite.yaml`` config (see that
+file's comment -- magnetite is the Fe3+-dominant member of the same
+spinel_xmg solid solution, not a separate calculation); no workbook
+reference sheet exists for this specific composition (the workbook
+reference test uses an Al-rich spinel instead -- see
+``test_stoichiometry_spinel_magnetite_workbook_reference.py``). A
+self-consistency check on a hand-picked near-pure Fe3O4 analysis rather
+than a cross-check against an authoritative external value.
 
 Pure Python -- no PyQt/QApplication needed.
 """
@@ -18,14 +21,14 @@ sys.path.insert(0, str(project_root))
 from src.stoichiometry import pipeline
 from src.stoichiometry.config import load_mineral_config
 
-MAGNETITE_YAML_PATH = project_root / "resources" / "minerals" / "magnetite.yaml"
+SPINEL_MAGNETITE_YAML_PATH = project_root / "resources" / "minerals" / "spinel-magnetite.yaml"
 
 ANALYSIS = {"FeO": 31.0, "Fe2O3": 67.0, "TiO2": 0.5, "Al2O3": 0.5}
 
 
 @pytest.fixture(scope="module")
 def magnetite_config():
-    return load_mineral_config(MAGNETITE_YAML_PATH)
+    return load_mineral_config(SPINEL_MAGNETITE_YAML_PATH)
 
 
 @pytest.fixture(scope="module")

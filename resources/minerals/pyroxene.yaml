@@ -1,5 +1,6 @@
 # Pyroxene (ortho/calcic): M2 M1 T2 O6 (tetrahedral T, octahedral M1, M2)
 mineral: pyroxene
+abbreviation: Px
 formula: M2M1T2O6
 normalization:
   basis: cation

@@ -1,5 +1,6 @@
 # Olivine: (Mg,Fe,Mn,Ca)2SiO4 (tetrahedral T, octahedral M)
 mineral: olivine
+abbreviation: Ol
 formula: X2SiO4
 normalization:
   basis: cation

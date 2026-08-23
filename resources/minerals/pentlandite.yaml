@@ -1,0 +1,29 @@
+# Pentlandite: generic M9S8 formula (single metal site) -- (Fe,Ni)9S8 with
+# minor Co (cobalt-pentlandite at the Co-dominant end). Genuinely different
+# metal:S target from every other sulfide group here (9:8, vs 1:1 for
+# monosulfide/pyrrhotite or 1:2 for pyrite) -- exactly why this needs its
+# own config rather than a loose "Fe-Ni sulfide" bucket shared with
+# pyrrhotite, which is structurally and stoichiometrically unrelated
+# (hexagonal, vacancy-driven ~1:1) despite the same casual "Fe-Ni sulfide"
+# label.
+#
+# basis: anion -- S is directly measured (see monosulfide.yaml's comment
+# for the general rationale); anchoring on it (target 8.0) lets the metal
+# site float around 9.0 rather than being pinned there by construction.
+# Falls back to cation-basis automatically if S wasn't measured.
+mineral: pentlandite
+abbreviation: Pn
+formula: (Fe,Ni,Co)9S8
+normalization:
+  basis: anion
+  ideal_oxygens: 8.0   # ideal S (anion) total under basis: anion
+  ideal_cations: 9.0   # fallback target if S wasn't measured
+  excludes: [S]
+sites:
+  M:
+    target: 9.0
+    elements: [Fe, Ni, Co]
+    priority: [Fe, Ni, Co]
+end_members:
+  method: pentlandite_ratio
+  members: [pentlandite, cobalt_pentlandite]

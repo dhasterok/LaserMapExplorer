@@ -1,0 +1,29 @@
+# Rutile: TiO2 (single octahedral site, same "one site, no T/M split" shape
+# as ilmenite/hematite). Common trace substituents are included directly in
+# the M site rather than as separate trace_elements bookkeeping: Nb5+/Ta5+
+# and Fe3+/Cr3+/V3+/Al3+ substitute for Ti4+ (coupled Nb,Ta-for-2Ti and
+# (Fe3+,Cr3+,V3+,Al3+)+(Nb5+,Ta5+)-for-2Ti4+ schemes), and Zr4+ substitutes
+# directly (the basis of Zr-in-rutile thermometry) -- all are real
+# structural cations here, not contamination.
+#
+# No redox: block -- unlike ilmenite/hematite (where Fe is the dominant
+# cation and its valence matters for the end-member split), Fe in rutile is
+# a minor trace substituent with no coupled charge-balance scheme validated
+# for this port; 'Fe' is used as a plain, non-split cation, same convention
+# as apatite/titanite's plain 'Fe'.
+#
+# No end_members block -- a single near-pure phase (TiO2 has no named solid
+# -solution end-members the way ilmenite/spinel do), same as
+# allanite/serpentine/talc/hematite.
+mineral: rutile
+abbreviation: Rt
+formula: TiO2
+normalization:
+  basis: cation
+  ideal_oxygens: 2
+  ideal_cations: 1
+sites:
+  M:
+    target: 1.0
+    elements: [Ti, Nb, Ta, Fe, Cr, V, Al, Zr]
+    priority: [Ti, Nb, Ta, Fe, Cr, V, Al, Zr]

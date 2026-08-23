@@ -26,6 +26,7 @@
 # default 0.0 = all ferrous), the same fallback convention already used for
 # mica/cordierite/staurolite/serpentine in this library.
 mineral: amphibole
+abbreviation: Amp
 formula: (Ca,Na)2-3(Mg,Fe,Al)5Si6-8Al0-2O22(OH)2
 normalization:
   basis: oxygen

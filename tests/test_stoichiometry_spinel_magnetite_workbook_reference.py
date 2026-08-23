@@ -1,10 +1,12 @@
-"""Cross-checks the spinel stoichiometry pipeline against
+"""Cross-checks the spinel-magnetite stoichiometry pipeline against
 ``tests/normalization.v17.xlsx``'s 'Spinel' sheet -- a hand-built,
 cell-by-cell recalculation of a real EPMA spinel analysis (from the
 Adirondacks) that solves for Fe3+ by charge balance.
 
-Pure Python -- no PyQt/QApplication needed. ``resources/minerals/spinel.yaml``
-uses the dedicated ``spinel_xmg`` site-allocation method (ports MinPlotX's
+Pure Python -- no PyQt/QApplication needed. ``resources/minerals/
+spinel-magnetite.yaml`` (a single config covering the whole spinel group,
+including magnetite -- see that file's comment) uses the dedicated
+``spinel_xmg`` site-allocation method (ports MinPlotX's
 ``spinel_Fe3unknown.m`` -- see ``sites.py``'s ``_allocate_spinel_xmg``) since
 Fe2+/Mg are equipartitioned between the A and D sites by bulk XFe/XMg ratio
 rather than simple priority-fill capping.
@@ -31,7 +33,7 @@ sys.path.insert(0, str(project_root))
 from src.stoichiometry import pipeline
 from src.stoichiometry.config import load_mineral_config
 
-SPINEL_YAML_PATH = project_root / "resources" / "minerals" / "spinel.yaml"
+SPINEL_YAML_PATH = project_root / "resources" / "minerals" / "spinel-magnetite.yaml"
 WORKBOOK_PATH = project_root / "tests" / "normalization.v17.xlsx"
 
 _OXIDE_TO_CATION = {

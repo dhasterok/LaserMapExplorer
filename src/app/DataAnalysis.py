@@ -161,9 +161,24 @@ class Clustering():
                     return
 
                 clr_array = self._clr_feature_matrix(data)[data.mask]
+
+                # min_cluster_size/min_samples are configured as a percentage
+                # of the clustered population (not a raw pixel count) and a
+                # multiplicative factor on that pixel count, respectively --
+                # a fixed pixel count doesn't scale across samples of very
+                # different sizes, and a low absolute default (the previous
+                # behavior) let HDBSCAN fragment a large map into far too
+                # many tiny clusters. "The map" here means the pixels
+                # actually being clustered (len(clr_array), i.e. data.mask's
+                # count), not the sample's total pixel count, since that's
+                # the population min_cluster_size is compared against.
+                n_pixels = len(clr_array)
+                min_cluster_size = max(2, round(n_pixels * app_data.cluster_min_size_pct / 100.0))
+                min_samples = max(1, round(min_cluster_size * app_data.cluster_min_samples_factor))
+
                 model = HDBSCAN(
-                    min_cluster_size=app_data.cluster_min_size,
-                    min_samples=app_data.cluster_min_samples,
+                    min_cluster_size=min_cluster_size,
+                    min_samples=min_samples,
                     copy=True,
                 ).fit(clr_array)
 
@@ -307,27 +322,32 @@ class ClusterPage(CustomPage, Clustering):
         self.comboBoxClusterDistance.setObjectName("comboBoxClusterDistance")
         self.cluster_form_layout.addRow("Distance", self.comboBoxClusterDistance)
 
-        self.spinBoxMinClusterSize = QSpinBox(parent=self.groupBoxClustering)
-        self.spinBoxMinClusterSize.setMaximumSize(QSize(150, 16777215))
-        self.spinBoxMinClusterSize.setFont(default_font())
-        self.spinBoxMinClusterSize.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.spinBoxMinClusterSize.setKeyboardTracking(False)
-        self.spinBoxMinClusterSize.setMinimum(2)
-        self.spinBoxMinClusterSize.setMaximum(1000000)
-        self.spinBoxMinClusterSize.setProperty("value", 25)
-        self.spinBoxMinClusterSize.setObjectName("spinBoxMinClusterSize")
-        self.cluster_form_layout.addRow("Min. cluster size", self.spinBoxMinClusterSize)
+        self.spinBoxMinClusterSizePct = QDoubleSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxMinClusterSizePct.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxMinClusterSizePct.setFont(default_font())
+        self.spinBoxMinClusterSizePct.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxMinClusterSizePct.setKeyboardTracking(False)
+        self.spinBoxMinClusterSizePct.setDecimals(2)
+        self.spinBoxMinClusterSizePct.setSuffix(" %")
+        self.spinBoxMinClusterSizePct.setMinimum(0.01)
+        self.spinBoxMinClusterSizePct.setMaximum(100.0)
+        self.spinBoxMinClusterSizePct.setSingleStep(0.1)
+        self.spinBoxMinClusterSizePct.setProperty("value", 0.5)
+        self.spinBoxMinClusterSizePct.setObjectName("spinBoxMinClusterSizePct")
+        self.cluster_form_layout.addRow("Min. cluster size", self.spinBoxMinClusterSizePct)
 
-        self.spinBoxMinSamples = QSpinBox(parent=self.groupBoxClustering)
-        self.spinBoxMinSamples.setMaximumSize(QSize(150, 16777215))
-        self.spinBoxMinSamples.setFont(default_font())
-        self.spinBoxMinSamples.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
-        self.spinBoxMinSamples.setKeyboardTracking(False)
-        self.spinBoxMinSamples.setMinimum(1)
-        self.spinBoxMinSamples.setMaximum(1000000)
-        self.spinBoxMinSamples.setProperty("value", 10)
-        self.spinBoxMinSamples.setObjectName("spinBoxMinSamples")
-        self.cluster_form_layout.addRow("Min. samples", self.spinBoxMinSamples)
+        self.spinBoxMinSamplesFactor = QDoubleSpinBox(parent=self.groupBoxClustering)
+        self.spinBoxMinSamplesFactor.setMaximumSize(QSize(150, 16777215))
+        self.spinBoxMinSamplesFactor.setFont(default_font())
+        self.spinBoxMinSamplesFactor.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
+        self.spinBoxMinSamplesFactor.setKeyboardTracking(False)
+        self.spinBoxMinSamplesFactor.setDecimals(2)
+        self.spinBoxMinSamplesFactor.setMinimum(0.01)
+        self.spinBoxMinSamplesFactor.setMaximum(1.0)
+        self.spinBoxMinSamplesFactor.setSingleStep(0.05)
+        self.spinBoxMinSamplesFactor.setProperty("value", 0.1)
+        self.spinBoxMinSamplesFactor.setObjectName("spinBoxMinSamplesFactor")
+        self.cluster_form_layout.addRow("Min. samples factor", self.spinBoxMinSamplesFactor)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -391,8 +411,8 @@ class ClusterPage(CustomPage, Clustering):
         self.sliderClusterExponent.sliderReleased.connect(lambda: self.update_cluster_exponent())
 
         # HDBSCAN parameters
-        self.spinBoxMinClusterSize.valueChanged.connect(lambda _: self.update_cluster_min_size())
-        self.spinBoxMinSamples.valueChanged.connect(lambda _: self.update_cluster_min_samples())
+        self.spinBoxMinClusterSizePct.valueChanged.connect(lambda _: self.update_cluster_min_size_pct())
+        self.spinBoxMinSamplesFactor.valueChanged.connect(lambda _: self.update_cluster_min_samples_factor())
 
         # starting seed
         self.lineEditSeed.editingFinished.connect(lambda: self.update_cluster_seed())
@@ -421,8 +441,8 @@ class ClusterPage(CustomPage, Clustering):
         self.dock.ui.app_data.clusterSeedChanged.connect(self.update_cluster_seed)
         self.dock.ui.app_data.clusterExponentChanged.connect(self.update_cluster_exponent)
         self.dock.ui.app_data.clusterDistanceChanged.connect(self.update_cluster_distance)
-        self.dock.ui.app_data.clusterMinSizeChanged.connect(self.update_cluster_min_size)
-        self.dock.ui.app_data.clusterMinSamplesChanged.connect(self.update_cluster_min_samples)
+        self.dock.ui.app_data.clusterMinSizePctChanged.connect(self.update_cluster_min_size_pct)
+        self.dock.ui.app_data.clusterMinSamplesFactorChanged.connect(self.update_cluster_min_samples_factor)
         self.dock.ui.app_data.clusterPreconditionChanged.connect(self.update_dim_red_precondition)
         self.dock.ui.app_data.numBasisChanged.connect(self.update_num_basis_for_precondition)
 
@@ -432,8 +452,8 @@ class ClusterPage(CustomPage, Clustering):
         self.spinBoxNClusters.valueChanged.connect(lambda: log(f"spinBoxNClusters value=[{self.spinBoxNClusters.value()}]", prefix="UI"))
         self.sliderClusterExponent.valueChanged.connect(lambda: log(f"horizontalSliderClusterExponent value=[{self.sliderClusterExponent.value()}]", prefix="UI"))
         self.comboBoxClusterDistance.activated.connect(lambda: log(f"comboBoxClusterDistance value=[{self.comboBoxClusterDistance.currentText()}]", prefix="UI"))
-        self.spinBoxMinClusterSize.valueChanged.connect(lambda: log(f"spinBoxMinClusterSize value=[{self.spinBoxMinClusterSize.value()}]", prefix="UI"))
-        self.spinBoxMinSamples.valueChanged.connect(lambda: log(f"spinBoxMinSamples value=[{self.spinBoxMinSamples.value()}]", prefix="UI"))
+        self.spinBoxMinClusterSizePct.valueChanged.connect(lambda: log(f"spinBoxMinClusterSizePct value=[{self.spinBoxMinClusterSizePct.value()}]", prefix="UI"))
+        self.spinBoxMinSamplesFactor.valueChanged.connect(lambda: log(f"spinBoxMinSamplesFactor value=[{self.spinBoxMinSamplesFactor.value()}]", prefix="UI"))
         self.lineEditSeed.editingFinished.connect(lambda: log(f"lineEditSeed value=[{self.lineEditSeed.value}]", prefix="UI"))
         self.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
         self.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.checkBoxWithPCA.isChecked()}]", prefix="UI"))
@@ -466,8 +486,8 @@ class ClusterPage(CustomPage, Clustering):
                 self.spinBoxClusterMax.setEnabled(True)
                 self.comboBoxClusterDistance.setEnabled(True)
                 self.sliderClusterExponent.setEnabled(False)
-                self.spinBoxMinClusterSize.setEnabled(False)
-                self.spinBoxMinSamples.setEnabled(False)
+                self.spinBoxMinClusterSizePct.setEnabled(False)
+                self.spinBoxMinSamplesFactor.setEnabled(False)
                 self.lineEditSeed.setEnabled(True)
                 self.toolButtonRandomSeed.setEnabled(True)
             case 'fuzzy c-means':
@@ -475,8 +495,8 @@ class ClusterPage(CustomPage, Clustering):
                 self.spinBoxClusterMax.setEnabled(True)
                 self.comboBoxClusterDistance.setEnabled(False)
                 self.sliderClusterExponent.setEnabled(True)
-                self.spinBoxMinClusterSize.setEnabled(False)
-                self.spinBoxMinSamples.setEnabled(False)
+                self.spinBoxMinClusterSizePct.setEnabled(False)
+                self.spinBoxMinSamplesFactor.setEnabled(False)
                 self.lineEditSeed.setEnabled(True)
                 self.toolButtonRandomSeed.setEnabled(True)
             case 'HDBSCAN':
@@ -486,8 +506,8 @@ class ClusterPage(CustomPage, Clustering):
                 self.spinBoxClusterMax.setEnabled(False)
                 self.comboBoxClusterDistance.setEnabled(False)
                 self.sliderClusterExponent.setEnabled(False)
-                self.spinBoxMinClusterSize.setEnabled(True)
-                self.spinBoxMinSamples.setEnabled(True)
+                self.spinBoxMinClusterSizePct.setEnabled(True)
+                self.spinBoxMinSamplesFactor.setEnabled(True)
                 self.lineEditSeed.setEnabled(False)
                 self.toolButtonRandomSeed.setEnabled(False)
             case _:
@@ -650,44 +670,44 @@ class ClusterPage(CustomPage, Clustering):
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()
 
-    def update_cluster_min_size(self, new_value=None):
-        """Update HDBSCAN's minimum cluster size.
+    def update_cluster_min_size_pct(self, new_value=None):
+        """Update HDBSCAN's minimum cluster size (as a percentage of the pixels being clustered).
 
         Parameters
         ----------
-        new_value : int or None, optional
-            The new minimum cluster size. If not provided, the current value of the spin box is used.
+        new_value : float or None, optional
+            The new minimum cluster size percentage. If not provided, the current value of the spin box is used.
             If provided, the spin box is updated with the new value.
         """
         if new_value is None:
-            self.dock.ui.app_data.cluster_min_size = self.spinBoxMinClusterSize.value()
+            self.dock.ui.app_data.cluster_min_size_pct = self.spinBoxMinClusterSizePct.value()
         else:
-            if new_value == self.spinBoxMinClusterSize.value():
+            if new_value == self.spinBoxMinClusterSizePct.value():
                 return
-            self.spinBoxMinClusterSize.blockSignals(True)
-            self.spinBoxMinClusterSize.setValue(new_value)
-            self.spinBoxMinClusterSize.blockSignals(False)
+            self.spinBoxMinClusterSizePct.blockSignals(True)
+            self.spinBoxMinClusterSizePct.setValue(new_value)
+            self.spinBoxMinClusterSizePct.blockSignals(False)
 
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()
 
-    def update_cluster_min_samples(self, new_value=None):
-        """Update HDBSCAN's min_samples.
+    def update_cluster_min_samples_factor(self, new_value=None):
+        """Update HDBSCAN's min_samples factor (a multiplicative factor on the pixel-count min_cluster_size).
 
         Parameters
         ----------
-        new_value : int or None, optional
-            The new min_samples value. If not provided, the current value of the spin box is used.
+        new_value : float or None, optional
+            The new min_samples factor. If not provided, the current value of the spin box is used.
             If provided, the spin box is updated with the new value.
         """
         if new_value is None:
-            self.dock.ui.app_data.cluster_min_samples = self.spinBoxMinSamples.value()
+            self.dock.ui.app_data.cluster_min_samples_factor = self.spinBoxMinSamplesFactor.value()
         else:
-            if new_value == self.spinBoxMinSamples.value():
+            if new_value == self.spinBoxMinSamplesFactor.value():
                 return
-            self.spinBoxMinSamples.blockSignals(True)
-            self.spinBoxMinSamples.setValue(new_value)
-            self.spinBoxMinSamples.blockSignals(False)
+            self.spinBoxMinSamplesFactor.blockSignals(True)
+            self.spinBoxMinSamplesFactor.setValue(new_value)
+            self.spinBoxMinSamplesFactor.blockSignals(False)
 
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()

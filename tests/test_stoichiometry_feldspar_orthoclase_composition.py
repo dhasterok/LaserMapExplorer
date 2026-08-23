@@ -1,8 +1,11 @@
-"""Characterization test for k-feldspar -- no workbook reference sheet
-exists for this mineral (same generic feldspar engine as plagioclase, just
-K-led; see ``resources/minerals/k-feldspar.yaml``). A self-consistency
-check on a hand-picked synthetic analysis rather than a cross-check against
-an authoritative external value.
+"""Characterization test for an orthoclase-dominant composition, run
+through the shared ``resources/minerals/feldspar.yaml`` config (see that
+file's comment -- alkali feldspar and plagioclase use the same generic
+engine, not a separate calculation); no workbook reference sheet exists for
+this specific composition (the workbook reference test uses a labradorite
+instead -- see ``test_stoichiometry_feldspar_workbook_reference.py``). A
+self-consistency check on a hand-picked synthetic analysis rather than a
+cross-check against an authoritative external value.
 
 Pure Python -- no PyQt/QApplication needed.
 """
@@ -17,7 +20,7 @@ sys.path.insert(0, str(project_root))
 from src.stoichiometry import pipeline
 from src.stoichiometry.config import load_mineral_config
 
-KFELDSPAR_YAML_PATH = project_root / "resources" / "minerals" / "k-feldspar.yaml"
+FELDSPAR_YAML_PATH = project_root / "resources" / "minerals" / "feldspar.yaml"
 
 # Near-ideal orthoclase (KAlSi3O8) with a small albite component.
 ANALYSIS = {"SiO2": 64.7, "Al2O3": 18.4, "CaO": 0.0, "Na2O": 0.5, "K2O": 16.0}
@@ -25,7 +28,7 @@ ANALYSIS = {"SiO2": 64.7, "Al2O3": 18.4, "CaO": 0.0, "Na2O": 0.5, "K2O": 16.0}
 
 @pytest.fixture(scope="module")
 def kfeldspar_config():
-    return load_mineral_config(KFELDSPAR_YAML_PATH)
+    return load_mineral_config(FELDSPAR_YAML_PATH)
 
 
 @pytest.fixture(scope="module")

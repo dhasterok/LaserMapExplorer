@@ -20,6 +20,9 @@ class StoichiometryResult:
     qc: dict
     exclusions: dict
     oxide_total_pct: float | None
+    basis_used: str                       # 'cation' | 'oxygen' | 'anion' -- actual basis this analysis normalized on,
+                                           # which can differ from config.basis for basis='anion' configs that fell
+                                           # back to 'cation' because the anion (S/As/Sb) wasn't measured
 
 
 def calculate(
@@ -53,7 +56,9 @@ def calculate(
         Overrides ``config.ideal_cations`` for this call, for minerals
         without one fixed formula (e.g. sulfide's generic config, where the
         normalization target is a per-analysis choice, not a config
-        constant -- see :func:`normalize.normalize_to_cations`).
+        constant -- see :func:`normalize.normalize_to_cations`). Also used
+        as the fallback target for ``basis: "anion"`` configs when the
+        anion wasn't measured (see ``StoichiometryResult.basis_used``).
 
     Returns
     -------
@@ -68,12 +73,28 @@ def calculate(
     if config.redox.elements:
         redox_result = redox.estimate_fe_split(moles, config, method=redox_method)
         apfu = redox_result.apfu
+        basis_used = config.basis
     else:
         redox_result = None
-        apfu = (
-            normalize.normalize_to_cations(moles, config, ideal_cations=ideal_cations_override) if config.basis == "cation"
-            else normalize.normalize_to_oxygen(moles, config)
-        )
+        if config.basis == "cation":
+            apfu = normalize.normalize_to_cations(moles, config, ideal_cations=ideal_cations_override)
+            basis_used = "cation"
+        elif config.basis == "anion":
+            # Anion (S/As/Sb) is directly measured for this tool's real
+            # inputs, so it's used as the normalization anchor when present
+            # -- but falls back to cation-basis (same as basis='cation'
+            # configs) rather than raising, since not every analysis
+            # collects it. Not a silent degrade: basis_used records which
+            # path actually ran.
+            if normalize.measured_anion_moles(moles, config) > 0:
+                apfu = normalize.normalize_to_measured_anion(moles, config)
+                basis_used = "anion"
+            else:
+                apfu = normalize.normalize_to_cations(moles, config, ideal_cations=ideal_cations_override)
+                basis_used = "cation"
+        else:  # 'oxygen'
+            apfu = normalize.normalize_to_oxygen(moles, config)
+            basis_used = "oxygen"
 
     site_allocation = sites.allocate_sites(apfu, config)
     end_member_result = endmembers.compute_end_members(site_allocation, config)
@@ -88,4 +109,5 @@ def calculate(
         qc=qc_result,
         exclusions=exclusions,
         oxide_total_pct=oxide_total,
+        basis_used=basis_used,
     )

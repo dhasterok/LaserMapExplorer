@@ -93,7 +93,13 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.setMinimumSize(QSize(855, 367))
         self.setMaximumSize(QSize(524287, 524287))
         self.setFloating(False)
-        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable)
+        # Closable in addition to floatable -- the status bar's 'BottomDock'
+        # toggle button (see MainWindow.open_mask_dock) already hides/shows
+        # this dock, but a native title-bar close button is a more
+        # discoverable way to do the same thing. Both stay in sync via
+        # visibilityChanged (see open_mask_dock), since either one can
+        # trigger a hide.
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
 
         # create a container to hold the dock contents
         container = QWidget()
@@ -1016,6 +1022,28 @@ class FilterTab(QWidget):
         if self.ui.app_data.c_field_type.lower() == 'roi':
             self.ui.schedule_update()
 
+    def _roi_row_color_changed(self, roi_id, hexcolor):
+        """Updates an ROI's color when its own row's ColorButton (in
+        ``roi_table``'s Color column) is changed directly, keeping
+        ``SampleObj.roi_stack`` and the toolbar's ``toolButtonRoiColor``
+        (if ``roi_id`` is the currently-selected region) in sync.
+        """
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+        for entry in current_data.roi_stack:
+            if entry['id'] == roi_id:
+                entry['color'] = hexcolor
+                break
+
+        if roi_id == self._selected_roi_id():
+            self.toolButtonRoiColor.blockSignals(True)
+            self.toolButtonRoiColor.color = hexcolor
+            self.toolButtonRoiColor.blockSignals(False)
+
+        if self.ui.app_data.c_field_type.lower() == 'roi':
+            self.ui.schedule_update()
+
     def sync_roi_color_button(self):
         """Sync the color button's swatch to the newly-selected ROI row,
         without re-triggering ``roi_color_callback``.
@@ -1104,7 +1132,14 @@ class FilterTab(QWidget):
             name_item.setData(Qt.ItemDataRole.UserRole, entry['id'])
             self.roi_table.setItem(row, 1, name_item)
 
-            self.roi_table.setItem(row, 2, QTableWidgetItem(entry['color']))
+            # ColorButton shows the hex code as its own text (see
+            # blueberry.ColorButton) and opens a color picker on click --
+            # a direct, per-row way to recolor a region, alongside the
+            # toolbar's single ColorButton (self.toolButtonRoiColor, which
+            # acts on whichever row is currently selected).
+            color_button = ColorButton(initial_color=entry['color'], ui=self.ui)
+            color_button.colorChanged.connect(lambda hexcolor, roi_id=entry['id']: self._roi_row_color_changed(roi_id, hexcolor))
+            self.roi_table.setCellWidget(row, 2, color_button)
 
             pct = percentages.get(entry['id'], {'pct_total': 0.0, 'pct_filtered': 0.0})
             pct_total_item = QTableWidgetItem(f"{pct['pct_total']:.1f}")
@@ -1410,6 +1445,7 @@ class PolygonTab(QWidget):
         self.ui.lame_action.ClearFilters.setEnabled(True)
         self.ui.lame_action.PolygonMask.setEnabled(True)
         self.ui.lame_action.PolygonMask.setChecked(True)
+        self.ui.data[sample_id].polygon_mask_enabled = True
 
         # apply polygon mask — iterate each row in the polygon table
         for row in range(self.tableWidgetPolyPoints.rowCount()):
@@ -1447,7 +1483,7 @@ class PolygonTab(QWidget):
 
         # recompute combined mask
         d = self.ui.data[sample_id]
-        d.mask = d.crop_mask & d.filter_mask & d.polygon_mask & d.cluster_mask & d.roi_selection_mask
+        d.recompute_mask()
 
         if update_plot:
             self.ui.schedule_update()
@@ -1604,10 +1640,35 @@ class ClusterTab(QWidget):
         app_data.cluster_dict[method][selected_cluster]['color'] = color
 
         # Color is column 3 (['', 'Name', 'Link', 'Color']), not column 2 (Link).
-        item = self.cluster_table.item(selected_cluster, 3)
-        if item is not None and item.text() == color:
+        button = self.cluster_table.cellWidget(selected_cluster, 3)
+        if button is not None and button.color.name() == color:
             return
-        self.cluster_table.setItem(selected_cluster, 3, QTableWidgetItem(color))
+        if button is not None:
+            button.blockSignals(True)
+            button.color = color
+            button.blockSignals(False)
+
+        # update plot if currently coloring by cluster
+        if app_data.c_field_type.lower() == 'cluster':
+            self.ui.schedule_update()
+
+    def _cluster_row_color_changed(self, row, hexcolor):
+        """Updates a cluster's color when its own row's ColorButton (in
+        ``cluster_table``'s Color column) is changed directly, keeping
+        ``app_data.cluster_dict`` and the toolbar's ``toolButtonClusterColor``
+        (if ``row`` is the currently-selected group) in sync.
+        """
+        if self.updating_cluster_table_flag or self.cluster_table.rowCount() == 0:
+            return
+
+        app_data = self.ui.app_data
+        method = app_data.cluster_method
+        app_data.cluster_dict[method][row]['color'] = hexcolor
+
+        if row == int(self.spinBoxClusterGroup.value() - 1):
+            self.toolButtonClusterColor.blockSignals(True)
+            self.toolButtonClusterColor.color = hexcolor
+            self.toolButtonClusterColor.blockSignals(False)
 
         # update plot if currently coloring by cluster
         if app_data.c_field_type.lower() == 'cluster':
@@ -1621,11 +1682,11 @@ class ClusterTab(QWidget):
         """
         if self.cluster_table.rowCount() == 0:
             return
-        item = self.cluster_table.item(int(self.spinBoxClusterGroup.value() - 1), 3)
-        if item is None:
+        button = self.cluster_table.cellWidget(int(self.spinBoxClusterGroup.value() - 1), 3)
+        if button is None:
             return
         self.toolButtonClusterColor.blockSignals(True)
-        self.toolButtonClusterColor.color = item.text()
+        self.toolButtonClusterColor.color = button.color.name()
         self.toolButtonClusterColor.blockSignals(False)
 
     def update_table_widget(self):
@@ -1672,7 +1733,15 @@ class ClusterTab(QWidget):
                     self.cluster_table.setCellWidget(c, 0, make_cb(c))
                     self.cluster_table.setItem(c, 1, QTableWidgetItem(cluster_name))
                     self.cluster_table.setItem(c, 2, QTableWidgetItem(''))
-                    self.cluster_table.setItem(c, 3, QTableWidgetItem(hexcolor))
+
+                    # ColorButton shows the hex code as its own text (see
+                    # blueberry.ColorButton) and opens a color picker on click --
+                    # a direct, per-row way to recolor a cluster, alongside the
+                    # toolbar's single ColorButton (self.toolButtonClusterColor,
+                    # which acts on whichever row spinBoxClusterGroup selects).
+                    color_button = ColorButton(initial_color=hexcolor, ui=self.ui)
+                    color_button.colorChanged.connect(lambda hexcolor, row=c: self._cluster_row_color_changed(row, hexcolor))
+                    self.cluster_table.setCellWidget(c, 3, color_button)
 
                     pct = percentages.get(c, {'pct_total': 0.0, 'pct_filtered': 0.0})
                     pct_total_item = QTableWidgetItem(f"{pct['pct_total']:.1f}")
@@ -1780,7 +1849,11 @@ class ClusterTab(QWidget):
         self.cluster_table.blockSignals(True)
         for i, color in enumerate(hexcolor):
             app_data.cluster_dict[method][i]['color'] = color
-            self.cluster_table.setItem(i, 3, QTableWidgetItem(color))
+            button = self.cluster_table.cellWidget(i, 3)
+            if button is not None:
+                button.blockSignals(True)
+                button.color = color
+                button.blockSignals(False)
         self.cluster_table.blockSignals(False)
 
         self.select_cluster_group_callback()

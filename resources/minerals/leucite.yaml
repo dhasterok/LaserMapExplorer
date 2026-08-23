@@ -1,0 +1,26 @@
+# Leucite: KAlSi2O6 -- a feldspathoid, but not part of the nepheline-
+# kalsilite solid solution (different T:A cation ratio, 3:1 here vs 2:1
+# for nepheline/kalsilite, so it's a distinct framework topology, not a
+# compositional tie-line partner). Analcime (the hydrous Na-analogue,
+# NaAlSi2O6*H2O) isn't included -- out of scope for this LA-ICP-MS-focused
+# port, which doesn't track H2O.
+#
+# Two sites, same shape as nepheline.yaml: T (tetrahedral, Al+Si) and A
+# (alkali cage site, K + minor Na/Ca). No redox. No end_members -- a
+# single near-pure phase in this mineral set, same as allanite/rutile.
+mineral: leucite
+abbreviation: Lct
+formula: KAlSi2O6
+normalization:
+  basis: cation
+  ideal_oxygens: 6
+  ideal_cations: 4
+sites:
+  T:
+    target: 3.0
+    elements: [Si, Al]
+    priority: [Si, Al]
+  A:
+    target: 1.0
+    elements: [K, Na, Ca]
+    priority: [K, Na, Ca]

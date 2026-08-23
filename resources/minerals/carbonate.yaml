@@ -20,6 +20,7 @@
 # in case an analysis does supply a CO2 wt.% column -- it's the anion, not
 # a site cation.
 mineral: carbonate
+abbreviation: Crb
 formula: (Ca,Mg,Fe,Mn)CO3
 normalization:
   basis: cation

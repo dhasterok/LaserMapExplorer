@@ -14,6 +14,7 @@ the file's own ``sites:`` ordering *is* the priority order.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -55,6 +56,7 @@ class EndMemberConfig:
 @dataclass
 class MineralConfig:
     mineral: str
+    abbreviation: str  # short prefix for output column names (e.g. 'Grt' for garnet) -- see dock.py's column-naming
     formula: str
     basis: str
     ideal_oxygens: float
@@ -82,9 +84,14 @@ VALID_END_MEMBER_METHODS = {
     "locock_2008", "olivine_ratio", "feldspar_ratio", "pyroxene_quad", "spinel_xmg",
     "xmg_ratio", "ilmenite_ratio", "lawsonite_ratio", "epidote_ratio", "scapolite_ratio", "titanite_ratio",
     "monazite_huttonite_ratio", "mica_cascade", "amphibole_ca_ratio", "amphibole_na_ratio", "carbonate_ratio",
+    "monosulfide_ratio", "pyrite_group_ratio", "pentlandite_ratio", "pyrrhotite_vacancy_ratio",
+    "orthopyroxene_ratio", "pyroxene_quad_jd_ae", "nepheline_kalsilite_ratio", "pyroxenoid_ratio",
 }
 VALID_SITE_METHODS = {"priority_fill", "pyroxene_quad", "spinel_xmg", "tetra_fe3_ratio", "equipart"}
-VALID_BASES = {"oxygen", "cation"}
+# "anion" -- for sulfides, where S/As/Sb (normalization.excludes) are
+# directly measured (not inferred via STANDARD_OXIDES like oxide O), so the
+# anion itself can anchor the normalization; see normalize.normalize_to_measured_anion.
+VALID_BASES = {"oxygen", "cation", "anion"}
 
 
 def _require(d: dict, key: str, context: str) -> object:
@@ -206,6 +213,12 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
         raise MineralConfigError(f"Config root must be a mapping, got {type(raw).__name__}.")
 
     mineral = _require(raw, "mineral", "config")
+    abbreviation = _require(raw, "abbreviation", "config")
+    if not isinstance(abbreviation, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", abbreviation):
+        raise MineralConfigError(
+            f"'abbreviation' ({abbreviation!r}) must be a letters/digits string starting with a letter "
+            "(it's used as an output column-name prefix, e.g. 'Grt' -> 'Grt_X')."
+        )
     formula = _require(raw, "formula", "config")
 
     normalization = _require(raw, "normalization", "config")
@@ -236,6 +249,7 @@ def parse_mineral_config(raw: dict) -> MineralConfig:
 
     config = MineralConfig(
         mineral=mineral,
+        abbreviation=abbreviation,
         formula=formula,
         basis=basis,
         ideal_oxygens=ideal_oxygens,

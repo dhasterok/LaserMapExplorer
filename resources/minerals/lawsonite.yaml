@@ -6,6 +6,7 @@
 # capped-fill, which is exactly what a priority list already expresses, not
 # equipartition. No mineral-specific site code needed.
 mineral: lawsonite
+abbreviation: Lws
 formula: CaAl2Si2O7(OH)2*H2O
 normalization:
   basis: oxygen

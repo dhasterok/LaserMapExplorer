@@ -395,7 +395,10 @@ class RegressionDock(CustomDockWidget):
             return []
 
         cluster_color, cluster_label, _ = style_data.get_cluster_colormap(cluster_dict, alpha=style_data.marker_alpha)
-        n = cluster_dict['n_clusters']
+        # actual non-mask cluster count, not cluster_dict['n_clusters'] (k-means/
+        # fuzzy c-means' requested-k setting -- HDBSCAN has no such key at all;
+        # see StyleToolbox.get_cluster_colormap's identical fix for why)
+        n = len([k for k in cluster_dict.keys() if isinstance(k, int) and k != 99])
         color_map = {i: cluster_color[i] for i in range(n)}
         label_map = {i: cluster_label[i] for i in range(n)}
         if 99 in cluster_dict:

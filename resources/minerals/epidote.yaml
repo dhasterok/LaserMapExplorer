@@ -8,6 +8,7 @@
 # every fixed_ratio-only mineral here) -- so piemontite (the Mn3+
 # end-member) is dropped from the end-member list.
 mineral: epidote
+abbreviation: Ep
 formula: Ca2(Al,Fe3+)3(SiO4)3(OH)
 normalization:
   basis: oxygen

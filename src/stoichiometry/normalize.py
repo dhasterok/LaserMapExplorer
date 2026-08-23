@@ -25,6 +25,7 @@ STANDARD_OXIDES: dict[str, str] = {
     "Mn": "MnO", "Mg": "MgO", "Ca": "CaO",
     "Na": "Na2O", "K": "K2O", "P": "P2O5",
     "Ni": "NiO", "Co": "CoO", "Zn": "ZnO", "Sc": "Sc2O3",
+    "B": "B2O3", "Li": "Li2O",  # tourmaline's T/B-site and Y-site (elbaite) trace/structural cations
     "Y": "Y2O3", "REE": "Y2O3",  # trivalent REE assumed to behave like Y at the X-site
     "Zr": "ZrO2", "Hf": "HfO2", "Nb": "Nb2O5", "V": "V2O3",
     "Ba": "BaO", "Sr": "SrO",
@@ -233,6 +234,62 @@ def normalize_to_cations(
         raise ValueError("Total cation moles is zero or negative; check the input analysis.")
 
     k = (ideal_cations if ideal_cations is not None else config.ideal_cations) / total
+    return {el: mol * k for el, mol in moles.items()}
+
+
+def measured_anion_moles(moles: dict[str, float], config: MineralConfig) -> float:
+    """Sum of ``config.normalization_excludes``' moles (e.g. S, or S+As+Sb)
+    -- the *directly measured* anion total a ``basis: "anion"`` config
+    anchors on. Exposed separately from :func:`normalize_to_measured_anion`
+    so callers (``pipeline.calculate``) can check it's actually nonzero
+    before committing to the anion basis, and fall back to
+    :func:`normalize_to_cations` when the anion wasn't collected in this
+    analysis (absent from the input, or zeroed by LOD treatment).
+    """
+    return sum(moles.get(el, 0.0) for el in config.normalization_excludes)
+
+
+def normalize_to_measured_anion(
+    moles: dict[str, float],
+    config: MineralConfig,
+) -> dict[str, float]:
+    """Scale cation moles so the *directly measured* anion total (``config.
+    normalization_excludes``' elements -- S, or S+As+Sb for sulfosalts) equals
+    ``config.ideal_oxygens`` (reused here as the generic "ideal anchor-basis
+    total" field, the same reuse ``ideal_cations`` already gets for the
+    cation basis).
+
+    Unlike :func:`normalize_to_oxygen` (which infers an oxide-basis oxygen
+    total from cation moles via ``STANDARD_OXIDES`` valence assumptions,
+    since O usually isn't measured directly), this anchors on an anion
+    that *is* directly measured by this tool's real inputs (LA-ICP-MS/EPMA
+    element wt%) -- so no oxide-form lookup is needed, and the metal
+    (cation) side is left to float freely. That's the point: real
+    non-stoichiometry (e.g. pyrrhotite's Fe-vacancy) then shows up directly
+    and intuitively as a metal apfu deficiency, rather than being
+    mathematically present-but-hidden behind a metal total forced to
+    exactly its nominal target the way :func:`normalize_to_cations` would
+    produce.
+
+    Parameters
+    ----------
+    moles : dict[str, float]
+        Output of :func:`to_cation_moles`.
+    config : MineralConfig
+
+    Returns
+    -------
+    dict[str, float]
+        Element -> apfu, anion-basis.
+    """
+    total_anion = measured_anion_moles(moles, config)
+    if total_anion <= 0:
+        raise ValueError(
+            "Total measured anion moles (config.normalization_excludes) is zero or negative; "
+            "check the input analysis, or fall back to normalize_to_cations if the anion wasn't measured."
+        )
+
+    k = config.ideal_oxygens / total_anion
     return {el: mol * k for el, mol in moles.items()}
 
 

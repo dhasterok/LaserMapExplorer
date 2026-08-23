@@ -680,9 +680,9 @@ class ScatterUI(CustomPage):
                 ]
 
                 # export the csv
-                csvdict.export_dict_to_csv(self.dock.ui.app_data.scatter_preset_dict, self.dock.ui.app_data.scatter_list_filename)
-            except:
-                QMessageBox.warning(self.dock.ui,'Error','could not save scatter presets to file.')
+                csvdict.export_dict_to_csv(self.dock.ui.app_data.scatter_preset_dict, self.dock.ui.app_data.scatter_list_path)
+            except Exception as e:
+                QMessageBox.warning(self.dock.ui,'Error',f'could not save scatter presets to file.\nError: {e}')
         else:
             # throw a warning that name is not saved
             QMessageBox.warning(self.dock.ui,'Error','could not save scatter preset fields.')

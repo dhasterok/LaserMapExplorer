@@ -1,0 +1,52 @@
+# Xenotime: (Y,HREE)PO4 -- isostructural with zircon (same tetragonal
+# structure, same A-site/T-site shape as zircon.yaml/monazite.yaml), so the
+# generic priority_fill engine (the default) already does the right thing.
+#
+# A = 8-coordinated site: Y and the heavy REE (Dy-Lu) are xenotime's
+# dominant cations (unlike zircon, where REE are trace) -- listed
+# individually, same convention as monazite.yaml's individually-listed
+# light REE, since here too REE aren't a trace admixture but the defining
+# chemistry. Th/U/Ca/Zr are also tracked: Th/U enter the same way they do
+# in zircon/monazite, and Zr enters via the coupled "zircon substitution"
+# (the reverse of zircon's xenotime substitution) Zr4+ + Si4+ = REE3+ + P5+.
+# T = tetrahedral site (P, plus trace Si from that same coupled
+# substitution).
+#
+# ideal_oxygens=4 -- verified via this engine's own O-per-cation convention
+# (STANDARD_OXIDES ratios; see apatite.yaml/mica.yaml for the general
+# derivation, and monazite.yaml/zircon.yaml for the identical cross-check):
+# Y2O3 ratio 1.5 + P2O5 ratio 2.5 = 4 for pure xenotime (1 Y + 1 P), and
+# ZrO2 ratio 2 + SiO2 ratio 2 = 4 for the zircon-substituted end -- both
+# land on the same O target, so ideal_oxygens=4 holds across the whole
+# Y-P / Zr-Si substitution range. ideal_cations=2 (A=1 + T=1) for the
+# cation-basis fallback.
+#
+# No redox: block -- xenotime has no Fe2+/Fe3+ structural role.
+#
+# No end_members block -- same reasoning as zircon.yaml: the A/T site
+# occupancies already expose the zircon-substitution degree directly, and
+# xenotime/zircon are reported as separate phases rather than a shared
+# end-member pair (they don't form a continuous solid solution in nature,
+# unlike monazite-huttonite).
+mineral: xenotime
+abbreviation: Xtm
+formula: (Y,HREE)PO4
+normalization:
+  basis: oxygen
+  ideal_oxygens: 4
+  ideal_cations: 2
+sites:
+  A:
+    target: 1.0
+    elements: [
+      Y, Dy, Ho, Er, Tm, Yb, Lu, Gd, Tb, REE,
+      Th, U, Ca, Zr,
+    ]
+    priority: [
+      Y, Dy, Ho, Er, Tm, Yb, Lu, Gd, Tb, REE,
+      Th, U, Ca, Zr,
+    ]
+  T:
+    target: 1.0
+    elements: [P, Si]
+    priority: [P, Si]

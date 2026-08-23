@@ -1,5 +1,15 @@
-# Spinel: AB2O4 (tetrahedral A, octahedral D)
-mineral: spinel
+# Spinel group (incl. magnetite/titanomagnetite): AB2O4 (tetrahedral A,
+# octahedral D). A single config covers the whole group -- magnetite is
+# chemically just the Fe3+-dominant member of this same spinel_xmg solid
+# solution (spinel_xmg already reports a "magnetite" end-member fraction),
+# so there's no separate calculation to duplicate. Named "spinel-magnetite"
+# (rather than just "spinel") so it's still discoverable under both names --
+# Fe-Ti oxide trace-element chemistry (magnetite/titanomagnetite
+# fingerprinting in ore deposits and provenance studies) is one of this
+# software's dominant LA-ICP-MS use cases for this phase, and a user
+# looking for "magnetite" shouldn't need to know to search for "spinel".
+mineral: spinel-magnetite
+abbreviation: Spl
 formula: AD2O4
 normalization:
   basis: cation

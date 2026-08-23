@@ -11,6 +11,7 @@
 # (capped at T's target, since Al is shared with M), remaining Al plus the
 # other trivalent/divalent cations fill M.
 mineral: sapphirine
+abbreviation: Spr
 formula: (Mg,Fe)3.5Al9Si1.5O20
 normalization:
   basis: cation

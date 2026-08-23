@@ -66,6 +66,21 @@ def _resolve_ppm_columns(config: MineralConfig, available_columns) -> dict[str, 
     return resolved
 
 
+def _qualitative_colors(n: int) -> list[str]:
+    """``n`` hex colors from a qualitative colormap (tab10, or tab20 once
+    more than 10 categories are needed) -- for a "dominant end-member" map's
+    discrete legend, where categories have no natural ordering (unlike a
+    continuous quantity), so a perceptually-sequential colormap would be
+    misleading.
+    """
+    import matplotlib.colors as mcolors
+    import matplotlib.pyplot as plt
+
+    cmap_name = "tab10" if n <= 10 else "tab20"
+    cmap = plt.get_cmap(cmap_name, n)
+    return [mcolors.to_hex(cmap(i)) for i in range(n)]
+
+
 def _resolve_oxide_columns(config: MineralConfig, available_columns) -> dict[str, str]:
     """Map each standard oxide form the config's elements need to a matching
     column, by exact name match (e.g. an XRF-imported 'SiO2' column).
@@ -578,6 +593,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         self._last_mask = mask
         self._last_results = {
             "mineral": self.config.mineral,
+            "mineral_abbreviation": self.config.abbreviation,
             "scope": self._scope_description(),
             "input_mode": input_mode,
             "redox_method": primary_method,
@@ -593,7 +609,22 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         """Write per-site apfu totals, end-member %, and the dominant
         end-member back via ``add_columns``.
 
-        ``endmember_dominant`` is a 1-indexed code into ``member_names``
+        Every column name is prefixed with ``config.abbreviation`` (e.g.
+        ``Grt_X``, ``Grt_pyrope``, ``Grt_dominant``) -- site names (``M``,
+        ``T``, ``A``, ...) and even some end-member names are reused across
+        many mineral configs, so an unprefixed ``X`` would silently collide
+        (or worse, get overwritten) the moment two different minerals are
+        computed on the same sample. The prefix is each mineral's standard
+        petrologic abbreviation (Whitney & Evans 2010), declared in the
+        mineral's own YAML (``config.abbreviation``) rather than hardcoded
+        here, matching every other mineral-specific fact in this package.
+
+        Site-total columns carry ``units='apfu'`` (set below) rather than an
+        ``apfu_`` name prefix -- the mineral prefix already disambiguates
+        the column name, so a second prefix just for the quantity type was
+        redundant, and units is exactly what that field is for.
+
+        ``{abbrev}_dominant`` is a 1-indexed code into ``member_names``
         (matching this project's established 1-indexed *display* convention
         for a categorical/discrete field, e.g. Masking.ClusterTab's "Cluster
         N" naming) giving, per pixel, whichever end-member has the largest
@@ -601,13 +632,22 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         from Pyrope-rich zones at a glance, in map/scatter/histogram form,
         the same way a Cluster field already does. NaN (not 0, which would
         collide with a real 1-indexed code) where every fraction is NaN/
-        missing for that pixel. The numeric code -> name mapping is surfaced
-        in the results text (see ``_update_results_text``) rather than
-        stored as a separate lookup structure -- there's no generic
+        missing for that pixel, or where this mineral has no end-member
+        scheme at all (``member_names`` empty). The numeric code -> name
+        mapping is surfaced in the results text (see ``_update_results_text``)
+        and, for map rendering, stored directly as column attributes (see
+        below) rather than a separate lookup structure -- there's no generic
         per-column name-lookup mechanism for a non-Cluster field type in
         this codebase yet (see ``AppData.cluster_dict``'s Cluster-specific
-        equivalent), so this keeps the mapping human-readable without
-        inventing new infrastructure other code doesn't know how to consume.
+        equivalent).
+
+        The ``{abbrev}_dominant`` column is additionally flagged
+        ``discrete=True`` with ``category_labels``/``category_colors``
+        attributes (a qualitative colormap, one color per member) --
+        ``plot_map_mpl`` (``src/plotting/LamePlot.py``) checks this flag to
+        render a swatch-per-category legend (like Cluster/ROI maps) instead
+        of a continuous colorbar, since a numeric code has no meaningful
+        magnitude ordering.
 
         Uses ``merge=True`` so this scoped run only touches rows inside
         ``mask`` -- pixels outside it (e.g. a different ROI/cluster computed
@@ -619,11 +659,12 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         if self.config is None or not results:
             return
 
+        prefix = self.config.abbreviation
         site_names = list(self.config.site_order)
         member_names = list(self.config.end_members.members)
-        column_names = (
-            [f"apfu_{s}" for s in site_names] + [f"endmember_{m}" for m in member_names] + ["endmember_dominant"]
-        )
+        dominant_col = f"{prefix}_dominant"
+        site_cols = [f"{prefix}_{s}" for s in site_names]
+        column_names = site_cols + [f"{prefix}_{m}" for m in member_names] + [dominant_col]
 
         arrays = []
         for r in results:
@@ -640,6 +681,19 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         array_2d = np.array(arrays, dtype=float)
         mask_arr = mask.values if hasattr(mask, "values") else np.asarray(mask)
         data.add_columns("Stoichiometry", column_names, array_2d, mask=mask_arr, merge=True)
+
+        if site_cols:
+            data.processed.set_attribute(site_cols, "units", "apfu")
+            # add_columns already computed each column's 'label' attribute
+            # (via SampleObj.create_label) before units was set above, so it
+            # needs recomputing now to actually pick up the '(apfu)' suffix.
+            for col in site_cols:
+                data.processed.set_attribute(col, "label", data.create_label(col))
+
+        if member_names:
+            data.processed.set_attribute(dominant_col, "discrete", True)
+            data.processed.set_attribute(dominant_col, "category_labels", member_names)
+            data.processed.set_attribute(dominant_col, "category_colors", _qualitative_colors(len(member_names)))
 
     def _populate_results_table(self, per_method_results, redox_methods):
         from src.app.InfoViewer import update_dataframe
@@ -676,7 +730,14 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             update_dataframe(df, self.tableResults)
 
     def _populate_summary_table(self, data, mask):
-        value_columns = [c for c in data.processed.columns if c.startswith("apfu_") or c.startswith("endmember_")]
+        # Attribute-based lookup (every column this dock writes carries
+        # data_type='Stoichiometry', set by add_columns) rather than a
+        # string-prefix check -- column names are now mineral-prefixed
+        # (e.g. 'Grt_X', 'Ccp_M') and that prefix varies per mineral, so
+        # there's no single fixed string to match against anymore. This
+        # still covers every mineral computed so far, same as the old
+        # "apfu_"/"endmember_" sweep did.
+        value_columns = data.processed.match_attributes({"data_type": "Stoichiometry"})
         if not value_columns:
             self._last_summary_df = None
             return
@@ -706,9 +767,10 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         # field/stat -- with as many regions as fields (or more), the
         # untransposed layout scrolled sideways rather than down.
         display_df = summary_df.set_index(region_column).T
-        field_labels = [
-            idx.removeprefix("apfu_").removeprefix("endmember_") for idx in display_df.index
-        ]
+        # Column names already carry their mineral prefix (e.g.
+        # 'Grt_X_mean') -- no generic 'apfu_'/'endmember_' leading prefix
+        # left to strip (see _write_results_to_sample's docstring).
+        field_labels = list(display_df.index)
         display_df.columns = [f"{region_column} {c}" for c in display_df.columns]
         update_dataframe(display_df.reset_index(drop=True), self.tableSummary)
         self.tableSummary.setVerticalHeaderLabels(field_labels)
@@ -728,10 +790,10 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         ]
         members = r.get("endmember_members")
         if members:
-            # endmember_dominant's numeric-code -> name mapping (see
+            # {abbrev}_dominant's numeric-code -> name mapping (see
             # _write_results_to_sample) -- surfaced here since there's no
             # generic per-field name-lookup UI (like AppData.cluster_dict's
             # Cluster-specific one) to show it instead.
             codes = ", ".join(f"{i + 1}={name}" for i, name in enumerate(members))
-            lines.append(f"endmember_dominant codes: {codes}")
+            lines.append(f"{r['mineral_abbreviation']}_dominant codes: {codes}")
         self.textEditResults.setPlainText("\n".join(lines))

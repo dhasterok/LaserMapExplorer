@@ -1,0 +1,33 @@
+# Pyrrhotite: Fe(1-x)S -- a monosulfide-solid-solution, vacancy-bearing
+# phase, structurally and stoichiometrically distinct from pentlandite
+# despite both loosely being called "Fe-Ni sulfides" (pyrrhotite is
+# hexagonal/monoclinic with Fe-site vacancies; pentlandite is cubic,
+# stoichiometric at M9S8, no vacancy).
+#
+# basis: anion is not just a convention choice here -- it's required for
+# this mineral's whole point. Cation-basis normalization forces the metal
+# site to sum to exactly its target (1.0) by construction, which would
+# hide the real vacancy entirely (it would leak into an inflated S apfu
+# instead, since S rides along scaled by the same factor -- see
+# normalize.normalize_to_cations's docstring). Anchoring on the directly-
+# measured S (target 1.0) instead lets the metal site float, so a real
+# Fe-deficient composition reads as e.g. apfu["Fe"] ~ 0.9, not pinned to
+# 1.0 -- see pyrrhotite_vacancy_ratio in endmembers.py. Falls back to
+# cation-basis automatically (losing the vacancy signal, same as before)
+# if S wasn't measured in a given analysis.
+mineral: pyrrhotite
+abbreviation: Po
+formula: Fe(1-x)S
+normalization:
+  basis: anion
+  ideal_oxygens: 1.0   # ideal S (anion) total under basis: anion
+  ideal_cations: 1.0   # fallback target if S wasn't measured
+  excludes: [S]
+sites:
+  M:
+    target: 1.0
+    elements: [Fe, Ni, Co]
+    priority: [Fe, Ni, Co]
+end_members:
+  method: pyrrhotite_vacancy_ratio
+  members: [vacancy_fraction]

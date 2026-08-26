@@ -15,7 +15,7 @@
 # cations, not contamination, same convention as rutile.yaml's Nb/Ta/Zr.
 #
 # No end_members block -- a single near-pure phase, same as
-# allanite/serpentine/talc/hematite/rutile.
+# allanite/serpentine/talc/rutile.
 mineral: fluorite
 abbreviation: Fl
 formula: CaF2

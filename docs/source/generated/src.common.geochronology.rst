@@ -20,5 +20,6 @@ src.common.geochronology
 
    .. autosummary::
    
+      GeochronDock
       Geochronology
    

@@ -19,10 +19,10 @@ import numpy as np
 import pandas as pd
 from PyQt6.QtCore import QRect, QSize, Qt, QTimer
 from PyQt6.QtWidgets import (
-    QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QListWidget,
-    QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
-    QScrollArea, QSizePolicy, QSplitter, QTableWidget, QToolBar, QVBoxLayout,
-    QWidget,
+    QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
+    QPushButton, QScrollArea, QSizePolicy, QSplitter, QTableWidget, QToolBar,
+    QVBoxLayout, QWidget,
 )
 
 from lame_core.CustomWidgets import CustomDockWidget, CustomAction
@@ -249,6 +249,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         results_group = QGroupBox("Per-pixel results (sample)")
         results_layout = QVBoxLayout(results_group)
         self.tableResults = QTableWidget()
+        self.tableResults.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         results_layout.addWidget(self.tableResults)
         splitter.addWidget(results_group)
 
@@ -261,6 +262,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         region_row.addWidget(self.comboBoxRegionColumn)
         summary_layout.addLayout(region_row)
         self.tableSummary = QTableWidget()
+        self.tableSummary.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         summary_layout.addWidget(self.tableSummary)
         splitter.addWidget(summary_group)
 
@@ -662,9 +664,19 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         prefix = self.config.abbreviation
         site_names = list(self.config.site_order)
         member_names = list(self.config.end_members.members)
+        # Diagnostic ratios (e.g. spinel's Cr#/Mg#/Fe3+-over-R3+/X_usp) are
+        # written out as ordinary columns alongside the tiered end-members,
+        # but deliberately excluded from the {abbrev}_dominant argmax below
+        # -- see config.py's EndMemberConfig.ratios docstring for why (a
+        # high ratio value would otherwise spuriously "win" that column over
+        # any single, more-diluted discrete end-member fraction).
+        ratio_names = list(self.config.end_members.ratios)
         dominant_col = f"{prefix}_dominant"
         site_cols = [f"{prefix}_{s}" for s in site_names]
-        column_names = site_cols + [f"{prefix}_{m}" for m in member_names] + [dominant_col]
+        column_names = (
+            site_cols + [f"{prefix}_{m}" for m in member_names]
+            + [f"{prefix}_{r}" for r in ratio_names] + [dominant_col]
+        )
 
         arrays = []
         for r in results:
@@ -675,7 +687,9 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             fractions = [r.end_members.get(m, np.nan) for m in member_names]
             row_vals += fractions
             finite = [(v, i) for i, v in enumerate(fractions) if np.isfinite(v)]
-            row_vals.append(float(max(finite, key=lambda t: t[0])[1] + 1) if finite else np.nan)
+            dominant = float(max(finite, key=lambda t: t[0])[1] + 1) if finite else np.nan
+            row_vals += [r.end_members.get(rn, np.nan) for rn in ratio_names]
+            row_vals.append(dominant)
             arrays.append(row_vals)
 
         array_2d = np.array(arrays, dtype=float)

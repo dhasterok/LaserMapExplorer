@@ -12,29 +12,12 @@
 
    Browser
    Calculator
-   CustomMplCanvas
-   DataHandling
    DualWidgetList
-   ExtendedDF
-   LamePlot
-   Logger
-   Masking
    MolecularWeightCalculator
-   Observable
-   Polygon
-   PolygonMatplotlib
-   Regression
-   RegressionModel
-   ScheduleTimer
-   SortAnalytes
-   Status
    TableFunctions
    csvdict
+   diffusion
    format
    gausscensor
    geochronology
-   outliers
-   plot_spider
-   scalebar
-   ternary_plot
    varfunc

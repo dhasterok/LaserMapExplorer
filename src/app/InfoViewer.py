@@ -105,6 +105,8 @@ def update_dataframe(dataframe, table_widget):
             item = QTableWidgetItem(f"{value:.{PRECISION}g}")
             table_widget.setItem(row_idx, col_idx, item)
 
+    table_widget.resizeColumnsToContents()
+
 def update_numpy_array(array, table_widget):
     global PRECISION
     """

@@ -1,7 +1,13 @@
-# Ilmenite: FeTiO3 (single octahedral site, no T/M split in MinPlotX's own model)
-mineral: ilmenite
+# Titanohematite: FeTiO3-Fe2O3 ilmenite-hematite solid-solution series
+# (single octahedral site, no T/M split in MinPlotX's own model). Covers
+# hematite as an end-member (see end_members below) rather than treating it
+# as a separate near-pure-phase config -- there is no standalone
+# hematite.yaml. Abbreviation is kept as 'Ilm' (Whitney & Evans 2010 has no
+# entry for the series name itself) so existing output column names are
+# unaffected by this rename.
+mineral: titanohematite
 abbreviation: Ilm
-formula: FeTiO3
+formula: FeTiO3-Fe2O3 (ilmenite-hematite series)
 normalization:
   basis: cation
   ideal_oxygens: 3

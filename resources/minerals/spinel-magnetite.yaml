@@ -35,12 +35,35 @@ redox:
   elements: [Fe]
   methods: [all_2plus, all_3plus, droop_1987]
   default_method: droop_1987
+qc_checks:
+  - spinel_other_fraction
 end_members:
   method: spinel_xmg
+  # Tiered scheme -- see endmembers.py's _spinel_xmg docstring for the full
+  # design rationale (too many named end-members in the old 28-member port
+  # to be practically useful):
+  #   Tier 1 (always on, 8): the classic spinel prism (Al/Cr/Fe3+ x Mg/Fe2+)
+  #     plus the titanomagnetite join, folding Ti into a pseudo-trivalent
+  #     [Fe2+Ti] component.
+  #   Tier 2 (auto-enabled once Mn or Zn is a non-negligible share of the
+  #     divalent axis): galaxite/manganochromite/jacobsite (Mn), gahnite/
+  #     franklinite (Zn).
+  #   Tier 3 (auto-enabled once V is a non-negligible share of the
+  #     trivalent axis, i.e. it was actually analyzed): coulsonite,
+  #     magnesiocoulsonite.
+  #   other: the residual -- always present, captures every dropped cell
+  #     (all Ni/Co end-members, zincochromite, V-Mn/V-Zn cells, and Si,
+  #     which gets no axis role at all here -- ringwoodite/ahrensite belong
+  #     in a separate silicate-spinel phase, not this oxide calculator).
   members: [
-    chromite, magnesiochromite, cr_mn, cr_ni, cr_zn, cr_co,
-    magnetite, magnesioferrite, jacobsite, trevorite, franklinite, fe3_co,
-    hercynite, spinel, galaxite, al_ni, gahnite, al_co,
-    coulsonite, magnesiocoulsonite, v_mn, v_ni, v_zn, v_co,
-    ahrensite, ringwoodite, ulvospinel, qandilite,
+    spinel, hercynite, magnesiochromite, chromite, magnesioferrite, magnetite, qandilite, ulvospinel,
+    galaxite, manganochromite, jacobsite, gahnite, franklinite,
+    coulsonite, magnesiocoulsonite,
+    other,
   ]
+  # Standard petrologic ratios -- tier-independent (always computed from
+  # true occupancy), and the primary/leading diagnostic output; the tiered
+  # end-members above are a secondary convenience for the handful of names
+  # that appear in the literature. See config.py's EndMemberConfig.ratios
+  # docstring for why these are kept structurally separate from `members`.
+  ratios: [cr_number, mg_number, fe3_over_r3, x_usp]

@@ -22,88 +22,93 @@ Source Code Installation
 
 This method always provides the most up-to-date version with the latest features and improvements. However, it may occasionally encounter issues as the code is improved and new features are implemented.
 
-Step 1: Install Anaconda
-------------------------
-1. Download Anaconda from https://www.anaconda.com/download
-2. Install Anaconda following the official installation guide for your operating system
+*LaME* is installed with Python's built-in ``venv`` -- no Anaconda required. If you prefer a conda-based environment, `miniforge <https://github.com/conda-forge/miniforge>`_ works too; see :ref:`installation-conda` below.
 
-Step 2: Install Git or Visual Studio Code
------------------------------------------
-Choose the option that best suits your needs:
+Prerequisites
+-------------
+* Python 3.11 or later
+* git
+* Node.js and npm (for the Blockly workflow editor)
 
-Option A: Install Git
-^^^^^^^^^^^^^^^^^^^^^
-* Windows: Open Anaconda Prompt
-* Mac/Linux: Open Terminal
-
-Run the following command:
-
-.. code-block:: bash
-
-   conda install git
-
-Option B: Install Visual Studio Code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-1. Download and install Visual Studio Code from https://code.visualstudio.com/
-2. Install the Python extension in Visual Studio Code
-3. Run the following command in Anaconda Prompt or Terminal:
-
-.. code-block:: bash
-
-   conda install git
-
-Step 3: Clone Repository
-------------------------
-Clone the *LaME* repository to your local directory:
+Step 1: Clone the Repositories
+-------------------------------
+*LaME* depends on several sibling packages, which must be cloned into the same parent directory:
 
 .. code-block:: bash
 
    git clone https://github.com/dhasterok/LaserMapExplorer.git
+   git clone https://github.com/dhasterok/lame-core.git
+   git clone https://github.com/dhasterok/blueberry-colortools.git
+   git clone https://github.com/dhasterok/siesta-rest-editor.git
+   git clone https://github.com/dhasterok/global_geochemistry.git
+
+The result should look like:
+
+.. code-block:: text
+
+   GitHub/
+   ├── LaserMapExplorer/
+   ├── lame-core/
+   ├── blueberry-colortools/
+   ├── siesta-rest-editor/
+   └── global_geochemistry/
+
+Step 2: Create a Virtual Environment
+-------------------------------------
+.. code-block:: bash
+
    cd LaserMapExplorer
+   python3 -m venv .venv
+   source .venv/bin/activate      # macOS / Linux
+   .venv\Scripts\activate         # Windows
 
-Step 4: Create and Activate Virtual Environment
------------------------------------------------
-Create a new Anaconda virtual environment:
-
+Step 3: Install Python Dependencies
+-------------------------------------
 .. code-block:: bash
 
-   conda create --name pyqt python=3.11 --file req.txt
-   conda activate pyqt
+   pip install -r requirements.txt
 
-If the above step fails, try the following alternative:
+This installs the sibling packages cloned in Step 1 in editable mode, along with every other dependency *LaME* needs.
 
+Step 4: Build the Blockly Workflow Editor
+-------------------------------------------
 .. code-block:: bash
 
-   conda create --name pyqt python=3.11
-   conda activate pyqt
-   conda install python=3.11 pyqt pyqtgraph PyQtWebEngine pandas matplotlib scikit-learn scikit-learn-extra opencv openpyxl numexpr
-   conda install conda-forge/label/cf201901::scikit-fuzzy
-   pip install darkdetect cmcrameri rst2pdf
+   cd blockly
+   npm install
+   npx webpack --config webpack.config.js
+   cd ..
 
 Step 5: Run *LaME*
-------------------
-Using Terminal Prompt or Anaconda Prompt:
-
+--------------------
 .. code-block:: bash
 
    python3 main.py
 
 Updating *LaME*
 ---------------
-To update *LaME* in the future, navigate to the LaserMapExplorer directory and run:
+To update *LaME* in the future, navigate to the LaserMapExplorer directory, pull the latest changes, activate your virtual environment, and reinstall dependencies:
 
 .. code-block:: bash
 
    git pull origin main
+   source .venv/bin/activate      # macOS / Linux, or .venv\Scripts\activate on Windows
+   pip install -r requirements.txt
 
-Then, activate your virtual environment and update dependencies if necessary:
+It's recommended to check the project's documentation for any additional steps that might be required after updating.
+
+.. _installation-conda:
+
+Using conda/miniforge instead
+------------------------------
+If you prefer a conda-based environment over ``venv``, install `miniforge <https://github.com/conda-forge/miniforge>`_ and substitute Step 2 above with:
 
 .. code-block:: bash
 
-   conda activate pyqt
-   conda update --all
+   conda create --name lame python=3.11
+   conda activate lame
 
-It's recommended to check the project's documentation for any additional steps that might be required after updating.
+Steps 1 and 3-5 are otherwise unchanged; when updating, run ``conda activate lame`` in place of activating the ``venv``.
 
 Troubleshooting
 ---------------

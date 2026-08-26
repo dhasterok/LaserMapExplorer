@@ -368,6 +368,9 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Docks</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="calculator.html">Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stoichiometry.html">Stoichiometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stoichiometry_technical.html">Stoichiometric Calculations: Technical Details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mineral_configs.html">Mineral Configuration Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster_dock.html">Cluster Dock</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging_tool.html">Logging Tool</a></li>
@@ -454,82 +457,84 @@
 <section id="source-code-installation">
 <h2>Source Code Installation<a class="headerlink" href="#source-code-installation" title="Link to this heading">#</a></h2>
 <p>This method always provides the most up-to-date version with the latest features and improvements. However, it may occasionally encounter issues as the code is improved and new features are implemented.</p>
-<section id="step-1-install-anaconda">
-<h3>Step 1: Install Anaconda<a class="headerlink" href="#step-1-install-anaconda" title="Link to this heading">#</a></h3>
-<ol class="arabic simple">
-<li><p>Download Anaconda from <a class="reference external" href="https://www.anaconda.com/download">https://www.anaconda.com/download</a></p></li>
-<li><p>Install Anaconda following the official installation guide for your operating system</p></li>
-</ol>
-</section>
-<section id="step-2-install-git-or-visual-studio-code">
-<h3>Step 2: Install Git or Visual Studio Code<a class="headerlink" href="#step-2-install-git-or-visual-studio-code" title="Link to this heading">#</a></h3>
-<p>Choose the option that best suits your needs:</p>
-<section id="option-a-install-git">
-<h4>Option A: Install Git<a class="headerlink" href="#option-a-install-git" title="Link to this heading">#</a></h4>
+<p><em>LaME</em> is installed with Python’s built-in <code class="docutils literal notranslate"><span class="pre">venv</span></code> – no Anaconda required. If you prefer a conda-based environment, <a class="reference external" href="https://github.com/conda-forge/miniforge">miniforge</a> works too; see <a class="reference internal" href="#installation-conda"><span class="std std-ref">Using conda/miniforge instead</span></a> below.</p>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>Windows: Open Anaconda Prompt</p></li>
-<li><p>Mac/Linux: Open Terminal</p></li>
+<li><p>Python 3.11 or later</p></li>
+<li><p>git</p></li>
+<li><p>Node.js and npm (for the Blockly workflow editor)</p></li>
 </ul>
-<p>Run the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>git
-</pre></div>
-</div>
 </section>
-<section id="option-b-install-visual-studio-code">
-<h4>Option B: Install Visual Studio Code<a class="headerlink" href="#option-b-install-visual-studio-code" title="Link to this heading">#</a></h4>
-<ol class="arabic simple">
-<li><p>Download and install Visual Studio Code from <a class="reference external" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></p></li>
-<li><p>Install the Python extension in Visual Studio Code</p></li>
-<li><p>Run the following command in Anaconda Prompt or Terminal:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>git
-</pre></div>
-</div>
-</section>
-</section>
-<section id="step-3-clone-repository">
-<h3>Step 3: Clone Repository<a class="headerlink" href="#step-3-clone-repository" title="Link to this heading">#</a></h3>
-<p>Clone the <em>LaME</em> repository to your local directory:</p>
+<section id="step-1-clone-the-repositories">
+<h3>Step 1: Clone the Repositories<a class="headerlink" href="#step-1-clone-the-repositories" title="Link to this heading">#</a></h3>
+<p><em>LaME</em> depends on several sibling packages, which must be cloned into the same parent directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/LaserMapExplorer.git
-<span class="nb">cd</span><span class="w"> </span>LaserMapExplorer
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/lame-core.git
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/blueberry-colortools.git
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/siesta-rest-editor.git
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/dhasterok/global_geochemistry.git
+</pre></div>
+</div>
+<p>The result should look like:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>GitHub/
+├── LaserMapExplorer/
+├── lame-core/
+├── blueberry-colortools/
+├── siesta-rest-editor/
+└── global_geochemistry/
 </pre></div>
 </div>
 </section>
-<section id="step-4-create-and-activate-virtual-environment">
-<h3>Step 4: Create and Activate Virtual Environment<a class="headerlink" href="#step-4-create-and-activate-virtual-environment" title="Link to this heading">#</a></h3>
-<p>Create a new Anaconda virtual environment:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>pyqt<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>--file<span class="w"> </span>req.txt
-conda<span class="w"> </span>activate<span class="w"> </span>pyqt
+<section id="step-2-create-a-virtual-environment">
+<h3>Step 2: Create a Virtual Environment<a class="headerlink" href="#step-2-create-a-virtual-environment" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>LaserMapExplorer
+python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">      </span><span class="c1"># macOS / Linux</span>
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate<span class="w">         </span><span class="c1"># Windows</span>
 </pre></div>
 </div>
-<p>If the above step fails, try the following alternative:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>pyqt<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
-conda<span class="w"> </span>activate<span class="w"> </span>pyqt
-conda<span class="w"> </span>install<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pyqt<span class="w"> </span>pyqtgraph<span class="w"> </span>PyQtWebEngine<span class="w"> </span>pandas<span class="w"> </span>matplotlib<span class="w"> </span>scikit-learn<span class="w"> </span>scikit-learn-extra<span class="w"> </span>opencv<span class="w"> </span>openpyxl<span class="w"> </span>numexpr
-conda<span class="w"> </span>install<span class="w"> </span>conda-forge/label/cf201901::scikit-fuzzy
-pip<span class="w"> </span>install<span class="w"> </span>darkdetect<span class="w"> </span>cmcrameri<span class="w"> </span>rst2pdf
+</section>
+<section id="step-3-install-python-dependencies">
+<h3>Step 3: Install Python Dependencies<a class="headerlink" href="#step-3-install-python-dependencies" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>This installs the sibling packages cloned in Step 1 in editable mode, along with every other dependency <em>LaME</em> needs.</p>
+</section>
+<section id="step-4-build-the-blockly-workflow-editor">
+<h3>Step 4: Build the Blockly Workflow Editor<a class="headerlink" href="#step-4-build-the-blockly-workflow-editor" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>blockly
+npm<span class="w"> </span>install
+npx<span class="w"> </span>webpack<span class="w"> </span>--config<span class="w"> </span>webpack.config.js
+<span class="nb">cd</span><span class="w"> </span>..
 </pre></div>
 </div>
 </section>
 <section id="step-5-run-lame">
 <h3>Step 5: Run <em>LaME</em><a class="headerlink" href="#step-5-run-lame" title="Link to this heading">#</a></h3>
-<p>Using Terminal Prompt or Anaconda Prompt:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>main.py
 </pre></div>
 </div>
 </section>
 <section id="updating-lame">
 <h3>Updating <em>LaME</em><a class="headerlink" href="#updating-lame" title="Link to this heading">#</a></h3>
-<p>To update <em>LaME</em> in the future, navigate to the LaserMapExplorer directory and run:</p>
+<p>To update <em>LaME</em> in the future, navigate to the LaserMapExplorer directory, pull the latest changes, activate your virtual environment, and reinstall dependencies:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
-</pre></div>
-</div>
-<p>Then, activate your virtual environment and update dependencies if necessary:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>pyqt
-conda<span class="w"> </span>update<span class="w"> </span>--all
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">      </span><span class="c1"># macOS / Linux, or .venv\Scripts\activate on Windows</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
 </pre></div>
 </div>
 <p>It’s recommended to check the project’s documentation for any additional steps that might be required after updating.</p>
+</section>
+<section id="using-conda-miniforge-instead">
+<span id="installation-conda"></span><h3>Using conda/miniforge instead<a class="headerlink" href="#using-conda-miniforge-instead" title="Link to this heading">#</a></h3>
+<p>If you prefer a conda-based environment over <code class="docutils literal notranslate"><span class="pre">venv</span></code>, install <a class="reference external" href="https://github.com/conda-forge/miniforge">miniforge</a> and substitute Step 2 above with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>lame<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+conda<span class="w"> </span>activate<span class="w"> </span>lame
+</pre></div>
+</div>
+<p>Steps 1 and 3-5 are otherwise unchanged; when updating, run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">lame</span></code> in place of activating the <code class="docutils literal notranslate"><span class="pre">venv</span></code>.</p>
 </section>
 <section id="troubleshooting">
 <h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h3>
@@ -587,16 +592,14 @@ conda<span class="w"> </span>update<span class="w"> </span>--all
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#standalone-application">Standalone Application</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#source-code-installation">Source Code Installation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-anaconda">Step 1: Install Anaconda</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-install-git-or-visual-studio-code">Step 2: Install Git or Visual Studio Code</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-a-install-git">Option A: Install Git</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-b-install-visual-studio-code">Option B: Install Visual Studio Code</a></li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-clone-repository">Step 3: Clone Repository</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-create-and-activate-virtual-environment">Step 4: Create and Activate Virtual Environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-clone-the-repositories">Step 1: Clone the Repositories</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-create-a-virtual-environment">Step 2: Create a Virtual Environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-install-python-dependencies">Step 3: Install Python Dependencies</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-build-the-blockly-workflow-editor">Step 4: Build the Blockly Workflow Editor</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-run-lame">Step 5: Run <em>LaME</em></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-lame">Updating <em>LaME</em></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-conda-miniforge-instead">Using conda/miniforge instead</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>

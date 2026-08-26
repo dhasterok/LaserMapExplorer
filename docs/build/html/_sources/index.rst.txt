@@ -10,7 +10,7 @@
 Welcome to Laser Map Explorer (*LaME*)
 **************************************
 
-Laser Map Explorer (*LaME*) is an innovative software tool developed by researchers in the University of Adelaide, Earth Sciences Department.  The work is supported by the MinEx CRC.  *LaME* is designed for processing and visualizing multi-analyte maps of minerals, whether it be LA-ICP-MS maps of isotopes, XRF maps of elements, or some other imaging method. The software aims to simplify the complex task of handling large volumes of map-form data via an intuitive graphical user interface.
+Laser Map Explorer (*LaME*) is an innovative software tool developed by researchers in the Adelaide University, Earth Sciences Department.  The work is supported by funds provided by the MinEx CRC.  *LaME* is designed for processing and visualizing multi-analyte maps of minerals, whether it be LA-ICP-MS maps of isotopes, XRF maps of elements, or some other imaging method. The software aims to simplify the complex task of handling large volumes of map-form data via an intuitive graphical user interface.
 
 Key Features:
 
@@ -20,6 +20,7 @@ Key Features:
 * Computations relevant to geoscientific interpretation
 * Creation of publication-ready figures
 * Rapid production of supplemental information
+* Workflow design tool for batch processing samples
 
 The program is currently in beta release.  There are plenty of bugs and some features that have yet to be partially or fully implemented.  This documentation covers all features and functionalities available in this version.  Release notes below detail the progress and future plans.
 
@@ -30,7 +31,9 @@ The program is currently in beta release.  There are plenty of bugs and some fea
 Release notes
 =============
 
-Most plot functions are operational, including analyte maps, noise reduction, scatter and heatmaps, PCA, and clustering.  Histograms and correlation plots are also functional.  Most plot types can be customized by selecting/filtering the data. Masking and filtering are functional but have not been extensively tested.  Profiling works but is not yet displayed in an easily customizable format.  Some buttons have planned functionality that has yet to be fully implemented. Note-taking functions, figure saving, spot data, and the custom field calculator are areas where functionality is not at 100%.
+Compiled on |today|.
+
+Plot functions are operational, including analyte maps, noise reduction, scatter and heatmaps, PCA, and clustering.  Histograms and correlation plots are also functional.  Most plot types can be customized by selecting/filtering the data. Masking and filtering are functional but have not been extensively tested.  Profiling works but is not yet displayed in an easily customizable format.  Some buttons have planned functionality that has yet to be fully implemented. Note-taking functions, figure saving, spot data, and the custom field calculator are areas where functionality is not at 100%.
 
 *LaME*'s documentation can be accessed through the help browser in the *Lower Tab*.  Since the documentation is integrated with the program it should be viewable when offline.  The documentation is not yet complete.
 
@@ -55,3 +58,5 @@ Funding for this app has been provided by the `MinEx CRC <https://minexcrc.com.a
    tutorials
    documentation
    contact
+
+.. |today| date::

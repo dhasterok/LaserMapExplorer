@@ -98,7 +98,7 @@ def calculate(
 
     site_allocation = sites.allocate_sites(apfu, config)
     end_member_result = endmembers.compute_end_members(site_allocation, config)
-    qc_result = qc.run_qc_checks(config, apfu, site_allocation, redox_result)
+    qc_result = qc.run_qc_checks(config, apfu, site_allocation, redox_result, end_members=end_member_result)
     oxide_total = normalize.oxide_total_percent(analysis, input_mode)
 
     return StoichiometryResult(

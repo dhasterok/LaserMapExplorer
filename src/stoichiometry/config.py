@@ -51,6 +51,16 @@ class TraceElementConfig:
 class EndMemberConfig:
     method: str = ""
     members: list[str] = field(default_factory=list)
+    # Optional, separate from `members`: diagnostic ratios (e.g. spinel's
+    # Cr#/Mg#/Fe3+-over-R3+/X_usp) that a method may also compute and return
+    # alongside the named end-member fractions. Kept structurally distinct
+    # (not just more `members`) because they don't participate in the
+    # sum-to-100 contract or dock.py's {abbrev}_dominant argmax -- a ratio
+    # like Mg#=85 would otherwise spuriously "win" that column over any
+    # single, more-diluted discrete end-member fraction. Still written out
+    # as ordinary {abbrev}_{ratio} columns via the same write path. Empty
+    # for every mineral that doesn't need this (the default).
+    ratios: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -167,13 +177,14 @@ def _parse_end_members(raw: dict | None) -> EndMemberConfig:
     context = "end_members"
     method = raw.get("method", "")
     members = raw.get("members", [])
+    ratios = raw.get("ratios", [])
     if method and method not in VALID_END_MEMBER_METHODS:
         raise MineralConfigError(
             f"{context} 'method' ({method!r}) is unknown; valid methods are {sorted(VALID_END_MEMBER_METHODS)}."
         )
     if not members:
         raise MineralConfigError(f"{context} 'members' must be a non-empty list.")
-    return EndMemberConfig(method=method, members=list(members))
+    return EndMemberConfig(method=method, members=list(members), ratios=list(ratios))
 
 
 def _parse_site_method(raw: dict | None) -> tuple[str, float]:

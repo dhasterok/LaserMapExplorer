@@ -14,7 +14,7 @@
 #
 # No end_members block -- a single near-pure phase (TiO2 has no named solid
 # -solution end-members the way ilmenite/spinel do), same as
-# allanite/serpentine/talc/hematite.
+# allanite/serpentine/talc.
 mineral: rutile
 abbreviation: Rt
 formula: TiO2

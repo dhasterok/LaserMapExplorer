@@ -209,71 +209,110 @@ def _orthopyroxene_ratio(site_allocation: SiteAllocationResult, config: MineralC
     return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
 
 
+# Composition-trigger threshold for spinel's Tier 2/3 end-members (a
+# cation's own share of its axis total, not a literal wt% conversion --
+# see _spinel_xmg's docstring). Roughly equivalent to ~1 wt% MnO/ZnO/V2O3
+# in a typical spinel, but deliberately not tied to any specific formula
+# weight. Module-level so it's easy to retune without touching the function.
+_SPINEL_TIER_TRIGGER_FRACTION = 0.02
+
+
 def _spinel_xmg(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
-    """Ports ``spinel_Fe3unknown.m``'s end-member scheme: D-site trivalent
-    fraction (Cr/Fe3+/Al/V) times A-site divalent fraction (Fe2+/Mg/Mn/Ni/
-    Zn/Co) for 24 "normal spinel" members, plus 4 Si/Ti ulvospinel-group
-    members (Si or Ti, which always sit in A, paired with the bulk Fe/Mg
-    split). Member names are systematic (``{trivalent}_{divalent}``) except
-    where a name is well-established and unambiguous (e.g. chromite,
-    magnetite, hercynite, spinel, coulsonite and their Mg-analogues, and the
-    four ulvospinel-group members) -- this avoids guessing at obscure/rare
-    end-member names (e.g. Co- or Zn-bearing chromite/coulsonite variants)
-    that aren't confidently attributable to a specific accepted mineral name.
+    """Tiered spinel-group end-member scheme, replacing a full 28-member
+    port of MinPlotX's ``spinel_Fe3unknown.m`` (every trivalent x divalent
+    cell, including every Ni/Co-bearing combination) that was too granular
+    to be practically useful -- most of those names are EPMA-noise-level
+    distinctions nobody wants, and they buried the handful of names people
+    actually use.
+
+    The classic spinel prism is defined on a folded, 4-way "trivalent-
+    equivalent" basis {Al, Cr, Fe3+, [Fe2+Ti] (a pseudo-trivalent component
+    folding the coupled 2Fe3+ <-> Fe2+ + Ti4+ substitution)} crossed with a
+    divalent basis {Mg, Fe2+, ...}. Both axis totals are always computed
+    from the *full* true occupancy (including Ni/Co/V/Si, whether or not
+    those get a named cell) -- Tier 2 (Mn, Zn) and Tier 3 (V) each only
+    contribute a *named* cell once their own share of their axis exceeds
+    ``_SPINEL_TIER_TRIGGER_FRACTION``; below that, or for cations that never
+    get a named cell at all (Ni, Co; the unnamed V-Mn/V-Zn/Zn-Cr cells; Si,
+    which plays no axis role here at all -- ringwoodite/ahrensite belong in
+    a separate silicate-spinel phase, not this oxide calculator, so Si
+    contamination from a bad beam overlap can't produce a nonsense
+    assignment), their share simply isn't in the named-cell sum and falls
+    into the ``other`` residual automatically.
+
+    Also computes four standard, tier-independent diagnostic ratios (Cr#,
+    Mg#, Fe3+/sum(R3+), X_usp) declared in ``config.end_members.ratios`` --
+    see ``config.py``'s ``EndMemberConfig.ratios`` docstring for why these
+    are kept separate from the tiered ``members`` (they'd otherwise
+    spuriously dominate the {abbrev}_dominant map).
     """
     d = site_allocation.sites.get("D")
     a = site_allocation.sites.get("A")
     if d is None or a is None:
         raise ValueError("spinel_xmg end-member calculation requires 'D' and 'A' sites in the config.")
 
-    trivalent = {"cr": d.elements.get("Cr", 0.0), "fe3": d.elements.get("Fe3", 0.0),
-                 "al": d.elements.get("Al", 0.0), "v": d.elements.get("V", 0.0)}
-    d_total = sum(trivalent.values()) + d.elements.get("Fe2", 0.0) + d.elements.get("Mg", 0.0)
-    x_trivalent = {k: (v / d_total if d_total > 0 else 0.0) for k, v in trivalent.items()}
-    x_ulv_group = 1.0 - sum(x_trivalent.values()) if d_total > 0 else 0.0  # D's Fe2+/Mg fraction
-
-    divalent = {"fe2": a.elements.get("Fe2", 0.0), "mg": a.elements.get("Mg", 0.0),
-                "mn": a.elements.get("Mn", 0.0), "ni": a.elements.get("Ni", 0.0),
-                "zn": a.elements.get("Zn", 0.0), "co": a.elements.get("Co", 0.0)}
-    a_divalent_total = sum(divalent.values())
-    x_divalent = {k: (v / a_divalent_total if a_divalent_total > 0 else 0.0) for k, v in divalent.items()}
-
-    # Systematic-name (trivalent_divalent) -> common name, where confidently known.
-    _COMMON_NAMES = {
-        "cr_fe2": "chromite", "cr_mg": "magnesiochromite",
-        "fe3_fe2": "magnetite", "fe3_mg": "magnesioferrite", "fe3_mn": "jacobsite",
-        "fe3_ni": "trevorite", "fe3_zn": "franklinite",
-        "al_fe2": "hercynite", "al_mg": "spinel", "al_mn": "galaxite", "al_zn": "gahnite",
-        "v_fe2": "coulsonite", "v_mg": "magnesiocoulsonite",
-    }
-    fractions: dict[str, float] = {}
-    for tri_key, tri_x in x_trivalent.items():
-        for di_key, di_x in x_divalent.items():
-            systematic = f"{tri_key}_{di_key}"
-            name = _COMMON_NAMES.get(systematic, systematic)
-            fractions[name] = tri_x * di_x
-
-    si_total = _site_total(site_allocation, "Si")
-    ti_total = _site_total(site_allocation, "Ti")
-    si_ti_total = si_total + ti_total
-    x_si = si_total / si_ti_total if si_ti_total > 0 else 0.0
-    x_ti = 1.0 - x_si if si_ti_total > 0 else 0.0
+    al_d = d.elements.get("Al", 0.0)
+    cr_d = d.elements.get("Cr", 0.0)
+    fe3_d = d.elements.get("Fe3", 0.0)
+    v_d = d.elements.get("V", 0.0)
+    ti_a = a.elements.get("Ti", 0.0)  # Ti is always A-site-exclusive in this tool's site model
 
     mg_total = _site_total(site_allocation, "Mg")
     fe2_total = _site_total(site_allocation, "Fe2")
-    bulk_divalent_total = mg_total + fe2_total
-    x_bulk_mg = mg_total / bulk_divalent_total if bulk_divalent_total > 0 else 0.0
-    x_bulk_fe = 1.0 - x_bulk_mg if bulk_divalent_total > 0 else 0.0
+    mn_total = _site_total(site_allocation, "Mn")
+    zn_total = _site_total(site_allocation, "Zn")
+    ni_total = _site_total(site_allocation, "Ni")
+    co_total = _site_total(site_allocation, "Co")
 
-    fractions["ahrensite"] = x_ulv_group * x_si * x_bulk_fe
-    fractions["ringwoodite"] = x_ulv_group * x_si * x_bulk_mg
-    fractions["ulvospinel"] = x_ulv_group * x_ti * x_bulk_fe
-    fractions["qandilite"] = x_ulv_group * x_ti * x_bulk_mg
+    trivalent_total = al_d + cr_d + fe3_d + ti_a + v_d
+    divalent_total = mg_total + fe2_total + mn_total + zn_total + ni_total + co_total
 
-    total = sum(fractions.values())
-    if total <= 0:
-        return {member: 0.0 for member in config.end_members.members}
-    return {member: 100.0 * fractions.get(member, 0.0) / total for member in config.end_members.members}
+    x_al = al_d / trivalent_total if trivalent_total > 0 else 0.0
+    x_cr = cr_d / trivalent_total if trivalent_total > 0 else 0.0
+    x_fe3 = fe3_d / trivalent_total if trivalent_total > 0 else 0.0
+    x_pseudo = ti_a / trivalent_total if trivalent_total > 0 else 0.0
+    x_v = v_d / trivalent_total if trivalent_total > 0 else 0.0
+
+    x_mg = mg_total / divalent_total if divalent_total > 0 else 0.0
+    x_fe2 = fe2_total / divalent_total if divalent_total > 0 else 0.0
+    x_mn = mn_total / divalent_total if divalent_total > 0 else 0.0
+    x_zn = zn_total / divalent_total if divalent_total > 0 else 0.0
+
+    # Tier 1: always on.
+    named_cells = {
+        "spinel": x_al * x_mg, "hercynite": x_al * x_fe2,
+        "magnesiochromite": x_cr * x_mg, "chromite": x_cr * x_fe2,
+        "magnesioferrite": x_fe3 * x_mg, "magnetite": x_fe3 * x_fe2,
+        "qandilite": x_pseudo * x_mg, "ulvospinel": x_pseudo * x_fe2,
+    }
+    # Tier 2: auto-enabled per cation once its own share of the divalent
+    # axis is non-negligible.
+    if x_mn > _SPINEL_TIER_TRIGGER_FRACTION:
+        named_cells["galaxite"] = x_al * x_mn
+        named_cells["manganochromite"] = x_cr * x_mn
+        named_cells["jacobsite"] = x_fe3 * x_mn
+    if x_zn > _SPINEL_TIER_TRIGGER_FRACTION:
+        named_cells["gahnite"] = x_al * x_zn
+        named_cells["franklinite"] = x_fe3 * x_zn
+    # Tier 3: auto-enabled once V is a non-negligible share of the
+    # trivalent axis (i.e. it was actually analyzed, not left at zero).
+    if x_v > _SPINEL_TIER_TRIGGER_FRACTION:
+        named_cells["coulsonite"] = x_v * x_fe2
+        named_cells["magnesiocoulsonite"] = x_v * x_mg
+
+    fractions = {member: 100.0 * named_cells.get(member, 0.0) for member in config.end_members.members if member != "other"}
+    fractions["other"] = max(0.0, 100.0 - sum(fractions.values()))
+
+    ratio_values = {
+        "cr_number": 100.0 * cr_d / (cr_d + al_d) if (cr_d + al_d) > 0 else 0.0,
+        "mg_number": 100.0 * mg_total / (mg_total + fe2_total) if (mg_total + fe2_total) > 0 else 0.0,
+        "fe3_over_r3": 100.0 * fe3_d / trivalent_total_r3 if (trivalent_total_r3 := al_d + cr_d + fe3_d + v_d) > 0 else 0.0,
+        "x_usp": 100.0 * ti_a / (ti_a + fe3_d) if (ti_a + fe3_d) > 0 else 0.0,
+    }
+
+    result = {member: fractions.get(member, 0.0) for member in config.end_members.members}
+    result.update({ratio: ratio_values.get(ratio, 0.0) for ratio in config.end_members.ratios})
+    return result
 
 
 def _xmg_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:

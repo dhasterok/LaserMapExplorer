@@ -43,7 +43,11 @@ def test_sites_close_to_target(result):
     assert sites["A"].total == pytest.approx(1.0, abs=0.05)
 
 
-def test_end_members_sum_to_100_and_magnetite_dominant(result):
+def test_end_members_sum_to_100_and_magnetite_dominant(result, magnetite_config):
+    """Only the tiered `members` (not the separate `ratios`, mixed into the
+    same dict -- see config.py's EndMemberConfig.ratios docstring) sum to
+    100."""
     em = result.end_members
-    assert sum(em.values()) == pytest.approx(100.0, abs=1e-6)
+    members_sum = sum(em[m] for m in magnetite_config.end_members.members)
+    assert members_sum == pytest.approx(100.0, abs=1e-6)
     assert em["magnetite"] > 90.0

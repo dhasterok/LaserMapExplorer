@@ -20,6 +20,7 @@ def check_hydrogarnet_substitution(
     apfu: dict[str, float],
     site_allocation: SiteAllocationResult,
     redox_result: RedoxResult | None,
+    end_members: dict[str, float] | None = None,
     threshold: float = 0.05,
 ) -> dict[str, Any]:
     """Flag likely hydrogarnet substitution ((OH)4 for SiO4), garnet-specific.
@@ -50,6 +51,7 @@ def check_cation_anion_ratio(
     apfu: dict[str, float],
     site_allocation: SiteAllocationResult,
     redox_result: RedoxResult | None,
+    end_members: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Real measured cation-total : anion-total apfu ratio (``config.
     normalization_excludes``' elements, e.g. S/As/Sb, vs everything else).
@@ -69,9 +71,29 @@ def check_cation_anion_ratio(
     return {"cation_total": cation_total, "anion_total": anion_total, "cation_to_anion_ratio": ratio}
 
 
+def check_spinel_other_fraction(
+    config: MineralConfig,
+    apfu: dict[str, float],
+    site_allocation: SiteAllocationResult,
+    redox_result: RedoxResult | None,
+    end_members: dict[str, float] | None = None,
+    threshold: float = 5.0,
+) -> dict[str, Any]:
+    """Flags when spinel-magnetite's tiered end-member scheme (``endmembers.
+    _spinel_xmg``) leaves more than ``threshold`` percent of the analysis in
+    its ``other`` residual -- a free diagnostic that the restricted basis
+    (Tier 1's 8 core members, plus whichever of Tier 2/3 auto-triggered) is
+    inadequate for this sample, rather than silently forcing an odd
+    composition into the nearest named corner.
+    """
+    other = (end_members or {}).get("other", 0.0)
+    return {"other_fraction_pct": other, "flag": other > threshold}
+
+
 _CHECKS = {
     "hydrogarnet_substitution": check_hydrogarnet_substitution,
     "cation_anion_ratio": check_cation_anion_ratio,
+    "spinel_other_fraction": check_spinel_other_fraction,
 }
 
 
@@ -80,9 +102,14 @@ def run_qc_checks(
     apfu: dict[str, float],
     site_allocation: SiteAllocationResult,
     redox_result: RedoxResult | None,
+    end_members: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Run every check named in ``config.qc_checks`` and collect results,
     plus the always-available site-total and charge-balance diagnostics.
+
+    ``end_members`` (the already-computed ``endmembers.compute_end_members``
+    result, optional) is only used by checks that need it (e.g.
+    ``spinel_other_fraction``) -- every other check ignores it.
 
     Returns
     -------
@@ -105,6 +132,6 @@ def run_qc_checks(
         fn = _CHECKS.get(name)
         if fn is None:
             raise ValueError(f"Unknown QC check {name!r}; expected one of {sorted(_CHECKS)}.")
-        result[name] = fn(config, apfu, site_allocation, redox_result)
+        result[name] = fn(config, apfu, site_allocation, redox_result, end_members=end_members)
 
     return result

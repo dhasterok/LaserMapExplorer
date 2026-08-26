@@ -4,7 +4,7 @@
 # solid solution the way pentlandite's Fe:Ni or monosulfide's Zn:Fe:Mn:Cd:Pb
 # do (chalcopyrite is close to a single, near-stoichiometric phase, with
 # Zn/Ag/In/Sn only as minor trace substituents) -- same "single near-pure
-# phase" precedent as allanite.yaml/hematite.yaml.
+# phase" precedent as allanite.yaml/serpentine.yaml.
 #
 # basis: anion -- S is directly measured (see monosulfide.yaml's comment
 # for the general rationale); anchoring on it (target 2.0) still gives real

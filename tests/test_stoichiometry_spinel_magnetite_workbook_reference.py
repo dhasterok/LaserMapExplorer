@@ -108,16 +108,19 @@ def test_d_and_a_site_totals_and_fe2_mg_equipartition(result):
     assert (sites["D"].elements.get("Fe2", 0.0) + sites["D"].elements.get("Mg", 0.0)) == pytest.approx(si_ti, rel=1e-6)
 
 
-def test_end_members_are_internally_consistent(result):
+def test_end_members_are_internally_consistent(result, spinel_config):
     """No workbook reference exists for spinel end-members (see module
     docstring) -- sanity-check internal consistency and that the dominant
     members are mineralogically sane for this Al-rich, Fe/Mg-bearing,
     essentially Si/Cr/V-free composition (should be spinel s.s. +
-    hercynite, not any Cr/V/Si/Ti-bearing member).
+    hercynite, not any Cr/V/Si/Ti-bearing member). Only the tiered
+    `members` (not the separate `ratios`, mixed into the same dict -- see
+    config.py's EndMemberConfig.ratios docstring) sum to 100.
     """
     em = result.end_members
-    assert sum(em.values()) == pytest.approx(100.0, abs=1e-6)
-    assert all(v >= 0 for v in em.values())
+    members_sum = sum(em[m] for m in spinel_config.end_members.members)
+    assert members_sum == pytest.approx(100.0, abs=1e-6)
+    assert all(em[m] >= 0 for m in spinel_config.end_members.members)
     assert em["spinel"] > em["hercynite"] > 0
     assert em["spinel"] + em["hercynite"] > 90  # overwhelmingly Mg-Al with minor Fe2+
     for cr_or_v_member in ("chromite", "magnesiochromite", "coulsonite", "magnesiocoulsonite"):

@@ -368,6 +368,11 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Docks</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="calculator.html">Calculator</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="stoichiometry.html">Stoichiometry</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry_technical.html">Stoichiometric Calculations: Technical Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mineral_configs.html">Mineral Configuration Reference</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster_dock.html">Cluster Dock</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging_tool.html">Logging Tool</a></li>
@@ -433,8 +438,8 @@
                   
   <section id="user-guide">
 <h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">#</a></h1>
-<p><em>LaME</em> is built in <a class="reference external" href="https://www.python.org/downloads/">Python3.11</a> using <a class="reference external" href="https://pypi.org/project/PyQt5/">PyQt5</a> for the user interface.  Most of the plotting is handled by <a class="reference external" href="https://matplotlib.org">matplotlib</a>, with some of the more dynamic plots using <a class="reference external" href="https://www.pyqtgraph.org">pyqtgraph</a>.</p>
-<p>There are two ways to use <em>LaME</em>, either as a precompiled executable or using the source code.  The latter will always be up to date, but may occasionally break as we improve the code, implement new features, or experiment with new tools.  If you do use the source, we suggest you download a distribution manager such as <a class="reference external" href="https://docs.github.com/en/desktop/overview/about-github-desktop">GitHub Desktop</a> which can be used to monitor changes and easily download new versions.</p>
+<p><em>LaME</em> is built in <a class="reference external" href="https://www.python.org/downloads/">Python3.12</a> using <a class="reference external" href="https://pypi.org/project/PyQt6/">PyQt6</a> for the user interface with plotting is handled by <a class="reference external" href="https://matplotlib.org">matplotlib</a>. A workflow design tool is built with Javascript <a class="reference external" href="https://www.blockly.com">Blockly</a> to create a visual programming environment for batch processing.</p>
+<p>There are two ways to use <em>LaME</em>, either as a precompiled executable (eventually) or using the source code.  The latter will always be up to date, but may occasionally break as we improve the code, implement new features, or experiment with new tools.  If you do use the source, we suggest you download a distribution manager such as <a class="reference external" href="https://docs.github.com/en/desktop/overview/about-github-desktop">GitHub Desktop</a> which can be used to monitor changes and easily download updates.</p>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
@@ -557,6 +562,17 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Docks</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="calculator.html">Calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stoichiometry.html">Stoichiometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry_technical.html">Stoichiometric Calculations: Technical Details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mineral_configs.html">Mineral Configuration Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#opening-the-dock">Opening the Dock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#compute-scope">Compute Scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#calculator-settings">Calculator Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#running">Running</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#output-columns">Output Columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stoichiometry.html#supported-minerals">Supported Minerals</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="cluster_dock.html">Cluster Dock</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="notes.html#restructred-text-rest">ReStructred Text (ReST)</a></li>

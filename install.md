@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python 3.11 or later
+- Python 3.12 or later
 - git
 - Node.js and npm (for the Blockly workflow editor)
 
@@ -26,6 +26,7 @@ GitHub/
 ├── LaserMapExplorer/
 ├── lame-core/
 ├── blueberry-colortools/
+├── global_geochemistry/
 └── siesta-rest-editor/
 ```
 

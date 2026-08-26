@@ -10,12 +10,4 @@
    :toctree:
    :recursive:
 
-   AnalyteSelectionDialog
-   FieldSelectionDialog
-   FileSelectorDialog
-   IsotopeSelectionDialog
-   MapImportDialog
-   PlotViewer
    PreferencesWindow
-   QuickViewDialog
-   SpotImportDialog

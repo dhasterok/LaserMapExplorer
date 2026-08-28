@@ -1,10 +1,15 @@
 """Top-level orchestrator: raw directory -> parsed files -> background/drift
 corrected, standard-calibrated result.
 
-Also handles the two-level "multi-sample session" layout observed in real
-raw-data exports: a parent directory holding several self-contained sample
-subfolders, each bracketed by its own standard files (see
-``discover_sample_directories`` / ``run_batch``).
+:func:`run` treats a session folder and its immediate subfolders as one
+pooled run (see :func:`gather_session_line_files`) -- the common real-world
+layout where standards and samples each sit in their own subdirectory
+(``session/N610/``, ``session/GSD/``, ``session/RM01/`` …) but share one
+background/drift fit and one set of bracketing standards.
+
+:func:`run_batch` handles the other layout -- a parent directory of several
+*independent* self-contained sessions, each calibrated on its own (see
+``discover_sample_directories``).
 """
 from __future__ import annotations
 
@@ -130,6 +135,8 @@ class SampleCalibratedResult:
     dating_ratio_fits: dict[str, DatingRatioFit] = field(default_factory=dict)  # "Pb206/U238" -> session cross-element dating-ratio fit, see dating_ratios.py
     deconvolution_provenance: dict[int, dict] = field(default_factory=dict)  # line_number -> {analyte -> {shift_applied, washout_applied, tau_s, noise_amplification, negative_count, flags}}, see src/deconvolution/pipeline.py
     deconvolution_settings: DeconvolutionSettings | None = None  # the settings actually used -- kept (not just the resulting provenance) so a "deconvolution correction" map stage can recompute the per-pixel delta on demand, same recompute-don't-store convention as the "background+drift correction" map stage (see dock_widgets._stage_series)
+    ablation_onset_trim_s: float = 0.0  # leading-row trim applied when building calibrated_ppm -- retained so apply_deconvolution() can re-derive with the same trim
+    isotope_share_specs: list[IsotopeShareSpec] = field(default_factory=list)  # the resolved per-isotope apportionment specs -- retained so apply_deconvolution() can rebuild isotopic_ppm from the deconvolved calibrated_ppm
     classification: pd.DataFrame = field(default_factory=pd.DataFrame)  # columns label/score/gap/ambiguous, same (file_index, row_in_ablation) index as calibrated_ppm -- set by dock_widgets._on_classify (Stage 3, src/classification/), not by run() itself; empty until the user runs it
     classification_categories: list[str] = field(default_factory=list)  # the selected mineral-name subset, in stable sorted order -- fixes the discrete colormap's code->name mapping regardless of which minerals actually got assigned
 
@@ -448,6 +455,7 @@ def run(
     per_file_overrides: dict[str, BackgroundWindowOverride] | None = None,
     acquired_time_format: str | None = None,
     excluded_files: set[str] | None = None,
+    session_drift_exclude_labels: set[str] | None = None,
     manual_row_exclusions: dict[str, dict[str, set[int]]] | None = None,
     manual_occurrence_exclusions: dict[str, set[str]] | None = None,
     detrend: bool = False,
@@ -467,13 +475,17 @@ def run(
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
 ) -> dict[str, SampleCalibratedResult]:
-    """Run the full background/drift/calibration pipeline over one raw-data folder.
+    """Run the full background/drift/calibration pipeline over one session folder.
 
     Parameters
     ----------
     sample_dir : str or pathlib.Path
-        Folder of raw line files (one or more sample labels, bracketed by
-        standard files).
+        The session folder. Raw line files are gathered from it *and each
+        of its immediate subfolders* (see :func:`gather_session_line_files`),
+        so a session laid out as ``session/N610/``, ``session/GSD/``,
+        ``session/RM01/`` … is pooled into one run: one shared
+        background/drift fit and one set of bracketing standards across
+        every sample.
     standard_names : Iterable[str] or Callable[[str], bool]
         Which filename labels are reference standards.
     reference_library : dict[str, ReferenceMaterial]
@@ -512,6 +524,13 @@ def run(
         timestamp auto-detection.
     excluded_files : set[str] or None, optional
         Filenames dropped entirely before any fitting.
+    session_drift_exclude_labels : set[str] or None, optional
+        Filename labels whose gas blanks are left *out of the session
+        background-drift fit* (:func:`fit_session_background_drift`). Those
+        labels are still parsed, background-corrected (with the model fit
+        from the remaining files), and calibrated -- this only removes their
+        contribution to the fit, e.g. for a sample whose blank is
+        contaminated. Empty/``None`` pools every label.
     manual_row_exclusions : dict[str, dict[str, set[int]]] or None, optional
         ``filename -> analyte -> row indices`` to exclude (Time Series
         viewer).
@@ -734,18 +753,19 @@ def run(
     excluded_files = excluded_files or set()
     manual_row_exclusions = manual_row_exclusions or {}
     manual_occurrence_exclusions = manual_occurrence_exclusions or {}
+    session_drift_exclude_labels = session_drift_exclude_labels or set()
     bias_specs = bias_specs or []
     isotope_share_specs = isotope_share_specs or []
     pool_specs = pool_specs or []
     dating_ratio_specs = dating_ratio_specs or []
     isotope_table_resolved = isotope_table if isotope_table is not None else DEFAULT_ISOTOPE_TABLE_PATH
 
-    paths = list_line_files(sample_dir)
+    paths = gather_session_line_files(sample_dir)
     if not paths:
-        raise PipelineError(f"No raw line files found in {sample_dir}.")
+        raise PipelineError(f"No raw line files found in {sample_dir} or its immediate subfolders.")
     paths = [p for p in paths if p.name not in excluded_files]
     if not paths:
-        raise PipelineError(f"All raw line files in {sample_dir} were excluded via excluded_files.")
+        raise PipelineError(f"All raw line files under {sample_dir} were excluded via excluded_files.")
 
     files = [
         parse_line_file(p, standard_names=standard_names, acquired_time_format=acquired_time_format)
@@ -761,7 +781,8 @@ def run(
         reference_channel_top_n=reference_channel_top_n, drift_method=drift_method,
         background_drift_method=background_drift_method, max_order=max_order,
         background_override=background_override, per_file_overrides=per_file_overrides,
-        excluded_files=excluded_files, manual_row_exclusions=manual_row_exclusions,
+        excluded_files=excluded_files, session_drift_exclude_labels=session_drift_exclude_labels,
+        manual_row_exclusions=manual_row_exclusions,
         manual_occurrence_exclusions=manual_occurrence_exclusions, detrend=detrend,
         despike_noise=despike_noise, force_zero_intercept=force_zero_intercept,
         bias_specs=bias_specs, bias_drift_order=bias_drift_order, bias_drift_method=bias_drift_method,
@@ -791,6 +812,7 @@ def _run_from_files(
     background_override: BackgroundWindowOverride | None = None,
     per_file_overrides: dict[str, BackgroundWindowOverride] | None = None,
     excluded_files: set[str] | None = None,
+    session_drift_exclude_labels: set[str] | None = None,
     manual_row_exclusions: dict[str, dict[str, set[int]]] | None = None,
     manual_occurrence_exclusions: dict[str, set[str]] | None = None,
     detrend: bool = False,
@@ -846,6 +868,7 @@ def _run_from_files(
     background_detection_kwargs = background_detection_kwargs or {}
     per_file_overrides = per_file_overrides or {}
     excluded_files = excluded_files or set()
+    session_drift_exclude_labels = session_drift_exclude_labels or set()
     manual_row_exclusions = manual_row_exclusions or {}
     manual_occurrence_exclusions = manual_occurrence_exclusions or {}
     bias_specs = bias_specs or []
@@ -898,9 +921,15 @@ def _run_from_files(
             )
         )
 
-    # Session-level background drift (standards AND samples both contribute).
+    # Session-level background drift: standards AND samples both contribute,
+    # minus any labels the caller explicitly held out of the fit (their
+    # blanks are still corrected below using the model fit from the rest).
+    drift_fit_backgrounds = [
+        b for b in initial_backgrounds if b.file_meta.label not in session_drift_exclude_labels
+    ]
     session_background_drift = fit_session_background_drift(
-        initial_backgrounds, order=background_drift_order, method=background_drift_method, max_order=max_order,
+        drift_fit_backgrounds or initial_backgrounds,
+        order=background_drift_order, method=background_drift_method, max_order=max_order,
     )
 
     # Second pass: recompute with the session drift model, reusing the same
@@ -961,6 +990,7 @@ def _run_from_files(
         "standard_labels_found": standard_labels,
         "sample_labels_found": sample_labels,
         "missing_reference_for_standards": missing_reference_for,
+        "session_drift_exclude_labels": sorted(session_drift_exclude_labels),
         "drift_order": drift_order,
         "background_drift_order": background_drift_order,
         "drift_method": drift_method,
@@ -1114,7 +1144,100 @@ def _run_from_files(
             dating_ratio_fits=dating_ratio_fits,
             deconvolution_provenance=deconvolution_provenance,
             deconvolution_settings=deconvolution_settings,
+            ablation_onset_trim_s=ablation_onset_trim_s,
+            isotope_share_specs=list(isotope_share_specs),
         )
+
+    return results
+
+
+def apply_deconvolution(
+    results: dict[str, SampleCalibratedResult],
+    deconvolution_settings: DeconvolutionSettings,
+    *,
+    isotope_table: pd.DataFrame | str | Path | None = None,
+) -> dict[str, SampleCalibratedResult]:
+    """Re-derive each sample's calibrated ppm with deconvolution applied.
+
+    The standalone "deconvolution" workflow stage: :func:`run` produces a
+    calibration from the plain background-corrected signal (no
+    deconvolution), the user QCs it, then this recomputes ``calibrated_ppm``
+    / ``grid_index`` / ``isotopic_ppm`` for every sample with
+    :func:`src.deconvolution.pipeline.correct_line` applied first, reusing
+    the already-fitted background, drift, standard, and bias state on each
+    result unchanged.
+
+    Parameters
+    ----------
+    results : dict[str, SampleCalibratedResult]
+        Output of :func:`run` / :func:`run_from_parsed`. Mutated in place
+        and also returned.
+    deconvolution_settings : DeconvolutionSettings
+        Shift / washout configuration to apply. Both flags off makes this a
+        no-op that restores the Stage-1 values.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Natural-abundance table for isotope apportionment. Defaults to
+        :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    dict[str, SampleCalibratedResult]
+        The same ``results`` dict, with each entry's ``calibrated_ppm``,
+        ``grid_index``, ``deconvolution_provenance``,
+        ``deconvolution_settings``, ``isotopic_ppm``,
+        ``isotopic_ppm_provenance``, and the ``deconvolution`` entries of
+        ``qc_report`` refreshed. ``calibration``/``classification_categories``
+        are cleared (the ppm they were computed from has changed).
+
+    Notes
+    -----
+    Always recomputes from ``result.backgrounds``' untouched
+    ``background_corrected_signal``, so it is idempotent and safe to re-run
+    after changing the settings. Isotope *ratios* (``calibrated_ratios``)
+    are unaffected -- they are computed directly from the
+    background-corrected signal, not the deconvolved one, at every stage.
+    """
+    isotope_table_resolved = isotope_table if isotope_table is not None else DEFAULT_ISOTOPE_TABLE_PATH
+
+    for result in results.values():
+        pairs = list(zip(result.files, result.backgrounds))
+        multi_result = result.multi_standard_calibration
+        if multi_result is not None:
+            standard_result = None
+        else:
+            primary = (result.provenance.get("primary_standards") or [None])[0]
+            standard_result = result.standard_results.get(primary)
+            if standard_result is None:
+                continue
+
+        calibrated_ppm, grid_index, deconvolution_provenance = _build_calibrated_ppm_and_grid(
+            pairs, standard_result, result.instrument_settings,
+            multi_result=multi_result, standard_results=result.standard_results,
+            deconvolution_settings=deconvolution_settings,
+            ablation_onset_trim_s=result.ablation_onset_trim_s,
+        )
+        isotopic_ppm, isotopic_ppm_provenance = _build_isotopic_ppm(
+            calibrated_ppm, result.calibrated_ratios, result.isotope_share_specs,
+            isotope_table=isotope_table_resolved,
+        )
+
+        result.calibrated_ppm = calibrated_ppm
+        result.grid_index = grid_index
+        result.deconvolution_provenance = deconvolution_provenance
+        result.deconvolution_settings = deconvolution_settings
+        result.isotopic_ppm = isotopic_ppm
+        result.isotopic_ppm_provenance = isotopic_ppm_provenance
+        result.qc_report["deconvolution"] = {
+            "apply_shift": deconvolution_settings.apply_shift,
+            "apply_washout": deconvolution_settings.apply_washout,
+            "n_lines": len(deconvolution_provenance),
+        }
+        if isotopic_ppm_provenance:
+            result.qc_report["isotopic_ppm"] = isotopic_ppm_provenance
+        result.provenance["deconvolution_settings"] = asdict(deconvolution_settings)
+        # The calibrated ppm these were computed from has changed.
+        result.classification = pd.DataFrame()
+        result.classification_categories = []
 
     return results
 
@@ -1183,6 +1306,45 @@ def run_from_parsed(
         files=files, sample_dir=sample_dir, reference_library=reference_library,
         excluded_files=excluded_files, **kwargs,
     )
+
+def gather_session_line_files(session_dir: str | Path) -> list[Path]:
+    """Collect raw line files from a session folder and its immediate subfolders.
+
+    Parameters
+    ----------
+    session_dir : str or pathlib.Path
+        The session directory.
+
+    Returns
+    -------
+    list[pathlib.Path]
+        Every ``"<label> - <N>.csv"`` file directly in ``session_dir`` plus
+        those one level down in each subfolder, de-duplicated by resolved
+        path and sorted by name. Non-matching files and deeper nesting are
+        ignored.
+
+    Notes
+    -----
+    This is what lets :func:`run` treat a session laid out as
+    ``session/N610/``, ``session/GSD/``, ``session/RM01/`` … (standards and
+    samples each in their own subfolder) as one pooled run. A flat session
+    folder with every file loose still works -- the subfolder scan simply
+    adds nothing.
+    """
+    session_dir = Path(session_dir)
+    seen: set[Path] = set()
+    ordered: list[Path] = []
+    dirs = [session_dir]
+    if session_dir.is_dir():
+        dirs += [p for p in sorted(session_dir.iterdir()) if p.is_dir()]
+    for d in dirs:
+        for p in list_line_files(d):
+            rp = p.resolve()
+            if rp not in seen:
+                seen.add(rp)
+                ordered.append(p)
+    return sorted(ordered, key=lambda p: p.name)
+
 
 def discover_sample_directories(parent_dir: str | Path) -> list[Path]:
     """Find sample subfolders under a parent directory.

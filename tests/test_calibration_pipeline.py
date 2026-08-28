@@ -20,11 +20,14 @@ from src.calibration.isotope_apportion import IsotopeShareSpec
 from src.calibration.massbias import BiasSpec, natural_abundance_ratio
 from src.calibration.pipeline import (
     PipelineError,
+    apply_deconvolution,
     discover_sample_directories,
+    gather_session_line_files,
     run,
     run_batch,
     run_from_parsed,
 )
+from src.deconvolution.config import DeconvolutionSettings
 from src.calibration.rawfile import list_line_files, parse_line_file
 from src.calibration.pooling import PooledElementSpec, combined_abundance_fraction
 from src.calibration.reflib import parse_reference_material
@@ -789,3 +792,112 @@ def test_discover_sample_directories_and_run_batch(tmp_path):
         result = folder_results["SAMPLE"]
         assert result.provenance["standards_shared_across_folders"] is False
         assert not result.calibrated_ppm.empty
+
+
+def _make_session_with_subfolders(session: Path):
+    """Standards and samples each in their own immediate subfolder of ``session``."""
+    base = datetime(2026, 3, 1, 10, 0, 0)
+    (session / "NIST610").mkdir(parents=True)
+    (session / "RM01").mkdir()
+    (session / "RM02").mkdir()
+    _write_raw_file(session / "NIST610", "NIST610", 1, base, seed=1)
+    _write_raw_file(session / "NIST610", "NIST610", 2, base + timedelta(minutes=60), seed=4)
+    _write_raw_file(session / "RM01", "RM01", 1, base + timedelta(minutes=15), seed=2)
+    _write_raw_file(session / "RM02", "RM02", 1, base + timedelta(minutes=30), seed=3)
+
+
+def test_gather_session_line_files_pools_dir_and_subfolders(tmp_path):
+    session = tmp_path / "session"
+    _make_session_with_subfolders(session)
+    (session / "RM01.csv").write_text("not a line file")  # loose non-matching file, ignored
+
+    names = [p.name for p in gather_session_line_files(session)]
+    assert names == ["NIST610 - 1.csv", "NIST610 - 2.csv", "RM01 - 1.csv", "RM02 - 1.csv"]
+
+
+def test_run_pools_standards_and_samples_from_sibling_subfolders(tmp_path):
+    session = tmp_path / "session"
+    _make_session_with_subfolders(session)
+
+    results = run(
+        session, standard_names={"NIST610"}, reference_library=_reference_library(),
+        primary_standards=["NIST610"], drift_order=0, background_drift_order=0,
+    )
+    # One shared NIST610 calibration bracketing every sample subfolder.
+    assert set(results) == {"RM01", "RM02"}
+    for label, result in results.items():
+        assert not result.calibrated_ppm.empty
+        assert set(result.standard_results) == {"NIST610"}
+        assert result.provenance["session_drift_exclude_labels"] == []
+        # Session background drift was fit across the whole session.
+        assert result.session_background_drift
+
+
+def test_session_drift_exclude_labels_holds_label_out_of_the_fit(tmp_path):
+    session = tmp_path / "session"
+    _make_session_with_subfolders(session)
+
+    results = run(
+        session, standard_names={"NIST610"}, reference_library=_reference_library(),
+        primary_standards=["NIST610"], drift_order=0, background_drift_order=0,
+        session_drift_exclude_labels={"RM02"},
+    )
+    # RM02 is still parsed, corrected, and calibrated -- only its blanks are
+    # left out of the session background/drift fit.
+    assert set(results) == {"RM01", "RM02"}
+    assert not results["RM02"].calibrated_ppm.empty
+    assert results["RM02"].provenance["session_drift_exclude_labels"] == ["RM02"]
+
+
+def test_run_errors_when_session_dir_has_no_line_files(tmp_path):
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    (empty / "notes.txt").write_text("x")
+    with pytest.raises(PipelineError, match="No raw line files found"):
+        run(empty, standard_names={"NIST610"}, reference_library=_reference_library())
+
+
+def test_run_stage1_has_no_deconvolution_by_default(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+    result = results["SAMPLE"]
+    assert result.deconvolution_settings is None
+    assert result.deconvolution_provenance == {}
+
+
+def test_apply_deconvolution_is_a_separate_rerunnable_stage(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+    stage1_ppm = results["SAMPLE"].calibrated_ppm.copy()
+
+    # Nothing enabled -> a no-op that leaves the Stage-1 ppm untouched.
+    apply_deconvolution(results, DeconvolutionSettings(apply_shift=False, apply_washout=False))
+    pd.testing.assert_frame_equal(results["SAMPLE"].calibrated_ppm, stage1_ppm)
+    assert results["SAMPLE"].deconvolution_settings.apply_washout is False
+
+    # Washout enabled -> per-line provenance is recorded and the settings
+    # are stored on the result; re-running from the untouched
+    # background-corrected signal is idempotent.
+    settings = DeconvolutionSettings(apply_washout=True, washout_tau_s={a: 0.5 for a in ANALYTES})
+    apply_deconvolution(results, settings)
+    deconvolved_ppm = results["SAMPLE"].calibrated_ppm.copy()
+    assert results["SAMPLE"].deconvolution_provenance
+    assert results["SAMPLE"].deconvolution_settings.apply_washout is True
+    assert results["SAMPLE"].qc_report["deconvolution"]["apply_washout"] is True
+
+    apply_deconvolution(results, settings)
+    pd.testing.assert_frame_equal(results["SAMPLE"].calibrated_ppm, deconvolved_ppm)
+
+    # Turning it back off restores the Stage-1 values.
+    apply_deconvolution(results, DeconvolutionSettings())
+    pd.testing.assert_frame_equal(results["SAMPLE"].calibrated_ppm, stage1_ppm)

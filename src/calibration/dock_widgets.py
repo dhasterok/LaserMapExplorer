@@ -16,7 +16,7 @@ from matplotlib.patches import Rectangle
 from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QAbstractItemView, QCheckBox, QComboBox, QDoubleSpinBox, QFileDialog,
-    QFormLayout, QGroupBox, QHBoxLayout, QInputDialog, QLabel, QLineEdit,
+    QFormLayout, QGroupBox, QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit,
     QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
     QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QSpinBox, QSplitter, QTableWidget,
     QTableWidgetItem, QTabWidget, QToolBar, QToolBox, QVBoxLayout, QWidget, QGridLayout, QStatusBar,
@@ -54,6 +54,27 @@ DRIFT_METHOD_LABELS = {
     "Auto (AIC)": "auto_aic",
     "Auto (Poisson GLM+LRT)": "auto_poisson_lrt",
 }
+
+
+def _centered_checkbox_cell(checkbox: QCheckBox) -> QWidget:
+    """Wrap a checkbox in a zero-margin container so it centers in its table cell.
+
+    Parameters
+    ----------
+    checkbox : PyQt6.QtWidgets.QCheckBox
+        The checkbox to host. Keep a reference to it (not the wrapper) for
+        reading its state.
+
+    Returns
+    -------
+    PyQt6.QtWidgets.QWidget
+        Pass this to :meth:`QTableWidget.setCellWidget`.
+    """
+    container = QWidget()
+    layout = QHBoxLayout(container)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.addWidget(checkbox, alignment=Qt.AlignmentFlag.AlignCenter)
+    return container
 
 
 def _populate_table(table_widget: QTableWidget, df: pd.DataFrame) -> None:
@@ -499,7 +520,6 @@ class CalibrationMainWindow(QMainWindow):
         self.resize(1400, 900)
 
         self._data_dir: Path | None = None
-        self._batch_sample_dirs: list[Path] = []
         # Analytes whose tableWashoutTau cell was last written by
         # _fill_washout_tau_from_fits (Kernel estimation's "Fit" button),
         # not typed by the user -- lets a later Fit click refresh its own
@@ -507,9 +527,11 @@ class CalibrationMainWindow(QMainWindow):
         # _on_washout_tau_item_changed, which discards an analyte from this
         # set the moment the user edits that cell).
         self._auto_filled_tau: set[str] = set()
-        # tableStandardLabels' Primary/Secondary checkbox and Reference
-        # combo cell widgets, keyed by label -- source of truth for
-        # _primary_standard_names/_secondary_standard_names/_reference_overrides.
+        # tableStandardLabels' Use/Primary/Secondary/Bias checkbox and
+        # Reference combo cell widgets, keyed by label -- source of truth
+        # for _session_drift_exclude_labels/_primary_standard_names/
+        # _secondary_standard_names/_bias_standard_names/_reference_overrides.
+        self._drift_use_checkboxes: dict[str, QCheckBox] = {}
         self._primary_checkboxes: dict[str, QCheckBox] = {}
         self._secondary_checkboxes: dict[str, QCheckBox] = {}
         self._bias_checkboxes: dict[str, QCheckBox] = {}
@@ -730,28 +752,47 @@ class CalibrationMainWindow(QMainWindow):
         return statusbar
 
     def _build_toolbar(self) -> QToolBar:
-        """Build the main toolbar (Run, Reprocess, Classify, export, Standards).
+        """Build the main toolbar: the three workflow stages, export, Standards.
 
         Returns
         -------
         PyQt6.QtWidgets.QToolBar
+            Stage 1 "Run" (background / drift / calibration) and its fast
+            "Reprocess" variant, Stage 2 "Deconvolve", Stage 3 "Classify",
+            then the export and reference-library actions.
         """
         toolbar = QToolBar("Calibration", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)
-        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon) 
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         self.actionRun = CustomAction(text="Run", light_icon_unchecked="icon-run-64.svg", parent=self)
-        self.actionRun.setToolTip("Run pipeline")
+        self.actionRun.setToolTip(
+            "Stage 1: background subtraction, session drift correction, and standard "
+            "calibration to ppm. QC the Background / Standards / Calibration / Maps tabs, "
+            "then Deconvolve."
+        )
 
         self.actionReprocess = CustomAction(text="Reprocess", light_icon_unchecked="icon-run-64.svg", parent=self)
         self.actionReprocess.setToolTip(
-            "Fast re-run from already-scanned files (re-applies deconvolution/calibration "
-            "settings without re-parsing raw files from disk). Single-folder mode only."
+            "Stage 1, fast: re-run from already-scanned files (re-applies settings without "
+            "re-parsing raw files from disk)."
         )
 
+        self.actionDeconvolve = CustomAction(text="Deconvolve", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionDeconvolve.setToolTip(
+            "Stage 2: apply the dwell-offset shift / washout correction (Deconvolution page) "
+            "to the Stage-1 calibrated data. Re-runnable -- always starts from the "
+            "background-corrected signal, so changing the settings and re-running is safe."
+        )
+        self.actionDeconvolve.setEnabled(False)
+
         self.actionClassify = CustomAction(text="Classify", light_icon_unchecked="icon-run-64.svg", parent=self)
-        self.actionClassify.setToolTip("Classify the current sample's calibrated pixels against the selected reference minerals.")
+        self.actionClassify.setToolTip(
+            "Stage 3: classify the current sample's calibrated pixels against the selected "
+            "reference minerals."
+        )
+        self.actionClassify.setEnabled(False)
 
         self.actionExportCsv = CustomAction(text="Save Data", light_icon_unchecked="icon-save-file-64.svg", parent=self)
         self.actionExportCsv.setToolTip("Save calibrated CSV...")
@@ -764,6 +805,7 @@ class CalibrationMainWindow(QMainWindow):
 
         toolbar.addAction(self.actionRun)
         toolbar.addAction(self.actionReprocess)
+        toolbar.addAction(self.actionDeconvolve)
         toolbar.addAction(self.actionClassify)
         toolbar.addSeparator()
         toolbar.addAction(self.actionExportCsv)
@@ -830,7 +872,7 @@ class CalibrationMainWindow(QMainWindow):
         return toolbox
 
     def _build_data_source_group(self) -> QGroupBox:
-        """Build the "Data source" group (directory, batch mode, Scan).
+        """Build the "Data source" group (session directory, time format, Scan).
 
         Returns
         -------
@@ -849,8 +891,13 @@ class CalibrationMainWindow(QMainWindow):
         dir_row.addWidget(self.buttonBrowseDir)
         layout.addLayout(dir_row)
 
-        self.checkBoxBatchMode = QCheckBox("Parent folder")
-        layout.addWidget(self.checkBoxBatchMode)
+        hint = QLabel(
+            "Point at the session folder. Raw line files are pooled from it and every "
+            "immediate subfolder (e.g. N610/, GSD/, RM01/ …) into one run -- one shared "
+            "background/drift fit and one set of bracketing standards across all samples."
+        )
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
 
         time_format_row = QHBoxLayout()
         time_format_row.addWidget(QLabel("Acquired time format"))
@@ -864,14 +911,6 @@ class CalibrationMainWindow(QMainWindow):
         )
         time_format_row.addWidget(self.lineEditTimeFormat, stretch=1)
         layout.addLayout(time_format_row)
-
-        self.buttonScan = QPushButton("Scan")
-        layout.addWidget(self.buttonScan)
-
-        self.listWidgetSampleFolders = QListWidget()
-        self.listWidgetSampleFolders.setMaximumHeight(100)
-        self.listWidgetSampleFolders.setVisible(False)
-        layout.addWidget(self.listWidgetSampleFolders)
 
         self.labelScanSummary = QLabel("")
         self.labelScanSummary.setWordWrap(True)
@@ -889,9 +928,23 @@ class CalibrationMainWindow(QMainWindow):
         group = QGroupBox("Standard configuration")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
-        self.tableStandardLabels = QTableWidget(0, 5)
-        self.tableStandardLabels.setHorizontalHeaderLabels(["Primary", "Secondary", "Bias", "Label", "Reference"])
-        self.tableStandardLabels.horizontalHeader().setStretchLastSection(True)
+        self.tableStandardLabels = QTableWidget(0, 6)
+        self.tableStandardLabels.setHorizontalHeaderLabels(
+            ["Use", "Primary", "Secondary", "Bias", "Label", "Reference"]
+        )
+        self.tableStandardLabels.verticalHeader().setVisible(False)
+        header = self.tableStandardLabels.horizontalHeader()
+        # Checkbox columns + Label snap to their (header-text) width; only
+        # Reference takes the slack.
+        for col in range(5):
+            header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.tableStandardLabels.setToolTip(
+            "Every scanned label (standards and samples). 'Use' checked (default) means "
+            "that label's gas blanks feed the session background/drift fit; uncheck it to "
+            "leave a label out of the fit while still correcting and calibrating it "
+            "(e.g. a sample with a contaminated blank)."
+        )
         layout.addWidget(self.tableStandardLabels)
         # note = QLabel(
         #     "One Primary standard -> single-point calibration. Two or more -> "
@@ -1985,11 +2038,15 @@ class CalibrationMainWindow(QMainWindow):
     def _connect_widgets(self):
         """Wire every toolbar action, button, combo, and checkbox to its slot."""
         self.buttonBrowseDir.clicked.connect(self._on_browse_dir)
-        self.checkBoxBatchMode.toggled.connect(self.listWidgetSampleFolders.setVisible)
-        self.buttonScan.clicked.connect(self._on_scan)
+        # A directory is scanned the moment it is chosen; re-editing the
+        # acquired-time format re-scans (that field is only needed to parse
+        # file headers, which the scan does eagerly for the Time Series
+        # preview -- it is otherwise not required until Run).
+        self.lineEditTimeFormat.editingFinished.connect(self._on_time_format_changed)
         self.actionOpenRefLibrary.triggered.connect(self._on_edit_standard)
         self.actionRun.triggered.connect(self._on_run)
         self.actionReprocess.triggered.connect(self._on_reprocess)
+        self.actionDeconvolve.triggered.connect(self._on_deconvolve)
         self.actionClassify.triggered.connect(self._on_classify)
         self.comboBoxSampleResult.currentIndexChanged.connect(self._on_sample_selected)
         # The analyte selector is shared across every results tab, but only
@@ -2022,63 +2079,58 @@ class CalibrationMainWindow(QMainWindow):
     # Data source / scan
     # ------------------------------------------------------------------
     def _on_browse_dir(self):
-        """Prompt for the raw-data directory and store it."""
+        """Prompt for the session directory, store it, and scan immediately."""
         directory = QFileDialog.getExistingDirectory(self, "Select raw data directory")
         if directory:
             self._data_dir = Path(directory)
             self.lineEditDataDir.setText(directory)
+            self._on_scan()
+
+    def _on_time_format_changed(self):
+        """Re-scan when the acquired-time format is edited (if a directory is set)."""
+        if self._data_dir is not None:
+            self._on_scan()
 
     def _on_scan(self):
         """Discover and eagerly parse every raw file, then repopulate the panels.
 
-        Parses each file (not just its label) so the Time Series tab can
-        preview raw lines pre-Run; parse failures are collected into the
-        scan summary. Repopulates the standard-label, focus, file,
-        per-line-override, isotope-calibration, dating-systems, and
-        washout-tau tables.
+        Line files are gathered from the session folder and each immediate
+        subfolder (see :func:`pipeline.gather_session_line_files`) and pooled
+        into one session. Parses each file (not just its label) so the Time
+        Series tab can preview raw lines pre-Run; parse failures are
+        collected into the scan summary. Repopulates the standard-label,
+        focus, file, per-line-override, isotope-calibration,
+        dating-systems, and washout-tau tables.
         """
         if self._data_dir is None:
             QMessageBox.warning(self, "Scan", "Choose a raw data directory first.")
             return
 
-        if self.checkBoxBatchMode.isChecked():
-            self._batch_sample_dirs = pipeline.discover_sample_directories(self._data_dir)
-            self.listWidgetSampleFolders.clear()
-            for d in self._batch_sample_dirs:
-                item = QListWidgetItem(d.name)
-                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                item.setCheckState(Qt.CheckState.Checked)
-                item.setData(Qt.ItemDataRole.UserRole, str(d))
-                self.listWidgetSampleFolders.addItem(item)
-            scan_dirs = self._batch_sample_dirs
-        else:
-            self._batch_sample_dirs = []
-            scan_dirs = [self._data_dir]
-
         time_format = self.lineEditTimeFormat.text().strip() or None
+        paths = pipeline.gather_session_line_files(self._data_dir)
 
         labels: set[str] = set()
         self._scanned_files = {}
-        n_files = 0
         failures: list[str] = []
-        for d in scan_dirs:
-            for path in list_line_files(d):
-                n_files += 1
-                try:
-                    label, _ = parse_filename_label(path)
-                    labels.add(label)
-                except Exception:
-                    continue
-                # Parsed eagerly (not just the filename label) so the Time
-                # Series tab can preview raw lines before any pipeline Run.
-                try:
-                    self._scanned_files[path.name] = parse_line_file(
-                        path, standard_names=labels, validate_isotopes=False, acquired_time_format=time_format,
-                    )
-                except Exception as e:
-                    failures.append(f"{path.name}: {e}")
+        for path in paths:
+            try:
+                label, _ = parse_filename_label(path)
+                labels.add(label)
+            except Exception:
+                continue
+            # Parsed eagerly (not just the filename label) so the Time
+            # Series tab can preview raw lines before any pipeline Run.
+            try:
+                self._scanned_files[path.name] = parse_line_file(
+                    path, standard_names=labels, validate_isotopes=False, acquired_time_format=time_format,
+                )
+            except Exception as e:
+                failures.append(f"{path.name}: {e}")
 
-        summary = f"{len(scan_dirs)} folder(s), {n_files} file(s), labels: {sorted(labels)}"
+        subfolders = sorted({p.parent.name for p in paths if p.parent != self._data_dir})
+        summary = f"{len(paths)} file(s), labels: {sorted(labels)}"
+        if subfolders:
+            summary += f"\nsubfolders: {subfolders}"
         if failures:
             summary += f"\n{len(failures)} file(s) failed to parse:\n" + "\n".join(failures[:10])
             if len(failures) > 10:
@@ -2129,11 +2181,16 @@ class CalibrationMainWindow(QMainWindow):
 
         Notes
         -----
-        A label that case-insensitively matches a loaded reference material
-        defaults to Primary-checked with that material pre-selected in the
-        Reference column.
+        Every scanned label (samples and standards) gets a row. "Use" is
+        checked by default -- unchecking it holds that label's gas blanks
+        out of the session background/drift fit (see
+        :meth:`_session_drift_exclude_labels`). A label that
+        case-insensitively matches a loaded reference material defaults to
+        Primary-checked with that material pre-selected in the Reference
+        column.
         """
         self.tableStandardLabels.setRowCount(0)
+        self._drift_use_checkboxes = {}
         self._primary_checkboxes = {}
         self._secondary_checkboxes = {}
         self._bias_checkboxes = {}
@@ -2150,15 +2207,24 @@ class CalibrationMainWindow(QMainWindow):
             # to calibration, which for 2+ means multi-point by default).
             match = next((k for k in self.reference_library if k.lower() == label.lower()), None)
 
+            use_cb = QCheckBox()
+            use_cb.setChecked(True)
+            use_cb.setToolTip(
+                "Include this label's gas blanks in the session background/drift fit. "
+                "Uncheck to leave it out of the fit while still correcting and calibrating it."
+            )
+            self.tableStandardLabels.setCellWidget(row, 0, _centered_checkbox_cell(use_cb))
+            self._drift_use_checkboxes[label] = use_cb
+
             primary_cb = QCheckBox()
             primary_cb.setChecked(match is not None)
             primary_cb.toggled.connect(lambda checked, lbl=label: self._on_primary_toggled(lbl, checked))
-            self.tableStandardLabels.setCellWidget(row, 0, primary_cb)
+            self.tableStandardLabels.setCellWidget(row, 1, _centered_checkbox_cell(primary_cb))
             self._primary_checkboxes[label] = primary_cb
 
             secondary_cb = QCheckBox()
             secondary_cb.toggled.connect(lambda checked, lbl=label: self._on_secondary_toggled(lbl, checked))
-            self.tableStandardLabels.setCellWidget(row, 1, secondary_cb)
+            self.tableStandardLabels.setCellWidget(row, 2, _centered_checkbox_cell(secondary_cb))
             self._secondary_checkboxes[label] = secondary_cb
 
             bias_cb = QCheckBox()
@@ -2167,18 +2233,18 @@ class CalibrationMainWindow(QMainWindow):
                 "calibration table above) -- independent of Primary/Secondary, which only control "
                 "elemental (total-concentration) calibration."
             )
-            self.tableStandardLabels.setCellWidget(row, 2, bias_cb)
+            self.tableStandardLabels.setCellWidget(row, 3, _centered_checkbox_cell(bias_cb))
             self._bias_checkboxes[label] = bias_cb
 
             label_item = QTableWidgetItem(label)
             label_item.setFlags(label_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            self.tableStandardLabels.setItem(row, 3, label_item)
+            self.tableStandardLabels.setItem(row, 4, label_item)
 
             combo = QComboBox()
             combo.addItem("—")
             combo.addItems(sorted(self.reference_library))
             combo.setCurrentText(match or "—")
-            self.tableStandardLabels.setCellWidget(row, 4, combo)
+            self.tableStandardLabels.setCellWidget(row, 5, combo)
             self._reference_combos[label] = combo
 
     def _on_primary_toggled(self, label: str, checked: bool):
@@ -2206,6 +2272,18 @@ class CalibrationMainWindow(QMainWindow):
         """
         if checked:
             self._primary_checkboxes[label].setChecked(False)
+
+    def _session_drift_exclude_labels(self) -> set[str]:
+        """Labels whose "Use" box is unchecked in the Standard Configuration table.
+
+        Returns
+        -------
+        set[str]
+            Passed to :func:`pipeline.run` as ``session_drift_exclude_labels``
+            -- these labels are still corrected and calibrated, but their gas
+            blanks do not feed the session background/drift fit.
+        """
+        return {label for label, cb in self._drift_use_checkboxes.items() if not cb.isChecked()}
 
     def _primary_standard_names(self) -> list[str]:
         """Sorted list of labels with their Primary box checked.
@@ -2577,11 +2655,7 @@ class CalibrationMainWindow(QMainWindow):
             self._file_use_state.setdefault(name, True)
 
         focus = self.comboBoxSampleResult.currentText()
-        # Batch mode keys comboBoxSampleResult's sample-result entries as
-        # "folder / label" (see _on_run_finished), but a raw filename only
-        # ever carries its own bare label -- compare against the trailing
-        # segment so focusing a batch-mode result still filters correctly.
-        focus_label = focus.rsplit(" / ", 1)[-1] if focus else focus
+        focus_label = focus
 
         def _matches_focus(name: str) -> bool:
             """Whether file ``name``'s label matches the focused label."""
@@ -2945,12 +3019,13 @@ class CalibrationMainWindow(QMainWindow):
     # Run
     # ------------------------------------------------------------------
     def _on_run(self):
-        """Gather every setting and launch :func:`pipeline.run`/``run_batch`` on a worker.
+        """Gather every setting and launch :func:`pipeline.run` on a worker.
 
         Resolves per-label reference overrides, merges the isotope and
         dating-ratio spec lists, and disables the Run/Reprocess actions
         until the worker signals back to :meth:`_on_run_finished` /
-        :meth:`_on_run_failed`.
+        :meth:`_on_run_failed`. The whole session folder (plus its
+        immediate subfolders) is processed as one pooled run.
         """
         if self._data_dir is None:
             QMessageBox.warning(self, "Run", "Choose and scan a raw data directory first.")
@@ -3003,6 +3078,7 @@ class CalibrationMainWindow(QMainWindow):
             per_file_overrides=self._gather_per_file_overrides(),
             acquired_time_format=self.lineEditTimeFormat.text().strip() or None,
             excluded_files={name for name, used in self._file_use_state.items() if not used},
+            session_drift_exclude_labels=self._session_drift_exclude_labels(),
             manual_row_exclusions=self._manual_row_exclusions,
             manual_occurrence_exclusions=self._manual_occurrence_exclusions,
             detrend=self.checkDetrend.isChecked(),
@@ -3012,21 +3088,16 @@ class CalibrationMainWindow(QMainWindow):
             isotope_share_specs=isotope_share_specs,
             pool_specs=pool_specs,
             dating_ratio_specs=dating_ratio_specs,
-            deconvolution_settings=self._current_deconvolution_settings(),
+            # Stage 1 only -- deconvolution is applied afterwards, as its own
+            # QC-able step, via the Deconvolve action.
             ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
         )
 
-        if self.checkBoxBatchMode.isChecked():
-            fn = pipeline.run_batch
-            kwargs = dict(parent_dir=self._data_dir, **common_kwargs)
-        else:
-            fn = pipeline.run
-            kwargs = dict(sample_dir=self._data_dir, **common_kwargs)
+        kwargs = dict(sample_dir=self._data_dir, **common_kwargs)
 
-        self.actionRun.setEnabled(False)
-        self.actionReprocess.setEnabled(False)
-        self.labelRunStatus.setText("Running...")
-        self._worker = _PipelineWorker(fn, kwargs, parent=self)
+        self._set_stage_actions_enabled(False)
+        self.labelRunStatus.setText("Stage 1: background / drift / calibration…")
+        self._worker = _PipelineWorker(pipeline.run, kwargs, parent=self)
         self._worker.finished_ok.connect(self._on_run_finished)
         self._worker.failed.connect(self._on_run_failed)
         self._worker.start()
@@ -3036,18 +3107,12 @@ class CalibrationMainWindow(QMainWindow):
 
         Notes
         -----
-        Reuses ``self._scanned_files`` instead of re-reading raw files from
-        disk, for quickly re-applying changed deconvolution/calibration
-        settings. Fixes up each file's ``meta.is_standard`` for the current
-        selection first. Batch mode is not supported here (``_scanned_files``
-        does not track subdirectories) -- use the Run button instead.
+        Reuses ``self._scanned_files`` (already pooled from the session
+        folder and every subfolder at Scan time) instead of re-reading raw
+        files from disk, for quickly re-applying changed
+        deconvolution/calibration settings. Fixes up each file's
+        ``meta.is_standard`` for the current selection first.
         """
-        if self.checkBoxBatchMode.isChecked():
-            QMessageBox.information(
-                self, "Reprocess",
-                "Reprocess (fast re-run) isn't available in batch mode -- use Run instead.",
-            )
-            return
         if not self._scanned_files:
             QMessageBox.warning(self, "Reprocess", "Scan a raw data directory first.")
             return
@@ -3097,6 +3162,7 @@ class CalibrationMainWindow(QMainWindow):
             background_override=self._current_background_override(),
             per_file_overrides=self._gather_per_file_overrides(),
             excluded_files={name for name, used in self._file_use_state.items() if not used},
+            session_drift_exclude_labels=self._session_drift_exclude_labels(),
             manual_row_exclusions=self._manual_row_exclusions,
             manual_occurrence_exclusions=self._manual_occurrence_exclusions,
             detrend=self.checkDetrend.isChecked(),
@@ -3106,52 +3172,108 @@ class CalibrationMainWindow(QMainWindow):
             isotope_share_specs=isotope_share_specs,
             pool_specs=pool_specs,
             dating_ratio_specs=dating_ratio_specs,
-            deconvolution_settings=self._current_deconvolution_settings(),
+            # Stage 1 only -- see _on_run.
             ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
         )
 
-        self.actionRun.setEnabled(False)
-        self.actionReprocess.setEnabled(False)
-        self.labelRunStatus.setText("Reprocessing...")
+        self._set_stage_actions_enabled(False)
+        self.labelRunStatus.setText("Stage 1: reprocessing…")
         self._worker = _PipelineWorker(pipeline.run_from_parsed, kwargs, parent=self)
         self._worker.finished_ok.connect(self._on_run_finished)
         self._worker.failed.connect(self._on_run_failed)
         self._worker.start()
 
+    def _set_stage_actions_enabled(self, enabled: bool):
+        """Enable/disable the workflow-stage toolbar actions.
+
+        Parameters
+        ----------
+        enabled : bool
+            ``False`` disables all four (a stage is running). ``True``
+            re-enables Run/Reprocess unconditionally, and Deconvolve/Classify
+            only once a Stage-1 result exists.
+        """
+        self.actionRun.setEnabled(enabled)
+        self.actionReprocess.setEnabled(enabled)
+        have_results = enabled and bool(self.results)
+        self.actionDeconvolve.setEnabled(have_results)
+        self.actionClassify.setEnabled(have_results)
+
     def _on_run_failed(self, message: str):
-        """Re-enable the run actions and surface a worker failure.
+        """Re-enable the stage actions and surface a worker failure.
 
         Parameters
         ----------
         message : str
             The exception message from the worker.
         """
-        self.actionRun.setEnabled(True)
-        self.actionReprocess.setEnabled(True)
+        self._set_stage_actions_enabled(True)
         self.labelRunStatus.setText(f"Failed: {message}")
         QMessageBox.critical(self, "Run pipeline", message)
 
-    def _on_run_finished(self, raw_results: dict):
-        """Store worker results, refill the sample combo, and refresh every tab.
+    def _on_deconvolve(self):
+        """Stage 2: apply the current deconvolution settings to the Stage-1 results.
+
+        Runs :func:`pipeline.apply_deconvolution` on a worker; it recomputes
+        each sample's calibrated ppm from the (untouched) background-corrected
+        signal with shift/washout applied, so it is safe to re-run after
+        changing the settings.
+        """
+        if not self.results:
+            QMessageBox.warning(self, "Deconvolve", "Run Stage 1 first.")
+            return
+        settings = self._current_deconvolution_settings()
+        self._set_stage_actions_enabled(False)
+        self.labelRunStatus.setText("Stage 2: applying deconvolution…")
+        self._worker = _PipelineWorker(
+            pipeline.apply_deconvolution,
+            dict(results=self.results, deconvolution_settings=settings),
+            parent=self,
+        )
+        self._worker.finished_ok.connect(self._on_deconvolve_finished)
+        self._worker.failed.connect(self._on_run_failed)
+        self._worker.start()
+
+    def _on_deconvolve_finished(self, raw_results: dict):
+        """Refresh the tabs after Stage 2, without disturbing the sample selection.
 
         Parameters
         ----------
         raw_results : dict
-            ``{sample label -> SampleCalibratedResult}``, or (batch mode)
-            ``{folder -> {label -> result}}`` which is flattened to
-            ``"folder / label"`` keys.
+            The same ``self.results`` dict, mutated in place by
+            :func:`pipeline.apply_deconvolution`.
         """
-        self.actionRun.setEnabled(True)
-        self.actionReprocess.setEnabled(True)
-        self.results = {}
-        if self.checkBoxBatchMode.isChecked():
-            for folder_name, folder_results in raw_results.items():
-                for label, result in folder_results.items():
-                    self.results[f"{folder_name} / {label}"] = result
-        else:
-            self.results = dict(raw_results)
+        self.results = dict(raw_results)
+        self._set_stage_actions_enabled(True)
+        applied = any(
+            r.deconvolution_settings and (r.deconvolution_settings.apply_shift or r.deconvolution_settings.apply_washout)
+            for r in self.results.values()
+        )
+        self.labelRunStatus.setText(
+            "Stage 2 complete: deconvolution applied — QC the Deconvolution / Maps tabs, then Classify."
+            if applied else
+            "Stage 2 complete: deconvolution settings had nothing enabled — calibrated data unchanged."
+        )
+        self._on_sample_selected()
+        self._refresh_time_series_tab()
 
-        self.labelRunStatus.setText(f"Done: {len(self.results)} sample result(s).")
+    def _on_run_finished(self, raw_results: dict):
+        """Store Stage-1 results, refill the sample combo, and refresh every tab.
+
+        Parameters
+        ----------
+        raw_results : dict
+            ``{sample label -> SampleCalibratedResult}`` from
+            :func:`pipeline.run` / :func:`pipeline.run_from_parsed`.
+        """
+        self.results = dict(raw_results)
+        self._set_stage_actions_enabled(True)
+
+        n = len(self.results)
+        self.labelRunStatus.setText(
+            f"Stage 1 complete: {n} sample result(s). QC the Background / Standards / "
+            f"Calibration / Maps tabs, then Deconvolve."
+        )
         # Union in every standard label used across all results (not just
         # sample-result keys) so a standard-only label (never itself a
         # sample folder) stays selectable to focus the file table on --
@@ -3234,8 +3356,13 @@ class CalibrationMainWindow(QMainWindow):
             refresh()
 
     def _on_sample_selected(self):
-        """Repopulate the analyte/standard/ratio selectors and refresh every tab."""
-        result = self._current_result()
+        """Repopulate the analyte/standard/ratio selectors and refresh every tab.
+
+        With "(all)" selected the selectors are filled from any result
+        (analytes/standards are session-wide) so the session-level tabs
+        (Background) still populate; per-sample tabs quietly no-op.
+        """
+        result = self._current_result() or (next(iter(self.results.values())) if self.results else None)
         if result is None:
             return
 
@@ -3274,24 +3401,44 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableTiming, df)
 
     def _refresh_background_tab(self):
-        """Redraw the background-drift plot and detection-limit summary for the analyte."""
-        result = self._current_result()
+        """Redraw the background-drift plot and detection-limit summary for the analyte.
+
+        Background/drift is session-level, so with "(all)" (or no specific
+        sample) selected every sample label is drawn together against the
+        shared session drift fit; the standards' occurrence backgrounds are
+        drawn once regardless.
+        """
         analyte = self.analyte_list.currentText()
-        if result is None or not analyte:
+        if not analyte or not self.results:
             return
+        result = self._current_result()
+        if result is not None:
+            sample_results = [result]
+        else:
+            sample_results = list(self.results.values())
+        if not sample_results:
+            return
+
+        any_result = sample_results[0]
+        drift_fit = any_result.session_background_drift.get(analyte)
+        groups: dict = {r.sample_label: r.backgrounds for r in sample_results}
+        reference_labels: set[str] = set()
+        for r in sample_results:
+            for label, sr in r.standard_results.items():
+                groups.setdefault(label, [occ.background for occ in sr.occurrences])
+                reference_labels.add(label)
+
         self.canvasBackground.axes.clear()
-        drift_fit = result.session_background_drift.get(analyte)
-        groups = {result.sample_label: result.backgrounds}
-        groups.update({label: [occ.background for occ in sr.occurrences] for label, sr in result.standard_results.items()})
         diagnostics.plot_background_drift(
             self.canvasBackground.axes, groups, drift_fit, analyte,
-            reference_labels=set(result.standard_results),
+            reference_labels=reference_labels,
         )
         self._draw(self.canvasBackground)
 
+        detection_backgrounds = [b for r in sample_results for b in r.backgrounds]
         provenance_counts: dict[str, int] = {}
         l_c_values, l_d_values = [], []
-        for b in result.backgrounds:
+        for b in detection_backgrounds:
             provenance = b.tau_provenance.get(analyte, "unknown")
             provenance_counts[provenance] = provenance_counts.get(provenance, 0) + 1
             limits = b.currie.get(analyte)

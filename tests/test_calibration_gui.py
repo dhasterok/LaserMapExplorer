@@ -47,7 +47,7 @@ def main_window(qtbot, app):
 
 def test_main_window_constructs_without_error(main_window):
     assert main_window.windowTitle() == "LA-ICP-MS Calibration"
-    assert main_window.tableStandardLabels.columnCount() == 5
+    assert main_window.tableStandardLabels.columnCount() == 6
     assert main_window.tableStandardLabels.rowCount() == 0
 
 
@@ -55,12 +55,6 @@ def test_drift_order_spinbox_default_and_editable(main_window):
     assert main_window.spinDriftOrder.value() == 3
     main_window.spinDriftOrder.setValue(2)
     assert main_window.spinDriftOrder.value() == 2
-
-
-def test_batch_mode_toggle_shows_folder_list(main_window):
-    assert main_window.listWidgetSampleFolders.isVisible() is False
-    main_window.checkBoxBatchMode.setChecked(True)
-    assert main_window.listWidgetSampleFolders.isVisible() is True
 
 
 def test_scan_populates_standard_label_table(tmp_path, main_window):
@@ -74,7 +68,7 @@ def test_scan_populates_standard_label_table(tmp_path, main_window):
 
     assert main_window.tableStandardLabels.rowCount() == 2
     labels = {
-        main_window.tableStandardLabels.item(i, 3).text()
+        main_window.tableStandardLabels.item(i, 4).text()
         for i in range(main_window.tableStandardLabels.rowCount())
     }
     assert labels == {"NIST610", "SAMPLE"}
@@ -89,6 +83,23 @@ def test_scan_populates_standard_label_table(tmp_path, main_window):
     assert main_window._bias_checkboxes["SAMPLE"].isChecked() is False
     assert main_window._reference_combos["NIST610"].currentText() == "NIST610"
     assert main_window._reference_combos["SAMPLE"].currentText() == "—"
+    # "Use" defaults to checked for every label, so nothing is held out of
+    # the session background/drift fit.
+    assert main_window._drift_use_checkboxes["NIST610"].isChecked() is True
+    assert main_window._drift_use_checkboxes["SAMPLE"].isChecked() is True
+    assert main_window._session_drift_exclude_labels() == set()
+
+
+def test_use_checkbox_feeds_session_drift_exclude_labels(tmp_path, main_window):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    main_window._data_dir = sample_dir
+    main_window.lineEditDataDir.setText(str(sample_dir))
+    main_window._on_scan()
+
+    main_window._drift_use_checkboxes["SAMPLE"].setChecked(False)
+    assert main_window._session_drift_exclude_labels() == {"SAMPLE"}
 
 
 def test_run_pipeline_end_to_end_via_gui(tmp_path, qtbot, main_window):
@@ -154,8 +165,17 @@ def test_deconvolution_settings_reach_run_and_populate_qc_tab(tmp_path, qtbot, m
     main_window.reference_library["NIST610"] = material
     main_window.spinDriftOrder.setValue(0)
 
+    # Stage 1: background / drift / calibration -- no deconvolution yet.
     main_window._on_run()
     qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
+    assert main_window._current_result().deconvolution_settings is None
+    assert main_window.actionDeconvolve.isEnabled() is True
+
+    # Stage 2: apply the configured deconvolution settings.
+    main_window._on_deconvolve()
+    qtbot.waitUntil(
+        lambda: main_window._current_result().deconvolution_settings is not None, timeout=10000
+    )
 
     result = main_window._current_result()
     assert result is not None
@@ -401,14 +421,6 @@ def test_mineral_preset_save_and_load_round_trips_check_states(tmp_path, main_wi
     main_window._set_all_minerals_checked(True)
 
 
-def test_reprocess_toolbar_action_blocked_in_batch_mode(main_window, mocker):
-    mock_info = mocker.patch.object(dw.QMessageBox, "information")
-    main_window.checkBoxBatchMode.setChecked(True)
-    main_window.actionReprocess.trigger()
-    mock_info.assert_called_once()
-    main_window.checkBoxBatchMode.setChecked(False)
-
-
 def test_reprocess_toolbar_action_reruns_without_rescanning(tmp_path, qtbot, main_window):
     """actionReprocess (run_from_parsed) must reuse self._scanned_files --
     not re-read raw files from disk -- while still reflecting settings
@@ -442,11 +454,14 @@ def test_reprocess_toolbar_action_reruns_without_rescanning(tmp_path, qtbot, mai
 
 
 def test_classify_toolbar_action_triggers_on_classify(main_window, mocker):
-    # No pipeline result yet, so _on_classify's own first-branch warning
-    # fires -- proves the toolbar action reaches _on_classify without
-    # relying on mocker.spy (which can't see calls Qt's C++ signal/slot
-    # dispatch makes through the pre-connect()-time bound method).
+    # The Classify action is disabled until Stage 1 has run; force-enable it
+    # so triggering exercises the signal/slot wiring. With no pipeline result
+    # _on_classify's own first-branch warning fires -- proves the toolbar
+    # action reaches _on_classify without relying on mocker.spy (which can't
+    # see calls Qt's C++ signal/slot dispatch makes through the
+    # pre-connect()-time bound method).
     mock_warning = mocker.patch.object(dw.QMessageBox, "warning")
+    main_window.actionClassify.setEnabled(True)
     main_window.actionClassify.trigger()
     mock_warning.assert_called_once()
 

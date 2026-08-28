@@ -17,6 +17,21 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 
 def create_app():
+    """Return the process ``QApplication``, creating one if needed.
+
+    Returns
+    -------
+    PyQt6.QtWidgets.QApplication
+        The existing application instance if one is already running,
+        otherwise a freshly constructed one built from ``sys.argv``.
+
+    Notes
+    -----
+    Attempts to reuse LaME's light/dark stylesheet via ``darkdetect`` and
+    ``lame_core.config.load_stylesheet``. Any failure there is swallowed --
+    stylesheet reuse is cosmetic only and a standalone run should not fail
+    without it.
+    """
     from PyQt6.QtWidgets import QApplication
 
     app = QApplication.instance() or QApplication(sys.argv)
@@ -30,6 +45,14 @@ def create_app():
 
 
 def main() -> int:
+    """Launch the standalone calibration GUI and block until it exits.
+
+    Returns
+    -------
+    int
+        The Qt event-loop exit code, suitable for passing to
+        :func:`sys.exit`.
+    """
     from src.calibration.dock_widgets import CalibrationMainWindow
 
     app = create_app()

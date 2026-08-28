@@ -1,0 +1,1 @@
+"""Plotting functions and UI logic for displaying and annotating plots."""

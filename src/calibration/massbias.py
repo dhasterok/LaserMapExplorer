@@ -45,6 +45,19 @@ _VALID_METHODS = {"fixed", "auto_aic"}
 
 
 def load_isotope_table(path: str | Path) -> pd.DataFrame | None:
+    """Load the isotope reference CSV.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Path to the isotope table (``symbol``, ``atomic_mass``,
+        ``abundance_nominal`` columns).
+
+    Returns
+    -------
+    pandas.DataFrame or None
+        The parsed table, or ``None`` if the file does not exist.
+    """
     path = Path(path)
     if not path.exists():
         return None
@@ -55,18 +68,35 @@ def natural_abundance_ratio(
     element: str, numerator_mass: int, denominator_mass: int,
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> float | None:
-    """Natural terrestrial abundance ratio of two isotopes of the SAME
-    element (e.g. ``natural_abundance_ratio("U", 238, 235)`` -> ~137.8,
-    from ``resources/app_data/isotope_info.csv``'s ``abundance_nominal``
-    column).
+    """Natural terrestrial abundance ratio of two isotopes of the same element.
 
+    Parameters
+    ----------
+    element : str
+        Element symbol, e.g. ``"U"``.
+    numerator_mass : int
+        Isotope mass of the ratio numerator, e.g. ``238``.
+    denominator_mass : int
+        Isotope mass of the ratio denominator, e.g. ``235``.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        A loaded isotope table, or a path to one. Defaults to
+        :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    float or None
+        ``abundance_nominal[numerator] / abundance_nominal[denominator]``
+        (e.g. ~137.8 for U238/U235). ``None`` if the table is unavailable,
+        either isotope is missing, or the denominator abundance is zero.
+
+    Notes
+    -----
     Only meaningful for isotope pairs that are physically invariant in
-    nature -- a radiogenic daughter pair's true ratio is exactly what
-    varies sample-to-sample, so this must never be used as a calibration
-    truth for one; see :func:`resolve_truth_ratio`'s certified-value-first
-    resolution order, which is what actually enforces that distinction
-    (this function itself has no way to know which pairs are radiogenic --
-    it just does the abundance-ratio arithmetic).
+    nature. A radiogenic daughter pair's true ratio is exactly what varies
+    sample-to-sample, so this must never be used as a calibration truth for
+    one; :func:`resolve_truth_ratio`'s certified-value-first resolution
+    order is what enforces that distinction -- this function itself has no
+    way to know which pairs are radiogenic.
     """
     if isotope_table is None:
         return None
@@ -88,13 +118,31 @@ def most_abundant_mass(
     element: str, candidate_masses: list[int],
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> int | None:
-    """The most naturally abundant of ``candidate_masses`` for ``element``
-    (from ``isotope_table``'s ``abundance_nominal`` column) -- a reasonable
-    default isotope-ratio denominator/normalizer when no certified
-    reference-material ratio is available to pick one (see the GUI's
-    isotope-calibration table: certified-ratio denominators take priority,
-    this is only the fallback). Returns ``None`` if the table is
-    unavailable or none of ``candidate_masses`` resolve.
+    """Pick the most naturally abundant isotope from a candidate list.
+
+    Parameters
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    candidate_masses : list[int]
+        Isotope masses of ``element`` to choose among.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        A loaded isotope table, or a path to one. Defaults to
+        :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    int or None
+        The candidate mass with the largest ``abundance_nominal``, or
+        ``None`` if the table is unavailable or none of ``candidate_masses``
+        resolve.
+
+    Notes
+    -----
+    A reasonable default isotope-ratio denominator/normalizer when no
+    certified reference-material ratio is available to pick one; certified
+    denominators take priority in the GUI's isotope-calibration table, this
+    is only the fallback.
     """
     if isotope_table is None:
         return None
@@ -109,6 +157,19 @@ def most_abundant_mass(
 
 @dataclass
 class BiasTruth:
+    """The truth isotope ratio a mass-bias curve is fit against.
+
+    Attributes
+    ----------
+    value : float
+        The truth ratio.
+    uncertainty_1sd : float or None
+        One-sigma uncertainty on ``value``; ``None`` for a
+        natural-abundance value.
+    source : {"certified_reference_ratio", "natural_abundance"}
+        Where ``value`` came from.
+    """
+
     value: float
     uncertainty_1sd: float | None
     source: str  # "certified_reference_ratio" | "natural_abundance"
@@ -118,23 +179,38 @@ def resolve_truth_ratio(
     reference: ReferenceMaterial, element: str, numerator_mass: int, denominator_mass: int,
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> BiasTruth | None:
-    """The calibration "truth" for isotope pair ``element{numerator_mass}/
-    element{denominator_mass}`` in ``reference`` -- a certified reference-
-    material ratio first, natural abundance second.
+    """Resolve the truth ratio for an isotope pair: certified first, natural second.
 
-    This is a deliberate INVERSION of KJ.jl's own order (natural-abundance
-    first, certified-anchor fallback only for pairs its own curated
-    "known invariant" table excludes) -- rather than separately
-    maintaining such a table (an auto-detected "is this pair radiogenic"
-    classification this project has deliberately chosen not to build), a
+    Parameters
+    ----------
+    reference : ReferenceMaterial
+        The reference material carrying certified isotope-ratio values.
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    numerator_mass : int
+        Isotope mass of the ratio numerator.
+    denominator_mass : int
+        Isotope mass of the ratio denominator.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Isotope table (or path) for the natural-abundance fallback.
+        Defaults to :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    BiasTruth or None
+        The certified reference ratio if present, else the natural
+        terrestrial abundance ratio, else ``None``.
+
+    Notes
+    -----
+    This is a deliberate inversion of KJ.jl's order (natural-abundance
+    first, certified-anchor fallback only for pairs excluded by its curated
+    "known invariant" table). Rather than maintaining such a table, a
     certified ratio's mere presence in a reference material's YAML already
     encodes "this pair needed special handling": it was deliberately added
-    for Pb/Sr/Nd/Hf (see ``scripts/build_reference_library_from_georem.py``),
-    never added for pairs where natural abundance already suffices (e.g.
-    U238/U235). Natural abundance is the fallback only when no certified
-    entry exists for that exact standard/pair.
-
-    Returns ``None`` if neither source has data for this pair.
+    for Pb/Sr/Nd/Hf (see
+    ``scripts/build_reference_library_from_georem.py``), never for pairs
+    where natural abundance already suffices (e.g. U238/U235).
     """
     numerator, denominator = f"{element}{numerator_mass}", f"{element}{denominator_mass}"
     entry = reference.ratio(numerator, denominator)
@@ -148,6 +224,27 @@ def resolve_truth_ratio(
 
 @dataclass
 class BiasFit:
+    """A fitted session-level mass-bias curve for one isotope pair.
+
+    Attributes
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    numerator_mass : int
+        Numerator isotope mass of the pair actually fit, e.g. ``206``.
+    denominator_mass : int
+        Denominator isotope mass of the pair actually fit, e.g. ``204``.
+    truth : BiasTruth
+        Representative truth for reporting; the contributing standard with
+        the most kept points, ties broken alphabetically.
+    log_bias_fit : DriftFitLike
+        Polynomial fit of ``log(measured_ratio / truth)`` versus time.
+    standard_labels : list[str]
+        Standard labels that contributed points, sorted.
+    n_points : int
+        Total number of standard-occurrence points in the fit.
+    """
+
     element: str
     numerator_mass: int          # the pair actually fit, e.g. 206 for Pb206/Pb204
     denominator_mass: int        # e.g. 204
@@ -157,17 +254,50 @@ class BiasFit:
     n_points: int
 
     def correction_factor(self, times) -> np.ndarray:
+        """Multiplicative bias-correction factor for the fitted pair.
+
+        Parameters
+        ----------
+        times : array_like
+            Acquisition times at which to evaluate the fitted curve.
+
+        Returns
+        -------
+        numpy.ndarray
+            ``exp(log_bias_fit.predict(times))``. Divide a measured ratio
+            of the fitted pair by this to remove instrumental
+            fractionation.
+        """
         return np.exp(np.asarray(self.log_bias_fit.predict(times), dtype=float))
 
 
 def bias_correction_factor(fit: BiasFit, times, numerator_mass: int, denominator_mass: int) -> np.ndarray:
-    """Generalizes ONE fitted bias curve to any OTHER isotope pair of the
-    SAME element without refitting -- KJ.jl's mass-ratio-exponent
-    rescaling (``bias.jl``): fractionation-per-unit-mass-difference is
-    assumed constant, so a curve fit on one pair predicts any other pair
-    of the same element by rescaling its exponent to that pair's own mass
-    ratio. Passing ``fit``'s own ``(numerator_mass, denominator_mass)``
-    gives ``beta == 1`` (no rescaling), i.e. the fitted curve itself.
+    """Rescale one fitted bias curve to another isotope pair of the same element.
+
+    Parameters
+    ----------
+    fit : BiasFit
+        A bias curve fitted on one pair of ``fit.element``.
+    times : array_like
+        Acquisition times at which to evaluate the correction.
+    numerator_mass : int
+        Numerator isotope mass of the target pair.
+    denominator_mass : int
+        Denominator isotope mass of the target pair.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``fit.correction_factor(times) ** beta``, where ``beta`` rescales
+        the exponent to the target pair's mass ratio. Passing ``fit``'s own
+        pair gives ``beta == 1`` (the fitted curve itself).
+
+    Notes
+    -----
+    KJ.jl's mass-ratio-exponent rescaling (``bias.jl``):
+    fractionation-per-unit-mass-difference is assumed constant, so a curve
+    fit on one pair predicts any other pair of the same element without
+    refitting.
     """
     beta = np.log(numerator_mass / denominator_mass) / np.log(fit.numerator_mass / fit.denominator_mass)
     return fit.correction_factor(times) ** beta
@@ -179,26 +309,53 @@ def fit_bias_curve(
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
     order: int = 1, method: str = "fixed", max_order: int = 3,
 ) -> BiasFit | None:
-    """Fits a single time-varying mass-bias curve for isotope pair
-    ``element{numerator_mass}/element{denominator_mass}`` from every
-    occurrence of every label in ``labels`` that has both channels and a
-    resolvable truth ratio (see :func:`resolve_truth_ratio`).
+    """Fit one time-varying mass-bias curve for an isotope pair.
 
+    Parameters
+    ----------
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-standard calibration results, keyed by standard label.
+    labels : list[str]
+        Standard labels to draw occurrences from.
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    numerator_mass : int
+        Numerator isotope mass of the pair to fit.
+    denominator_mass : int
+        Denominator isotope mass of the pair to fit.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Isotope table (or path) for the natural-abundance truth fallback.
+        Defaults to :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+    order : int, optional
+        Polynomial order for ``method="fixed"``, by default ``1``.
+    method : {"fixed", "auto_aic"}, optional
+        Order-selection strategy, by default ``"fixed"``.
+    max_order : int, optional
+        Highest order considered when ``method="auto_aic"``, by default
+        ``3``.
+
+    Returns
+    -------
+    BiasFit or None
+        The fitted curve, or ``None`` when fewer than 2 usable points exist
+        or the underlying fit fails.
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not ``"fixed"`` or ``"auto_aic"`` (a log-ratio of
+        two CPS channels is not a Poisson count, so ``"auto_poisson_lrt"``
+        is invalid here).
+
+    Notes
+    -----
     Each occurrence's point is ``log(measured_ratio / that label's own
-    truth)`` vs. time -- occurrences from different standards (each with
-    their own truth) are pooled into one fit this way, matching how a
-    session's bracketing standards are pooled elsewhere in this codebase.
-    Reuses ``StandardOccurrence.mean_signal`` (already background-
-    corrected, already row-outlier-screened -- the exact signal
-    ``calibrate_standard`` itself drift-fits) rather than recomputing
-    anything from raw per-row data.
-
-    ``method="auto_poisson_lrt"`` is invalid here (raises) -- a log-ratio
-    of two CPS channels isn't a Poisson count, unlike the raw signal
-    ``standards.py``/``background.py`` fit that method against.
-
-    Returns ``None`` (not a crash) when fewer than 2 usable points exist
-    or the underlying fit fails.
+    truth)`` versus time. Occurrences from different standards (each with
+    their own truth) are pooled into one fit, matching how a session's
+    bracketing standards are pooled elsewhere. ``StandardOccurrence.mean_signal``
+    (already background-corrected and row-outlier-screened -- the exact
+    signal ``calibrate_standard`` drift-fits) is reused rather than
+    recomputing from raw rows.
     """
     if method not in _VALID_METHODS:
         raise ValueError(f"massbias fitting only supports {sorted(_VALID_METHODS)}, got {method!r}.")
@@ -257,16 +414,35 @@ def fit_bias_curve(
 
 
 def corrected_ratio(signal: pd.DataFrame, absolute_time, fit: BiasFit, numerator_mass: int, denominator_mass: int) -> np.ndarray:
-    """The SAMPLE's own mass-bias-corrected TRUE ratio -- removes
-    instrumental fractionation (via ``fit``), does NOT impose the
-    standard's ratio on the sample. That's the whole point: it preserves
-    whatever radiogenic signal is actually present in the sample.
+    """Apply a fitted mass-bias curve to a sample's own measured ratio.
 
-    ``numerator_mass``/``denominator_mass`` need not match ``fit``'s own
-    pair -- any isotope pair of ``fit.element`` can be corrected from one
-    fitted curve (see :func:`bias_correction_factor`); the caller is
-    responsible for ensuring ``signal`` actually has both requested
-    channels for ``fit.element``.
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        The sample's signal, containing ``f"{fit.element}{numerator_mass}"``
+        and ``f"{fit.element}{denominator_mass}"`` columns.
+    absolute_time : array_like
+        Per-row acquisition times aligned with ``signal``.
+    fit : BiasFit
+        The session-level mass-bias curve.
+    numerator_mass : int
+        Numerator isotope mass of the pair to correct. Need not match
+        ``fit``'s own pair.
+    denominator_mass : int
+        Denominator isotope mass of the pair to correct.
+
+    Returns
+    -------
+    numpy.ndarray
+        The sample's mass-bias-corrected ratio, one value per row.
+        Instrumental fractionation is removed but the standard's ratio is
+        not imposed -- whatever radiogenic signal is present is preserved.
+
+    Notes
+    -----
+    Any isotope pair of ``fit.element`` can be corrected from one fitted
+    curve (see :func:`bias_correction_factor`); the caller must ensure
+    ``signal`` actually has both requested channels.
     """
     numerator, denominator = f"{fit.element}{numerator_mass}", f"{fit.element}{denominator_mass}"
     measured = signal[numerator].to_numpy(dtype=float) / signal[denominator].to_numpy(dtype=float)
@@ -276,6 +452,21 @@ def corrected_ratio(signal: pd.DataFrame, absolute_time, fit: BiasFit, numerator
 
 @dataclass
 class BiasSpec:
+    """Request to fit one named mass-bias curve.
+
+    Attributes
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    numerator_mass : int
+        Numerator isotope mass of the pair to fit.
+    denominator_mass : int
+        Denominator isotope mass of the pair to fit.
+    bias_standards : list[str] or None, optional
+        Standard labels to fit from. ``None`` (default) uses every standard
+        label with usable occurrences and a resolvable truth.
+    """
+
     element: str
     numerator_mass: int
     denominator_mass: int
@@ -287,10 +478,32 @@ def fit_session_bias(
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
     method: str = "fixed", order: int = 1, max_order: int = 3,
 ) -> dict[str, BiasFit]:
-    """One :func:`fit_bias_curve` per ``bias_specs`` entry, keyed
-    ``"{element}{numerator_mass}/{element}{denominator_mass}"``. A spec
-    that resolves to no usable data (see ``fit_bias_curve``) is simply
-    omitted from the result, not an error.
+    """Fit every requested mass-bias curve for a session.
+
+    Parameters
+    ----------
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-standard calibration results, keyed by standard label.
+    bias_specs : list[BiasSpec]
+        One entry per mass-bias curve to fit.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Isotope table (or path) for natural-abundance truth fallbacks.
+        Defaults to :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+    method : {"fixed", "auto_aic"}, optional
+        Order-selection strategy passed to :func:`fit_bias_curve`, by
+        default ``"fixed"``.
+    order : int, optional
+        Polynomial order for ``method="fixed"``, by default ``1``.
+    max_order : int, optional
+        Highest order considered for ``method="auto_aic"``, by default
+        ``3``.
+
+    Returns
+    -------
+    dict[str, BiasFit]
+        One fit per spec that resolved to usable data, keyed
+        ``"{element}{numerator_mass}/{element}{denominator_mass}"``. Specs
+        with no usable data are omitted rather than raising.
     """
     fits: dict[str, BiasFit] = {}
     for spec in bias_specs:

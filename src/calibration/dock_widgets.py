@@ -57,9 +57,25 @@ DRIFT_METHOD_LABELS = {
 
 
 def _populate_table(table_widget: QTableWidget, df: pd.DataFrame) -> None:
-    """Renders a DataFrame of mixed dtypes into a QTableWidget (booleans/strings
-    included) -- ``InfoViewer.update_dataframe`` assumes all-numeric content,
-    which the calibration QC tables don't satisfy."""
+    """Render a mixed-dtype DataFrame into a read-only QTableWidget.
+
+    Parameters
+    ----------
+    table_widget : PyQt6.QtWidgets.QTableWidget
+        Target widget; its rows, columns, and headers are replaced.
+    df : pandas.DataFrame
+        Source data. Floats are formatted ``%.4g``; every other value is
+        stringified. Cells are made non-editable.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    ``InfoViewer.update_dataframe`` assumes all-numeric content, which the
+    calibration QC tables (booleans, strings) do not satisfy.
+    """
     table_widget.setRowCount(len(df))
     table_widget.setColumnCount(len(df.columns))
     table_widget.setHorizontalHeaderLabels([str(c) for c in df.columns])
@@ -79,14 +95,27 @@ _ELEMENT_COL_RE = re.compile(r"^([A-Z][a-z]?)(\d+)$")
 
 
 def _resolve_element_columns(references: list[MineralReference], available_columns) -> dict[str, str]:
-    """Map each element symbol any reference needs to a matching isotope-
-    style analyte column in ``calibrated_ppm`` (e.g. 'Ca' -> 'Ca43'), by
-    prefix match -- same problem/approach as
+    """Map element symbols to matching isotope-style ppm columns.
+
+    Parameters
+    ----------
+    references : list[MineralReference]
+        Reference minerals whose ``composition`` keys define the elements
+        needed.
+    available_columns : Iterable
+        Column names of ``calibrated_ppm`` to match against.
+
+    Returns
+    -------
+    dict[str, str]
+        ``element symbol -> first matching ``<element><mass>`` column``
+        (e.g. ``"Ca" -> "Ca43"``), by prefix match.
+
+    Notes
+    -----
+    Same problem/approach as
     ``src.stoichiometry.dock._resolve_ppm_columns``, reimplemented locally
-    rather than importing that sibling package's private helper (same
-    "duplicate a small private helper" precedent already used for
-    ``_mad_outlier_mask``/deconvolution's shift-offset math elsewhere in
-    this codebase).
+    rather than importing that sibling package's private helper.
     """
     needed = {el for ref in references for el in ref.composition}
     resolved: dict[str, str] = {}
@@ -101,18 +130,40 @@ def _resolve_element_columns(references: list[MineralReference], available_colum
 
 
 class _PipelineWorker(QThread):
-    """Runs ``pipeline.run``/``run_batch`` off the UI thread so scanning/parsing
-    a full session (potentially 100+ files) doesn't freeze the GUI."""
+    """Run a pipeline callable off the UI thread.
+
+    Runs ``pipeline.run``/``run_batch``/``run_from_parsed`` on a background
+    thread so scanning/parsing a full session (potentially 100+ files) does
+    not freeze the GUI.
+
+    Attributes
+    ----------
+    finished_ok : PyQt6.QtCore.pyqtSignal
+        Emitted with the result ``dict`` on success.
+    failed : PyQt6.QtCore.pyqtSignal
+        Emitted with the exception's string message on failure.
+
+    Parameters
+    ----------
+    fn : Callable
+        The pipeline function to call.
+    kwargs : dict
+        Keyword arguments passed to ``fn``.
+    parent : PyQt6.QtCore.QObject, optional
+        Qt parent.
+    """
 
     finished_ok = pyqtSignal(dict)
     failed = pyqtSignal(str)
 
     def __init__(self, fn, kwargs, parent=None):
+        """Store the callable and its keyword arguments (see the class docstring)."""
         super().__init__(parent)
         self._fn = fn
         self._kwargs = kwargs
 
     def run(self):
+        """Execute ``fn(**kwargs)``, emitting ``finished_ok`` or ``failed``."""
         try:
             result = self._fn(**self._kwargs)
         except Exception as e:  # noqa: BLE001 -- surfaced to the user via a message box
@@ -144,6 +195,20 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self, reference_library: dict[str, reflib.ReferenceMaterial], library_dir: Path,
         initial_name: str | None = None, parent=None,
     ):
+        """Build the dialog and select an initial material.
+
+        Parameters
+        ----------
+        reference_library : dict[str, reflib.ReferenceMaterial]
+            The live library, mutated in place (never reassigned).
+        library_dir : pathlib.Path
+            Directory the YAML files are read from and written back to.
+        initial_name : str or None, optional
+            Material to select on open; the first alphabetically when
+            ``None``.
+        parent : PyQt6.QtWidgets.QWidget, optional
+            Qt parent.
+        """
         super().__init__(parent)
         self.reference_library = reference_library
         self.library_dir = library_dir
@@ -215,6 +280,14 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self._populate_combo(select=initial_name)
 
     def _populate_combo(self, select: str | None = None):
+        """Refill the standard picker and load the chosen material.
+
+        Parameters
+        ----------
+        select : str or None, optional
+            Material to reselect; falls back to the current selection, then
+            the first entry.
+        """
         select = select or self.comboStandard.currentText() or None
         self.comboStandard.blockSignals(True)
         self.comboStandard.clear()
@@ -225,6 +298,13 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self._load_selected_material(self.comboStandard.currentText())
 
     def _load_selected_material(self, name: str):
+        """Load ``name``'s analytes and isotope ratios into the two tables.
+
+        Parameters
+        ----------
+        name : str
+            Reference-material name; an empty string clears the tables.
+        """
         self.material = self.reference_library.get(name) if name else None
         self.table.setRowCount(0)
         self.tableRatios.setRowCount(0)
@@ -256,12 +336,14 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self.tableRatios.resizeColumnsToContents()
 
     def _on_add_analyte_row(self):
+        """Append a blank row to the analytes table."""
         row = self.table.rowCount()
         self.table.insertRow(row)
         for j in range(self.table.columnCount()):
             self.table.setItem(row, j, QTableWidgetItem(""))
 
     def _on_add_ratio_row(self):
+        """Append a blank row to the isotope-ratios table."""
         row = self.tableRatios.rowCount()
         self.tableRatios.insertRow(row)
         for j in range(self.tableRatios.columnCount()):
@@ -269,11 +351,19 @@ class ReferenceMaterialEditDialog(QMainWindow):
 
     @staticmethod
     def _on_delete_selected_row(table: QTableWidget):
+        """Delete every selected row from ``table``.
+
+        Parameters
+        ----------
+        table : PyQt6.QtWidgets.QTableWidget
+            The analytes or isotope-ratios table.
+        """
         rows = sorted({idx.row() for idx in table.selectedIndexes()}, reverse=True)
         for row in rows:
             table.removeRow(row)
 
     def _on_reload(self):
+        """Reload the reference library from disk, in place."""
         self.library_dir.mkdir(parents=True, exist_ok=True)
         fresh = reflib.load_reference_library(self.library_dir)
         self.reference_library.clear()
@@ -281,6 +371,7 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self._populate_combo()
 
     def _on_new_standard(self):
+        """Prompt for a name and create a new standard from ``_template.yaml``."""
         name, ok = QInputDialog.getText(self, "Add standard", "Standard name (matches raw filename label):")
         if not ok or not name.strip():
             return
@@ -296,6 +387,11 @@ class ReferenceMaterialEditDialog(QMainWindow):
         self._populate_combo(select=name)
 
     def _on_save(self):
+        """Validate both tables and write the current material back to YAML.
+
+        Shows a warning message box (and aborts the save) on the first
+        malformed analyte or ratio row.
+        """
         if self.material is None:
             return
         analytes = {}
@@ -360,12 +456,20 @@ class ReferenceMaterialEditDialog(QMainWindow):
 
 
 class CalibrationMainWindow(QMainWindow):
-    """Standalone calibration GUI: raw-data scanning, background/drift/standard
-    settings, reference-library editing, instrument-geometry entry, run
-    controls, export, and diagnostic viewer tabs.
+    """Standalone calibration GUI main window.
 
-    Not registered into LaME's ``MainWindow`` -- deliberately independent per
-    the "standalone for now" requirement.
+    Hosts raw-data scanning, background/drift/standard settings,
+    reference-library editing, instrument-geometry entry, run controls,
+    export, and the diagnostic viewer tabs. Not registered into LaME's
+    ``MainWindow`` -- deliberately independent per the "standalone for now"
+    requirement.
+
+    Notes
+    -----
+    The ``TAB_*`` class attributes are the results-tab indices, matching the
+    add order in :meth:`_build_results_tabs`; they are shared between
+    :meth:`_refresh_active_tab` and
+    :meth:`_update_plot_controls_visibility`.
     """
 
     # Tab indices, matching the add order in _build_results_tabs -- shared
@@ -383,6 +487,13 @@ class CalibrationMainWindow(QMainWindow):
     TAB_CLASSIFICATION = 9
 
     def __init__(self, parent=None):
+        """Build the window, load libraries, and wire up every widget.
+
+        Parameters
+        ----------
+        parent : PyQt6.QtWidgets.QWidget, optional
+            Qt parent.
+        """
         super().__init__(parent)
         self.setWindowTitle("LA-ICP-MS Calibration")
         self.resize(1400, 900)
@@ -478,6 +589,7 @@ class CalibrationMainWindow(QMainWindow):
     # UI construction
     # ------------------------------------------------------------------
     def _setup_ui(self):
+        """Assemble the toolbar, split left-panel/results layout, and status bar."""
         self.addToolBar(self._build_toolbar())
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -529,14 +641,21 @@ class CalibrationMainWindow(QMainWindow):
         self.setStatusBar(self._build_status_bar())
 
     def _build_plot_controls_row(self) -> QHBoxLayout:
-        """Shared row of per-plot controls, above the tab widget instead of
-        duplicated inside each tab: the Stage combobox (Maps only), Offset
-        lines checkbox (Time Series only), and a single Log scale checkbox
-        shared by Maps and Time Series. ``_update_plot_controls_visibility``
-        shows/hides each control to match the active tab; a fixed-height
-        spacer keeps the row's height constant even when every control in
-        it is hidden (Timing/Background/Standards/Data tabs), so the tab
-        widget below doesn't jump up and down as the user switches tabs.
+        """Build the shared row of per-plot controls shown above the tab widget.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QHBoxLayout
+            A layout holding the Stage combo (Maps), Offset-lines and
+            Edit-mode / Hide-masked checkboxes (Time Series / Standards),
+            and a shared Log-scale checkbox.
+
+        Notes
+        -----
+        :meth:`_update_plot_controls_visibility` shows/hides each control to
+        match the active tab; a fixed-height spacer keeps the row's height
+        constant even when every control is hidden, so the tab widget below
+        does not jump as the user switches tabs.
         """
         row = QHBoxLayout()
 
@@ -581,6 +700,7 @@ class CalibrationMainWindow(QMainWindow):
         return row
 
     def _update_plot_controls_visibility(self):
+        """Show only the shared plot controls relevant to the active tab."""
         index = self.tabs.currentIndex()
         is_maps = index == self.TAB_MAPS
         is_time_series = index == self.TAB_TIME_SERIES
@@ -595,6 +715,12 @@ class CalibrationMainWindow(QMainWindow):
         self.checkHideMaskedPoints.setVisible(is_maskable)
 
     def _build_status_bar(self) -> QStatusBar:
+        """Build the status bar carrying the run-status label.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QStatusBar
+        """
         statusbar = QStatusBar(self)
 
         self.labelRunStatus = QLabel("")
@@ -604,6 +730,12 @@ class CalibrationMainWindow(QMainWindow):
         return statusbar
 
     def _build_toolbar(self) -> QToolBar:
+        """Build the main toolbar (Run, Reprocess, Classify, export, Standards).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QToolBar
+        """
         toolbar = QToolBar("Calibration", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)
@@ -642,14 +774,17 @@ class CalibrationMainWindow(QMainWindow):
         return toolbar
 
     def _build_input_data_toolbox(self) -> QToolBox:
-        """Groups the left-panel controls onto five QToolBox pages so the user
-        scrolls through one at a time instead of stacking every group box:
-        "Input Data" (data source / standard configuration / instrument
-        settings), "Analyte Settings" (isotope calibration / dating ratios),
-        "Calibration Settings" (drift/calibration and background/edge-trim
-        overrides), "Deconvolution" (along-line shift/washout correction,
-        src/deconvolution/), and "Classification" (cosine-distance mineral
-        matching, src/classification/)."""
+        """Build the left-panel QToolBox with its five pages.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QToolBox
+            Pages: "Input Data" (data source / standard configuration /
+            instrument settings), "Analyte Settings" (isotope calibration /
+            dating ratios), "Calibration Settings" (drift/calibration and
+            background/edge-trim overrides), "Deconvolution", and
+            "Classification".
+        """
         toolbox = QToolBox()
         # Matches the spacing set on the app's other two production
         # QToolBoxes (see MainWindow.py's control_dock/mask_dock toolboxes).
@@ -695,6 +830,12 @@ class CalibrationMainWindow(QMainWindow):
         return toolbox
 
     def _build_data_source_group(self) -> QGroupBox:
+        """Build the "Data source" group (directory, batch mode, Scan).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+        """
         group = QGroupBox("Data source")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
@@ -739,6 +880,12 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_standards_group(self) -> QGroupBox:
+        """Build the "Standard configuration" group (per-label Primary/Secondary/Bias table).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+        """
         group = QGroupBox("Standard configuration")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
@@ -756,6 +903,12 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_instrument_settings_group(self) -> QGroupBox:
+        """Build the "Instrument settings" group (geometry, laser, dwell, notes).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+        """
         group = QGroupBox("Instrument settings")
         group_layout = QVBoxLayout(group)
         group_layout.setContentsMargins(3, 3, 3, 3)
@@ -844,6 +997,12 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_drift_calibration_group(self) -> QGroupBox:
+        """Build the "Drift & calibration" group (methods, orders, QC options).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+        """
         group = QGroupBox("Drift && calibration")
         form_layout = QFormLayout(group)
         form_layout.setContentsMargins(3, 3, 3, 3)
@@ -903,12 +1062,23 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_isotope_calibration_group(self) -> QGroupBox:
-        """One row per measured element with 2+ isotopes (populated at Scan
-        time, see _populate_isotope_calibration_table), each with a 3-state
-        Mode combobox read at Run time by _gather_isotope_specs. Elements
-        with only one measured isotope are omitted -- there's nothing to
-        apportion, only Mechanism A's elemental calibration (always on,
-        unconditionally) applies to them."""
+        """Build the "Isotope calibration" group.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+            Contains ``tableIsotopeCalibration``, one row per measured
+            element with 2+ isotopes (filled at Scan time by
+            :meth:`_populate_isotope_calibration_table`), each with a
+            3-state Mode combo read at Run time by
+            :meth:`_gather_isotope_specs`.
+
+        Notes
+        -----
+        Elements with only one measured isotope are omitted -- there is
+        nothing to apportion; only the always-on elemental calibration
+        (Mechanism A) applies to them.
+        """
         group = QGroupBox("Isotope calibration")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
@@ -934,14 +1104,23 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_radiometric_dating_group(self) -> QGroupBox:
-        """One row per radiometric dating system whose required isotopes
-        are present among the analytes seen at Scan time (see
-        _populate_dating_systems_table) -- Stage 1: Pb-Pb, U-Pb, Th-Pb
-        only (Rb-Sr/Sm-Nd/Lu-Hf/Re-Os need isobaric-interference stripping
-        this pass deliberately doesn't build). Each row is a single Enable
-        checkbox, no Mode dropdown -- unlike the per-element table above,
-        a cross-element parent/daughter pair has no elemental/natural-
-        abundance fallback to choose between."""
+        """Build the "Radiometric dating ratios" group.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+            Contains ``tableRadiometricSystems``, one row per dating system
+            (Stage 1: Pb-Pb, U-Pb, Th-Pb) whose required isotopes are
+            present, filled at Scan time by
+            :meth:`_populate_dating_systems_table`.
+
+        Notes
+        -----
+        Rb-Sr/Sm-Nd/Lu-Hf/Re-Os need isobaric-interference stripping not
+        built this pass. Each row is a single Enable checkbox -- a
+        cross-element parent/daughter pair has no elemental/natural-abundance
+        fallback to choose between.
+        """
         group = QGroupBox("Radiometric dating ratios")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
@@ -964,6 +1143,12 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_background_override_group(self) -> QGroupBox:
+        """Build the "Timing overrides" group (gas-blank window, edge trim, per-line table).
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+        """
         group = QGroupBox("Timing overrides (optional)")
         group_layout = QVBoxLayout(group)
         group_layout.setContentsMargins(3, 3, 3, 3)
@@ -1029,14 +1214,21 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_deconvolution_group(self) -> QGroupBox:
-        """Along-line dwell-offset shift and washout-tailing correction
-        (src/deconvolution/, Stages 0/1/3 of
-        plans/laicpms_map_correction_spec.md). Both flags default off, so
-        an existing Run is unaffected unless explicitly enabled here. Tau
-        can be entered by hand in the table below, or fitted from real
-        reference data via the Kernel estimation section (spec Stage 2,
-        src/deconvolution/esf.py) -- an analyte with no tau (manual or
-        fitted) simply isn't washout-corrected."""
+        """Build the "Deconvolution" group.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+            Shift/washout checkboxes, the per-analyte tau table, and the
+            nested Kernel estimation group.
+
+        Notes
+        -----
+        Both flags default off, so an existing Run is unaffected unless
+        explicitly enabled. Tau may be typed into the table or fitted via
+        the Kernel estimation section; an analyte with no tau is simply not
+        washout-corrected.
+        """
         group = QGroupBox("Deconvolution")
         layout = QVBoxLayout(group)
         layout.setContentsMargins(3, 3, 3, 3)
@@ -1074,17 +1266,24 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _build_kernel_estimation_group(self) -> QGroupBox:
-        """Fits washout tau (and a validating edge-spread tau) from real
-        reference data already in the scanned session (spec Sec 6.1 routes
-        a/b, src/deconvolution/esf.py) -- Pulse rows fit every analyte's
-        decay (single- vs double-exponential, AIC/BIC-gated) and feed
-        tableWashoutTau; Edge rows fit one representative analyte (the
-        highest-signal one in the window) to the analytic EMG curve and,
-        when at least one Pulse row was also fitted, cross-check its tau
-        against the pulse fit (the "closure check", spec's mandatory
-        Sec 6.1 test). Route (c), in-situ estimation, needs the
-        classification/unmixing stage (not built yet) and isn't offered
-        here.
+        """Build the "Kernel estimation" group.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+            The reference-window table, Fit button, and fit-report text
+            area.
+
+        Notes
+        -----
+        Fits washout tau (and a validating edge-spread tau) from real
+        reference data already in the scanned session. Pulse rows fit every
+        analyte's decay (single- vs double-exponential, AIC/BIC-gated) and
+        feed ``tableWashoutTau``; Edge rows fit one representative analyte to
+        the analytic EMG curve and, when a Pulse row was also fitted,
+        cross-check its tau against the pulse fit (the closure check). Route
+        (c), in-situ estimation, needs the classification/unmixing stage and
+        is not offered here.
         """
         group = QGroupBox("Kernel estimation")
         layout = QVBoxLayout(group)
@@ -1126,6 +1325,7 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _on_add_kernel_reference_row(self):
+        """Append a kernel-reference row (file combo, start/end, Pulse/Edge kind)."""
         row = self.tableKernelReferences.rowCount()
         self.tableKernelReferences.insertRow(row)
         file_combo = QComboBox()
@@ -1138,15 +1338,25 @@ class CalibrationMainWindow(QMainWindow):
         self.tableKernelReferences.setCellWidget(row, 3, kind_combo)
 
     def _on_delete_selected_kernel_reference_row(self):
+        """Delete every selected row from the kernel-reference table."""
         rows = sorted({idx.row() for idx in self.tableKernelReferences.selectedIndexes()}, reverse=True)
         for row in rows:
             self.tableKernelReferences.removeRow(row)
 
     def _on_washout_tau_item_changed(self, item: QTableWidgetItem):
-        """A cell edit (by the user -- programmatic fills below block
-        signals first) means that analyte's tau is no longer "just
-        something Fit filled in" -- drop it from _auto_filled_tau so a
-        later Fit click won't silently overwrite what the user just typed.
+        """Forget a tau cell's auto-filled status once the user edits it.
+
+        Parameters
+        ----------
+        item : PyQt6.QtWidgets.QTableWidgetItem
+            The changed cell. Only column 1 (Tau) is acted on.
+
+        Notes
+        -----
+        A user edit means that analyte's tau is no longer "just something
+        Fit filled in", so it is dropped from ``_auto_filled_tau`` and a
+        later Fit click will not silently overwrite it. Programmatic fills
+        block signals first, so they never reach here.
         """
         if item.column() != 1:
             return
@@ -1155,6 +1365,13 @@ class CalibrationMainWindow(QMainWindow):
             self._auto_filled_tau.discard(analyte_item.text())
 
     def _on_fit_kernels(self):
+        """Fit every kernel-reference window and write a text report.
+
+        Pulse rows fit washout tau per analyte (feeding ``tableWashoutTau``
+        via :meth:`_fill_washout_tau_from_fits`); Edge rows fit an
+        edge-spread tau and, when a Pulse row was also fitted, run the
+        closure check. Malformed or too-short rows are reported and skipped.
+        """
         report_lines = []
         pulse_fits_by_analyte: dict[str, "esf.SinglePulseFit"] = {}
         edge_fits: list["esf.EdgeSpreadFit"] = []
@@ -1229,10 +1446,20 @@ class CalibrationMainWindow(QMainWindow):
         self.textKernelFitReport.setPlainText("\n".join(report_lines) if report_lines else "No reference rows to fit.")
 
     def _fill_washout_tau_from_fits(self, tau_by_analyte: dict[str, float]):
-        """Only overwrites a tableWashoutTau cell that's blank or was
-        previously filled by this same mechanism (_auto_filled_tau) -- a
+        """Write fitted tau values into ``tableWashoutTau``, sparing hand edits.
+
+        Parameters
+        ----------
+        tau_by_analyte : dict[str, float]
+            Fitted washout tau in seconds, keyed by analyte.
+
+        Notes
+        -----
+        Only a cell that is blank, or was previously filled by this same
+        mechanism (tracked in ``_auto_filled_tau``), is overwritten -- a
         value the user typed by hand is never touched (see
-        _on_washout_tau_item_changed)."""
+        :meth:`_on_washout_tau_item_changed`).
+        """
         self.tableWashoutTau.blockSignals(True)
         for row in range(self.tableWashoutTau.rowCount()):
             analyte_item = self.tableWashoutTau.item(row, 0)
@@ -1249,13 +1476,15 @@ class CalibrationMainWindow(QMainWindow):
         self.tableWashoutTau.blockSignals(False)
 
     def _populate_washout_tau_table(self):
-        """(Re)builds tableWashoutTau from the analytes seen at Scan time --
-        same "populated at Scan time" pattern as
-        _populate_isotope_calibration_table, but one row per analyte (no
-        element grouping, since washout tau is a per-analyte/per-isotope
-        physical property, not something isotopes of one element share).
-        Existing Tau entries are preserved across a re-scan (e.g. after
-        adding more files under the same labels) rather than wiped.
+        """Rebuild ``tableWashoutTau``, one row per analyte, preserving typed values.
+
+        Notes
+        -----
+        Same "populated at Scan time" pattern as
+        :meth:`_populate_isotope_calibration_table`, but with no element
+        grouping -- washout tau is a per-analyte/per-isotope physical
+        property. Existing Tau entries survive a re-scan rather than being
+        wiped.
         """
         existing_tau = {}
         for row in range(self.tableWashoutTau.rowCount()):
@@ -1277,6 +1506,15 @@ class CalibrationMainWindow(QMainWindow):
         self.tableWashoutTau.blockSignals(False)
 
     def _current_deconvolution_settings(self) -> DeconvolutionSettings:
+        """Read the deconvolution controls into a settings object.
+
+        Returns
+        -------
+        DeconvolutionSettings
+            ``apply_shift``/``apply_washout`` from the checkboxes and
+            ``washout_tau_s`` from every positive-numeric row of
+            ``tableWashoutTau``.
+        """
         washout_tau_s = {}
         for row in range(self.tableWashoutTau.rowCount()):
             analyte_item = self.tableWashoutTau.item(row, 0)
@@ -1300,16 +1538,21 @@ class CalibrationMainWindow(QMainWindow):
         )
 
     def _build_classification_group(self) -> QGroupBox:
-        """Mineral classification by cosine-distance matching
-        (src/classification/, design spec
-        plans/mineral_classification_calibration_spec.md Sec 3) against
-        ``calibrated_ppm`` -- unlike Deconvolution (a per-line correction
-        threaded into the Run pipeline itself), classification runs
-        on-demand, after a Run has already produced calibrated data, via
-        its own Classify button -- there's nothing to correct upstream of
-        it, and re-classifying with a different threshold/mineral subset
-        shouldn't require re-running background/drift/standards from
-        scratch.
+        """Build the "Classification" group.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QGroupBox
+            Match-threshold / ambiguity-gap sliders, the filterable mineral
+            list, preset controls, and the Classify button.
+
+        Notes
+        -----
+        Cosine-distance mineral matching against ``calibrated_ppm``. Unlike
+        Deconvolution (threaded into the Run pipeline), classification runs
+        on demand after a Run, via its own Classify button -- re-classifying
+        with a different threshold/subset should not require re-running
+        background/drift/standards.
         """
         group = QGroupBox("Classification")
         layout = QVBoxLayout(group)
@@ -1407,6 +1650,7 @@ class CalibrationMainWindow(QMainWindow):
         return group
 
     def _populate_mineral_list(self):
+        """Fill ``listMinerals`` with every reference mineral, all checked."""
         self.listMinerals.clear()
         for ref in sorted(self.mineral_references, key=lambda r: r.mineral_name):
             item = QListWidgetItem(ref.mineral_name)
@@ -1415,11 +1659,24 @@ class CalibrationMainWindow(QMainWindow):
             self.listMinerals.addItem(item)
 
     def _set_all_minerals_checked(self, checked: bool):
+        """Check or uncheck every mineral in the list.
+
+        Parameters
+        ----------
+        checked : bool
+            ``True`` to check all, ``False`` to uncheck all.
+        """
         state = Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
         for i in range(self.listMinerals.count()):
             self.listMinerals.item(i).setCheckState(state)
 
     def _selected_mineral_references(self) -> list[MineralReference]:
+        """Reference minerals currently checked in ``listMinerals``.
+
+        Returns
+        -------
+        list[MineralReference]
+        """
         checked_names = {
             self.listMinerals.item(i).text()
             for i in range(self.listMinerals.count())
@@ -1428,10 +1685,21 @@ class CalibrationMainWindow(QMainWindow):
         return [r for r in self.mineral_references if r.mineral_name in checked_names]
 
     def _apply_mineral_filters(self, *_args):
-        """Combines (ANDs) the class-filter combo with the text search --
-        neither ListFilterWidget's own text-only hiding nor a class-only
-        pass is sufficient alone, so this recomputes visibility for both
-        conditions together on every change to either one."""
+        """Re-hide minerals failing either the class filter or the text search.
+
+        Parameters
+        ----------
+        *_args
+            Ignored; accepts the varied Qt signal signatures this is
+            connected to.
+
+        Notes
+        -----
+        ANDs the class-filter combo with the text search -- neither
+        ``ListFilterWidget``'s text-only hiding nor a class-only pass is
+        sufficient alone, so visibility is recomputed for both conditions on
+        every change to either.
+        """
         query = self.filterMinerals.filter_text().strip().lower()
         selected_class = self.comboMineralClassFilter.currentText()
         class_by_name = {r.mineral_name: r.mineral_class for r in self.mineral_references}
@@ -1444,10 +1712,19 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_mineral_preview()
 
     def _refresh_mineral_preview(self, *_args):
-        """Live preview: shows the currently checked mineral names in
-        tableClassificationSummary with blank score/gap columns, even
-        before Classify has ever been run -- _on_classify overwrites this
-        with the real per-pixel stats once it runs."""
+        """Show the checked mineral names in the summary table with blank stats.
+
+        Parameters
+        ----------
+        *_args
+            Ignored; accepts the varied Qt signal signatures this is
+            connected to.
+
+        Notes
+        -----
+        A live preview shown even before Classify has run;
+        :meth:`_on_classify` overwrites it with real per-pixel statistics.
+        """
         if not hasattr(self, "tableClassificationSummary"):
             return
         selected_refs = self._selected_mineral_references()
@@ -1461,6 +1738,13 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableClassificationSummary, preview)
 
     def _populate_mineral_preset_combo(self, select: str | None = None):
+        """Refill the mineral-preset combo from disk.
+
+        Parameters
+        ----------
+        select : str or None, optional
+            Preset name to reselect after refilling.
+        """
         self.comboMineralPresets.blockSignals(True)
         self.comboMineralPresets.clear()
         presets = load_presets(DEFAULT_PRESETS_PATH)
@@ -1472,6 +1756,7 @@ class CalibrationMainWindow(QMainWindow):
         self.comboMineralPresets.blockSignals(False)
 
     def _on_save_mineral_preset(self):
+        """Prompt for a name and save the checked minerals as a preset."""
         selected_refs = self._selected_mineral_references()
         if not selected_refs:
             QMessageBox.warning(self, "Save Preset", "No reference minerals selected.")
@@ -1484,6 +1769,7 @@ class CalibrationMainWindow(QMainWindow):
         self._populate_mineral_preset_combo(select=name)
 
     def _on_load_mineral_preset(self):
+        """Check exactly the minerals named by the selected preset."""
         name = self.comboMineralPresets.currentText()
         if not name:
             QMessageBox.warning(self, "Load Preset", "No saved presets yet.")
@@ -1497,6 +1783,14 @@ class CalibrationMainWindow(QMainWindow):
             item.setCheckState(Qt.CheckState.Checked if item.text() in names else Qt.CheckState.Unchecked)
 
     def _on_classify(self):
+        """Classify the current sample's calibrated pixels against checked minerals.
+
+        Stores the result on ``result.classification`` /
+        ``result.classification_categories`` and refreshes the
+        Classification tab. Warns (and aborts) if there is no run, no
+        mineral library, no checked minerals, or no matching analyte
+        columns.
+        """
         result = self._current_result()
         if result is None:
             QMessageBox.warning(self.ui if hasattr(self, "ui") else self, "Classify", "Run the pipeline first.")
@@ -1525,6 +1819,13 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_classification_tab()
 
     def _build_results_tabs(self) -> QTabWidget:
+        """Build the right-hand results tab widget and every tab's canvas/table.
+
+        Returns
+        -------
+        PyQt6.QtWidgets.QTabWidget
+            Tabs in the order given by the ``TAB_*`` class attributes.
+        """
         self.tabs = QTabWidget()
 
         # -- Timing / files --
@@ -1682,6 +1983,7 @@ class CalibrationMainWindow(QMainWindow):
     # Wiring
     # ------------------------------------------------------------------
     def _connect_widgets(self):
+        """Wire every toolbar action, button, combo, and checkbox to its slot."""
         self.buttonBrowseDir.clicked.connect(self._on_browse_dir)
         self.checkBoxBatchMode.toggled.connect(self.listWidgetSampleFolders.setVisible)
         self.buttonScan.clicked.connect(self._on_scan)
@@ -1720,12 +2022,21 @@ class CalibrationMainWindow(QMainWindow):
     # Data source / scan
     # ------------------------------------------------------------------
     def _on_browse_dir(self):
+        """Prompt for the raw-data directory and store it."""
         directory = QFileDialog.getExistingDirectory(self, "Select raw data directory")
         if directory:
             self._data_dir = Path(directory)
             self.lineEditDataDir.setText(directory)
 
     def _on_scan(self):
+        """Discover and eagerly parse every raw file, then repopulate the panels.
+
+        Parses each file (not just its label) so the Time Series tab can
+        preview raw lines pre-Run; parse failures are collected into the
+        scan summary. Repopulates the standard-label, focus, file,
+        per-line-override, isotope-calibration, dating-systems, and
+        washout-tau tables.
+        """
         if self._data_dir is None:
             QMessageBox.warning(self, "Scan", "Choose a raw data directory first.")
             return
@@ -1786,11 +2097,19 @@ class CalibrationMainWindow(QMainWindow):
         self._populate_washout_tau_table()
 
     def _populate_focus_combo(self, labels: set[str]):
-        """Populates comboBoxSampleResult with every label found at Scan
-        time (both samples and standards) plus "(all)", so the Time Series
-        file table can be focused to one label pre-Run -- not just the
-        per-run calibrated-result keys _on_run_finished adds post-Run (see
-        that method, which unions those in rather than replacing this)."""
+        """Fill ``comboBoxSampleResult`` with "(all)" plus every scanned label.
+
+        Parameters
+        ----------
+        labels : set[str]
+            Sample and standard labels found at Scan time.
+
+        Notes
+        -----
+        Lets the Time Series file table be focused to one label pre-Run;
+        :meth:`_on_run_finished` later unions in the per-run
+        calibrated-result keys rather than replacing this.
+        """
         current = self.comboBoxSampleResult.currentText()
         self.comboBoxSampleResult.blockSignals(True)
         self.comboBoxSampleResult.clear()
@@ -1801,6 +2120,19 @@ class CalibrationMainWindow(QMainWindow):
         self.comboBoxSampleResult.blockSignals(False)
 
     def _populate_standard_labels(self, labels: set[str]):
+        """Rebuild ``tableStandardLabels`` with a row per label.
+
+        Parameters
+        ----------
+        labels : set[str]
+            Filename labels found at Scan time.
+
+        Notes
+        -----
+        A label that case-insensitively matches a loaded reference material
+        defaults to Primary-checked with that material pre-selected in the
+        Reference column.
+        """
         self.tableStandardLabels.setRowCount(0)
         self._primary_checkboxes = {}
         self._secondary_checkboxes = {}
@@ -1850,33 +2182,79 @@ class CalibrationMainWindow(QMainWindow):
             self._reference_combos[label] = combo
 
     def _on_primary_toggled(self, label: str, checked: bool):
+        """Uncheck a label's Secondary box when its Primary box is checked.
+
+        Parameters
+        ----------
+        label : str
+            Standard label whose Primary box changed.
+        checked : bool
+            New checked state.
+        """
         if checked:
             self._secondary_checkboxes[label].setChecked(False)
 
     def _on_secondary_toggled(self, label: str, checked: bool):
+        """Uncheck a label's Primary box when its Secondary box is checked.
+
+        Parameters
+        ----------
+        label : str
+            Standard label whose Secondary box changed.
+        checked : bool
+            New checked state.
+        """
         if checked:
             self._primary_checkboxes[label].setChecked(False)
 
     def _primary_standard_names(self) -> list[str]:
+        """Sorted list of labels with their Primary box checked.
+
+        Returns
+        -------
+        list[str]
+        """
         return sorted(label for label, cb in self._primary_checkboxes.items() if cb.isChecked())
 
     def _secondary_standard_names(self) -> list[str]:
+        """Sorted list of labels with their Secondary box checked.
+
+        Returns
+        -------
+        list[str]
+        """
         return sorted(label for label, cb in self._secondary_checkboxes.items() if cb.isChecked())
 
     def _bias_standard_names(self) -> list[str]:
+        """Sorted list of labels with their Bias box checked.
+
+        Returns
+        -------
+        list[str]
+        """
         return sorted(label for label, cb in self._bias_checkboxes.items() if cb.isChecked())
 
     def _checked_standard_names(self) -> set[str]:
-        """Every label treated as a standard file by the pipeline --
-        Primary/Secondary (elemental calibration) union Bias (mass-bias/
-        isotope-ratio calibration only) -- a label checked Bias but neither
-        Primary nor Secondary still needs to be scanned as a standard file
-        (not a sample) and have its reference material resolved."""
+        """Every label the pipeline should treat as a standard file.
+
+        Returns
+        -------
+        set[str]
+            Primary union Secondary (elemental calibration) union Bias
+            (mass-bias/isotope-ratio calibration) -- a Bias-only label still
+            must be scanned as a standard and have its reference resolved.
+        """
         return set(self._primary_standard_names()) | set(self._secondary_standard_names()) | set(self._bias_standard_names())
 
     def _reference_overrides(self) -> dict[str, str]:
-        """label -> chosen reference-material name (tableStandardLabels'
-        Reference column), omitting rows left at the "—" placeholder."""
+        """Per-label reference-material choices from the Reference column.
+
+        Returns
+        -------
+        dict[str, str]
+            ``label -> chosen reference-material name``, omitting rows left
+            at the "—" placeholder.
+        """
         return {
             label: combo.currentText()
             for label, combo in self._reference_combos.items()
@@ -1893,10 +2271,14 @@ class CalibrationMainWindow(QMainWindow):
     ISOTOPE_MODE_NATURAL_ABUNDANCE = "Isotopic (natural abundance)"
 
     def _populate_isotope_calibration_table(self):
-        """(Re)builds tableIsotopeCalibration from the analytes seen at Scan
-        time, one row per element with 2+ measured isotopes -- an element
-        with only one measured isotope has nothing to apportion (Mechanism
-        A's elemental calibration already covers it unconditionally)."""
+        """Rebuild ``tableIsotopeCalibration``, one row per multi-isotope element.
+
+        Notes
+        -----
+        Built from the analytes seen at Scan time. An element with only one
+        measured isotope has nothing to apportion (the always-on elemental
+        calibration already covers it) and is omitted.
+        """
         self.tableIsotopeCalibration.setRowCount(0)
         self._isotope_mode_combos = {}
         self._isotope_pool_checkboxes = {}
@@ -1958,16 +2340,24 @@ class CalibrationMainWindow(QMainWindow):
     def _resolve_isotope_normalizer_mass(
         self, element: str, masses: list[int], remapped_library: dict[str, reflib.ReferenceMaterial],
     ) -> int | None:
-        """Which of ``masses`` acts as the ratio denominator/normalizer for
-        ``element`` -- a certified reference-material ratio's own
-        denominator, when the currently-checked standards' reference
-        materials carry one for this element (the first one found, sorted
-        by standard label then isotope-ratio key, matching this project's
-        "certified-first" resolution order elsewhere -- see
-        massbias.resolve_truth_ratio's docstring); otherwise the most
-        naturally abundant of the measured isotopes (see
-        massbias.most_abundant_mass), a reasonable default when there's no
-        certified pair to anchor on.
+        """Choose the ratio normalizer (denominator) isotope for an element.
+
+        Parameters
+        ----------
+        element : str
+            Element symbol.
+        masses : list[int]
+            Measured isotope masses of ``element``.
+        remapped_library : dict[str, reflib.ReferenceMaterial]
+            This run's resolved ``label -> reference material`` mapping.
+
+        Returns
+        -------
+        int or None
+            A certified reference ratio's own denominator for this element
+            when the checked standards carry one (first found, sorted by
+            label then ratio key); otherwise the most naturally abundant
+            measured isotope; ``None`` if neither resolves.
         """
         for label in sorted(self._checked_standard_names()):
             material = remapped_library.get(label)
@@ -1984,11 +2374,20 @@ class CalibrationMainWindow(QMainWindow):
     def _gather_isotope_specs(
         self, remapped_library: dict[str, reflib.ReferenceMaterial],
     ) -> tuple[list[BiasSpec], list[IsotopeShareSpec]]:
-        """Reads tableIsotopeCalibration's per-element Mode selection into
-        the ``bias_specs``/``isotope_share_specs`` pipeline.run() expects --
-        called from _on_run, after remapped_library (this run's resolved
-        label -> reference material mapping) is built, since normalizer-mass
-        resolution needs it."""
+        """Read the per-element Mode selections into pipeline spec lists.
+
+        Parameters
+        ----------
+        remapped_library : dict[str, reflib.ReferenceMaterial]
+            This run's resolved ``label -> reference material`` mapping,
+            needed for normalizer-mass resolution.
+
+        Returns
+        -------
+        tuple[list[BiasSpec], list[IsotopeShareSpec]]
+            The ``bias_specs`` and ``isotope_share_specs`` that
+            :func:`pipeline.run` expects.
+        """
         bias_specs: list[BiasSpec] = []
         isotope_share_specs: list[IsotopeShareSpec] = []
         bias_standards = self._bias_standard_names() or None  # None -> pipeline uses every usable standard
@@ -2024,10 +2423,15 @@ class CalibrationMainWindow(QMainWindow):
         return bias_specs, isotope_share_specs
 
     def _gather_pool_specs(self) -> list[PooledElementSpec]:
-        """Reads tableIsotopeCalibration's "El total" checkbox column into
-        ``pipeline.run()``'s ``pool_specs`` -- independent of each row's
-        Mode selection (pooling and per-isotope apportionment are separate,
-        opt-in-together-or-separately features)."""
+        """Read the "El total" checkbox column into pooled-channel specs.
+
+        Returns
+        -------
+        list[PooledElementSpec]
+            One entry per checked element with 2+ measured isotopes, for
+            :func:`pipeline.run`'s ``pool_specs``. Independent of each row's
+            Mode selection.
+        """
         return [
             PooledElementSpec(element=element, masses=self._isotope_element_masses.get(element, []))
             for element, cb in self._isotope_pool_checkboxes.items()
@@ -2040,17 +2444,22 @@ class CalibrationMainWindow(QMainWindow):
     # directly for Pb-Pb's same-element pairs)
     # ------------------------------------------------------------------
     def _populate_dating_systems_table(self):
-        """(Re)builds tableRadiometricSystems from the analytes seen at
-        Scan time, one row per dating system whose required isotopes are
-        all present -- Pb-Pb (2+ of Pb204/206/207/208), U-Pb (U238 +
-        Pb206, optionally Pb207 for the 207Pb/235U reformulation and
-        Pb207/Pb206), Th-Pb (Th232 + Pb208)."""
+        """Rebuild ``tableRadiometricSystems``, one row per usable dating system.
+
+        Notes
+        -----
+        Built from the analytes seen at Scan time. A system appears only
+        when its required isotopes are all present: Pb-Pb (2+ of
+        Pb204/206/207/208), U-Pb (U238 + Pb206, optionally Pb207), Th-Pb
+        (Th232 + Pb208).
+        """
         self.tableRadiometricSystems.setRowCount(0)
         self._dating_system_checkboxes = {}
 
         analytes = set(next(iter(self._scanned_files.values())).analytes) if self._scanned_files else set()
 
         def has(name: str) -> bool:
+            """Whether analyte column ``name`` was seen at Scan time."""
             return name in analytes
 
         systems: list[tuple[str, str]] = []
@@ -2085,22 +2494,23 @@ class CalibrationMainWindow(QMainWindow):
             self._dating_system_checkboxes[name] = cb
 
     def _gather_dating_ratio_specs(self) -> tuple[list[BiasSpec], list[DatingRatioSpec]]:
-        """Reads tableRadiometricSystems' per-system Enable checkbox into
-        the ``bias_specs`` (same-element pairs, e.g. Pb-Pb's 206Pb/204Pb --
-        reuses ``massbias.py`` directly, the exact same mechanism the
-        per-element Isotope calibration table's "Isotopic (mass-bias
-        corrected)" Mode uses) / ``dating_ratio_specs`` (cross-element
-        pairs, see ``dating_ratios.py``) ``pipeline.run()`` expects --
-        called from ``_on_run``; the returned ``bias_specs`` still need
-        merging/deduping against the per-element Mode table's own
-        ``bias_specs`` by the caller, since the same pair (e.g. Pb207/
-        Pb206) can legitimately be requested by both tables.
+        """Read the per-system Enable checkboxes into pipeline spec lists.
 
-        Reuses the *same* "Bias" checkbox column on ``tableStandardLabels``
-        as the standards-selection source these fits bracket against
-        (``self._bias_standard_names()``) -- one shared "which standards
-        anchor isotope-ratio work" concept, no separate checkbox column
-        for dating systems.
+        Returns
+        -------
+        tuple[list[BiasSpec], list[DatingRatioSpec]]
+            ``bias_specs`` for same-element pairs (e.g. Pb-Pb's 206Pb/204Pb,
+            reusing ``massbias.py``) and ``dating_ratio_specs`` for
+            cross-element pairs (see ``dating_ratios.py``).
+
+        Notes
+        -----
+        The returned ``bias_specs`` still need merging/deduping against the
+        per-element Mode table's own ``bias_specs`` by the caller, since the
+        same pair (e.g. Pb207/Pb206) can be requested by both tables (both
+        resolve to an identical :class:`BiasSpec`). Brackets against the
+        same "Bias" checkbox column (``self._bias_standard_names()``) as the
+        per-element table.
         """
         bias_specs: dict[tuple[str, int, int], BiasSpec] = {}
         dating_specs: list[DatingRatioSpec] = []
@@ -2109,6 +2519,7 @@ class CalibrationMainWindow(QMainWindow):
         analytes = set(next(iter(self._scanned_files.values())).analytes) if self._scanned_files else set()
 
         def has(name: str) -> bool:
+            """Whether analyte column ``name`` was seen at Scan time."""
             return name in analytes
 
         pb_pb_cb = self._dating_system_checkboxes.get("Pb-Pb")
@@ -2152,13 +2563,15 @@ class CalibrationMainWindow(QMainWindow):
     # role-colored points once a BackgroundResult is available)
     # ------------------------------------------------------------------
     def _populate_file_table(self):
-        """(Re)builds tableTimeSeriesFiles, filtered to the label currently
-        selected in comboBoxSampleResult (every file if "(all)"/blank).
-        View/Use state (self._file_view_state/_file_use_state) is
-        initialized once per filename the first time it's seen and
-        persists across focus changes and re-population -- so switching
-        the focus combo doesn't lose View/Use choices made while a
-        different label was in focus."""
+        """Rebuild ``tableTimeSeriesFiles``, filtered to the focused label.
+
+        Notes
+        -----
+        Filtered to the label selected in ``comboBoxSampleResult`` (every
+        file for "(all)"/blank). View/Use state
+        (``_file_view_state``/``_file_use_state``) is initialized once per
+        filename and persists across focus changes and re-population.
+        """
         for name in self._scanned_files:
             self._file_view_state.setdefault(name, False)
             self._file_use_state.setdefault(name, True)
@@ -2171,6 +2584,7 @@ class CalibrationMainWindow(QMainWindow):
         focus_label = focus.rsplit(" / ", 1)[-1] if focus else focus
 
         def _matches_focus(name: str) -> bool:
+            """Whether file ``name``'s label matches the focused label."""
             if not focus or focus == "(all)":
                 return True
             try:
@@ -2209,26 +2623,53 @@ class CalibrationMainWindow(QMainWindow):
         self.analyte_list.blockSignals(False)
 
     def _on_file_view_toggled(self, name: str, checked: bool):
+        """Record a file's View state and redraw the Time Series tab.
+
+        Parameters
+        ----------
+        name : str
+            Filename.
+        checked : bool
+            New View state.
+        """
         self._file_view_state[name] = checked
         self._update_toggle_all_button_labels()
         self._refresh_time_series_tab()
 
     def _on_file_use_toggled(self, name: str, checked: bool):
+        """Record a file's Use state (whether it enters the next Run).
+
+        Parameters
+        ----------
+        name : str
+            Filename.
+        checked : bool
+            New Use state.
+        """
         self._file_use_state[name] = checked
         self._update_toggle_all_button_labels()
 
     def _visible_file_table_names(self) -> list[str]:
+        """Filenames currently listed in ``tableTimeSeriesFiles``.
+
+        Returns
+        -------
+        list[str]
+        """
         return [
             self.tableTimeSeriesFiles.item(row, 2).text() for row in range(self.tableTimeSeriesFiles.rowCount())
         ]
 
     def _update_toggle_all_button_labels(self):
-        """buttonViewAll/buttonUseAll's label always names the action a
-        click will actually perform: "All" when at least one currently-
-        listed row is unchecked (so a click would check every row), "None"
-        when every currently-listed row is already checked (so a click
-        would uncheck them all) -- matches _on_toggle_view_all/_on_toggle_
-        use_all's own all-or-nothing toggle logic."""
+        """Relabel the View-all/Use-all buttons to name the action a click does.
+
+        Notes
+        -----
+        "All" when at least one listed row is unchecked (a click would check
+        every row); "None" when every listed row is already checked (a click
+        would uncheck them). Matches :meth:`_on_toggle_view_all` /
+        :meth:`_on_toggle_use_all`'s all-or-nothing logic.
+        """
         names = self._visible_file_table_names()
         view_all_checked = bool(names) and all(self._file_view_state.get(n, False) for n in names)
         use_all_checked = bool(names) and all(self._file_use_state.get(n, True) for n in names)
@@ -2236,6 +2677,7 @@ class CalibrationMainWindow(QMainWindow):
         self.buttonUseAll.setText("Use None" if use_all_checked else "Use All")
 
     def _on_toggle_view_all(self):
+        """Check View for every listed file, or uncheck if all are checked."""
         names = self._visible_file_table_names()
         if not names:
             return
@@ -2246,6 +2688,7 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_time_series_tab()
 
     def _on_toggle_use_all(self):
+        """Check Use for every listed file, or uncheck if all are checked."""
         names = self._visible_file_table_names()
         if not names:
             return
@@ -2255,6 +2698,13 @@ class CalibrationMainWindow(QMainWindow):
         self._populate_file_table()
 
     def _refresh_time_series_tab(self):
+        """Redraw the Time Series canvas for the selected analyte and View files.
+
+        Works pre-Run on scanned files; once a Run exists, points are
+        role-colored from each file's ``BackgroundResult`` and outlier
+        occurrences are highlighted. Stashes the returned point-index frame
+        on ``self._time_series_point_index`` for click/drag hit-testing.
+        """
         analyte = self.analyte_list.currentText()
         if not analyte:
             self.canvasTimeSeries.axes.clear()
@@ -2295,18 +2745,31 @@ class CalibrationMainWindow(QMainWindow):
         self._draw(self.canvasTimeSeries)
 
     def _mask_display_mode(self) -> str:
-        """``"hidden"`` or ``"light_gray"`` for ``plot_time_series``/
-        ``plot_standard_vs_reference``'s ``mask_display`` param, from the
-        shared "Hide masked points" checkbox above the tab widget."""
+        """Current ``mask_display`` mode from the "Hide masked points" checkbox.
+
+        Returns
+        -------
+        {"hidden", "light_gray"}
+            Passed to ``plot_time_series`` / ``plot_standard_vs_reference``.
+        """
         return "hidden" if self.checkHideMaskedPoints.isChecked() else "light_gray"
 
     def _manual_row_masks_for_analyte(self, analyte: str) -> dict[str, np.ndarray]:
-        """Builds the per-filename boolean mask ``plot_time_series``'s
-        ``manual_row_masks`` expects, from ``self._manual_row_exclusions``
-        (filename -> analyte -> set of absolute row indices) for one
-        analyte -- used for instant visual feedback on a click/drag
-        exclusion, before the next Run actually recomputes statistics with
-        it applied (see ``pipeline.run``'s own ``manual_row_exclusions``)."""
+        """Build per-file boolean row masks for one analyte from manual exclusions.
+
+        Parameters
+        ----------
+        analyte : str
+            Analyte to build masks for.
+
+        Returns
+        -------
+        dict[str, numpy.ndarray]
+            ``filename -> boolean mask`` (length of that file's signal), as
+            ``plot_time_series``'s ``manual_row_masks`` expects. Used for
+            instant visual feedback before the next Run applies the
+            exclusions.
+        """
         masks: dict[str, np.ndarray] = {}
         for filename, per_analyte in self._manual_row_exclusions.items():
             row_indices = per_analyte.get(analyte)
@@ -2325,6 +2788,7 @@ class CalibrationMainWindow(QMainWindow):
     # Per-line background/edge-trim override table
     # ------------------------------------------------------------------
     def _populate_per_line_override_table(self):
+        """Rebuild ``tablePerLineOverrides`` with one blank row per scanned file."""
         self.tablePerLineOverrides.setRowCount(0)
         for name in sorted(self._scanned_files):
             row = self.tablePerLineOverrides.rowCount()
@@ -2336,14 +2800,20 @@ class CalibrationMainWindow(QMainWindow):
                 self.tablePerLineOverrides.setItem(row, col, QTableWidgetItem(""))
 
     def _gather_per_file_overrides(self) -> dict[str, BackgroundWindowOverride]:
-        """Reads the per-line override table into overrides, one per row with
-        at least one non-blank cell -- blank cells fall back to the global
-        override/edge-trim settings (or auto-detection, if the global
-        override itself isn't enabled)."""
+        """Read ``tablePerLineOverrides`` into per-filename override objects.
+
+        Returns
+        -------
+        dict[str, BackgroundWindowOverride]
+            One entry per row with at least one non-blank cell. Blank cells
+            fall back to the global override/edge-trim settings (or
+            auto-detection when the global override is disabled).
+        """
         overrides: dict[str, BackgroundWindowOverride] = {}
         global_override = self._current_background_override()
 
         def _cell_float(row: int, col: int, default: float | None) -> float | None:
+            """Parse one override-table cell as a float, or return ``default`` if blank."""
             text = self.tablePerLineOverrides.item(row, col).text().strip()
             return float(text) if text else default
 
@@ -2365,6 +2835,14 @@ class CalibrationMainWindow(QMainWindow):
         return overrides
 
     def _current_background_override(self) -> BackgroundWindowOverride | None:
+        """Read the global gas-blank/edge-trim controls into an override.
+
+        Returns
+        -------
+        BackgroundWindowOverride or None
+            ``None`` when neither the "Override gas-blank window" nor the
+            "Trim ablation edge effect" checkbox is enabled.
+        """
         if not self.checkBackgroundOverride.isChecked() and not self.checkEdgeTrim.isChecked():
             return None
         return BackgroundWindowOverride(
@@ -2378,16 +2856,32 @@ class CalibrationMainWindow(QMainWindow):
     # Reference library
     # ------------------------------------------------------------------
     def _reload_reference_library(self):
-        """Mutates ``self.reference_library`` in place (never reassigns) --
-        an open ReferenceMaterialEditDialog holds the same dict object, so
-        this keeps it in sync live rather than needing an explicit
-        sync-back step when the dialog closes."""
+        """Reload the reference library from disk, mutating the dict in place.
+
+        Notes
+        -----
+        Never reassigns ``self.reference_library`` -- an open
+        :class:`ReferenceMaterialEditDialog` holds the same dict object, so
+        in-place update keeps it live without an explicit sync-back step.
+        """
         REFERENCE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
         fresh = reflib.load_reference_library(REFERENCE_LIBRARY_DIR)
         self.reference_library.clear()
         self.reference_library.update(fresh)
 
     def _open_reference_dialog(self, initial_name: str | None = None) -> ReferenceMaterialEditDialog:
+        """Open (non-modally) the reference-material editor and keep a reference to it.
+
+        Parameters
+        ----------
+        initial_name : str or None, optional
+            Material to select on open.
+
+        Returns
+        -------
+        ReferenceMaterialEditDialog
+            The shown dialog; reloads the library on close.
+        """
         dialog = ReferenceMaterialEditDialog(
             self.reference_library, REFERENCE_LIBRARY_DIR, initial_name=initial_name, parent=self,
         )
@@ -2397,10 +2891,12 @@ class CalibrationMainWindow(QMainWindow):
         return dialog
 
     def _on_edit_standard(self):
+        """Open the reference-material editor on the first material."""
         initial = sorted(self.reference_library)[0] if self.reference_library else None
         self._open_reference_dialog(initial_name=initial)
 
     def _on_add_standard(self):
+        """Open the editor and immediately start its "New standard" flow."""
         # Opens the same dialog used for editing, then immediately triggers
         # its own "New..." flow (name prompt, template-based creation) --
         # reuses that logic rather than duplicating it here.
@@ -2411,6 +2907,14 @@ class CalibrationMainWindow(QMainWindow):
     # Instrument settings
     # ------------------------------------------------------------------
     def _current_instrument_settings(self) -> InstrumentSettings:
+        """Read the Instrument settings form into an :class:`InstrumentSettings`.
+
+        Returns
+        -------
+        InstrumentSettings
+            Zero-valued spin boxes map to ``None``; the Notes field is
+            parsed as ``key: value`` lines.
+        """
         notes = {}
         for line in self.textNotes.toPlainText().splitlines():
             if ":" in line:
@@ -2418,6 +2922,7 @@ class CalibrationMainWindow(QMainWindow):
                 notes[key.strip()] = value.strip()
 
         def _or_none(spin: QDoubleSpinBox):
+            """Return a spin box's value, or ``None`` when it is zero (unset)."""
             return None if spin.value() == 0 else spin.value()
 
         return InstrumentSettings.from_manual_entry(
@@ -2440,6 +2945,13 @@ class CalibrationMainWindow(QMainWindow):
     # Run
     # ------------------------------------------------------------------
     def _on_run(self):
+        """Gather every setting and launch :func:`pipeline.run`/``run_batch`` on a worker.
+
+        Resolves per-label reference overrides, merges the isotope and
+        dating-ratio spec lists, and disables the Run/Reprocess actions
+        until the worker signals back to :meth:`_on_run_finished` /
+        :meth:`_on_run_failed`.
+        """
         if self._data_dir is None:
             QMessageBox.warning(self, "Run", "Choose and scan a raw data directory first.")
             return
@@ -2520,13 +3032,15 @@ class CalibrationMainWindow(QMainWindow):
         self._worker.start()
 
     def _on_reprocess(self):
-        """Fast reprocess-only re-run: reuses files already parsed by the
-        last Scan (self._scanned_files) instead of re-reading every raw
-        file from disk -- for quickly re-applying changed deconvolution/
-        calibration settings. Batch mode isn't supported here (unlike
-        _on_run/run_batch) since self._scanned_files doesn't track which
-        subdirectory each file came from -- see run_from_parsed's
-        docstring; use the main Run button for batch mode instead.
+        """Re-run from already-parsed Scan files via :func:`pipeline.run_from_parsed`.
+
+        Notes
+        -----
+        Reuses ``self._scanned_files`` instead of re-reading raw files from
+        disk, for quickly re-applying changed deconvolution/calibration
+        settings. Fixes up each file's ``meta.is_standard`` for the current
+        selection first. Batch mode is not supported here (``_scanned_files``
+        does not track subdirectories) -- use the Run button instead.
         """
         if self.checkBoxBatchMode.isChecked():
             QMessageBox.information(
@@ -2605,12 +3119,28 @@ class CalibrationMainWindow(QMainWindow):
         self._worker.start()
 
     def _on_run_failed(self, message: str):
+        """Re-enable the run actions and surface a worker failure.
+
+        Parameters
+        ----------
+        message : str
+            The exception message from the worker.
+        """
         self.actionRun.setEnabled(True)
         self.actionReprocess.setEnabled(True)
         self.labelRunStatus.setText(f"Failed: {message}")
         QMessageBox.critical(self, "Run pipeline", message)
 
     def _on_run_finished(self, raw_results: dict):
+        """Store worker results, refill the sample combo, and refresh every tab.
+
+        Parameters
+        ----------
+        raw_results : dict
+            ``{sample label -> SampleCalibratedResult}``, or (batch mode)
+            ``{folder -> {label -> result}}`` which is flattened to
+            ``"folder / label"`` keys.
+        """
         self.actionRun.setEnabled(True)
         self.actionReprocess.setEnabled(True)
         self.results = {}
@@ -2651,27 +3181,46 @@ class CalibrationMainWindow(QMainWindow):
     # Results viewer
     # ------------------------------------------------------------------
     def _current_result(self) -> SampleCalibratedResult | None:
+        """The calibrated result for the selected sample, if any.
+
+        Returns
+        -------
+        SampleCalibratedResult or None
+            ``None`` when "(all)", a standard-only label, or nothing is
+            selected.
+        """
         key = self.comboBoxSampleResult.currentText()
         return self.results.get(key)
 
     @staticmethod
     def _draw(canvas):
-        """``canvas.draw()`` alone schedules a Qt repaint for the next
-        event-loop iteration but doesn't force one -- on some platforms
-        that iteration doesn't happen promptly, leaving a tab's plot
-        visually stale (still showing the previous analyte/state) even
-        though its data already updated, until something else (e.g.
-        switching tabs) triggers a repaint. ``flush_events()`` forces the
-        pending repaint through immediately instead of waiting for it."""
+        """Draw a canvas and force the pending repaint through immediately.
+
+        Parameters
+        ----------
+        canvas : matplotlib.backends.backend_qt.FigureCanvasQT
+            The canvas to redraw.
+
+        Notes
+        -----
+        ``canvas.draw()`` alone only schedules a repaint for the next
+        event-loop iteration, which on some platforms leaves a tab's plot
+        visually stale until something else triggers a repaint;
+        ``flush_events()`` forces it now.
+        """
         canvas.draw()
         canvas.flush_events()
 
     def _refresh_active_tab(self):
-        """Refreshes whichever results tab is currently visible -- the
-        counterpart to the shared analyte selector and the shared plot
-        controls (offset/log-scale/stage), all of which are wired to this
-        instead of to each analyte-dependent tab directly. Timing/Files and
-        Data don't depend on the selected analyte, so they're omitted."""
+        """Refresh whichever results tab is currently visible.
+
+        Notes
+        -----
+        The counterpart to the shared analyte selector and shared plot
+        controls, which are wired here rather than to each analyte-dependent
+        tab. Timing/Files and Data do not depend on the selected analyte and
+        are omitted.
+        """
         refreshers = {
             self.TAB_BACKGROUND: self._refresh_background_tab,
             self.TAB_TIME_SERIES: self._refresh_time_series_tab,
@@ -2685,6 +3234,7 @@ class CalibrationMainWindow(QMainWindow):
             refresh()
 
     def _on_sample_selected(self):
+        """Repopulate the analyte/standard/ratio selectors and refresh every tab."""
         result = self._current_result()
         if result is None:
             return
@@ -2716,6 +3266,7 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_classification_tab()
 
     def _refresh_timing_tab(self):
+        """Repopulate the Timing / Files table for the current result."""
         result = self._current_result()
         if result is None:
             return
@@ -2723,6 +3274,7 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableTiming, df)
 
     def _refresh_background_tab(self):
+        """Redraw the background-drift plot and detection-limit summary for the analyte."""
         result = self._current_result()
         analyte = self.analyte_list.currentText()
         if result is None or not analyte:
@@ -2761,9 +3313,17 @@ class CalibrationMainWindow(QMainWindow):
             )
 
     def _on_standard_label_changed(self):
+        """Redraw the Standards QC tab for the newly selected standard label."""
         self._refresh_standards_tab()
 
     def _refresh_standards_tab(self):
+        """Redraw the standard-vs-reference plot and the accuracy tables.
+
+        Rebuilds the figure from scratch each time (the plot adds a
+        ``twinx`` axis that ``axes.clear()`` would not remove) and stashes
+        the returned point-index frame on ``self._standards_point_index``
+        for click/drag hit-testing.
+        """
         result = self._current_result()
         label = self.comboStandardLabel.currentText()
         analyte = self.analyte_list.currentText()
@@ -2797,6 +3357,11 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableAccuracyHoldout, holdout_df)
 
     def _refresh_calibration_curve_tab(self):
+        """Redraw the multi-point calibration curve, or a placeholder message.
+
+        The tab is only meaningful with 2+ Primary standards; otherwise it
+        shows an explanatory title.
+        """
         self.canvasCalibrationCurve.axes.clear()
         result = self._current_result()
         analyte = self.analyte_list.currentText()
@@ -2815,6 +3380,11 @@ class CalibrationMainWindow(QMainWindow):
         self._draw(self.canvasCalibrationCurve)
 
     def _refresh_isotope_ratios_tab(self):
+        """Redraw the bias/dating-ratio fit plot and the corrected-ratio map.
+
+        Handles both mass-bias fits and cross-element dating-ratio fits for
+        the selected pair; shows a guidance title when no fit is available.
+        """
         result = self._current_result()
         pair = self.comboIsotopeRatioPair.currentText()
 
@@ -2876,6 +3446,7 @@ class CalibrationMainWindow(QMainWindow):
     _CLICK_TOLERANCE_PX = 8.0
 
     def _connect_canvas_interactions(self):
+        """Wire mouse press/motion/release on the Time Series and Standards canvases."""
         # source -> toolbar, so click/drag point-masking can defer to the
         # toolbar's own zoom/pan rubber-band interaction instead of running
         # alongside it -- two independent rectangle-overlay draws (the
@@ -2894,6 +3465,15 @@ class CalibrationMainWindow(QMainWindow):
             canvas.mpl_connect("button_release_event", lambda e, s=source: self._on_canvas_release(e, s))
 
     def _on_canvas_press(self, event, source: str):
+        """Record the drag anchor for point masking, if Edit mode is armed.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            The press event.
+        source : {"time_series", "standards"}
+            Which canvas fired the event.
+        """
         if not self.checkEditMode.isChecked():
             return  # point masking only responds to clicks in Edit mode
         toolbar = self._canvas_toolbars.get(source)
@@ -2907,6 +3487,15 @@ class CalibrationMainWindow(QMainWindow):
         self._drag_axes = event.inaxes
 
     def _on_canvas_motion(self, event, source: str):
+        """Draw the dashed selection rectangle while dragging past the threshold.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            The motion event.
+        source : {"time_series", "standards"}
+            Which canvas fired the event.
+        """
         if self._drag_canvas != source or self._drag_start_px is None or event.xdata is None:
             return
         dx = event.x - self._drag_start_px[0]
@@ -2925,6 +3514,16 @@ class CalibrationMainWindow(QMainWindow):
         self._drag_axes.figure.canvas.draw_idle()
 
     def _on_canvas_release(self, event, source: str):
+        """Resolve a click or drag into a point selection and toggle its mask.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            The release event.
+        source : {"time_series", "standards"}
+            Which canvas fired the event; selects the point-index frame and
+            the toggle method used.
+        """
         if self._drag_canvas != source or self._drag_start_px is None:
             return
         start_px, start_data, axes = self._drag_start_px, self._drag_start_data, self._drag_axes
@@ -2966,12 +3565,41 @@ class CalibrationMainWindow(QMainWindow):
 
     @staticmethod
     def _to_numeric_x(series: pd.Series) -> np.ndarray:
+        """Convert an x-value series to floats, mapping datetimes via ``date2num``.
+
+        Parameters
+        ----------
+        series : pandas.Series
+            The ``x`` column of a point-index frame.
+
+        Returns
+        -------
+        numpy.ndarray
+        """
         if pd.api.types.is_datetime64_any_dtype(series):
             import matplotlib.dates as mdates
             return mdates.date2num(series)
         return series.to_numpy(dtype=float)
 
     def _nearest_point(self, df: pd.DataFrame | None, ax, px_x: float, px_y: float, tolerance_px: float):
+        """Index of the point in ``df`` closest to a pixel location, within tolerance.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame or None
+            A point-index frame with ``x``/``y`` columns.
+        ax : matplotlib.axes.Axes
+            Axes providing the data->pixel transform.
+        px_x, px_y : float
+            Target location in display pixels.
+        tolerance_px : float
+            Maximum pixel distance for a match.
+
+        Returns
+        -------
+        Hashable or None
+            The matching row's index label, or ``None``.
+        """
         if df is None or df.empty:
             return None
         x_num = self._to_numeric_x(df["x"])
@@ -2982,6 +3610,21 @@ class CalibrationMainWindow(QMainWindow):
         return df.index[i] if d[i] <= tolerance_px else None
 
     def _points_in_rect(self, df: pd.DataFrame | None, x0: float, y0: float, x1: float, y1: float) -> pd.DataFrame:
+        """Rows of ``df`` whose ``(x, y)`` fall inside the data-space rectangle.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame or None
+            A point-index frame with ``x``/``y`` columns.
+        x0, y0, x1, y1 : float
+            Opposite corners of the rectangle, in data coordinates (order
+            does not matter).
+
+        Returns
+        -------
+        pandas.DataFrame
+            The enclosed rows (possibly empty).
+        """
         if df is None or df.empty:
             return pd.DataFrame() if df is None else df.iloc[0:0]
         x_num = self._to_numeric_x(df["x"])
@@ -2992,6 +3635,21 @@ class CalibrationMainWindow(QMainWindow):
         return df[mask]
 
     def _toggle_time_series_points(self, selected: pd.DataFrame):
+        """Toggle manual row exclusions for the selected Time Series points.
+
+        Parameters
+        ----------
+        selected : pandas.DataFrame
+            Rows from ``self._time_series_point_index`` (``filename``,
+            ``row_index``, ``analyte`` columns).
+
+        Notes
+        -----
+        If any selected point is already excluded, the whole group is
+        un-excluded; otherwise the whole group is excluded. Only updates
+        ``self._manual_row_exclusions`` and redraws -- statistics are
+        recomputed on the next Run.
+        """
         # Consistency rule (matches the Use-all/View-all toggle buttons):
         # if any selected point is already manually excluded, un-exclude
         # the whole group; otherwise exclude the whole group. A single
@@ -3011,6 +3669,20 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_time_series_tab()
 
     def _toggle_standards_points(self, selected: pd.DataFrame):
+        """Toggle manual occurrence exclusions for the selected Standards QC points.
+
+        Parameters
+        ----------
+        selected : pandas.DataFrame
+            Rows from ``self._standards_point_index`` (``occurrence_order``,
+            ``analyte`` columns).
+
+        Notes
+        -----
+        Whole-group toggle, same consistency rule as
+        :meth:`_toggle_time_series_points`. Updates
+        ``self._manual_occurrence_exclusions`` and redraws only.
+        """
         result = self._current_result()
         label = self.comboStandardLabel.currentText()
         if result is None or label not in result.standard_results:
@@ -3038,11 +3710,27 @@ class CalibrationMainWindow(QMainWindow):
         self._refresh_standards_tab()
 
     def _stage_series(self, result: SampleCalibratedResult, stage: str, analyte: str) -> pd.Series:
-        """Reconstructs one correction stage's per-row values, aligned with
-        ``result.grid_index``'s (file_index, row_in_ablation) index, so
-        ``diagnostics.plot_index_map`` can position them identically to the
-        calibrated stage.
+        """Reconstruct one map correction stage's per-row values.
 
+        Parameters
+        ----------
+        result : SampleCalibratedResult
+            The sample to reconstruct from.
+        stage : {"raw", "background+drift correction", "deconvolution correction", "calibrated"}
+            Which stage to return.
+        analyte : str
+            Analyte column.
+
+        Returns
+        -------
+        pandas.Series
+            Per-row values on ``result.grid_index``'s
+            ``(file_index, row_in_ablation)`` index, so
+            :func:`diagnostics.plot_index_map` positions them identically to
+            the calibrated stage. Empty when the analyte is absent.
+
+        Notes
+        -----
         "background+drift correction" combines both corrections into a
         single map stage and displays the *change* they made (corrected
         minus raw), not the corrected value itself. The drift-normalized
@@ -3122,6 +3810,7 @@ class CalibrationMainWindow(QMainWindow):
         return pd.Series(values, index=pd.MultiIndex.from_tuples(index_tuples, names=["file_index", "row_in_ablation"]))
 
     def _refresh_map_tab(self):
+        """Redraw the index map for the selected analyte and correction stage."""
         result = self._current_result()
         analyte = self.analyte_list.currentText()
         stage = self.comboMapStage.currentText()
@@ -3145,6 +3834,7 @@ class CalibrationMainWindow(QMainWindow):
         self.toolbarMap.update()
 
     def _refresh_data_tab(self):
+        """Show the calibrated ppm table (first 1000 rows) for the current result."""
         result = self._current_result()
         if result is None:
             return
@@ -3159,9 +3849,13 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableData, display_df)
 
     def _refresh_deconvolution_tab(self):
-        """Not analyte-dependent (summarizes every analyte at once, same as
-        _refresh_data_tab) -- called once per sample-result selection, not
-        wired into _refresh_active_tab's per-analyte-change dict."""
+        """Redraw the deconvolution noise-amplification summary and report table.
+
+        Notes
+        -----
+        Not analyte-dependent -- called once per sample-result selection,
+        not from :meth:`_refresh_active_tab`'s per-analyte dict.
+        """
         result = self._current_result()
         if result is None:
             return
@@ -3175,12 +3869,14 @@ class CalibrationMainWindow(QMainWindow):
         _populate_table(self.tableDeconvolutionReport, df)
 
     def _refresh_classification_tab(self):
-        """Not analyte-dependent (classification's own map is a single
-        categorical field, not one-per-analyte) -- called once per sample-
-        result selection, not wired into _refresh_active_tab's per-analyte-
-        change dict. classification is populated by the Classify button
-        (_on_classify), not by a pipeline Run, so this is commonly empty
-        immediately after a fresh Run -- that's expected, not an error.
+        """Redraw the categorical classification map and per-mineral summary.
+
+        Notes
+        -----
+        Not analyte-dependent -- called once per sample-result selection.
+        ``result.classification`` is populated by the Classify button, not a
+        pipeline Run, so this is commonly empty right after a fresh Run;
+        that is expected, not an error.
         """
         result = self._current_result()
         self.canvasClassification.axes.clear()
@@ -3215,6 +3911,7 @@ class CalibrationMainWindow(QMainWindow):
     # Export
     # ------------------------------------------------------------------
     def _on_export_csv(self):
+        """Prompt for a path and write the current result's calibrated CSV."""
         result = self._current_result()
         if result is None:
             return
@@ -3223,6 +3920,7 @@ class CalibrationMainWindow(QMainWindow):
             io_export.export_calibrated_csv(result, path)
 
     def _on_export_json(self):
+        """Prompt for a path and write the current result's QC report JSON."""
         result = self._current_result()
         if result is None:
             return

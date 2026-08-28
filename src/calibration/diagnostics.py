@@ -54,19 +54,34 @@ def plot_background_drift(
     ax, groups: dict[str, list[BackgroundResult]], drift_fit: DriftFit | None, analyte: str,
     reference_labels: set[str] | None = None,
 ) -> None:
-    """Background level vs time (mean ± SE per file), combined across every
-    sample AND reference-standard label in one plot, with the session
-    drift fit overlaid.
+    """Plot background level versus time for every label, with the drift fit.
 
-    ``groups`` is label -> that label's own ``BackgroundResult`` list
-    (samples and reference standards mixed together -- e.g. one sample
-    label's files plus every standard label's occurrence backgrounds).
-    ``reference_labels`` (a subset of ``groups``' keys) marks which labels
-    are reference standards, drawn as circles; every other label is a
-    sample, drawn as squares. Each label gets its own color (cycled from
-    :data:`_LABEL_COLOR_CYCLE`, stable by sorted label order) so different
-    samples/standards stay visually distinguishable even when both share a
-    marker shape.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    groups : dict[str, list[BackgroundResult]]
+        Label -> that label's ``BackgroundResult`` list, samples and
+        reference standards mixed together.
+    drift_fit : DriftFit or None
+        Session background drift fit to overlay, or ``None`` to skip it.
+    analyte : str
+        Analyte to plot.
+    reference_labels : set[str] or None, optional
+        Subset of ``groups`` keys that are reference standards (drawn as
+        circles); every other label is a sample (drawn as squares). By
+        default ``None`` (all samples).
+
+    Returns
+    -------
+    None
+        Draws onto ``ax`` in place.
+
+    Notes
+    -----
+    Each label gets its own color, cycled from :data:`_LABEL_COLOR_CYCLE`
+    and stable by sorted label order, so samples/standards stay
+    distinguishable even when they share a marker shape.
     """
     reference_labels = reference_labels or set()
     all_times: list = []
@@ -109,38 +124,43 @@ def plot_standard_vs_reference(
     ax, standard_result: StandardCalibrationResult, analyte: str, ax_cps=None,
     manually_excluded_override: set[int] | None = None, mask_display: str = "light_gray",
 ) -> pd.DataFrame:
-    """Back-calculated standard ppm vs time (filled markers, left/primary
-    axis), against the reference value ± uncertainty band, with the
-    session's raw background-corrected CPS overlaid as open markers on a
-    secondary axis (``ax_cps`` -- created via ``ax.twinx()`` if not
-    supplied; callers reusing the same Axes across redraws should pass
-    their own persistent twin, since ``ax.twinx()`` creates a new Axes
-    every call).
+    """Plot back-calculated standard ppm and CPS versus time against the reference.
 
-    A point flagged by the accuracy QC test (``AccuracyRow.flagged`` --
-    its measured-vs-reference difference exceeded the accuracy threshold)
-    is drawn in red instead of its usual fit/holdout-group color; a point
-    excluded via manual click/drag masking (``AccuracyRow.
-    manually_excluded``, or ``manually_excluded_override`` -- an
-    occurrence_order set forcing this color even before a Run recomputes
-    that field, for instant visual feedback right after a click) takes
-    precedence over the flagged color. This replaces an earlier version
-    that overlaid a red "*" annotation on flagged points instead of
-    recoloring them.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Primary axis; back-calculated ppm (filled markers) and the
+        reference value +/- uncertainty band.
+    standard_result : StandardCalibrationResult
+        Supplies the accuracy table(s) and per-occurrence signal.
+    analyte : str
+        Analyte to plot.
+    ax_cps : matplotlib.axes.Axes or None, optional
+        Secondary axis for the raw background-corrected CPS (open markers).
+        Created via ``ax.twinx()`` when ``None``; callers reusing the same
+        Axes across redraws should pass their own persistent twin.
+    manually_excluded_override : set[int] or None, optional
+        ``occurrence_order`` values to draw as masked immediately, before a
+        Run recomputes ``AccuracyRow.manually_excluded``. By default
+        ``None``.
+    mask_display : {"light_gray", "hidden"}, optional
+        How a manually-excluded point is drawn, by default ``"light_gray"``.
+        ``"hidden"`` drops it from the plot but not from the returned frame.
 
-    ``mask_display`` controls how a manually-excluded point is drawn:
-    ``"light_gray"`` (default) or ``"hidden"`` (dropped from both the ppm
-    and its mirrored cps point entirely). Either way, masked points are
-    still included in the returned point-index DataFrame with
-    ``manually_excluded=True`` -- hiding is purely visual, click/drag
-    hit-testing still works at a hidden point's (unchanged) data location
-    so it can be un-masked again.
+    Returns
+    -------
+    pandas.DataFrame
+        Columns ``occurrence_order, analyte, x, y, series, group, flagged,
+        manually_excluded``; one row per rendered point across both the ppm
+        and cps series, for click/drag hit-testing. Empty (but present)
+        when there is no data.
 
-    Returns a DataFrame (columns: ``occurrence_order, analyte, x, y,
-    series, group, flagged, manually_excluded``, one row per rendered
-    point across both the ppm and cps series) for hit-testing click/drag
-    point-masking interactions against -- see ``dock_widgets``'s canvas
-    wiring. Empty (but present) when there's no data to plot.
+    Notes
+    -----
+    A point flagged by the accuracy QC test (``AccuracyRow.flagged``) is
+    drawn red; a manually-excluded point takes precedence and is drawn
+    light gray. Hiding is purely visual -- hit-testing still works at a
+    hidden point's data location so it can be un-masked.
     """
     point_columns = ["occurrence_order", "analyte", "x", "y", "series", "group", "flagged", "manually_excluded"]
     rows = [r for r in standard_result.accuracy_table if r.analyte == analyte]
@@ -159,9 +179,11 @@ def plot_standard_vs_reference(
     signal_by_order = {o.occurrence_order: o.mean_signal.get(analyte) for o in standard_result.occurrences}
 
     def _is_masked(r) -> bool:
+        """Whether accuracy row ``r`` is manually excluded (row flag or override)."""
         return bool(r.manually_excluded or r.occurrence_order in manually_excluded_override)
 
     def _point_color(r, default_color: str) -> str:
+        """Marker color for row ``r``: gray if masked, red if flagged, else ``default_color``."""
         if _is_masked(r):
             return "lightgray"
         if r.flagged:
@@ -218,9 +240,30 @@ def plot_standard_vs_reference(
 
 
 def plot_standard_qc_series(ax_cps, ax_ppm, standard_result: StandardCalibrationResult, analyte: str) -> None:
-    """Raw/background-corrected CPS and corrected ppm across the session, one
-    point per standard occurrence -- used when more than one standard
-    measurement exists to QC drift over the whole session."""
+    """Plot CPS and corrected ppm across the session, one point per occurrence.
+
+    Parameters
+    ----------
+    ax_cps : matplotlib.axes.Axes
+        Axis for background-corrected CPS versus occurrence number.
+    ax_ppm : matplotlib.axes.Axes
+        Axis for calibrated ppm versus occurrence number, with the
+        reference value drawn as a dashed line.
+    standard_result : StandardCalibrationResult
+        Supplies occurrences and accuracy rows.
+    analyte : str
+        Analyte to plot.
+
+    Returns
+    -------
+    None
+        Draws onto the two axes in place.
+
+    Notes
+    -----
+    Fit-group points are blue, holdout points green. Used when more than
+    one standard measurement exists, to QC drift over the whole session.
+    """
     occurrences = sorted(standard_result.occurrences, key=lambda o: o.occurrence_order)
     orders = [o.occurrence_order for o in occurrences]
     cps = [o.mean_signal.get(analyte, np.nan) for o in occurrences]
@@ -247,14 +290,28 @@ def plot_standard_qc_series(ax_cps, ax_ppm, standard_result: StandardCalibration
 
 
 def plot_multi_point_calibration(ax, curve: CalibrationCurve, analyte: str) -> None:
-    """CPS-vs-ppm calibration curve for one analyte across every primary
-    standard that contributed to it (see
-    ``standards.combine_primary_standards``) -- one point per standard,
-    labeled by name, with the fitted line drawn across the observed CPS
-    range. Only meaningful for ``method="multi_point_linear"`` (2+ primary
-    standards); called with a ``"single_point_ratio"`` curve it still
-    draws the single point and the (origin-forced) line through it, just
-    without a meaningful R².
+    """Plot a CPS-vs-ppm calibration curve and its contributing standard points.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    curve : CalibrationCurve
+        The fitted curve and its ``(label, cps, ppm)`` points.
+    analyte : str
+        Analyte name, used in axis labels and the title.
+
+    Returns
+    -------
+    None
+        Draws onto ``ax`` in place.
+
+    Notes
+    -----
+    Most meaningful for ``method="multi_point_linear"`` (2+ primary
+    standards); with a ``"single_point_ratio"`` curve it still draws the
+    single point and the origin-forced line, just without a meaningful
+    R-squared.
     """
     if not curve.points:
         ax.set_title(f"{analyte}: no calibration points")
@@ -287,16 +344,30 @@ def plot_bias_fit(
     ax, bias_fit: BiasFit, standard_results: dict[str, StandardCalibrationResult],
     isotope_table=DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> None:
-    """Mass-bias QC view (see ``massbias.py``): each bracketing-standard
-    occurrence's own measured-ratio-over-truth (a value near 1.0 means no
-    bias at that point in the session), colored per label, against the
-    fitted bias curve -- the mass-bias counterpart to
-    ``plot_standard_vs_reference``.
+    """Plot mass-bias QC: per-occurrence measured/truth ratio and the fitted curve.
 
-    Recomputes each occurrence's point the same way
-    ``massbias.fit_bias_curve`` did internally (``BiasFit`` itself doesn't
-    retain the raw per-occurrence points, only the fitted curve), so
-    ``standard_results`` must be the same dict the fit was produced from.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    bias_fit : BiasFit
+        The fitted mass-bias curve.
+    standard_results : dict[str, StandardCalibrationResult]
+        Must be the same dict ``bias_fit`` was produced from -- the raw
+        per-occurrence points are recomputed from it.
+    isotope_table : pandas.DataFrame or str or pathlib.Path, optional
+        Isotope table (or path) for truth-ratio resolution. Defaults to
+        :data:`~src.calibration.massbias.DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    None
+        Draws onto ``ax`` in place.
+
+    Notes
+    -----
+    A value near 1.0 means no bias at that point in the session. The
+    mass-bias counterpart to :func:`plot_standard_vs_reference`.
     """
     numerator = f"{bias_fit.element}{bias_fit.numerator_mass}"
     denominator = f"{bias_fit.element}{bias_fit.denominator_mass}"
@@ -342,17 +413,27 @@ def plot_bias_fit(
 def plot_dating_ratio_fit(
     ax, fit: DatingRatioFit, standard_results: dict[str, StandardCalibrationResult],
 ) -> None:
-    """Cross-element dating-ratio QC view (see ``dating_ratios.py``): each
-    bracketing-standard occurrence's own measured-ratio-over-truth (a
-    value near 1.0 means no session drift at that point), colored per
-    label, against the fitted correction curve -- the dating-ratio
-    counterpart to :func:`plot_bias_fit`.
+    """Plot dating-ratio QC: per-occurrence measured/truth ratio and fitted curve.
 
-    Recomputes each occurrence's point the same way
-    ``dating_ratios.fit_dating_ratio`` did internally (``DatingRatioFit``
-    itself doesn't retain the raw per-occurrence points, only the fitted
-    curve), so ``standard_results`` must be the same dict the fit was
-    produced from.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    fit : DatingRatioFit
+        The fitted cross-element dating-ratio correction curve.
+    standard_results : dict[str, StandardCalibrationResult]
+        Must be the same dict ``fit`` was produced from -- the raw
+        per-occurrence points are recomputed from it.
+
+    Returns
+    -------
+    None
+        Draws onto ``ax`` in place.
+
+    Notes
+    -----
+    A value near 1.0 means no session drift at that point. The dating-ratio
+    counterpart to :func:`plot_bias_fit`.
     """
     numerator = f"{fit.numerator_element}{fit.numerator_mass}"
     denominator = f"{fit.denominator_element}{fit.denominator_mass}"
@@ -400,16 +481,30 @@ def plot_index_map(
     ax, values: pd.Series, grid_index: pd.DataFrame, title: str = "", cbar_label: str = "",
     log_scale: bool = False,
 ) -> None:
-    """Index-based 2D map: line/file order x sweep-index-within-ablation-window.
+    """Draw an index-based 2D map: line/file order x sweep-index-within-window.
 
-    ``grid_index`` must carry ``line_number``/``sweep_index`` columns aligned
-    with ``values``' index (see ``pipeline._build_calibrated_ppm_and_grid``).
-    ``cbar_label`` names the colorbar's units (e.g. ``"CPS"`` for raw/
-    background+drift stages, ``"ppm"`` for calibrated).
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    values : pandas.Series
+        Per-pixel values, indexed to align with ``grid_index``.
+    grid_index : pandas.DataFrame
+        Must carry ``line_number`` and ``sweep_index`` columns aligned with
+        ``values`` (see ``pipeline._build_calibrated_ppm_and_grid``).
+    title : str, optional
+        Axes title, by default ``""``.
+    cbar_label : str, optional
+        Colorbar unit label, by default ``""`` (e.g. ``"CPS"`` or
+        ``"ppm"``).
+    log_scale : bool, optional
+        Use :class:`~matplotlib.colors.LogNorm`; values <= 0 are masked
+        out rather than raising. By default ``False``.
 
-    ``log_scale`` switches the color mapping to :class:`~matplotlib.colors.LogNorm`
-    (values <= 0, e.g. from a background-corrected stage, are masked out --
-    undefined on a log scale -- rather than raising).
+    Returns
+    -------
+    matplotlib.image.AxesImage or None
+        The drawn image, or ``None`` when there is no data.
     """
     if values.empty or grid_index.empty:
         ax.set_title(f"{title}: no data")
@@ -440,23 +535,29 @@ def plot_index_map(
 def plot_categorical_map(
     ax, labels: pd.Series, grid_index: pd.DataFrame, category_names: list[str], title: str = "",
 ) -> None:
-    """Index-based 2D map of a categorical field (mineral classification --
-    ``src/classification/``) -- same line/sweep-index grid as
-    :func:`plot_index_map`, but a discrete swatch-per-category legend
-    instead of a continuous colorbar, since a category code has no
-    meaningful magnitude ordering. Mirrors the generic-discrete-field path
-    ``src/plotting/LamePlot.py``'s ``plot_map_mpl`` already uses for
-    ``SampleObj``-backed maps (e.g. the stoichiometry dock's
-    ``{abbrev}_dominant``); this app's own maps aren't ``SampleObj``-backed
-    (see ``pipeline.SampleCalibratedResult``), so that generic path isn't
-    reachable here and this is a standalone reimplementation of the same
-    idea against this app's own ``grid_index`` grid.
+    """Draw an index-based 2D map of a categorical (e.g. mineral-class) field.
 
-    ``labels`` : per-pixel category string (or NaN/None for unclassified),
-    aligned with ``grid_index``'s index. ``category_names`` fixes the
-    code->color assignment (same list every redraw, e.g. the full selected
-    mineral subset) so a category's color doesn't shift between redraws
-    just because a different subset happened to be present in the frame.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    labels : pandas.Series
+        Per-pixel category string (or NaN/None for unclassified), aligned
+        with ``grid_index``.
+    grid_index : pandas.DataFrame
+        Must carry ``line_number`` and ``sweep_index`` columns.
+    category_names : list[str]
+        Fixes the code->color assignment; pass the same list every redraw
+        (e.g. the full selected mineral subset) so a category's color does
+        not shift between frames.
+    title : str, optional
+        Axes title, by default ``""``.
+
+    Returns
+    -------
+    None
+        Draws onto ``ax`` in place, with a discrete swatch-per-category
+        legend instead of a colorbar.
     """
     if labels.empty or grid_index.empty or not category_names:
         ax.set_title(f"{title}: no data")
@@ -488,12 +589,27 @@ def plot_categorical_map(
 
 
 def _qualitative_colors_for_diagnostics(n: int) -> list[str]:
-    """Same qualitative-colormap convention as
-    ``src.stoichiometry.dock._qualitative_colors``/
-    ``src.calibration.dock_widgets._qualitative_colors`` (categories have
-    no natural ordering, so a perceptually-sequential colormap would
-    mislead) -- reimplemented locally since this module has no PyQt/dock
-    dependency to import it from.
+    """Return ``n`` distinct qualitative hex colors.
+
+    Parameters
+    ----------
+    n : int
+        Number of colors needed.
+
+    Returns
+    -------
+    list[str]
+        ``n`` hex color strings sampled from ``"tab10"`` (``n <= 10``) or
+        ``"tab20"``.
+
+    Notes
+    -----
+    Same qualitative-colormap convention as
+    ``src.stoichiometry.dock._qualitative_colors`` and
+    ``src.calibration.dock_widgets._qualitative_colors`` (categories have no
+    natural ordering, so a perceptually sequential colormap would mislead),
+    reimplemented locally since this module has no PyQt/dock dependency to
+    import it from.
     """
     import matplotlib.pyplot as plt
 
@@ -503,8 +619,19 @@ def _qualitative_colors_for_diagnostics(n: int) -> list[str]:
 
 
 def cbar_label_for_stage(stage: str) -> str:
-    """Colorbar unit label for a map correction stage: ppm for calibrated,
-    CPS for anything still in instrument-counts-like units."""
+    """Colorbar unit label for a map correction stage.
+
+    Parameters
+    ----------
+    stage : str
+        Correction-stage name, e.g. ``"raw"``, ``"background+drift
+        correction"``, or ``"calibrated"``.
+
+    Returns
+    -------
+    str
+        ``"ppm"`` when ``stage == "calibrated"``, otherwise ``"CPS"``.
+    """
     return "ppm" if stage == "calibrated" else "CPS"
 
 
@@ -513,8 +640,30 @@ def plot_all_stage_maps(
     calibrated: pd.Series, grid_index: pd.DataFrame, analyte: str,
     log_scale: bool = False,
 ) -> None:
-    """1x3 row of :func:`plot_index_map` calls, one per correction stage
-    (raw / combined background+drift correction / calibrated)."""
+    """Draw a 1x3 row of stage maps: raw, background+drift corrected, calibrated.
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to add the three subplots to.
+    raw : pandas.Series
+        Per-pixel raw values.
+    background_drift_corrected : pandas.Series
+        Per-pixel values after combined background and drift correction.
+    calibrated : pandas.Series
+        Per-pixel calibrated ppm.
+    grid_index : pandas.DataFrame
+        Shared ``line_number``/``sweep_index`` grid for all three panels.
+    analyte : str
+        Analyte name, used in the panel titles.
+    log_scale : bool, optional
+        Passed through to :func:`plot_index_map`, by default ``False``.
+
+    Returns
+    -------
+    None
+        Adds three subplots to ``fig`` in place.
+    """
     axes = fig.subplots(1, 3)
     stages = [
         (axes[0], raw, f"{analyte}: raw", "raw"),
@@ -529,16 +678,31 @@ def plot_all_stage_maps(
 
 
 def build_accuracy_table_df(accuracy_rows, excluded_outliers: dict[str, list[int]] | None = None) -> pd.DataFrame:
-    """Flattens a list of :class:`~src.calibration.standards.AccuracyRow` into
-    a display-ready table, with a boolean (True/False) flag column.
+    """Flatten accuracy rows into a display-ready DataFrame.
 
-    ``excluded_outliers`` (``StandardCalibrationResult.excluded_outliers``),
-    if given, adds an ``outliers_excluded`` column: the total number of
-    fit-group occurrences dropped from that analyte's drift fit/calibration
-    factor by outlier rejection (see ``standards._mad_outlier_mask``). An
-    excluded occurrence still gets its own row here -- outlier rejection
-    only affects the drift fit/calibration factor, not this QC table -- so
-    this column is a same-value-per-analyte summary, not a per-row flag.
+    Parameters
+    ----------
+    accuracy_rows : Iterable[AccuracyRow]
+        Rows to flatten (e.g. ``StandardCalibrationResult.accuracy_table``).
+    excluded_outliers : dict[str, list[int]] or None, optional
+        ``StandardCalibrationResult.excluded_outliers``. When given, adds an
+        ``outliers_excluded`` column with the per-analyte count of
+        fit-group occurrences dropped by outlier rejection. By default
+        ``None``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per accuracy row, with columns ``analyte, observed,
+        observed_se, reference, reference_uncertainty, difference,
+        combined_uncertainty, stat, threshold, group, flag`` and (when
+        applicable) ``outliers_excluded``.
+
+    Notes
+    -----
+    An excluded occurrence still gets its own row -- outlier rejection only
+    affects the drift fit/calibration factor -- so ``outliers_excluded`` is
+    a same-value-per-analyte summary, not a per-row flag.
     """
     rows = []
     for r in accuracy_rows:
@@ -561,7 +725,23 @@ def build_accuracy_table_df(accuracy_rows, excluded_outliers: dict[str, list[int
 
 
 def build_timing_report_df(files: list[LineFileData], backgrounds: list[BackgroundResult]) -> pd.DataFrame:
-    """One row per file: acquired time, background start/end, ablation start/end."""
+    """Build a per-file timing table.
+
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Parsed raw files.
+    backgrounds : list[BackgroundResult]
+        Background results, matched to ``files`` by file path. Files with no
+        matching result are omitted.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per file in acquisition-time order, with columns ``file,
+        label, index, is_standard, acquired_at, bg_start_time, bg_end_time,
+        bg_method, ablation_start_time, ablation_end_time``.
+    """
     by_path = {b.file_meta.path: b for b in backgrounds}
     rows = []
     for f in sorted(files, key=lambda x: x.meta.acquired_at):
@@ -589,57 +769,50 @@ def plot_time_series(
     outlier_names: set[str] | None = None, manual_row_masks: dict[str, np.ndarray] | None = None,
     mask_display: str = "light_gray",
 ) -> pd.DataFrame:
-    """Discrete-point (scatter, never connected) time-series view of one
-    analyte across one or more lines.
+    """Draw a discrete-point (never connected) time series for one analyte.
 
-    Points are colored by role -- background / excluded (edge-trim or
-    manual-override exclusion) / included / outlier -- using the same colors
-    (:data:`ROLE_COLORS`) whether the line is a standard or a sample, so
-    color always means "role", not "which line". A sample line only ever
-    shows background/included (it has no edge-trim or outlier-rejection
-    concept applied to it by default), reusing the standard's own
-    background/included colors. If a line has no
-    :class:`~src.calibration.background.BackgroundResult` (a pre-pipeline-run
-    raw preview), its points use a single neutral color instead of the
-    role-based scheme (see ``background.classify_rows``).
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw into.
+    lines : list[tuple[LineFileData, BackgroundResult or None]]
+        Each line's parsed data and its background result (``None`` for a
+        pre-Run raw preview).
+    analyte : str
+        Analyte to plot.
+    offset : bool, optional
+        Vertically stagger each line by ``i * offset_step`` and label it at
+        its right end. By default ``False``.
+    offset_step : float or None, optional
+        Vertical step between lines; defaults to half the overall value
+        range across ``lines``.
+    log_scale : bool, optional
+        Use a log y-axis, by default ``False``.
+    outlier_names : set[str] or None, optional
+        Filenames (``path.name``) whose occurrence was dropped by outlier
+        rejection; their included region is drawn with the ``"outlier"``
+        color. By default ``None``.
+    manual_row_masks : dict[str, numpy.ndarray] or None, optional
+        ``filename -> boolean mask`` (length of that line's signal) marking
+        click/drag-masked rows, drawn with the ``"manual"`` role. By
+        default ``None``.
+    mask_display : {"light_gray", "hidden"}, optional
+        How ``"manual"``-role points are drawn, by default ``"light_gray"``.
 
-    ``outlier_names``, if given, is the set of filenames (``path.name``)
-    whose occurrence was dropped from this analyte's drift fit/calibration
-    factor by statistical outlier rejection (see
-    ``StandardCalibrationResult.excluded_outliers``) -- those lines' included
-    region is colored ``"outlier"`` instead of ``"included"``, making outlier
-    rejection visible here rather than only as a count in the accuracy table.
+    Returns
+    -------
+    pandas.DataFrame
+        Columns ``filename, row_index, analyte, x, y, role``; one row per
+        plotted point (``row_index`` indexes that line's own
+        ``signal``/``absolute_time``), for click/drag hit-testing. Empty
+        (but present) when there is no data.
 
-    When ``offset`` is True, each line's y-values are shifted by
-    ``i * offset_step`` (its position in ``lines``) so multiple lines don't
-    overlap, and a text label (filename) is placed at the right end of each
-    line's (offset) series -- omitted when ``offset`` is False, since
-    overlapping unlabeled series have no single meaningful label position.
-    ``offset_step`` defaults to half the overall value range across ``lines``.
-
-    ``log_scale`` switches the y-axis to a log scale (points at zero/negative
-    counts simply don't render, per matplotlib's usual log-axis behavior).
-
-    ``manual_row_masks`` (filename -> boolean array the length of that
-    line's own signal, i.e. ``background.classify_rows``'s own
-    ``manual_row_mask`` param, per line) renders a click/drag-masked row
-    with the ``"manual"`` role/color, taking precedence over every
-    automatic role -- works even pre-Run (see ``classify_rows``).
-
-    ``mask_display`` controls how ``"manual"``-role (masked) points are
-    drawn: ``"light_gray"`` (default, :data:`ROLE_COLORS`'s own color for
-    that role) or ``"hidden"`` (not drawn at all). Either way, masked rows
-    are still included in the returned point-index DataFrame with
-    ``role="manual"`` -- hiding is purely visual, click/drag hit-testing
-    still works at a hidden point's (unchanged) data location so it can be
-    un-masked again.
-
-    Returns a DataFrame (columns: ``filename, row_index, analyte, x, y,
-    role``, one row per plotted point -- ``row_index`` is the absolute
-    index into that line's own ``signal``/``absolute_time`` arrays) for
-    hit-testing click/drag point-masking interactions against -- see
-    ``dock_widgets``'s canvas wiring. Empty (but present) when there's no
-    data to plot.
+    Notes
+    -----
+    Points are colored by role using :data:`ROLE_COLORS`, so color always
+    means "role", not "which line". Hiding masked points is purely visual --
+    they stay in the returned frame with ``role="manual"`` so they can be
+    un-masked.
     """
     point_columns = ["filename", "row_index", "analyte", "x", "y", "role"]
     if not lines:

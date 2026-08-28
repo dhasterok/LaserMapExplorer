@@ -1,0 +1,1 @@
+"""UI logic and controls for storing and retreiving plot data from the plot tree. Includes the plot registry for managing the plot data structure."""

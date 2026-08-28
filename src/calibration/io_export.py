@@ -15,15 +15,29 @@ from src.calibration.pipeline import SampleCalibratedResult
 
 
 def export_calibrated_csv(result: SampleCalibratedResult, path: str | Path) -> Path:
-    """Writes calibrated ppm data joined with its grid/position columns to CSV.
+    """Write calibrated ppm data joined with its grid/position columns to CSV.
 
-    ``calibrated_ratios`` (mass-bias-corrected isotope ratios, e.g. "Pb206 /
-    Pb204") and ``isotopic_ppm`` (isotope-apportioned concentrations, see
-    ``isotope_apportion.py``), when non-empty, are joined in too --
-    ``isotopic_ppm`` columns get an ``isotopic_`` prefix since they can
-    otherwise share a column name with ``calibrated_ppm`` (same analyte,
-    e.g. "Pb206", but a different -- elemental vs. isotope-apportioned --
-    number; see ``SampleCalibratedResult.isotopic_ppm``'s own docstring).
+    Parameters
+    ----------
+    result : SampleCalibratedResult
+        A calibrated sample. ``grid_index`` and ``calibrated_ppm`` are
+        always written; ``calibrated_ratios`` and ``isotopic_ppm`` are
+        joined in when non-empty.
+    path : str or pathlib.Path
+        Destination CSV path.
+
+    Returns
+    -------
+    pathlib.Path
+        The path written to (``Path(path)``).
+
+    Notes
+    -----
+    ``isotopic_ppm`` columns get an ``isotopic_`` prefix, since they can
+    otherwise collide with a ``calibrated_ppm`` column of the same analyte
+    name (e.g. ``"Pb206"``) that holds a different -- elemental vs.
+    isotope-apportioned -- number (see
+    ``SampleCalibratedResult.isotopic_ppm``).
     """
     path = Path(path)
     merged = result.grid_index.join(result.calibrated_ppm)
@@ -36,6 +50,18 @@ def export_calibrated_csv(result: SampleCalibratedResult, path: str | Path) -> P
 
 
 def _accuracy_rows_to_dicts(rows) -> list[dict]:
+    """Serialize accuracy rows to JSON-ready dicts.
+
+    Parameters
+    ----------
+    rows : Iterable[AccuracyRow]
+        Accuracy rows whose ``time`` attribute is a ``datetime``.
+
+    Returns
+    -------
+    list[dict]
+        One dict per row, with ``time`` replaced by its ISO-8601 string.
+    """
     out = []
     for r in rows:
         d = asdict(r)
@@ -45,6 +71,20 @@ def _accuracy_rows_to_dicts(rows) -> list[dict]:
 
 
 def _standard_result_to_dict(sr) -> dict:
+    """Flatten a standard calibration result to a JSON-ready dict.
+
+    Parameters
+    ----------
+    sr : StandardCalibrationResult
+        Per-standard calibration output, including drift fits and accuracy
+        tables.
+
+    Returns
+    -------
+    dict
+        Scalar QC fields plus per-analyte drift-fit orders and serialized
+        accuracy tables (``holdout_accuracy_table`` is ``None`` when absent).
+    """
     return {
         "standard_label": sr.standard_label,
         "split_enabled": sr.split_enabled,
@@ -60,11 +100,28 @@ def _standard_result_to_dict(sr) -> dict:
 
 
 def export_qc_report_json(result: SampleCalibratedResult, path: str | Path) -> Path:
-    """Writes provenance, per-file timing, and standard QC/accuracy tables to JSON.
+    """Write provenance, per-file timing, and standard QC/accuracy tables to JSON.
 
-    This is the natural future payload for ``ProjectModel.SampleCalibration.payload``
-    (see ``src/project/ProjectModel.py``), though wiring that up is deferred --
-    this function only produces the JSON, it doesn't touch a project manifest.
+    Parameters
+    ----------
+    result : SampleCalibratedResult
+        A calibrated sample; supplies provenance, QC report, file timing,
+        and per-standard results.
+    path : str or pathlib.Path
+        Destination JSON path.
+
+    Returns
+    -------
+    pathlib.Path
+        The path written to (``Path(path)``).
+
+    Notes
+    -----
+    This is the natural future payload for
+    ``ProjectModel.SampleCalibration.payload`` (see
+    ``src/project/ProjectModel.py``), though wiring that up is deferred --
+    this function only produces the JSON, it does not touch a project
+    manifest.
     """
     path = Path(path)
     timing_df = diagnostics.build_timing_report_df(result.files, result.backgrounds)
@@ -87,8 +144,28 @@ def export_qc_report_json(result: SampleCalibratedResult, path: str | Path) -> P
 def export_figures(
     result: SampleCalibratedResult, output_dir: str | Path, analytes: list[str] | None = None
 ) -> list[Path]:
-    """Saves a batch of diagnostic figures (background drift, standard-vs-reference,
-    standard QC series, calibrated-stage maps) as PNGs under ``output_dir``."""
+    """Save a batch of diagnostic figures as PNGs under ``output_dir``.
+
+    Parameters
+    ----------
+    result : SampleCalibratedResult
+        A calibrated sample, supplying backgrounds, per-standard results,
+        session drift fits, and calibrated maps.
+    output_dir : str or pathlib.Path
+        Directory to write PNGs into. Created (with parents) if absent.
+    analytes : list[str] or None, optional
+        Analytes to plot. When ``None``, defaults to every column of
+        ``result.calibrated_ppm`` (and, per standard, its calibration-factor
+        keys).
+
+    Returns
+    -------
+    list[pathlib.Path]
+        Every PNG path written, in creation order. Figures produced:
+        background drift, standard-vs-reference, standard QC series (per
+        standard and analyte), and calibrated-stage index maps (per
+        analyte).
+    """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []

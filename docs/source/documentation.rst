@@ -33,8 +33,19 @@ If the UI is altered by QtCreator, then you will need to alter the UI files usin
 
     main
     src.app
-    src.ui
+    src.calibration
+    src.classification
     src.common
+    src.control
+    src.data
+    src.deconvolution
+    src.importers
+    src.plotting
+    src.project
+    src.stoichiometry
+    src.style
+    src.tree
+    src.workflow
 
 Blockly Workflow (js) API
 =========================

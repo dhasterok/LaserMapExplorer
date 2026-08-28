@@ -47,6 +47,30 @@ from src.calibration.massbias import DEFAULT_ISOTOPE_TABLE_PATH, natural_abundan
 
 @dataclass
 class IsotopeShareSpec:
+    """Request to split one element's calibrated ppm across its isotopes.
+
+    Attributes
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    normalizer_mass : int
+        The ratio-denominator isotope mass, e.g. ``204`` for Pb.
+    companion_masses : list[int]
+        Numerator isotope masses to apportion, e.g. ``[206, 207, 208]``.
+    total_ppm_source_mass : int or None, optional
+        Which ``calibrated_ppm`` column supplies the total-element ppm.
+        ``None`` (default) auto-picks the first of
+        ``[normalizer_mass] + companion_masses`` actually present in
+        ``calibrated_ppm``.
+    mode : {"mass_bias", "natural_abundance"}, optional
+        ``"mass_bias"`` (default) reads corrected ratios from the
+        calibrated-ratio columns (see ``massbias.py``).
+        ``"natural_abundance"`` ignores those and uses a fixed terrestrial
+        abundance ratio per companion -- invalid for radiogenic daughter
+        pairs (see ``massbias.resolve_truth_ratio``), offered for
+        non-radiogenic pairs a user still wants split out by mass.
+    """
+
     element: str
     normalizer_mass: int              # the ratio denominator isotope, e.g. 204 for Pb
     companion_masses: list[int]       # e.g. [206, 207, 208]
@@ -67,6 +91,19 @@ class IsotopeShareSpec:
 
 @dataclass
 class IsotopeShareResult:
+    """Per-isotope concentrations from apportioning one element's total ppm.
+
+    Attributes
+    ----------
+    ppm : dict[int, numpy.ndarray]
+        Isotope mass -> per-sweep ppm array, including the normalizer mass.
+    included_masses : list[int]
+        Companion masses that actually had a usable corrected ratio, sorted.
+    missing_masses : list[int]
+        Requested companion masses with no corrected ratio available -- gaps
+        reported rather than backfilled from natural abundance.
+    """
+
     ppm: dict[int, np.ndarray] = field(default_factory=dict)   # mass -> per-sweep ppm, including normalizer
     included_masses: list[int] = field(default_factory=list)   # companions that actually had a corrected ratio
     missing_masses: list[int] = field(default_factory=list)    # requested companions with no corrected ratio available
@@ -75,25 +112,41 @@ class IsotopeShareResult:
 def apportion_element_ppm(
     total_element_ppm: np.ndarray, corrected_ratios: dict[int, np.ndarray], normalizer_mass: int,
 ) -> IsotopeShareResult | None:
-    """Splits ``total_element_ppm`` (the element's already-calibrated total
-    concentration, one value per row/sweep) across its isotopes, using
-    ``corrected_ratios`` (mass -> per-row ``isotope/normalizer`` ratio,
-    e.g. ``{206: R206, 207: R207, 208: R208}`` for Pb normalized to Pb204).
+    """Split an element's calibrated total ppm across its isotopes.
 
-    Uses EXACTLY the isotopes with a resolvable corrected ratio as if they
+    Parameters
+    ----------
+    total_element_ppm : numpy.ndarray
+        The element's already-calibrated total concentration, one value
+        per row/sweep.
+    corrected_ratios : dict[int, numpy.ndarray]
+        Numerator isotope mass -> per-row ``isotope / normalizer`` ratio,
+        e.g. ``{206: R206, 207: R207, 208: R208}`` for Pb normalized to
+        Pb204. Entries whose value is ``None`` are ignored.
+    normalizer_mass : int
+        Mass of the ratio-denominator isotope, e.g. ``204`` for Pb.
+
+    Returns
+    -------
+    IsotopeShareResult or None
+        Per-isotope ppm arrays (including the normalizer), with
+        ``included_masses`` listing the companions used and
+        ``missing_masses`` empty. ``None`` when ``corrected_ratios`` has no
+        usable entries at all.
+
+    Notes
+    -----
+    Uses exactly the isotopes with a resolvable corrected ratio as if they
     were the complete isotope set -- valid to the extent the normalizer
-    plus the included companions already account for ~100% of the
-    element's natural isotope population (true for Pb/Sr/Nd/Hf's dominant
-    isotopes). A companion with no corrected ratio (e.g. its own mass-bias
-    fit wasn't available) is reported in ``missing_masses`` rather than
-    silently backfilled from natural abundance -- blending a mass-bias-
-    corrected, sample-specific number with a natural-abundance placeholder
-    in the same output would hide a real precision difference between the
-    two, so this reports the gap instead of hiding it.
+    plus included companions already account for ~100% of the element's
+    natural isotope population (true for Pb/Sr/Nd/Hf's dominant isotopes).
+    A companion with no corrected ratio is reported in ``missing_masses``
+    rather than backfilled from natural abundance, so a real precision
+    difference between the two is not hidden.
 
-    Returns ``None`` (not a crash) if ``corrected_ratios`` has no usable
-    entries at all -- apportionment can't proceed for this element/sample
-    without at least one companion ratio.
+    The shares are ``share_normalizer = 1 / (1 + sum(R_i))`` and
+    ``share_i = R_i * share_normalizer``, so
+    ``ppm_i = total_element_ppm * share_i``.
     """
     usable = {
         mass: np.asarray(ratio, dtype=float)
@@ -125,23 +178,47 @@ def apportion_from_spec(
     spec: IsotopeShareSpec, calibrated_ppm_columns: dict[str, np.ndarray], calibrated_ratio_columns: dict[str, np.ndarray],
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> IsotopeShareResult | None:
-    """Convenience wrapper around :func:`apportion_element_ppm` that
-    resolves ``spec``'s masses against actual column-name dicts (as found
-    on ``SampleCalibratedResult.calibrated_ppm``/``calibrated_ratios``,
-    e.g. ``{"Pb206": array(...), ...}`` / ``{"Pb206 / Pb204": array(...), ...}``).
+    """Resolve an :class:`IsotopeShareSpec` against column dicts and apportion.
 
-    ``spec.mode == "mass_bias"`` (default) reads each companion's
-    corrected ratio from ``calibrated_ratio_columns``, filling in
-    ``missing_masses`` for requested companions with no corrected-ratio
-    column present -- see the module docstring for why this is NOT
-    backfilled from natural abundance.
+    Parameters
+    ----------
+    spec : IsotopeShareSpec
+        Which element, normalizer, and companion masses to apportion, and
+        in which mode.
+    calibrated_ppm_columns : dict[str, numpy.ndarray]
+        Calibrated elemental ppm keyed by analyte column name, e.g.
+        ``{"Pb206": array(...), ...}`` (as on
+        ``SampleCalibratedResult.calibrated_ppm``).
+    calibrated_ratio_columns : dict[str, numpy.ndarray]
+        Mass-bias-corrected isotope ratios keyed by column name, e.g.
+        ``{"Pb206 / Pb204": array(...), ...}``. Consulted only in
+        ``"mass_bias"`` mode.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Isotope table (or path) for ``"natural_abundance"`` mode. Defaults
+        to :data:`~src.calibration.massbias.DEFAULT_ISOTOPE_TABLE_PATH`.
 
-    ``spec.mode == "natural_abundance"`` ignores ``calibrated_ratio_columns``
-    entirely and instead uses a fixed terrestrial-abundance ratio (see
-    ``massbias.natural_abundance_ratio``, resolved against ``isotope_table``)
-    for every companion mass, constant across every row -- a companion
-    with no natural-abundance entry in ``isotope_table`` is reported in
-    ``missing_masses`` instead.
+    Returns
+    -------
+    IsotopeShareResult or None
+        Apportioned per-isotope ppm with ``missing_masses`` populated for
+        companions that could not be resolved. ``None`` when no
+        total-element ppm column can be found or
+        :func:`apportion_element_ppm` returns ``None``.
+
+    Raises
+    ------
+    ValueError
+        If ``spec.mode`` is not ``"mass_bias"`` or ``"natural_abundance"``.
+
+    Notes
+    -----
+    In ``"mass_bias"`` mode each companion's corrected ratio is read from
+    ``calibrated_ratio_columns``; a companion with no such column is added
+    to ``missing_masses`` rather than backfilled from natural abundance
+    (see the module docstring). In ``"natural_abundance"`` mode a fixed
+    terrestrial ratio (see ``massbias.natural_abundance_ratio``) is used
+    for every companion, constant across rows; a companion with no
+    abundance entry goes to ``missing_masses``.
     """
     if spec.mode not in _VALID_MODES:
         raise ValueError(f"IsotopeShareSpec.mode must be one of {sorted(_VALID_MODES)}, got {spec.mode!r}.")

@@ -55,17 +55,51 @@ TOTAL_SUFFIX = POOLED_TOTAL_SUFFIX  # re-exported for convenience -- reflib owns
 
 @dataclass
 class PooledElementSpec:
+    """Which isotopes of one element to combine into a pooled total channel.
+
+    Attributes
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    masses : list[int]
+        Every isotope mass of ``element`` the user has opted to pool --
+        usually every measured one.
+    """
+
     element: str
     masses: list[int]  # every isotope of `element` a user has opted to pool -- usually every measured one
 
 
 def pooled_channel_name(element: str) -> str:
+    """Name of the pooled virtual channel for ``element``.
+
+    Parameters
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+
+    Returns
+    -------
+    str
+        ``element`` with :data:`TOTAL_SUFFIX` appended, e.g. ``"Pb total"``.
+    """
     return f"{element}{TOTAL_SUFFIX}"
 
 
 def is_pooled_channel_name(analyte: str) -> str | None:
-    """Returns the element name if ``analyte`` is a pooled-channel name
-    (see :func:`pooled_channel_name`), else ``None``."""
+    """Recover the element name from a pooled-channel name.
+
+    Parameters
+    ----------
+    analyte : str
+        An analyte/channel name to test.
+
+    Returns
+    -------
+    str or None
+        The element name if ``analyte`` ends with :data:`TOTAL_SUFFIX`
+        (see :func:`pooled_channel_name`), otherwise ``None``.
+    """
     if analyte.endswith(TOTAL_SUFFIX):
         return analyte[: -len(TOTAL_SUFFIX)]
     return None
@@ -75,10 +109,25 @@ def combined_abundance_fraction(
     element: str, masses: list[int],
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> float | None:
-    """Sum of ``masses``' natural-abundance fractions for ``element`` (from
-    ``isotope_table``'s ``abundance_nominal`` column) -- e.g. Pb-206 +
-    Pb-207 + Pb-208 (excluding Pb-204) is ~0.986. Returns ``None`` if the
-    table is unavailable or none of ``masses`` resolve.
+    """Combined natural-abundance fraction of a set of isotopes of one element.
+
+    Parameters
+    ----------
+    element : str
+        Element symbol, e.g. ``"Pb"``.
+    masses : list[int]
+        Isotope masses of ``element`` to sum.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        A loaded isotope table, or a path to one, providing an
+        ``abundance_nominal`` column. Defaults to
+        :data:`~src.calibration.massbias.DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    float or None
+        Sum of the ``abundance_nominal`` values for the requested masses
+        (e.g. Pb-206 + Pb-207 + Pb-208, excluding Pb-204, is ~0.986).
+        ``None`` if the table is unavailable or none of ``masses`` resolve.
     """
     if isotope_table is None:
         return None
@@ -95,20 +144,39 @@ def synthesize_pooled_channels(
     files: list[LineFileData], specs: list[PooledElementSpec],
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> None:
-    """Mutates every file in ``files`` in place, adding one new raw CPS
-    column (and ``LineFileData.analytes`` entry) per spec --
-    :func:`pooled_channel_name` -- equal to the sum of whichever of
-    ``spec.masses`` are actually present in that file's own signal,
-    divided by their combined natural-abundance fraction (see module
-    docstring).
+    """Add a pooled ``"<element> total"`` raw CPS channel to each file, in place.
+
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Parsed raw files. Each is mutated in place: a new column is added
+        to ``f.signal`` and a matching entry to ``f.analytes``.
+    specs : list[PooledElementSpec]
+        One entry per element to pool, naming the isotope masses to sum.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        A loaded isotope table, or a path to one, used for the
+        abundance-fraction rescaling. Defaults to
+        :data:`~src.calibration.massbias.DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    None
+        The ``files`` list is modified in place.
+
+    Notes
+    -----
+    For each spec, each file gets a column named by
+    :func:`pooled_channel_name`, equal to the sum of whichever of
+    ``spec.masses`` are actually present in that file's signal, divided by
+    their combined natural-abundance fraction (see the module docstring).
 
     Must run before background-window detection (see ``pipeline.run``) so
-    the pooled channel gets the same background/drift/calibration
-    treatment as any ordinary analyte column. A file missing every one of
+    the pooled channel gets the same background/drift/calibration treatment
+    as any ordinary analyte column. A file missing every one of
     ``spec.masses``, or whose available subset has no resolvable combined
-    abundance fraction, is left untouched for that spec (no pooled column
-    added there) rather than raising -- matches how an unresolvable
-    analyte is handled elsewhere in this pipeline.
+    abundance fraction, is left untouched for that spec rather than raising
+    -- matching how an unresolvable analyte is handled elsewhere in this
+    pipeline.
     """
     if isotope_table is not None and not isinstance(isotope_table, pd.DataFrame):
         isotope_table = load_isotope_table(isotope_table)

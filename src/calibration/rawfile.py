@@ -44,11 +44,29 @@ DEFAULT_ISOTOPE_TABLE_PATH = "resources/app_data/isotope_info.csv"
 
 
 class RawFileFormatError(ValueError):
-    """Raised when a raw line file doesn't match the expected instrument export format."""
+    """Raised when a raw line file does not match the expected instrument export format."""
 
 
 @dataclass
 class LineFileMeta:
+    """Identifying metadata for one raw line-scan file.
+
+    Attributes
+    ----------
+    path : pathlib.Path
+        Path to the source CSV.
+    label : str
+        Filename label -- the text before ``" - N"`` in the filename stem.
+    index : int
+        The ``N`` in ``"<label> - <N>.csv"``; the line/spot number.
+    is_standard : bool
+        Whether ``label`` was matched as a reference-standard file.
+    acquired_at : datetime.datetime
+        Acquisition start time, parsed from the ``Acquired :`` header line.
+    batch : str or None
+        Batch name from the header, or ``None`` if the line omits it.
+    """
+
     path: Path
     label: str
     index: int
@@ -59,6 +77,27 @@ class LineFileMeta:
 
 @dataclass
 class LineFileData:
+    """Parsed contents of one raw line-scan file.
+
+    Attributes
+    ----------
+    meta : LineFileMeta
+        Identifying metadata for the file.
+    time_s : numpy.ndarray
+        Per-row elapsed time in seconds (the ``Time [Sec]`` column).
+    absolute_time : numpy.ndarray
+        Per-row wall-clock time as ``datetime64[us]``
+        (``meta.acquired_at + time_s``).
+    analytes : list[str]
+        Analyte/channel column names, e.g. ``["Al27", "Ca43", ...]``.
+    signal : pandas.DataFrame
+        CPS values; row-number index, one column per analyte.
+    dt_s : float
+        Median sweep interval in seconds, or NaN for a single-row file.
+    n_rows : int
+        Number of numeric data rows parsed.
+    """
+
     meta: LineFileMeta
     time_s: np.ndarray
     absolute_time: np.ndarray          # np.datetime64[us], one per row
@@ -69,7 +108,23 @@ class LineFileData:
 
 
 def parse_filename_label(path: Path) -> tuple[str, int]:
-    """Split '<label> - <N>.csv' into (label, N)."""
+    """Split a ``"<label> - <N>.csv"`` filename into its label and index.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        File path whose stem is parsed (the extension is ignored).
+
+    Returns
+    -------
+    tuple[str, int]
+        ``(label, N)``.
+
+    Raises
+    ------
+    RawFileFormatError
+        If the stem does not match the ``"<label> - <N>"`` pattern.
+    """
     m = _FILENAME_RE.match(path.stem)
     if not m:
         raise RawFileFormatError(
@@ -79,7 +134,19 @@ def parse_filename_label(path: Path) -> tuple[str, int]:
 
 
 def list_line_files(directory: str | Path) -> list[Path]:
-    """All files in ``directory`` matching the raw '<label> - <N>.csv' pattern."""
+    """List raw line-scan CSVs in a directory.
+
+    Parameters
+    ----------
+    directory : str or pathlib.Path
+        Directory to scan (non-recursively).
+
+    Returns
+    -------
+    list[pathlib.Path]
+        Every ``*.csv`` whose stem matches the ``"<label> - <N>"`` pattern,
+        sorted by name. Non-matching CSVs are skipped silently.
+    """
     directory = Path(directory)
     files = []
     for p in sorted(directory.glob("*.csv")):
@@ -92,6 +159,21 @@ def list_line_files(directory: str | Path) -> list[Path]:
 
 
 def _is_standard(label: str, standard_names) -> bool:
+    """Whether ``label`` names a reference-standard file.
+
+    Parameters
+    ----------
+    label : str
+        Filename label to test.
+    standard_names : Iterable[str] or Callable[[str], bool] or None
+        A membership collection, a predicate, or ``None``.
+
+    Returns
+    -------
+    bool
+        ``False`` when ``standard_names`` is ``None``; otherwise the
+        predicate result or membership test.
+    """
     if standard_names is None:
         return False
     if callable(standard_names):
@@ -100,14 +182,29 @@ def _is_standard(label: str, standard_names) -> bool:
 
 
 def _parse_acquired_line(line: str, time_format: str | None = None) -> tuple[datetime, str | None]:
-    """Parses the ``Acquired : <timestamp> using Batch <batch>`` header line.
+    """Parse the ``Acquired : <timestamp> using Batch <batch>`` header line.
 
-    ``time_format`` (a ``datetime.strptime`` pattern, e.g. ``"%d/%m/%y %H:%M:%S"``)
-    overrides auto-detection entirely -- for a timestamp format not covered
-    by :data:`_ACQUIRED_TIME_FORMATS` (different instrument software/export
-    versions have already been seen to differ on 2- vs 4-digit years). When
-    omitted (the default), every candidate in :data:`_ACQUIRED_TIME_FORMATS`
-    is tried in order and the first match wins.
+    Parameters
+    ----------
+    line : str
+        The raw header line.
+    time_format : str or None, optional
+        A :func:`datetime.datetime.strptime` pattern overriding
+        auto-detection entirely. When omitted, each candidate in
+        :data:`_ACQUIRED_TIME_FORMATS` is tried in order and the first
+        match wins.
+
+    Returns
+    -------
+    tuple[datetime.datetime, str or None]
+        ``(acquired_at, batch)``; ``batch`` is ``None`` when the line has
+        no ``" using Batch "`` clause.
+
+    Raises
+    ------
+    RawFileFormatError
+        If the line is not an ``Acquired :`` line, or the timestamp does
+        not parse against any tried format.
     """
     m = _ACQUIRED_RE.match(line.strip())
     if not m:
@@ -135,6 +232,19 @@ def _parse_acquired_line(line: str, time_format: str | None = None) -> tuple[dat
 
 
 def _is_numeric_row(fields: list[str]) -> bool:
+    """Whether a split CSV row is a numeric data row.
+
+    Parameters
+    ----------
+    fields : list[str]
+        Comma-split fields of one line.
+
+    Returns
+    -------
+    bool
+        ``True`` only if the first field is non-empty and parses as a
+        float -- used to detect the end of the data block.
+    """
     if not fields or fields[0].strip() == "":
         return False
     try:
@@ -147,11 +257,28 @@ def _is_numeric_row(fields: list[str]) -> bool:
 def validate_analyte_columns(
     analytes: list[str], isotope_table_path: str | Path = DEFAULT_ISOTOPE_TABLE_PATH
 ) -> list[str]:
-    """Analyte column names (e.g. 'Al27') not found in the isotope reference table.
+    """Find analyte column names not present in the isotope reference table.
 
-    Non-fatal by design: an unrecognized column is reported for the caller to
-    warn about, not treated as a parse failure, since instruments can report
-    isotopes absent from any particular local reference table.
+    Parameters
+    ----------
+    analytes : list[str]
+        Analyte column names to check, e.g. ``["Al27", "Ca43"]``.
+    isotope_table_path : str or pathlib.Path, optional
+        Path to the isotope reference CSV (``symbol`` and ``atomic_mass``
+        columns). Defaults to :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    list[str]
+        Column names that do not match the ``<element><mass>`` pattern, or
+        whose ``(element, mass)`` pair is absent from the table. Empty if
+        the table file does not exist.
+
+    Notes
+    -----
+    Non-fatal by design: an unrecognized column is reported for the caller
+    to warn about, not treated as a parse failure, since instruments can
+    report isotopes absent from any particular local reference table.
     """
     path = Path(isotope_table_path)
     if not path.exists():
@@ -182,20 +309,40 @@ def parse_line_file(
 
     Parameters
     ----------
-    path : str or Path
-    standard_names : iterable of str, or callable(label) -> bool, optional
+    path : str or pathlib.Path
+        Path to the raw line-scan CSV. Its stem must match
+        ``"<label> - <N>"``.
+    standard_names : Iterable[str] or Callable[[str], bool] or None, optional
         Determines ``LineFileMeta.is_standard`` from the filename label (the
-        text before ' - N' in the filename stem).
-    validate_isotopes : bool
+        text before ``" - N"`` in the filename stem). By default ``None``
+        (nothing is a standard).
+    validate_isotopes : bool, optional
         Cross-check analyte column names against
         ``resources/app_data/isotope_info.csv`` and warn (not raise) on
-        unrecognized columns.
-    acquired_time_format : str, optional
-        A ``datetime.strptime`` pattern (e.g. ``"%d/%m/%y %H:%M:%S"``)
-        overriding auto-detection of the header's ``Acquired : <timestamp>``
-        line -- see :func:`_parse_acquired_line`. Only needed when the
-        instrument export uses a timestamp layout not already covered by
-        :data:`_ACQUIRED_TIME_FORMATS`.
+        unrecognized columns. By default ``True``.
+    acquired_time_format : str or None, optional
+        A :func:`datetime.datetime.strptime` pattern (e.g.
+        ``"%d/%m/%y %H:%M:%S"``) overriding auto-detection of the header's
+        ``Acquired : <timestamp>`` line -- see :func:`_parse_acquired_line`.
+        Only needed when the instrument export uses a timestamp layout not
+        already covered by :data:`_ACQUIRED_TIME_FORMATS`.
+
+    Returns
+    -------
+    LineFileData
+        The parsed timing arrays, analyte list, and CPS signal frame.
+
+    Raises
+    ------
+    RawFileFormatError
+        If the filename, header lines, column header row, or data block do
+        not match the expected instrument export format.
+
+    Warns
+    -----
+    UserWarning
+        When ``validate_isotopes`` is true and one or more analyte columns
+        are absent from the isotope reference table.
     """
     path = Path(path)
     label, index = parse_filename_label(path)

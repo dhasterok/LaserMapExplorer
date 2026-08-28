@@ -17,10 +17,24 @@ from src.calibration.poisson_drift import PoissonDriftFit, select_poisson_order_
 
 
 class DriftFitError(ValueError):
-    """Raised when there isn't enough data to fit the requested polynomial order."""
+    """Raised when there is not enough data to fit the requested polynomial order."""
 
 
 def _to_seconds(times, t0: datetime) -> np.ndarray:
+    """Convert an iterable of datetimes to seconds since ``t0``.
+
+    Parameters
+    ----------
+    times : array_like
+        Datetimes, or anything :func:`pandas.to_datetime` accepts.
+    t0 : datetime.datetime
+        Time origin.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``(times - t0)`` in seconds, as ``float``.
+    """
     ts = pd.to_datetime(list(times))
     t0_ts = pd.Timestamp(t0)
     return (ts - t0_ts).total_seconds().to_numpy(dtype=float)
@@ -28,6 +42,28 @@ def _to_seconds(times, t0: datetime) -> np.ndarray:
 
 @dataclass
 class DriftFit:
+    """A polynomial fit of a value versus time, with goodness-of-fit stats.
+
+    Attributes
+    ----------
+    analyte : str
+        Name of the analyte (or synthetic channel) fitted. May be empty.
+    order : int
+        Polynomial degree actually used.
+    coeffs : numpy.ndarray
+        :func:`numpy.polyfit` coefficients, highest power first.
+    t0 : datetime.datetime
+        Time origin; the fit's x-axis is seconds since ``t0``.
+    r_squared : float
+        Coefficient of determination on the training points (``1.0`` when
+        the values have zero variance).
+    n_points : int
+        Number of points fitted.
+    residual_std : float
+        Sample standard deviation (``ddof=1``) of the residuals; ``0.0``
+        for a single point.
+    """
+
     analyte: str
     order: int
     coeffs: np.ndarray        # np.polyfit coefficients, highest power first
@@ -37,18 +73,52 @@ class DriftFit:
     residual_std: float
 
     def predict(self, times) -> np.ndarray:
+        """Evaluate the fitted polynomial at the given times.
+
+        Parameters
+        ----------
+        times : array_like
+            Datetimes (or anything :func:`pandas.to_datetime` accepts)
+            at which to evaluate the curve.
+
+        Returns
+        -------
+        numpy.ndarray
+            Predicted values, one per element of ``times``.
+        """
         x = _to_seconds(times, self.t0)
         return np.polyval(self.coeffs, x)
 
 
 def fit_polynomial(times, values, order: int, analyte: str = "") -> DriftFit:
-    """Fit a degree-``order`` polynomial to ``values`` vs ``times``.
+    """Fit a degree-``order`` polynomial to ``values`` versus ``times``.
 
-    ``order=0`` degenerates to the sample mean. Raises :class:`DriftFitError`
-    if there are fewer than ``order + 1`` points -- callers that want an
-    automatic order reduction (e.g. ``standards.py`` when too few standard
-    occurrences are available) implement that policy themselves rather than
-    this function silently picking a different order.
+    Parameters
+    ----------
+    times : array_like
+        Acquisition datetimes. The earliest becomes the fit's ``t0``.
+    values : array_like
+        Values to fit, aligned with ``times``.
+    order : int
+        Polynomial degree. ``order=0`` degenerates to the sample mean.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+
+    Returns
+    -------
+    DriftFit
+        The fitted polynomial and its goodness-of-fit statistics.
+
+    Raises
+    ------
+    DriftFitError
+        If ``times`` is empty, or has fewer than ``order + 1`` points.
+
+    Notes
+    -----
+    Callers that want automatic order reduction (e.g. ``standards.py`` when
+    too few standard occurrences are available) implement that policy
+    themselves rather than this function silently picking a different order.
     """
     times = list(times)
     values = np.asarray(values, dtype=float)
@@ -76,18 +146,50 @@ def fit_polynomial(times, values, order: int, analyte: str = "") -> DriftFit:
 
 
 def evaluate(fit: DriftFit, times) -> np.ndarray:
+    """Evaluate ``fit`` at ``times`` (thin wrapper over ``fit.predict``).
+
+    Parameters
+    ----------
+    fit : DriftFit
+        A fitted drift polynomial.
+    times : array_like
+        Datetimes at which to evaluate the curve.
+
+    Returns
+    -------
+    numpy.ndarray
+        Predicted values, one per element of ``times``.
+    """
     return fit.predict(times)
 
 
 def fit_polynomial_with_order_fallback(times, values, order: int, analyte: str = "") -> DriftFit | None:
-    """:func:`fit_polynomial`, reducing ``order`` (down to 0) when there
-    aren't enough points to support the requested order, instead of
-    raising -- returns ``None`` only if even order 0 has no data.
+    """:func:`fit_polynomial` with automatic order reduction instead of raising.
 
+    Parameters
+    ----------
+    times : array_like
+        Acquisition datetimes.
+    values : array_like
+        Values to fit, aligned with ``times``.
+    order : int
+        Requested polynomial degree. Reduced (down to 0) while
+        ``len(values) < order + 2``.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+
+    Returns
+    -------
+    DriftFit or None
+        The fit at the highest supportable order, or ``None`` if even
+        order 0 has no data.
+
+    Notes
+    -----
     Shared by ``standards.py`` (per-standard signal drift) and
     ``massbias.py`` (mass-bias log-ratio drift) -- both need "fit at this
-    order if there's enough data, otherwise the highest order that fits"
-    rather than a hard failure on a sparsely-sampled session.
+    order if there is enough data, otherwise the highest order that fits"
+    rather than a hard failure on a sparsely sampled session.
     """
     eff_order = order
     while eff_order > 0 and len(values) < eff_order + 2:
@@ -102,16 +204,33 @@ DriftFitLike = DriftFit | PoissonDriftFit
 
 
 def _cv_rss_for_order(times, values, order: int) -> float | None:
-    """Leave-one-out cross-validated residual sum of squares for a
-    candidate order -- the Gaussian/OLS analog of
-    ``poisson_drift._cv_deviance_for_order`` (see its docstring for the
-    full rationale). AIC alone compares fits only *at the observed times*,
-    so on sparse, gapped data a higher order can lower AIC by wiggling
-    unconstrained through the gaps between clusters of points; CV RSS
-    catches this because that same fit predicts a held-out point from its
-    own cluster poorly once it's not in the training data.
+    """Leave-one-out cross-validated residual sum of squares for a candidate order.
 
-    Returns ``None`` if there aren't enough points, or any fold fails to fit.
+    Parameters
+    ----------
+    times : array_like
+        Acquisition datetimes.
+    values : array_like
+        Values to fit, aligned with ``times``.
+    order : int
+        Candidate polynomial degree.
+
+    Returns
+    -------
+    float or None
+        Summed squared held-out prediction errors across all folds, or
+        ``None`` if there are fewer than ``order + 3`` points or any fold
+        fails to fit.
+
+    Notes
+    -----
+    The Gaussian/OLS analog of
+    ``poisson_drift._cv_deviance_for_order`` (see its docstring for the
+    full rationale). AIC alone compares fits only at the observed times, so
+    on sparse, gapped data a higher order can lower AIC by wiggling
+    unconstrained through the gaps between clusters of points; CV RSS
+    catches this, because that same fit predicts a held-out point from its
+    own cluster poorly once it is not in the training data.
     """
     times_list = list(times)
     n = len(times_list)
@@ -132,8 +251,33 @@ def _cv_rss_for_order(times, values, order: int) -> float | None:
 
 
 def _predicted_values_are_stable(fit: DriftFit, times, observed_values, max_ratio: float = 10.0) -> bool:
-    """Final safety net alongside the cross-validation check above: AIC is
-    computed only from residuals at the observed times, so even with the CV
+    """Whether a fit stays within a sane range across the whole time span.
+
+    Parameters
+    ----------
+    fit : DriftFit
+        The candidate fit to probe.
+    times : array_like
+        Observed acquisition datetimes; their min and max bound the probe
+        interval.
+    observed_values : array_like
+        The values that were fitted, used to derive the plausible range.
+    max_ratio : float, optional
+        Allowed excursion of the predicted curve from the observed median,
+        as a multiple of the observed spread. By default ``10.0``.
+
+    Returns
+    -------
+    bool
+        ``True`` if every prediction on a 200-point grid across
+        ``[min(times), max(times)]`` is finite and within
+        ``max_ratio * span`` of the observed median; ``True`` trivially
+        when the time span is degenerate.
+
+    Notes
+    -----
+    Final safety net alongside the cross-validation check: AIC is computed
+    only from residuals at the observed times, so even with the CV
     requirement in place this is cheap extra insurance against a fit that
     swings unrealistically far from the observed data's own range anywhere
     across the full time span (including beyond the last observed time).
@@ -156,23 +300,44 @@ def _predicted_values_are_stable(fit: DriftFit, times, observed_values, max_rati
 
 
 def select_order_by_aic(times, values, max_order: int = 3, analyte: str = "") -> DriftFit:
-    """Incrementally tests order 0 -> 1 -> ... -> max_order, accepting each
-    next order only when *all three* hold: it lowers AIC = n*ln(RSS/n) +
-    2*(order+1) relative to the current best, its leave-one-out
-    cross-validated RSS also improves (see :func:`_cv_rss_for_order`), and
-    its predicted curve stays plausible across the whole time span (see
-    :func:`_predicted_values_are_stable`) -- stops at the first order
-    failing any of the three and returns the last accepted fit.
+    """Select a polynomial drift order by AIC, guarded by cross-validation.
+
+    Parameters
+    ----------
+    times : array_like
+        Acquisition datetimes.
+    values : array_like
+        Values to fit, aligned with ``times``.
+    max_order : int, optional
+        Highest polynomial order considered, by default ``3``.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+
+    Returns
+    -------
+    DriftFit
+        The last accepted fit.
+
+    Raises
+    ------
+    DriftFitError
+        If ``times`` is empty.
+
+    Notes
+    -----
+    Incrementally tests order 0 -> 1 -> ... -> ``max_order``, accepting each
+    next order only when all three hold: it lowers
+    ``AIC = n * ln(RSS / n) + 2 * (order + 1)`` relative to the current
+    best, its leave-one-out cross-validated RSS also improves (see
+    :func:`_cv_rss_for_order`), and its predicted curve stays plausible
+    across the whole time span (see :func:`_predicted_values_are_stable`).
+    Stops at the first order failing any of the three.
 
     AIC alone is not sufficient on sparse, gapped data (e.g. separate
-    analytical sessions within one dataset): a higher order can lower
-    in-sample AIC by wiggling through the gaps between clusters of points
-    without actually predicting them better, which the CV requirement
-    catches (see :func:`_cv_rss_for_order`).
-
-    A simpler alternative to :func:`~src.calibration.poisson_drift.select_poisson_order_lrt`
-    for values the Poisson non-negative-integer-count assumption doesn't
-    apply to (e.g. a background-corrected/net signal, which can be negative).
+    analytical sessions within one dataset). A simpler alternative to
+    :func:`~src.calibration.poisson_drift.select_poisson_order_lrt` for
+    values the Poisson non-negative-integer-count assumption does not apply
+    to (e.g. a background-corrected net signal, which can be negative).
     """
     times = list(times)
     values = np.asarray(values, dtype=float)
@@ -181,6 +346,19 @@ def select_order_by_aic(times, values, max_order: int = 3, analyte: str = "") ->
         raise DriftFitError("No data points to fit.")
 
     def _aic(order: int) -> tuple[DriftFit, float]:
+        """Fit at ``order`` and return ``(fit, AIC)``.
+
+        Parameters
+        ----------
+        order : int
+            Polynomial order to fit.
+
+        Returns
+        -------
+        tuple[DriftFit, float]
+            The fit and ``n * ln(RSS / n) + 2 * (order + 1)``, with RSS
+            floored at ``1e-12`` so a perfect fit does not give ``-inf``.
+        """
         fit = fit_polynomial(times, values, order=order, analyte=analyte)
         predicted = fit.predict(times)
         # A perfect fit (RSS=0, e.g. order == n-1) makes ln(RSS/n) -> -inf;
@@ -212,18 +390,49 @@ def select_drift_fit(
     times, values, counts=None, tau_s=None, method: str = "fixed",
     order: int = 1, max_order: int = 3, analyte: str = "",
 ) -> DriftFitLike:
-    """Single dispatcher over the three user-facing drift-fit methods, shared
-    by ``background.py`` and ``standards.py``.
+    """Dispatch to one of the three user-facing drift-fit methods.
 
-    - ``"fixed"``: ordinary-least-squares :func:`fit_polynomial` at ``order``.
-    - ``"auto_aic"``: :func:`select_order_by_aic` over ``0..max_order`` (Gaussian/OLS).
-    - ``"auto_poisson_lrt"``: :func:`~src.calibration.poisson_drift.select_poisson_order_lrt`
-      over ``0..max_order`` on recovered integer counts -- requires ``counts``/``tau_s``;
-      raises rather than silently falling back, since a missing counts/tau_s
-      argument here is a caller bug, not a degraded-data condition.
+    Parameters
+    ----------
+    times : array_like
+        Acquisition datetimes.
+    values : array_like
+        Values to fit (``"fixed"`` and ``"auto_aic"``), aligned with
+        ``times``.
+    counts : array_like or None, optional
+        Recovered integer counts, required for ``"auto_poisson_lrt"``.
+    tau_s : float or None, optional
+        Effective counting time in seconds, required for
+        ``"auto_poisson_lrt"``.
+    method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+        - ``"fixed"`` -- OLS :func:`fit_polynomial` at ``order``.
+        - ``"auto_aic"`` -- :func:`select_order_by_aic` over
+          ``0..max_order`` (Gaussian/OLS).
+        - ``"auto_poisson_lrt"`` --
+          :func:`~src.calibration.poisson_drift.select_poisson_order_lrt`
+          over ``0..max_order`` on recovered integer counts.
 
-    Returns a :class:`DriftFit` (``"fixed"``/``"auto_aic"``) or
-    :class:`~src.calibration.poisson_drift.PoissonDriftFit` (``"auto_poisson_lrt"``).
+        By default ``"fixed"``.
+    order : int, optional
+        Polynomial order for ``"fixed"``, by default ``1``.
+    max_order : int, optional
+        Highest order for the ``auto_*`` methods, by default ``3``.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+
+    Returns
+    -------
+    DriftFit or PoissonDriftFit
+        A :class:`DriftFit` for ``"fixed"``/``"auto_aic"``, a
+        :class:`~src.calibration.poisson_drift.PoissonDriftFit` for
+        ``"auto_poisson_lrt"``.
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is unknown, or ``method="auto_poisson_lrt"`` without
+        both ``counts`` and ``tau_s`` (a caller bug, not a degraded-data
+        condition, so it raises rather than falling back).
     """
     if method == "fixed":
         return fit_polynomial(times, values, order=order, analyte=analyte)

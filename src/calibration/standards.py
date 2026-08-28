@@ -32,6 +32,25 @@ from src.calibration.reflib import ReferenceMaterial, resolve_elemental_value
 
 @dataclass
 class StandardOccurrence:
+    """One measurement of a standard: its file, background result, and stats.
+
+    Attributes
+    ----------
+    file_meta : LineFileMeta
+        Identifying metadata for the raw file.
+    background : BackgroundResult
+        The file's background/ablation-window result.
+    mean_signal : dict[str, float]
+        Mean background-corrected signal over the included, row-screened
+        ablation region, keyed by analyte (NaN when empty).
+    sem_signal : dict[str, float]
+        Standard error of ``mean_signal`` per analyte (``0.0`` for a single
+        row).
+    occurrence_order : int
+        1-based position in true acquisition-time order among this label's
+        files (not the filename index).
+    """
+
     file_meta: LineFileMeta
     background: BackgroundResult
     mean_signal: dict[str, float]
@@ -41,6 +60,43 @@ class StandardOccurrence:
 
 @dataclass
 class AccuracyRow:
+    """One analyte/occurrence row of the standard accuracy QC table.
+
+    Attributes
+    ----------
+    analyte : str
+        Analyte name.
+    observed_value : float
+        Back-calculated concentration for this occurrence.
+    observed_se : float
+        Standard error on ``observed_value``.
+    reference_value : float
+        Certified concentration from the reference material.
+    reference_uncertainty : float
+        One-sigma uncertainty on ``reference_value`` (``0.0`` if unknown).
+    difference : float
+        ``observed_value - reference_value``.
+    combined_uncertainty : float
+        Quadrature sum of ``observed_se`` and ``reference_uncertainty``.
+    z_or_t_stat : float
+        ``difference / combined_uncertainty`` (``inf`` when the combined
+        uncertainty is zero).
+    threshold_multiple : float
+        The ``accuracy_threshold`` this row was tested against.
+    flagged : bool
+        Whether ``abs(z_or_t_stat)`` exceeds ``threshold_multiple``.
+    group : {"fit", "holdout", "all"}
+        Which occurrence group this row belongs to.
+    occurrence_order : int
+        The occurrence's ``occurrence_order``.
+    time : datetime.datetime
+        The occurrence's ``acquired_at`` -- lets diagnostics plot
+        reference-vs-time.
+    manually_excluded : bool
+        Whether the user excluded this occurrence/analyte via the QC viewer
+        (see ``calibrate_standard``'s ``manual_occurrence_exclusions``).
+    """
+
     analyte: str
     observed_value: float
     observed_se: float
@@ -59,6 +115,42 @@ class AccuracyRow:
 
 @dataclass
 class StandardCalibrationResult:
+    """Full calibration + QC output for one standard label.
+
+    Attributes
+    ----------
+    standard_label : str
+        The standard's filename label.
+    reference : ReferenceMaterial
+        The resolved reference-material composition.
+    occurrences : list[StandardOccurrence]
+        Every occurrence of this standard, in acquisition-time order.
+    drift_fits : dict[str, DriftFitLike]
+        Per-analyte signal-drift fit (``DriftFit`` or ``PoissonDriftFit``).
+    calibration_factor : dict[str, float]
+        Per-analyte summary ppm-per-CPS multiplier, for QC/reporting.
+    accuracy_table : list[AccuracyRow]
+        Accuracy rows for the fit group (or all occurrences when not split).
+    holdout_accuracy_table : list[AccuracyRow] or None
+        Accuracy rows for the held-out even occurrences, or ``None`` when
+        ``split_odd_even`` was false.
+    split_enabled : bool
+        Whether odd/even holdout splitting was used.
+    skipped_analytes : list[str]
+        Analytes with no reference value or no stable drift fit.
+    excluded_outliers : dict[str, list[int]]
+        Per-analyte ``occurrence_order`` values dropped by the automatic MAD
+        screen.
+    manually_excluded_occurrences : dict[str, list[int]]
+        Per-analyte ``occurrence_order`` values dropped by user click/drag.
+    mean_predicted_signal : dict[str, float]
+        Per-analyte ``mean(drift_fit.predict(kept_times))`` -- the
+        multi-point calibration input.
+    detrend_fits : dict[str, DriftFitLike]
+        Per-analyte linear fit of ``(observed - reference)`` versus time
+        (see ``calibrate_standard``'s ``detrend``).
+    """
+
     standard_label: str
     reference: ReferenceMaterial
     occurrences: list[StandardOccurrence]
@@ -76,20 +168,40 @@ class StandardCalibrationResult:
 
 @dataclass
 class CalibrationCurve:
-    """One analyte's CPS->ppm calibration curve, fit across every PRIMARY
-    standard's own (drift-fit mean predicted CPS, reference ppm) point --
-    see :func:`combine_primary_standards`.
+    """One analyte's CPS-to-ppm calibration curve across the primary standards.
 
-    With exactly one primary standard, this degenerates to today's
-    single-point behavior: ``slope = reference_value / mean_predicted_cps``,
-    ``intercept = 0`` (a line forced through the origin), ``r_squared =
-    None`` (not a meaningful statistic for one point). With two or more,
-    it's an ordinary-least-squares fit of ppm vs CPS -- with a free
-    intercept (``method="multi_point_linear"``) by default, or forced
-    through the origin (``method="multi_point_zero_intercept"``,
-    ``intercept=0``) when ``force_zero_intercept`` is requested -- see
-    :func:`combine_primary_standards`.
+    Fit across every primary standard's own ``(drift-fit mean predicted
+    CPS, reference ppm)`` point -- see :func:`combine_primary_standards`.
+
+    Attributes
+    ----------
+    analyte : str
+        Analyte name.
+    slope : float
+        ppm per CPS.
+    intercept : float
+        ppm offset; ``0.0`` for single-point and zero-intercept fits.
+    r_squared : float or None
+        Coefficient of determination; ``None`` for a single point.
+    n_points : int
+        Number of contributing primary standards.
+    method : {"single_point_ratio", "multi_point_linear", "multi_point_zero_intercept"}
+        How the curve was fit.
+    points : list[tuple[str, float, float]]
+        The ``(standard_label, mean_predicted_cps, reference_ppm)`` points
+        used.
+
+    Notes
+    -----
+    With exactly one primary standard this degenerates to
+    ``slope = reference_value / mean_predicted_cps``, ``intercept = 0`` (a
+    line through the origin), ``r_squared = None``. With two or more it is
+    an OLS fit of ppm versus CPS -- free intercept
+    (``"multi_point_linear"``) by default, or forced through the origin
+    (``"multi_point_zero_intercept"``) when ``force_zero_intercept`` is
+    requested.
     """
+
     analyte: str
     slope: float
     intercept: float
@@ -101,14 +213,26 @@ class CalibrationCurve:
 
 @dataclass
 class MultiStandardCalibrationResult:
-    """The combined output of :func:`combine_primary_standards` -- a
-    sibling to (not a replacement for) each primary standard's own
-    :class:`StandardCalibrationResult`, which every standard (primary or
-    secondary) still gets independently for its own QC story (occurrences,
-    drift fit, accuracy table). This only exists once 2+ primary standards
-    are configured; with exactly one, callers use the existing
-    ``calibrate_standard``/``apply_calibration`` path directly instead.
+    """Combined multi-standard calibration output from :func:`combine_primary_standards`.
+
+    A sibling to (not a replacement for) each primary standard's own
+    :class:`StandardCalibrationResult`. Only exists once 2+ primary
+    standards are configured.
+
+    Attributes
+    ----------
+    primary_labels : list[str]
+        The primary standard labels combined.
+    curves : dict[str, CalibrationCurve]
+        Per-analyte shared CPS-to-ppm curve.
+    drift_reference_by_analyte : dict[str, str]
+        Per-analyte, which primary label's own drift fit time-normalizes a
+        sample before the shared curve is applied.
+    skipped_analytes : list[str]
+        Analytes with no usable ``(CPS, ppm)`` point from any primary
+        standard.
     """
+
     primary_labels: list[str]
     curves: dict[str, CalibrationCurve]
     drift_reference_by_analyte: dict[str, str]  # analyte -> which primary label's own drift fit time-normalizes samples
@@ -119,10 +243,34 @@ def assemble_occurrences(
     backgrounds: list[BackgroundResult], row_outlier_order: int = 1, row_outlier_threshold: float = 5.0,
     manual_row_exclusions: dict[str, dict[str, set[int]]] | None = None,
 ) -> list[StandardOccurrence]:
-    """Builds :class:`StandardOccurrence` entries from a standard label's
-    background results, numbered by true acquisition-time order (not by
-    filename index, which is only meaningful within one label).
+    """Build :class:`StandardOccurrence` entries from a standard's background results.
 
+    Parameters
+    ----------
+    backgrounds : list[BackgroundResult]
+        Background/ablation-window results for every file of one standard
+        label. Sorted here by ``acquired_at``.
+    row_outlier_order : int, optional
+        Polynomial order for the per-analyte row-outlier fit, by default
+        ``1``.
+    row_outlier_threshold : float, optional
+        Rejection threshold passed to
+        :func:`~src.calibration.background.detect_row_outliers`, by default
+        ``5.0``.
+    manual_row_exclusions : dict[str, dict[str, set[int]]] or None, optional
+        ``filename -> analyte -> set of absolute row indices`` to force-exclude
+        (from the Time Series viewer's click/drag masking). Unioned into
+        each analyte's automatic mask.
+
+    Returns
+    -------
+    list[StandardOccurrence]
+        One entry per file, in acquisition-time order, each carrying
+        row-screened ``mean_signal``/``sem_signal`` and a copy of the
+        ablation window with per-analyte ``row_outlier_mask`` attached.
+
+    Notes
+    -----
     Statistics use the ablation window's *included* (edge-trimmed) region
     (``AblationWindow.included_start_idx``/``included_end_idx``), not
     necessarily the full ablation span -- see ``background.apply_edge_trim``.
@@ -209,13 +357,24 @@ def assemble_occurrences(
 def _mad_outlier_mask(values: list[float], threshold: float = 3.5) -> list[bool]:
     """Robust keep-mask via modified z-score (median absolute deviation).
 
+    Parameters
+    ----------
+    values : list[float]
+        One value per candidate point (e.g. per standard occurrence).
+    threshold : float, optional
+        Modified-z-score cutoff, by default ``3.5`` (Iglewicz & Hoaglin).
+
+    Returns
+    -------
+    list[bool]
+        ``True`` to keep, ``False`` to reject. All ``True`` when there are
+        fewer than 4 points or the MAD is zero.
+
+    Notes
+    -----
     A standard occurrence can include a bad measurement (contamination, a
     mis-detected background window, an isolated spike) that would otherwise
     skew both the drift fit and the calibration factor derived from it.
-    ``threshold=3.5`` is the conventional cutoff for this statistic (Iglewicz
-    & Hoaglin). Requires at least 4 points to attempt rejection -- with
-    fewer, there's not enough information to distinguish a real outlier from
-    ordinary scatter, so nothing is excluded.
     """
     n = len(values)
     if n < 4:
@@ -230,10 +389,25 @@ def _mad_outlier_mask(values: list[float], threshold: float = 3.5) -> list[bool]
 
 
 def _poisson_eligible(o: StandardOccurrence, analyte: str, background_fraction_threshold: float) -> bool:
-    """True when this occurrence's background is negligible enough, relative
-    to its raw ablation signal, that fitting the *raw* (uncorrected) rate is
-    an adequate stand-in for the background-corrected rate this module
-    otherwise fits -- see ``calibrate_standard``'s ``method`` docstring."""
+    """Whether an occurrence's background is negligible vs. its raw ablation signal.
+
+    Parameters
+    ----------
+    o : StandardOccurrence
+        The occurrence to test.
+    analyte : str
+        Analyte name.
+    background_fraction_threshold : float
+        Maximum ``background_mean / ablation_mean`` for the raw rate to be
+        an adequate stand-in for the background-corrected rate.
+
+    Returns
+    -------
+    bool
+        ``True`` when ``tau`` is known, the analyte is present, the mean
+        ablation level is positive, and the background is below
+        ``background_fraction_threshold`` of it.
+    """
     bg = o.background
     if bg.tau_provenance.get(analyte, "unknown") == "unknown":
         return False
@@ -249,10 +423,29 @@ def _poisson_eligible(o: StandardOccurrence, analyte: str, background_fraction_t
 def _poisson_inputs_for_analyte(
     occurrences: list[StandardOccurrence], analyte: str
 ) -> tuple[list[datetime], list[float], list[float]]:
-    """(times, total_counts, total_tau_s) per occurrence, recovered from raw
-    (pre-background-subtraction) ablation CPS -- the Poisson non-negative-
-    integer-count assumption doesn't hold for the net/background-corrected
-    signal, which can be negative."""
+    """Per-occurrence Poisson GLM inputs from raw ablation CPS.
+
+    Parameters
+    ----------
+    occurrences : list[StandardOccurrence]
+        Occurrences to build inputs from. Those with unresolvable ``tau``
+        or no recoverable counts are skipped.
+    analyte : str
+        Analyte name.
+
+    Returns
+    -------
+    tuple[list[datetime.datetime], list[float], list[float]]
+        ``(times, total_counts, total_tau_s)``, one element per usable
+        occurrence, recovered from raw (pre-background-subtraction) ablation
+        CPS.
+
+    Notes
+    -----
+    Uses the raw signal because the Poisson non-negative-integer-count
+    assumption does not hold for the net/background-corrected signal, which
+    can be negative.
+    """
     times: list[datetime] = []
     counts_list: list[float] = []
     tau_list: list[float] = []
@@ -285,9 +478,55 @@ def calibrate_standard(
     manual_occurrence_exclusions: dict[str, set[str]] | None = None,
     detrend: bool = False,
 ) -> StandardCalibrationResult:
-    """Fits per-analyte drift, computes calibration factors, and builds the
-    accuracy QC table(s).
+    """Fit per-analyte drift, compute calibration factors, and build QC tables.
 
+    Parameters
+    ----------
+    occurrences : list[StandardOccurrence]
+        Every occurrence of one standard label. Must be non-empty.
+    reference : ReferenceMaterial
+        The standard's certified composition.
+    drift_order : int, optional
+        Polynomial order for ``method="fixed"`` (with automatic reduction),
+        by default ``1``.
+    split_odd_even : bool, optional
+        When true, odd ``occurrence_order`` entries fit the drift/calibration
+        and even entries are held out for independent QC. By default
+        ``False``.
+    accuracy_threshold : float, optional
+        ``abs(z_or_t_stat)`` above which an accuracy row is flagged, by
+        default ``2.0``.
+    standard_label : str, optional
+        Label stored on the result, by default ``""``.
+    method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+        Per-analyte drift-fit strategy, by default ``"fixed"``.
+    max_order : int, optional
+        Highest order for the ``auto_*`` methods, by default ``3``.
+    poisson_background_fraction_threshold : float, optional
+        Maximum ``background_mean / ablation_mean`` for an analyte to be
+        eligible for ``"auto_poisson_lrt"``, by default ``0.05``.
+    manual_occurrence_exclusions : dict[str, set[str]] or None, optional
+        ``filename -> set of analytes`` to drop from that analyte's drift
+        fit / calibration factor (a user's QC-viewer click). Kept separate
+        from the automatic MAD screen.
+    detrend : bool, optional
+        When true, fit one extra linear model of ``(observed - reference)``
+        versus time per analyte and store it in ``detrend_fits``. By
+        default ``False``.
+
+    Returns
+    -------
+    StandardCalibrationResult
+        Drift fits, calibration factors, accuracy table(s), and the various
+        exclusion/skipped bookkeeping fields.
+
+    Raises
+    ------
+    ValueError
+        If ``occurrences`` is empty.
+
+    Notes
+    -----
     If ``split_odd_even``, odd ``occurrence_order`` entries are the fit group
     (drift fit + calibration factor derived from them) and even entries are
     held out and back-calculated through that fit for independent QC
@@ -440,6 +679,21 @@ def calibrate_standard(
         mean_predicted_signal[analyte] = mean_predicted
 
     def _accuracy_rows(group_occurrences: list[StandardOccurrence], group_label: str) -> list[AccuracyRow]:
+        """Back-calculate each occurrence through its drift fit into accuracy rows.
+
+        Parameters
+        ----------
+        group_occurrences : list[StandardOccurrence]
+            Occurrences to evaluate.
+        group_label : {"fit", "holdout", "all"}
+            Value stored on each row's ``group`` field.
+
+        Returns
+        -------
+        list[AccuracyRow]
+            One row per (occurrence, analyte) that has both a reference
+            value and a drift fit.
+        """
         rows = []
         for o in group_occurrences:
             for analyte in analytes:
@@ -498,12 +752,30 @@ def calibrate_standard(
 
 
 def apply_calibration(signal: pd.DataFrame, absolute_time, result: StandardCalibrationResult) -> pd.DataFrame:
-    """Applies ``result``'s drift-normalized calibration curve to arbitrary
-    background-corrected signal (typically a sample's ablation signal):
-    ``calibrated_ppm(t) = signal(t) / drift_fit.predict(t) * reference_value``,
-    per analyte. Reduces to a constant multiplicative scale when the drift
-    fit is order 0. Analytes with no drift fit / reference value (see
-    ``StandardCalibrationResult.skipped_analytes``) are omitted from the output.
+    """Apply a standard's drift-normalized calibration curve to a signal.
+
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        Background-corrected signal (typically a sample's ablation signal),
+        one column per analyte.
+    absolute_time : array_like
+        Per-row acquisition times aligned with ``signal``.
+    result : StandardCalibrationResult
+        The calibration to apply.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Calibrated ppm,
+        ``signal(t) / drift_fit.predict(t) * reference_value`` per analyte
+        (minus any ``detrend_fit``), indexed like ``signal``. Analytes with
+        no drift fit or reference value are omitted.
+
+    Notes
+    -----
+    Reduces to a constant multiplicative scale when the drift fit is order
+    0.
     """
     out = {}
     for analyte in signal.columns:
@@ -526,10 +798,28 @@ def combine_primary_standards(
     standard_results: dict[str, StandardCalibrationResult], primary_labels: list[str],
     force_zero_intercept: bool = False,
 ) -> MultiStandardCalibrationResult:
-    """Combines two or more primary standards' own (already-computed, per-
-    label) drift fits into one shared CPS-vs-ppm calibration curve per
-    analyte.
+    """Combine several primary standards into one shared CPS-vs-ppm curve per analyte.
 
+    Parameters
+    ----------
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-label calibration results (from :func:`calibrate_standard`),
+        keyed by standard label.
+    primary_labels : list[str]
+        Which labels in ``standard_results`` are primary standards.
+    force_zero_intercept : bool, optional
+        When true, multi-point fits are forced through the origin
+        (``method="multi_point_zero_intercept"``); otherwise a free
+        intercept is fit. By default ``False``.
+
+    Returns
+    -------
+    MultiStandardCalibrationResult
+        Per-analyte :class:`CalibrationCurve`, the per-analyte drift
+        reference label, and the list of skipped analytes.
+
+    Notes
+    -----
     For each analyte, gathers one ``(standard_label, mean_predicted_cps,
     reference_ppm)`` point per primary standard that has both a resolvable
     drift fit (``mean_predicted_signal``, populated by
@@ -645,6 +935,19 @@ def combine_primary_standards(
             )
 
         def _kept_count(label: str) -> int:
+            """Number of ``label``'s occurrences not excluded for ``analyte``.
+
+            Parameters
+            ----------
+            label : str
+                A contributing primary standard label.
+
+            Returns
+            -------
+            int
+                Occurrences whose ``occurrence_order`` is in neither the
+                automatic nor the manual exclusion set for ``analyte``.
+            """
             sr = standard_results[label]
             excluded = set(sr.excluded_outliers.get(analyte, [])) | set(sr.manually_excluded_occurrences.get(analyte, []))
             return sum(1 for o in sr.occurrences if o.occurrence_order not in excluded)
@@ -662,18 +965,36 @@ def apply_multi_point_calibration(
     signal: pd.DataFrame, absolute_time, multi_result: MultiStandardCalibrationResult,
     standard_results: dict[str, StandardCalibrationResult],
 ) -> pd.DataFrame:
-    """Applies a :class:`MultiStandardCalibrationResult`'s per-analyte
-    calibration curve to arbitrary background-corrected signal, the
-    multi-point analog of :func:`apply_calibration`:
-    ``calibrated_ppm(t) = (signal(t) / drift_fit.predict(t) * mean_predicted_cps)
-    * slope + intercept``, where ``drift_fit``/``mean_predicted_cps`` come
-    from whichever primary standard ``drift_reference_by_analyte`` picked
-    for that analyte. The inner ``signal/drift_fit.predict(t) *
-    mean_predicted_cps`` term is the same time-normalization
-    ``apply_calibration`` performs, just expressed as a normalized CPS
-    level rather than jumping straight to ppm -- for a single-point curve
-    (``slope = ref_value/mean_predicted_cps``, ``intercept = 0``) this is
-    algebraically identical to ``apply_calibration``'s output.
+    """Apply a multi-standard calibration curve to a signal.
+
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        Background-corrected signal, one column per analyte.
+    absolute_time : array_like
+        Per-row acquisition times aligned with ``signal``.
+    multi_result : MultiStandardCalibrationResult
+        The combined curve set and per-analyte drift references.
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-label calibration results, used to look up the drift fit and
+        ``mean_predicted_signal`` for each analyte's drift reference.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Calibrated ppm,
+        ``(signal(t) / drift_fit.predict(t) * mean_predicted_cps) * slope +
+        intercept`` per analyte (minus any ``detrend_fit``), indexed like
+        ``signal``. Analytes with no curve or no usable drift reference are
+        omitted.
+
+    Notes
+    -----
+    The multi-point analog of :func:`apply_calibration`. The inner
+    ``signal / drift_fit.predict(t) * mean_predicted_cps`` term is the same
+    time-normalization, expressed as a normalized CPS level; for a
+    single-point curve this is algebraically identical to
+    :func:`apply_calibration`'s output.
     """
     out = {}
     for analyte in signal.columns:

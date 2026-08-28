@@ -52,6 +52,20 @@ _VALID_METHODS = {"fixed", "auto_aic"}
 
 @dataclass
 class DatingRatioTruth:
+    """The certified truth value for one cross-element dating ratio.
+
+    Attributes
+    ----------
+    value : float
+        Certified parent/daughter (or daughter/daughter) ratio.
+    uncertainty_1sd : float or None
+        One-sigma uncertainty on ``value``, or ``None`` if the reference
+        material does not report one.
+    source : str
+        Provenance tag. Always ``"certified_reference_ratio"`` -- there is
+        no natural-abundance fallback for cross-element ratios.
+    """
+
     value: float
     uncertainty_1sd: float | None
     source: str = "certified_reference_ratio"
@@ -61,12 +75,32 @@ def resolve_dating_ratio_truth(
     reference: ReferenceMaterial, numerator_element: str, numerator_mass: int,
     denominator_element: str, denominator_mass: int,
 ) -> DatingRatioTruth | None:
-    """The calibration "truth" for a cross-element ratio -- a certified
-    reference-material ratio only. Unlike ``massbias.resolve_truth_ratio``,
-    there is NO natural-abundance fallback here: no fixed natural ratio
-    relates two different elements' concentrations, so a reference
-    material with no certified value for this exact pair simply has no
-    usable truth.
+    """Look up the certified truth ratio for a cross-element dating pair.
+
+    Parameters
+    ----------
+    reference : ReferenceMaterial
+        The reference material carrying certified isotope-ratio values.
+    numerator_element : str
+        Element symbol of the ratio numerator, e.g. ``"Pb"``.
+    numerator_mass : int
+        Isotope mass of the ratio numerator, e.g. ``206``.
+    denominator_element : str
+        Element symbol of the ratio denominator, e.g. ``"U"``.
+    denominator_mass : int
+        Isotope mass of the ratio denominator, e.g. ``238``.
+
+    Returns
+    -------
+    DatingRatioTruth or None
+        The certified value and its uncertainty, or ``None`` if the
+        reference material has no certified value for this exact pair.
+
+    Notes
+    -----
+    Unlike ``massbias.resolve_truth_ratio`` there is no natural-abundance
+    fallback: no fixed natural ratio relates two different elements'
+    concentrations.
     """
     entry = reference.ratio(f"{numerator_element}{numerator_mass}", f"{denominator_element}{denominator_mass}")
     if entry is None or entry.value is None:
@@ -76,6 +110,28 @@ def resolve_dating_ratio_truth(
 
 @dataclass
 class DatingRatioFit:
+    """A fitted session-level drift curve for one cross-element dating ratio.
+
+    Attributes
+    ----------
+    numerator_element, denominator_element : str
+        Element symbols of the ratio numerator and denominator.
+    numerator_mass, denominator_mass : int
+        Isotope masses of the ratio numerator and denominator.
+    numerator_scale_factor : float
+        Fixed multiplier applied to the measured numerator (e.g. the
+        238U/235U abundance ratio when 235U is never measured).
+    truth : DatingRatioTruth
+        Representative certified truth for reporting; the contributing
+        standard with the most kept points, ties broken alphabetically.
+    log_ratio_fit : DriftFitLike
+        Polynomial fit of ``log(measured_ratio / truth)`` versus time.
+    standard_labels : list[str]
+        Standard labels that contributed points, sorted.
+    n_points : int
+        Total number of standard-occurrence points in the fit.
+    """
+
     numerator_element: str
     numerator_mass: int
     denominator_element: str
@@ -87,11 +143,42 @@ class DatingRatioFit:
     n_points: int
 
     def correction_factor(self, times) -> np.ndarray:
+        """Multiplicative drift correction factor at the given times.
+
+        Parameters
+        ----------
+        times : array_like
+            Acquisition times (datetimes or numeric) at which to evaluate
+            the fitted curve.
+
+        Returns
+        -------
+        numpy.ndarray
+            ``exp(log_ratio_fit.predict(times))`` -- divide a measured
+            ratio by this to remove session drift.
+        """
         return np.exp(np.asarray(self.log_ratio_fit.predict(times), dtype=float))
 
 
 @dataclass
 class DatingRatioSpec:
+    """Request to calibrate one named cross-element dating ratio.
+
+    Attributes
+    ----------
+    numerator_element, denominator_element : str
+        Element symbols of the ratio numerator and denominator.
+    numerator_mass, denominator_mass : int
+        Isotope masses of the ratio numerator and denominator.
+    numerator_scale_factor : float, optional
+        Fixed multiplier for the measured numerator, by default ``1.0``.
+        Used for the "mass shift" case where 235U is computed as
+        ``k * (207Pb/238U)`` with ``k`` the natural 238U/235U ratio.
+    dating_standards : list[str] or None, optional
+        Standard labels to fit from. ``None`` (default) uses every standard
+        label with usable occurrences and a resolvable truth.
+    """
+
     numerator_element: str
     numerator_mass: int
     denominator_element: str
@@ -104,25 +191,48 @@ def fit_dating_ratio(
     standard_results: dict[str, StandardCalibrationResult], labels: list[str], spec: DatingRatioSpec,
     order: int = 1, method: str = "fixed", max_order: int = 3,
 ) -> DatingRatioFit | None:
-    """Fits a single time-varying calibration curve for the cross-element
-    ratio named by ``spec``, from every occurrence of every label in
-    ``labels`` that has both channels and a resolvable truth ratio (see
-    :func:`resolve_dating_ratio_truth`).
+    """Fit one time-varying calibration curve for a cross-element dating ratio.
 
+    Parameters
+    ----------
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-standard calibration results, keyed by standard label.
+    labels : list[str]
+        Standard labels to draw occurrences from.
+    spec : DatingRatioSpec
+        Which ratio to fit and its numerator scale factor.
+    order : int, optional
+        Polynomial order for ``method="fixed"``, by default ``1``.
+    method : {"fixed", "auto_aic"}, optional
+        ``"fixed"`` uses ``order`` (with order fallback); ``"auto_aic"``
+        selects the order by AIC up to ``max_order``. By default
+        ``"fixed"``.
+    max_order : int, optional
+        Highest polynomial order considered when ``method="auto_aic"``, by
+        default ``3``.
+
+    Returns
+    -------
+    DatingRatioFit or None
+        The fitted curve, or ``None`` when fewer than 2 usable points exist
+        or the underlying fit fails.
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not ``"fixed"`` or ``"auto_aic"`` (a log-ratio of
+        two CPS channels is not a Poisson count, so ``"auto_poisson_lrt"``
+        is invalid here).
+
+    Notes
+    -----
     Each occurrence's point is ``log(measured_ratio / that label's own
-    truth)`` vs. time, where ``measured_ratio = spec.numerator_scale_factor
-    * mean_signal[numerator] / mean_signal[denominator]`` -- occurrences
-    from different standards (each with their own truth) are pooled into
-    one fit this way, matching ``massbias.fit_bias_curve``'s own pooling
-    convention. Reuses ``StandardOccurrence.mean_signal`` (already
-    background-corrected, already row-outlier-screened) rather than
-    recomputing anything from raw per-row data.
-
-    ``method="auto_poisson_lrt"`` is invalid here (raises) -- a log-ratio
-    of two CPS channels isn't a Poisson count.
-
-    Returns ``None`` (not a crash) when fewer than 2 usable points exist
-    or the underlying fit fails.
+    truth)`` versus time, with ``measured_ratio = spec.numerator_scale_factor
+    * mean_signal[numerator] / mean_signal[denominator]``. Occurrences from
+    different standards (each with their own truth) are pooled into one fit,
+    matching ``massbias.fit_bias_curve``'s pooling convention, and
+    ``StandardOccurrence.mean_signal`` (already background-corrected and
+    row-outlier-screened) is reused rather than recomputing from raw rows.
     """
     if method not in _VALID_METHODS:
         raise ValueError(f"dating-ratio fitting only supports {sorted(_VALID_METHODS)}, got {method!r}.")
@@ -186,11 +296,26 @@ def fit_dating_ratio(
 
 
 def corrected_dating_ratio(signal: pd.DataFrame, absolute_time, fit: DatingRatioFit) -> np.ndarray:
-    """The SAMPLE's own calibrated parent/daughter (or daughter/daughter)
-    ratio -- removes session-level drift (via ``fit``), does NOT impose the
-    standard's ratio on the sample. Preserves whatever radiogenic signal is
-    actually present, the same guarantee ``massbias.corrected_ratio``
-    makes for same-element pairs.
+    """Apply a fitted drift curve to a sample's own measured dating ratio.
+
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        The sample's signal, containing the numerator and denominator
+        analyte columns named by ``fit``.
+    absolute_time : array_like
+        Per-row acquisition times aligned with ``signal``.
+    fit : DatingRatioFit
+        The session-level drift curve for this ratio.
+
+    Returns
+    -------
+    numpy.ndarray
+        The sample's drift-corrected parent/daughter (or daughter/daughter)
+        ratio, one value per row. The standard's ratio is not imposed on the
+        sample -- whatever radiogenic signal is present is preserved, the
+        same guarantee ``massbias.corrected_ratio`` makes for same-element
+        pairs.
     """
     numerator = f"{fit.numerator_element}{fit.numerator_mass}"
     denominator = f"{fit.denominator_element}{fit.denominator_mass}"
@@ -203,10 +328,29 @@ def fit_session_dating_ratios(
     standard_results: dict[str, StandardCalibrationResult], specs: list[DatingRatioSpec],
     method: str = "fixed", order: int = 1, max_order: int = 3,
 ) -> dict[str, DatingRatioFit]:
-    """One :func:`fit_dating_ratio` per ``specs`` entry, keyed
-    ``"{numerator_element}{numerator_mass}/{denominator_element}{denominator_mass}"``.
-    A spec that resolves to no usable data (see ``fit_dating_ratio``) is
-    simply omitted from the result, not an error.
+    """Fit every requested cross-element dating ratio for a session.
+
+    Parameters
+    ----------
+    standard_results : dict[str, StandardCalibrationResult]
+        Per-standard calibration results, keyed by standard label.
+    specs : list[DatingRatioSpec]
+        One entry per dating ratio to fit.
+    method : {"fixed", "auto_aic"}, optional
+        Order-selection method passed to :func:`fit_dating_ratio`, by
+        default ``"fixed"``.
+    order : int, optional
+        Polynomial order for ``method="fixed"``, by default ``1``.
+    max_order : int, optional
+        Highest order considered for ``method="auto_aic"``, by default
+        ``3``.
+
+    Returns
+    -------
+    dict[str, DatingRatioFit]
+        One fit per spec that resolved to usable data, keyed
+        ``"{numerator_element}{numerator_mass}/{denominator_element}{denominator_mass}"``.
+        Specs with no usable data are omitted rather than raising.
     """
     fits: dict[str, DatingRatioFit] = {}
     for spec in specs:

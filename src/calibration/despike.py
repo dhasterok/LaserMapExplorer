@@ -34,22 +34,36 @@ import numpy as np
 
 
 def noise_despike(values: np.ndarray, window: int = 3, nlim: float = 12.0, maxiter: int = 4) -> np.ndarray:
-    """Replaces rows whose value exceeds a rolling-mean-plus-Poisson-noise
-    band with that local rolling mean, iterating until stable (or
-    ``maxiter``).
+    """Replace rolling-mean outliers in a raw CPS series with the local mean.
 
+    Parameters
+    ----------
+    values : numpy.ndarray
+        One analyte's raw CPS series (one file, one column).
+    window : int, optional
+        Rolling-window width in samples, by default ``3``. Forced to the
+        next odd number if given even.
+    nlim : float, optional
+        Number of rolling standard deviations above the rolling mean beyond
+        which a row is flagged as a spike, by default ``12.0``.
+    maxiter : int, optional
+        Maximum number of flag-and-replace passes, by default ``4``.
+
+    Returns
+    -------
+    numpy.ndarray
+        A cleaned copy; flagged rows are set to the local rolling mean.
+        ``values`` itself is not modified. Arrays shorter than ``window``
+        are returned unchanged.
+
+    Notes
+    -----
     ``rolling_std = sqrt(rolling_mean)`` -- the Poisson count-statistics
     approximation latools itself uses (treating the CPS values numerically
     as if they were counts, rather than converting via dwell time/tau).
-    Combined with a loose ``nlim`` (12 rolling-std by default), this is
-    meant to catch only extreme, physically implausible spikes, not to be
-    a precise statistical test.
-
-    Edge rows (within ``window // 2`` of either end, where the rolling
-    window doesn't fully overlap the data) are never flagged. Requires at
-    least ``window`` points; shorter arrays are returned unchanged.
-
-    Returns a cleaned copy -- ``values`` itself is not modified.
+    Combined with a loose ``nlim``, this is meant to catch only extreme,
+    physically implausible spikes, not to be a precise statistical test.
+    Edge rows (within ``window // 2`` of either end) are never flagged.
     """
     sig = np.array(values, dtype=float, copy=True)
     n = len(sig)
@@ -78,18 +92,35 @@ def noise_despike(values: np.ndarray, window: int = 3, nlim: float = 12.0, maxit
 
 
 def expdecay_despike(values: np.ndarray, tstep: float, exponent: float, maxiter: int = 3) -> np.ndarray:
-    """Replaces rows that jump beyond what the laser cell's washout decay
-    (``exponent``, 1/s, negative) could physically explain relative to
-    their immediate neighbour, with that neighbour's value, iterating
-    until stable (or ``maxiter``).
+    """Replace rows that decay faster than the cell washout physically allows.
 
+    Parameters
+    ----------
+    values : numpy.ndarray
+        One analyte's raw CPS series (one file, one column).
+    tstep : float
+        Time between successive samples, in seconds.
+    exponent : float
+        Laser-cell washout decay exponent, in 1/s (negative). A
+        known/measured value for this instrument and cell; not auto-fit
+        here.
+    maxiter : int, optional
+        Maximum number of flag-and-replace passes, by default ``3``.
+
+    Returns
+    -------
+    numpy.ndarray
+        A cleaned copy; a row that jumps beyond what ``exponent`` could
+        explain relative to its immediate neighbour is set to that
+        neighbour's value. ``values`` itself is not modified. Arrays with
+        fewer than 6 points are returned unchanged.
+
+    Notes
+    -----
     The initial noise estimate is built from the first up-to-50 points
     (matching latools: start from the first 5, widen to 10/20/30/50 only
-    while doing so doesn't inflate the estimate by more than 50% -- avoids
-    the estimate itself being contaminated by the ablation onset). Requires
-    at least 6 points; shorter arrays are returned unchanged.
-
-    Returns a cleaned copy -- ``values`` itself is not modified.
+    while doing so does not inflate the estimate by more than 50%, which
+    avoids the estimate being contaminated by the ablation onset).
     """
     sig = np.array(values, dtype=float, copy=True)
     n = len(sig)

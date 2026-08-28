@@ -25,18 +25,47 @@ class PoissonFitError(ValueError):
 
 
 def _to_seconds(times, t0: datetime) -> np.ndarray:
+    """Convert an iterable of datetimes to seconds since ``t0``.
+
+    Parameters
+    ----------
+    times : array_like
+        Datetimes, or anything :func:`pandas.to_datetime` accepts.
+    t0 : datetime.datetime
+        Time origin.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``(times - t0)`` in seconds, as ``float``.
+    """
     ts = pd.to_datetime(list(times))
     t0_ts = pd.Timestamp(t0)
     return (ts - t0_ts).total_seconds().to_numpy(dtype=float)
 
 
 def _poisson_deviance(n: np.ndarray, mu: np.ndarray) -> float:
-    """2*sum(n*log(n/mu) - (n-mu)), with the n*log(n/mu) term defined as 0 when n=0.
+    """Poisson deviance ``2 * sum(n * log(n / mu) - (n - mu))``.
 
-    Computed only over n>0 entries (rather than `np.where` over the whole
-    array) so 0*log(0) never gets evaluated -- `np.where` evaluates both
-    branches eagerly and would raise spurious divide-by-zero/invalid-value
-    runtime warnings even though the masked-out result is correct.
+    Parameters
+    ----------
+    n : numpy.ndarray
+        Observed non-negative counts.
+    mu : numpy.ndarray
+        Predicted Poisson means, aligned with ``n``.
+
+    Returns
+    -------
+    float
+        The deviance, with the ``n * log(n / mu)`` term taken as 0 where
+        ``n == 0``.
+
+    Notes
+    -----
+    Computed only over ``n > 0`` entries (rather than :func:`numpy.where`
+    over the whole array) so ``0 * log(0)`` is never evaluated --
+    :func:`numpy.where` evaluates both branches eagerly and would raise
+    spurious divide-by-zero/invalid-value runtime warnings.
     """
     mu_safe = np.maximum(mu, 1e-300)
     term = np.zeros_like(n, dtype=float)
@@ -47,6 +76,37 @@ def _poisson_deviance(n: np.ndarray, mu: np.ndarray) -> float:
 
 @dataclass
 class PoissonDriftFit:
+    """A fitted Poisson-GLM (log-link) drift model for one analyte.
+
+    Attributes
+    ----------
+    analyte : str
+        Name of the analyte fitted. May be empty.
+    order : int
+        Polynomial order; ``0`` is the constant model.
+    model : str
+        Human-readable model tag, ``"constant"`` or ``"poly(k)"``.
+    coeffs : numpy.ndarray
+        Length ``order + 1``, compatible with
+        ``numpy.vander(..., increasing=True)``. Parameterizes
+        ``log(rate in CPS)`` directly.
+    t0 : datetime.datetime
+        Time origin.
+    t_scale : float
+        Time scaling in seconds; standardized time is ``(t - t0) / t_scale``.
+    deviance : float
+        Poisson deviance of the fit.
+    n_points : int
+        Number of windows fitted.
+    drift_pvalue : float or None
+        Likelihood-ratio-test p-value against the previous (order ``- 1``)
+        model; ``None`` for order 0.
+    tau_total_s : float
+        Sum of the per-window counting times, in seconds.
+    converged : bool
+        Whether IRLS converged (always ``True`` for order 0).
+    """
+
     analyte: str
     order: int                     # 0 = constant
     model: str                      # "constant" | "poly(k)"
@@ -60,7 +120,19 @@ class PoissonDriftFit:
     converged: bool
 
     def predict(self, times) -> np.ndarray:
-        """Predicted background rate in CPS at the given times."""
+        """Predicted background rate in CPS at the given times.
+
+        Parameters
+        ----------
+        times : array_like
+            Datetimes at which to evaluate the fitted model.
+
+        Returns
+        -------
+        numpy.ndarray
+            Predicted rate in counts per second, one per element of
+            ``times``. No ``tau`` is needed at prediction time.
+        """
         s = _to_seconds(times, self.t0) / self.t_scale
         x = np.vander(s, len(self.coeffs), increasing=True)
         eta = np.clip(x @ self.coeffs, -700.0, 30.0)
@@ -68,10 +140,30 @@ class PoissonDriftFit:
 
 
 def detect_poisson_file_outliers(counts, tau_s, ratio_threshold: float = 15.0, min_other_nonzero: int = 2) -> np.ndarray:
-    """Robust, session-wide file-level outlier screen for Poisson background
-    counts: flags a whole *file* whose recovered rate is grossly
-    inconsistent with the rest of the session's nonzero-count files.
+    """Flag whole files whose Poisson background rate is grossly off the session.
 
+    Parameters
+    ----------
+    counts : array_like
+        Recovered integer background counts, one per file.
+    tau_s : array_like
+        Effective counting time in seconds, one per file, aligned with
+        ``counts``.
+    ratio_threshold : float, optional
+        A file is flagged when its rate is at least this many times the
+        median rate of the other nonzero-count files. By default ``15.0``.
+    min_other_nonzero : int, optional
+        Minimum number of other nonzero-count files needed to judge any one
+        file; below this nothing is flagged for it. By default ``2``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Boolean array the length of ``counts``; ``True`` marks an outlier
+        file. All ``False`` when there are too few nonzero-count files.
+
+    Notes
+    -----
     This is a different failure mode than ``background.detect_row_outliers``
     catches: that screen only compares *rows within one file's own window*
     against each other, so a file whose entire background window is
@@ -123,8 +215,6 @@ def detect_poisson_file_outliers(counts, tau_s, ratio_threshold: float = 15.0, m
     being contamination, and this is a session-wide, one-shot decision
     affecting every row of a whole file, so it's biased toward requiring a
     much starker, orders-of-magnitude departure before excluding one.
-
-    Returns a boolean array the length of ``counts`` (``True`` = outlier).
     """
     n_arr = np.asarray(counts, dtype=float)
     tau_arr = np.asarray(tau_s, dtype=float)
@@ -150,19 +240,43 @@ def fit_poisson_glm(
     times, counts, tau_s, order: int, analyte: str = "",
     max_iter: int = 50, tol: float = 1e-8, eta_clip: float = 30.0,
 ) -> PoissonDriftFit | None:
-    """Fits one Poisson GLM (log link) of the given polynomial order via IRLS.
+    """Fit one Poisson GLM (log link) of the given polynomial order via IRLS.
 
-    Returns ``None`` (never raises) when the fit can't be trusted: too few
-    points for the requested order, non-convergence, or an ill-conditioned
-    design matrix -- callers (esp. :func:`select_poisson_order_lrt`) use this
-    to fall back to a lower order rather than propagate a bad fit.
+    Parameters
+    ----------
+    times : array_like
+        Per-window acquisition datetimes.
+    counts : array_like
+        Recovered integer counts, one per window.
+    tau_s : array_like
+        Effective counting time in seconds, one per window.
+    order : int
+        Polynomial order; ``0`` is the closed-form constant model.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+    max_iter : int, optional
+        Maximum IRLS iterations, by default ``50``.
+    tol : float, optional
+        Relative deviance-change convergence tolerance, by default ``1e-8``.
+    eta_clip : float, optional
+        Clip bound on the linear predictor, by default ``30.0``.
+
+    Returns
+    -------
+    PoissonDriftFit or None
+        The fitted model, or ``None`` (never raises) when the fit cannot be
+        trusted: too few points for the requested order, non-convergence,
+        or an ill-conditioned design matrix.
+
+    Notes
+    -----
+    Callers (especially :func:`select_poisson_order_lrt`) use the ``None``
+    return to fall back to a lower order rather than propagate a bad fit.
 
     Expects file-level outliers already excluded by the caller (see
-    :func:`detect_poisson_file_outliers`) -- this function itself performs
-    an ordinary (non-robust) fit, deliberately: robustness belongs in a
-    one-time pre-filtering decision, not folded into the polynomial search
-    itself (see :func:`detect_poisson_file_outliers`'s docstring for why
-    that combination was tried and rejected).
+    :func:`detect_poisson_file_outliers`) -- this function performs an
+    ordinary (non-robust) fit deliberately: robustness belongs in a
+    one-time pre-filtering decision, not folded into the polynomial search.
     """
     n_arr = np.asarray(counts, dtype=float)
     tau_arr = np.asarray(tau_s, dtype=float)
@@ -244,20 +358,35 @@ def fit_poisson_glm(
 def _cv_deviance_for_order(times, counts, tau_s, order: int, analyte: str = "") -> float | None:
     """Leave-one-out cross-validated Poisson deviance for a candidate order.
 
-    Refits the model with each observation held out in turn, then scores
-    that fit's predicted rate against the held-out observation's actual
-    count -- unlike in-sample deviance (what the LRT step below compares),
-    this measures genuine *predictive* accuracy. A higher order that only
-    reduces in-sample deviance by wiggling unconstrained through the gaps
-    between sparse clusters of files (separate analytical sessions within
-    one dataset) will predict a held-out point from that same cluster
-    poorly once it's not in the training data -- so CV deviance does not
-    improve even though in-sample deviance did, and :func:`select_poisson_order_lrt`
-    uses that disagreement to reject the order.
+    Parameters
+    ----------
+    times : array_like
+        Per-window acquisition datetimes.
+    counts : array_like
+        Recovered integer counts, one per window.
+    tau_s : array_like
+        Effective counting time in seconds, one per window.
+    order : int
+        Candidate polynomial order.
+    analyte : str, optional
+        Label passed through to the per-fold fits, by default ``""``.
 
-    Returns ``None`` if there aren't enough points, or any fold fails to
-    fit/converge -- an order that can't even be evaluated robustly across
-    folds isn't a safe choice either.
+    Returns
+    -------
+    float or None
+        Summed held-out Poisson deviance across all folds, or ``None`` if
+        there are fewer than ``order + 3`` points or any fold fails to
+        fit/converge.
+
+    Notes
+    -----
+    Unlike in-sample deviance (what the LRT step compares), this measures
+    genuine predictive accuracy. A higher order that only reduces in-sample
+    deviance by wiggling unconstrained through the gaps between sparse
+    clusters of files will predict a held-out point from that same cluster
+    poorly, so CV deviance does not improve --
+    :func:`select_poisson_order_lrt` uses that disagreement to reject the
+    order.
     """
     times_list = list(times)
     n = len(times_list)
@@ -283,13 +412,34 @@ def _cv_deviance_for_order(times, counts, tau_s, order: int, analyte: str = "") 
 def _predicted_rate_is_stable(
     fit: PoissonDriftFit, times, observed_max_rate: float, max_ratio: float = 10.0
 ) -> bool:
-    """Final safety net alongside the cross-validation check above: the log
-    link means ``predict()`` returns ``exp(eta)``, so even a modest wobble
-    in the fitted polynomial between or beyond the actual observation times
-    gets *exponentiated* into a wildly unrealistic predicted rate. Densely
-    samples the fit across the full observed time span and rejects the
-    order if its predicted rate anywhere exceeds ``max_ratio`` times the
-    largest rate actually observed in the input data.
+    """Whether a Poisson fit's predicted rate stays sane across the time span.
+
+    Parameters
+    ----------
+    fit : PoissonDriftFit
+        The candidate fit to probe.
+    times : array_like
+        Observed per-window datetimes; their min and max bound the probe
+        interval.
+    observed_max_rate : float
+        Largest rate (counts / tau) actually observed in the input data.
+    max_ratio : float, optional
+        Allowed multiple of ``observed_max_rate`` for any predicted rate on
+        the probe grid. By default ``10.0``.
+
+    Returns
+    -------
+    bool
+        ``True`` if every prediction on a 200-point grid across the
+        observed span is finite and at most ``max_ratio * observed_max_rate``;
+        ``True`` trivially when the time span is degenerate.
+
+    Notes
+    -----
+    Final safety net alongside the cross-validation check: the log link
+    means ``predict()`` returns ``exp(eta)``, so even a modest wobble in the
+    fitted polynomial between or beyond the observation times gets
+    exponentiated into a wildly unrealistic predicted rate.
     """
     ts = pd.Timestamp(min(times))
     te = pd.Timestamp(max(times))
@@ -306,16 +456,45 @@ def _predicted_rate_is_stable(
 def select_poisson_order_lrt(
     times, counts, tau_s, analyte: str = "", max_order: int = 3, alpha: float = 0.05,
 ) -> PoissonDriftFit:
-    """Incrementally tests order 0 -> 1 -> 2 -> ... -> max_order (not 0-vs-max),
-    accepting each next order only when *all three* hold: its likelihood-
-    ratio test against the previous order is significant at ``alpha``, its
-    leave-one-out cross-validated deviance also improves on the previous
-    order's (see :func:`_cv_deviance_for_order`), and its predicted rate
-    stays plausible across the whole session (see
-    :func:`_predicted_rate_is_stable`) -- stops at the first order failing
-    any of the three and returns the last accepted fit.
+    """Select a Poisson drift order by incremental LRT, guarded by CV.
 
-    The LRT alone is not sufficient: it only ever compares deviance *at the
+    Parameters
+    ----------
+    times : array_like
+        Per-window acquisition datetimes.
+    counts : array_like
+        Recovered integer counts, one per window.
+    tau_s : array_like
+        Effective counting time in seconds, one per window.
+    analyte : str, optional
+        Label stored on the returned fit, by default ``""``.
+    max_order : int, optional
+        Highest polynomial order considered, by default ``3``.
+    alpha : float, optional
+        LRT significance level for accepting each next order, by default
+        ``0.05``.
+
+    Returns
+    -------
+    PoissonDriftFit
+        The last accepted fit.
+
+    Raises
+    ------
+    PoissonFitError
+        If even the order-0 constant model cannot be fit.
+
+    Notes
+    -----
+    Tests order 0 -> 1 -> 2 -> ... -> ``max_order`` (not 0-vs-max),
+    accepting each next order only when all three hold: its likelihood-ratio
+    test against the previous order is significant at ``alpha``, its
+    leave-one-out cross-validated deviance also improves (see
+    :func:`_cv_deviance_for_order`), and its predicted rate stays plausible
+    across the whole session (see :func:`_predicted_rate_is_stable`). Stops
+    at the first order failing any of the three.
+
+    The LRT alone is not sufficient: it only ever compares deviance at the
     observed times*, so on sparse, gapped data (e.g. separate analytical
     sessions within one dataset) a higher order can pass it by slightly
     improving the fit at those specific clustered points while extrapolating

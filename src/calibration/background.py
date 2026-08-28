@@ -33,6 +33,25 @@ from src.calibration.rawfile import LineFileData, LineFileMeta
 
 @dataclass
 class BackgroundWindow:
+    """Row/time bounds of the gas-blank window for one file.
+
+    Attributes
+    ----------
+    start_idx : int
+        First background row (inclusive).
+    end_idx : int
+        One past the last background row (exclusive).
+    start_time : datetime.datetime
+        Wall-clock time of ``start_idx``.
+    end_time : datetime.datetime
+        Wall-clock time of the last background row.
+    method : {"changepoint_median_channel", "fallback_fixed_window", "manual_override"}
+        How the window was chosen.
+    reference_channel : str
+        Channel(s) used for detection (comma-joined), or the fallback
+        reason.
+    """
+
     start_idx: int
     end_idx: int              # exclusive
     start_time: datetime
@@ -43,6 +62,32 @@ class BackgroundWindow:
 
 @dataclass
 class AblationWindow:
+    """Row/time bounds of the ablation signal for one file.
+
+    Attributes
+    ----------
+    start_idx : int
+        First ablation row (inclusive).
+    end_idx : int
+        One past the last ablation row (exclusive).
+    start_time : datetime.datetime
+        Wall-clock time of ``start_idx``.
+    end_time : datetime.datetime
+        Wall-clock time of the last ablation row.
+    included_start_idx : int or None
+        First row of the edge-trimmed region used for *statistics*; ``None``
+        is normalized to ``start_idx`` in ``__post_init__``. See
+        :func:`apply_edge_trim`.
+    included_end_idx : int or None
+        One past the last row of the statistics region; ``None`` is
+        normalized to ``end_idx``.
+    row_outlier_mask : dict[str, numpy.ndarray]
+        Per-analyte boolean keep/reject mask over
+        ``[included_start_idx, included_end_idx)`` from
+        :func:`detect_row_outliers`. An analyte is absent only when there
+        were too few rows to attempt detection.
+    """
+
     start_idx: int
     end_idx: int               # exclusive
     start_time: datetime
@@ -71,6 +116,7 @@ class AblationWindow:
     row_outlier_mask: dict[str, np.ndarray] = field(default_factory=dict)
 
     def __post_init__(self):
+        """Normalize ``None`` included-index bounds to the full window span."""
         if self.included_start_idx is None:
             self.included_start_idx = self.start_idx
         if self.included_end_idx is None:
@@ -79,6 +125,51 @@ class AblationWindow:
 
 @dataclass
 class BackgroundResult:
+    """Background statistics, LOD, and corrected ablation signal for one file.
+
+    Attributes
+    ----------
+    file_meta : LineFileMeta
+        Identifying metadata for the source file.
+    window : BackgroundWindow
+        The gas-blank window used.
+    ablation : AblationWindow
+        The ablation window used.
+    background_mean : dict[str, float]
+        Per-analyte background level -- a Poisson rate
+        (counts / counting time) when ``tau`` is resolvable, else the
+        arithmetic mean of the clean rows.
+    background_std : dict[str, float]
+        Per-analyte sample standard deviation of the clean background rows.
+    background_n : dict[str, int]
+        Per-analyte count of clean background rows.
+    lod : dict[str, float]
+        Per-analyte limit of detection (see
+        :func:`~src.calibration.lod.compute_lod`).
+    ablation_signal : pandas.DataFrame
+        Raw ablation-window signal, index reset.
+    background_corrected_signal : pandas.DataFrame
+        Ablation signal minus the background (drift-aware or per-file
+        constant).
+    background_correction_method : {"naive_per_file_constant", "session_drift_aware"}
+        Which subtraction was applied.
+    background_counts : dict[str, float or None]
+        Per-analyte recovered total integer background counts (``None`` when
+        unrecoverable).
+    background_tau_s : dict[str, float or None]
+        Per-analyte per-reading counting time in seconds (``None`` when
+        unknown).
+    tau_provenance : dict[str, str]
+        Per-analyte ``"metadata"`` / ``"inferred"`` / ``"bounded"`` /
+        ``"unknown"``.
+    currie : dict[str, CurrieLimits]
+        Per-analyte detection limits; key omitted when ``tau`` is unknown.
+    background_row_outlier_mask : dict[str, numpy.ndarray]
+        Per-analyte boolean mask over ``[window.start_idx, window.end_idx)``
+        flagging contamination spikes in the blank. An analyte is absent
+        only when there were too few rows to attempt detection.
+    """
+
     file_meta: LineFileMeta
     window: BackgroundWindow
     ablation: AblationWindow
@@ -116,10 +207,38 @@ class BackgroundResult:
 
 
 def _to_datetime(x) -> datetime:
+    """Coerce a timestamp-like value to a plain :class:`datetime.datetime`.
+
+    Parameters
+    ----------
+    x : Any
+        Anything :class:`pandas.Timestamp` accepts (``numpy.datetime64``,
+        ISO string, ...).
+
+    Returns
+    -------
+    datetime.datetime
+        The equivalent naive/aware Python datetime.
+    """
     return pd.Timestamp(x).to_pydatetime()
 
 
 def _total_signal(signal: pd.DataFrame, channels: list[str] | None) -> np.ndarray:
+    """Row-wise sum of selected channels, used as the detection reference series.
+
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        One file's CPS signal, one column per analyte.
+    channels : list[str] or None
+        Channels to sum. Names absent from ``signal`` are ignored; if none
+        remain (or ``channels`` is ``None``/empty), every column is summed.
+
+    Returns
+    -------
+    numpy.ndarray
+        The per-row sum.
+    """
     cols = [c for c in (channels or []) if c in signal.columns]
     if not cols:
         cols = list(signal.columns)
@@ -129,10 +248,30 @@ def _total_signal(signal: pd.DataFrame, channels: list[str] | None) -> np.ndarra
 def select_reference_channels(
     files: list[LineFileData], top_n: int = 5, n_rows: int = 5, min_fold_change: float = 500.0
 ) -> list[str]:
-    """Analytes with the largest session-wide ablation signal, used as the
-    background-detection reference channel(s), restricted to channels that
-    actually respond to the ablation onset.
+    """Pick the reference channel(s) for background-window detection.
 
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Every parsed file in the session.
+    top_n : int, optional
+        Number of channels to return, by default ``5``.
+    n_rows : int, optional
+        Number of leading rows per file used to estimate the gas-blank
+        baseline, by default ``5``.
+    min_fold_change : float, optional
+        Minimum peak/baseline fold-change for a channel to be considered a
+        genuine matrix responder, by default ``500.0``.
+
+    Returns
+    -------
+    list[str]
+        Up to ``top_n`` channel names, those clearing ``min_fold_change``
+        ranked by median peak magnitude (or every channel by peak magnitude
+        if none clear it).
+
+    Notes
+    -----
     Two single-criterion approaches were tried against real instrument data
     and both mis-selected channels that made changepoint detection unreliable:
 
@@ -178,6 +317,24 @@ def select_reference_channels(
 def _fallback_window(
     line_data: LineFileData, fallback_n_rows: int, reason: str
 ) -> tuple[BackgroundWindow, AblationWindow]:
+    """Build a fixed-width background window when changepoint detection fails.
+
+    Parameters
+    ----------
+    line_data : LineFileData
+        The file to window.
+    fallback_n_rows : int
+        Desired number of leading rows for the background window (clamped to
+        ``[1, n_rows - 1]``).
+    reason : str
+        Diagnostic reason, stored as the window's ``reference_channel``.
+
+    Returns
+    -------
+    tuple[BackgroundWindow, AblationWindow]
+        The fixed background window (``method="fallback_fixed_window"``) and
+        the complementary ablation window.
+    """
     n = line_data.n_rows
     end_idx = min(max(1, fallback_n_rows), max(1, n - 1))
     window = BackgroundWindow(
@@ -204,11 +361,45 @@ def detect_background_window(
     tail_margin: int = 20,
     eps: float = 1.0,
 ) -> tuple[BackgroundWindow, AblationWindow]:
-    """Locate the gas-blank -> ablation step change in ``line_data``.
+    """Locate the gas-blank -> ablation step change in one file.
 
-    Method: sum the reference channel(s) into one robust series, then scan
-    left to right for the *first* index where the trailing-window median
-    jumps by at least ``threshold_ratio`` over the leading-window median.
+    Parameters
+    ----------
+    line_data : LineFileData
+        The file to analyze.
+    reference_channels : list[str] or None, optional
+        Channels summed into the detection series. ``None`` sums every
+        channel.
+    window : int, optional
+        Half-width (in rows) of the leading/trailing comparison windows, by
+        default ``10``.
+    threshold_ratio : float, optional
+        Minimum ``after / before`` ratio for a row to count as the step, by
+        default ``100.0``.
+    fallback_n_rows : int, optional
+        Fixed background width used when no step is found, by default
+        ``20``.
+    search_margin : int, optional
+        Rows skipped at the start of the scan, by default ``5``.
+    tail_margin : int, optional
+        Rows skipped at the end of the scan, by default ``20``.
+    eps : float, optional
+        Floor added to the "before" median to avoid divide-by-zero, by
+        default ``1.0``.
+
+    Returns
+    -------
+    tuple[BackgroundWindow, AblationWindow]
+        The detected windows (``method="changepoint_median_channel"``), or
+        a fixed fallback window (``method="fallback_fixed_window"``) when no
+        candidate clears ``threshold_ratio``.
+
+    Notes
+    -----
+    Sums the reference channel(s) into one robust series, then scans left to
+    right for the *first* index where the trailing-window low-end jumps by
+    at least ``threshold_ratio`` over the leading-window median, then refines
+    forward to the exact first elevated row.
 
     Deliberately the first qualifying jump, not the single largest one over
     the whole file: an early version of this function picked whichever jump
@@ -292,20 +483,51 @@ def detect_background_window(
 
 
 def _window_midpoint(window: BackgroundWindow) -> datetime:
+    """Midpoint time of a background window, used as its drift-fit x value.
+
+    Parameters
+    ----------
+    window : BackgroundWindow
+        The window.
+
+    Returns
+    -------
+    datetime.datetime
+        ``start_time + (end_time - start_time) / 2``.
+    """
     return window.start_time + (window.end_time - window.start_time) / 2
 
 
 def fit_session_background_drift(
     backgrounds: list[BackgroundResult], order: int = 1, method: str = "fixed", max_order: int = 3,
 ) -> dict[str, DriftFitLike]:
-    """Fit a per-analyte polynomial to background level vs time, across every file in the session.
+    """Fit a per-analyte polynomial to background level versus time for a session.
 
-    Background applies to every file (standards and samples both have a gas
-    blank), so this should be called on the full session's `BackgroundResult`
-    list, not just the standards'. An analyte with no data at all is simply
-    omitted, and callers fall back to the naive per-file-constant correction
-    for it.
+    Parameters
+    ----------
+    backgrounds : list[BackgroundResult]
+        The full session's background results (standards and samples both
+        have a gas blank).
+    order : int, optional
+        Polynomial order for ``method="fixed"`` (with automatic reduction),
+        by default ``1``.
+    method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+        Per-analyte fitting strategy, by default ``"fixed"``.
+    max_order : int, optional
+        Highest order for the ``auto_*`` methods, by default ``3``.
 
+    Returns
+    -------
+    dict[str, DriftFitLike]
+        Per-analyte fit -- a
+        :class:`~src.calibration.poisson_drift.PoissonDriftFit` for analytes
+        that used the Poisson path, otherwise a
+        :class:`~src.calibration.drift.DriftFit`. Analytes with no usable
+        data are omitted (callers fall back to per-file-constant
+        correction).
+
+    Notes
+    -----
     ``method``:
 
     - ``"fixed"`` (default): ordinary-least-squares fit at ``order``, falling
@@ -400,10 +622,46 @@ def compute_background_result(
     sweeps_per_reading: int | None = None,
     manual_row_exclusions: dict[str, set[int]] | None = None,
 ) -> BackgroundResult:
-    """Background stats, LOD, and background-corrected ablation signal.
+    """Compute background stats, LOD, and the background-corrected ablation signal.
 
-    If ``window``/``ablation`` aren't supplied, they're auto-detected via
-    :func:`detect_background_window`. If ``session_background_drift`` (from
+    Parameters
+    ----------
+    line_data : LineFileData
+        The file to process.
+    window : BackgroundWindow or None, optional
+        Background window; auto-detected via :func:`detect_background_window`
+        when ``None`` (together with ``ablation``).
+    ablation : AblationWindow or None, optional
+        Ablation window; auto-detected when ``None``.
+    reference_channels : list[str] or None, optional
+        Passed to :func:`detect_background_window` when auto-detecting.
+    detection_kwargs : dict or None, optional
+        Extra keyword arguments for :func:`detect_background_window`.
+    session_background_drift : dict[str, DriftFitLike] or None, optional
+        Per-analyte session drift curves (from
+        :func:`fit_session_background_drift`). When given, each ablation
+        sweep is corrected using the curve at that sweep's own time;
+        analytes with no fit fall back to per-file-constant subtraction.
+    dwell_time_ms : float or None, optional
+        Per-analyte dwell time from instrument metadata, in milliseconds.
+    sweeps_per_reading : int or None, optional
+        Sweeps averaged per reported value, from instrument metadata.
+        Supplying both this and ``dwell_time_ms`` gives every analyte
+        ``tau_provenance="metadata"``.
+    manual_row_exclusions : dict[str, set[int]] or None, optional
+        ``analyte -> set of absolute row indices`` to force-exclude from the
+        background statistics (Time Series viewer click/drag), unioned into
+        each analyte's automatic row-outlier mask.
+
+    Returns
+    -------
+    BackgroundResult
+        Per-analyte background statistics, Poisson fields, detection limits,
+        row-outlier masks, and the corrected ablation signal.
+
+    Notes
+    -----
+    If ``session_background_drift`` (from
     :func:`fit_session_background_drift`) is supplied, each ablation sweep is
     corrected using the session-level drift curve evaluated at that sweep's
     own absolute time, per analyte -- not the single per-file background
@@ -552,8 +810,30 @@ def recompute_from_window(
 ) -> BackgroundResult:
     """Recompute a :class:`BackgroundResult` for GUI-overridden window bounds.
 
-    Marks ``window.method = "manual_override"`` so it's visibly distinct from
-    an auto-detected window in diagnostics/QC output.
+    Parameters
+    ----------
+    line_data : LineFileData
+        The file to reprocess.
+    start_idx : int
+        First background row (inclusive).
+    end_idx : int
+        One past the last background row; the ablation window is
+        ``[end_idx, n_rows)``.
+    reference_channels : list[str] or None, optional
+        Stored on the window's ``reference_channel`` field (comma-joined),
+        else ``"manual"``.
+    session_background_drift : dict[str, DriftFitLike] or None, optional
+        Passed through to :func:`compute_background_result`.
+    dwell_time_ms : float or None, optional
+        Passed through to :func:`compute_background_result`.
+    sweeps_per_reading : int or None, optional
+        Passed through to :func:`compute_background_result`.
+
+    Returns
+    -------
+    BackgroundResult
+        The recomputed result, with ``window.method == "manual_override"``
+        so it is visibly distinct from an auto-detected window in QC output.
     """
     n = line_data.n_rows
     window = BackgroundWindow(
@@ -576,15 +856,28 @@ def recompute_from_window(
 
 @dataclass
 class BackgroundWindowOverride:
-    """Manual gas-blank/edge-trim settings, expressed relative to each
-    line's own start (not absolute per-file times) -- the gas blank's timing
-    is expected to be consistent across a whole session (e.g. to exclude
-    mounting-epoxy contamination measured right after the true gas blank),
-    so a single override applies uniformly to every file rather than needing
-    per-file entries. See ``pipeline.run()``'s ``background_override``
-    (global) and ``per_file_overrides`` (per-file escape hatch, keyed by
-    filename, taking precedence over the global override for that file).
+    """Manual gas-blank / edge-trim settings, relative to each line's own start.
+
+    A single override applies uniformly to every file (the gas blank's
+    timing is expected to be consistent across a session). See
+    ``pipeline.run()``'s ``background_override`` (global) and
+    ``per_file_overrides`` (per-file escape hatch).
+
+    Attributes
+    ----------
+    start_offset_s : float or None
+        Background-window start, in seconds from the line's start
+        (``Time [Sec]``). ``None`` means 0.
+    end_offset_s : float or None
+        Background-window end, in seconds from the line's start. ``None``
+        means the same as the start (an empty background window).
+    edge_trim_lead_s : float
+        Seconds trimmed from the *start* of the ablation window's statistics
+        region (see :func:`apply_edge_trim`); the display span is untouched.
+    edge_trim_trail_s : float
+        Seconds trimmed from the *end* of the statistics region.
     """
+
     start_offset_s: float | None = None    # seconds from line start (Time [Sec]); None -> 0
     end_offset_s: float | None = None       # seconds from line start; None -> same as start (empty background)
     edge_trim_lead_s: float = 0.0            # trims the *statistics* region (see apply_edge_trim), not the display
@@ -594,15 +887,27 @@ class BackgroundWindowOverride:
 def window_from_override(
     line_data: LineFileData, override: BackgroundWindowOverride
 ) -> tuple[BackgroundWindow, AblationWindow]:
-    """Builds explicit background/ablation windows from a manual time-offset
-    override instead of running changepoint detection.
+    """Build explicit windows from a manual time-offset override.
 
-    ``start_offset_s``/``end_offset_s`` select the background window as
-    seconds from the line's own start (against ``line_data.time_s``, not
-    absolute time). If ``edge_trim_lead_s``/``edge_trim_trail_s`` are
-    nonzero, the resulting ablation window is additionally edge-trimmed (see
-    :func:`apply_edge_trim`) for excluding a standard glass's leading/
-    trailing edge-effect ramp from calibration statistics.
+    Parameters
+    ----------
+    line_data : LineFileData
+        The file to window.
+    override : BackgroundWindowOverride
+        The manual start/end offsets and edge-trim durations.
+
+    Returns
+    -------
+    tuple[BackgroundWindow, AblationWindow]
+        The background window (``method="manual_override"``) and the
+        complementary ablation window, edge-trimmed via
+        :func:`apply_edge_trim` when the override requests it.
+
+    Notes
+    -----
+    ``start_offset_s``/``end_offset_s`` are measured against
+    ``line_data.time_s`` (seconds from the line's own start), not absolute
+    time.
     """
     n = line_data.n_rows
     start_idx = (
@@ -635,14 +940,27 @@ def window_from_override(
 def apply_edge_trim(
     ablation: AblationWindow, line_data: LineFileData, lead_s: float, trail_s: float
 ) -> AblationWindow:
-    """Returns a copy of ``ablation`` with ``included_start_idx``/``included_end_idx``
-    narrowed to exclude ``lead_s`` seconds from the start and ``trail_s``
-    seconds from the end of the ablation window -- e.g. for excluding a
-    standard glass's edge-effect ramp (a leading/trailing rise or fall in
-    counts, rather than the ordinary flat plateau) from the statistics used
-    for calibration (``standards.assemble_occurrences``). ``start_idx``/
-    ``end_idx`` (and everything raw/background+drift/calibrated maps
-    display) are untouched -- only the *included* (statistics) region shrinks.
+    """Narrow an ablation window's statistics region by a lead/trail duration.
+
+    Parameters
+    ----------
+    ablation : AblationWindow
+        The window to trim.
+    line_data : LineFileData
+        Source of the per-row ``time_s`` used to convert durations to row
+        counts.
+    lead_s : float
+        Seconds excluded from the start of the window.
+    trail_s : float
+        Seconds excluded from the end of the window.
+
+    Returns
+    -------
+    AblationWindow
+        A copy with ``included_start_idx``/``included_end_idx`` narrowed
+        (never collapsed below one row). ``start_idx``/``end_idx`` -- and
+        everything the raw/background+drift/calibrated maps display -- are
+        untouched.
     """
     abl_time_s = line_data.time_s[ablation.start_idx:ablation.end_idx]
     if len(abl_time_s) == 0:
@@ -671,12 +989,31 @@ def apply_edge_trim(
 def detect_row_outliers(
     values: np.ndarray, order: int = 1, threshold: float = 5.0, provisional_threshold: float = 2.5,
 ) -> np.ndarray:
-    """Row-level outlier detection: fits a low-order polynomial (default
-    order 1, i.e. linear) vs. row index, then flags rows whose residual
-    against that fit is a robust (MAD-based) outlier -- catches a short
-    edge-effect ramp on a standard glass, or an isolated spike/dropout,
-    automatically, without a manually-specified trim duration.
+    """Flag rows whose residual against a low-order fit is a robust outlier.
 
+    Parameters
+    ----------
+    values : numpy.ndarray
+        One analyte's signal over a background or ablation window.
+    order : int, optional
+        Polynomial order fitted versus row index, by default ``1``.
+        ``order=0`` uses a dedicated median-centered, nonzero-rows-only
+        path.
+    threshold : float, optional
+        Modified-z-score cutoff for the final decision, by default ``5.0``.
+    provisional_threshold : float, optional
+        Looser cutoff for the first pass of the ``order >= 1``
+        two-pass refit, by default ``2.5``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Boolean array the length of ``values``; ``True`` marks an outlier.
+        All ``False`` when there are fewer than ``order + 4`` points (or,
+        for ``order=0``, fewer than 4 nonzero rows).
+
+    Notes
+    -----
     ``order=0`` is a dedicated, simpler single-pass path: it centers on the
     **median** of the rows, not a mean/polyfit-based fit. The median is
     already robust (50% breakdown point) to however many outliers are in
@@ -738,9 +1075,6 @@ def detect_row_outliers(
     and, for the order=0 median path, a near-zero background-window scale
     (~25-30 rows) with one or two injected contamination spikes (isolated
     exactly, with a false-positive rate under 1% across 100 flat-data trials).
-
-    Returns a boolean array the length of ``values`` (``True`` = outlier).
-    Requires at least ``order + 4`` points; with fewer, nothing is flagged.
     """
     n = len(values)
     values = np.asarray(values, dtype=float)
@@ -776,6 +1110,18 @@ def detect_row_outliers(
     x -= x.mean()
 
     def _fitted(idx: np.ndarray) -> np.ndarray:
+        """Polynomial fit to ``values[idx]`` evaluated at every row.
+
+        Parameters
+        ----------
+        idx : numpy.ndarray
+            Row indices to fit on (all rows, or the provisional inliers).
+
+        Returns
+        -------
+        numpy.ndarray
+            The fitted curve at every row of ``values``.
+        """
         coeffs = np.polyfit(x[idx], values[idx], order)
         return np.polyval(coeffs, x)
 
@@ -806,9 +1152,36 @@ def classify_rows(
     line_data: LineFileData, background: BackgroundResult | None, analyte: str | None = None,
     is_outlier: bool = False, manual_row_mask: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Per-row role for every sweep in ``line_data``: ``"background"``,
-    ``"excluded"``, or ``"included"``.
+    """Classify every sweep in a line by role, for the time-series viewer.
 
+    Parameters
+    ----------
+    line_data : LineFileData
+        The line whose rows are classified.
+    background : BackgroundResult or None
+        The line's background result. ``None`` (pre-Run) makes every row
+        ``"unclassified"`` before ``manual_row_mask`` is applied.
+    analyte : str or None, optional
+        Analyte for the per-analyte row-outlier lookups. ``None`` (default)
+        skips them and uses only the coarse window boundaries.
+    is_outlier : bool, optional
+        When true, mark the entire included region ``"outlier"`` (the whole
+        occurrence was dropped from calibration). Takes precedence over the
+        per-row mask. By default ``False``.
+    manual_row_mask : numpy.ndarray or None, optional
+        Caller-supplied boolean array the length of ``line_data.signal``;
+        matching rows become ``"manual"``, taking precedence over
+        everything else including ``is_outlier``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of role strings (``"background"``, ``"excluded"``,
+        ``"included"``, ``"outlier"``, ``"manual"``, or ``"unclassified"``),
+        one per row of ``line_data.signal``.
+
+    Notes
+    -----
     ``"excluded"`` covers rows inside the ablation window but outside its
     edge-trimmed included region (``AblationWindow.included_start_idx``/
     ``included_end_idx`` -- see :func:`apply_edge_trim`), plus any
@@ -849,10 +1222,6 @@ def classify_rows(
     actually recomputes statistics with the exclusion applied (see
     ``compute_background_result``'s/``assemble_occurrences``'s own
     ``manual_row_exclusions`` parameter for that computational side).
-
-    Returns an array of role strings, one per row of ``line_data.signal``. If
-    ``background`` is ``None`` (no pipeline run yet -- a pre-Run raw preview),
-    every row is ``"unclassified"`` (before ``manual_row_mask`` is applied).
     """
     n = line_data.n_rows
     if background is None:

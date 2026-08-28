@@ -55,6 +55,63 @@ class PipelineError(ValueError):
 
 @dataclass
 class SampleCalibratedResult:
+    """Everything the pipeline produces for one sample label.
+
+    Attributes
+    ----------
+    sample_label : str
+        The sample's filename label.
+    files : list[LineFileData]
+        The sample's parsed raw files.
+    backgrounds : list[BackgroundResult]
+        Per-file background results for ``files``.
+    standard_results : dict[str, StandardCalibrationResult]
+        Every calibrated standard label in the session (not just the
+        primaries), for QC.
+    calibrated_ppm : pandas.DataFrame
+        Calibrated elemental ppm, ``(file_index, row_in_ablation)`` index,
+        one column per analyte.
+    grid_index : pandas.DataFrame
+        Per-pixel grid/position columns aligned with ``calibrated_ppm``.
+    session_background_drift : dict[str, DriftFitLike]
+        Per-analyte session background drift fits.
+    instrument_settings : InstrumentSettings
+        The geometry/metadata settings used.
+    qc_report : dict
+        Nested QC summary (timing, per-standard flag counts, curve stats,
+        ...).
+    provenance : dict
+        Full record of the inputs and options this run used.
+    multi_standard_calibration : MultiStandardCalibrationResult or None
+        Set when 2+ primary standards were combined.
+    bias_fits : dict[str, BiasFit]
+        ``"Pb206/Pb204"`` -> session mass-bias fit (see ``massbias.py``).
+    calibrated_ratios : pandas.DataFrame
+        Mass-bias-corrected *and* cross-element dating ratios, one
+        ``"<num> / <den>"`` column each, sharing this per-row frame.
+    isotopic_ppm : pandas.DataFrame
+        Isotope-apportioned concentrations -- same analyte-string columns as
+        ``calibrated_ppm`` but a separate frame (see
+        ``isotope_apportion.py``).
+    isotopic_ppm_provenance : dict[str, dict]
+        Per-element ``{"included_masses", "missing_masses",
+        "normalizer_mass"}``.
+    dating_ratio_fits : dict[str, DatingRatioFit]
+        ``"Pb206/U238"`` -> session cross-element dating-ratio fit.
+    deconvolution_provenance : dict[int, dict]
+        ``line_number`` -> per-analyte deconvolution provenance.
+    deconvolution_settings : DeconvolutionSettings or None
+        The settings actually used, retained so a "deconvolution
+        correction" map stage can recompute the per-pixel delta.
+    classification : pandas.DataFrame
+        ``label``/``score``/``gap``/``ambiguous`` columns on the
+        ``calibrated_ppm`` index; set by the GUI's classify step, empty
+        until the user runs it.
+    classification_categories : list[str]
+        The selected mineral-name subset in stable sorted order, fixing the
+        discrete colormap's code->name mapping.
+    """
+
     sample_label: str
     files: list[LineFileData]
     backgrounds: list[BackgroundResult]
@@ -78,6 +135,19 @@ class SampleCalibratedResult:
 
 
 def _group_by_label(files: list[LineFileData]) -> dict[str, list[LineFileData]]:
+    """Group parsed files by their filename label.
+
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Parsed raw files.
+
+    Returns
+    -------
+    dict[str, list[LineFileData]]
+        ``label -> files with that label``, preserving input order within
+        each group.
+    """
     groups: dict[str, list[LineFileData]] = {}
     for f in files:
         groups.setdefault(f.meta.label, []).append(f)
@@ -85,6 +155,18 @@ def _group_by_label(files: list[LineFileData]) -> dict[str, list[LineFileData]]:
 
 
 def _timing_summary(backgrounds: list[BackgroundResult]) -> list[dict]:
+    """Serialize per-file background/ablation timing to JSON-ready dicts.
+
+    Parameters
+    ----------
+    backgrounds : list[BackgroundResult]
+        Background results to summarize; sorted here by ``acquired_at``.
+
+    Returns
+    -------
+    list[dict]
+        One dict per file with ISO-8601 timing strings and window methods.
+    """
     return [
         {
             "file": b.file_meta.path.name,
@@ -110,11 +192,42 @@ def _build_calibrated_ppm_and_grid(
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[int, dict]]:
-    """``multi_result``/``standard_results`` (both required together) route
-    calibration through :func:`~src.calibration.standards.apply_multi_point_calibration`
-    instead of the single-standard ``standard_result``/``apply_calibration``
-    path -- used when 2+ primary standards were configured (see ``run()``).
+    """Build the calibrated ppm frame and its per-pixel grid index.
 
+    Parameters
+    ----------
+    pairs : list[tuple[LineFileData, BackgroundResult]]
+        One ``(line, background)`` pair per file of a single sample label.
+        Sorted here by ``acquired_at``.
+    standard_result : StandardCalibrationResult or None
+        Single-standard calibration to apply. Ignored when ``multi_result``
+        is given.
+    instrument_settings : InstrumentSettings
+        Supplies pixel spacing for the grid.
+    multi_result : MultiStandardCalibrationResult or None, optional
+        Multi-standard calibration; when given (together with
+        ``standard_results``) routes through
+        :func:`~src.calibration.standards.apply_multi_point_calibration`.
+    standard_results : dict[str, StandardCalibrationResult] or None, optional
+        Per-label results, required with ``multi_result`` for the
+        per-analyte drift reference.
+    deconvolution_settings : DeconvolutionSettings or None, optional
+        When given, applies
+        :func:`src.deconvolution.pipeline.correct_line` to each line's
+        background-corrected signal immediately before calibration.
+    ablation_onset_trim_s : float, optional
+        Seconds of leading ablation rows dropped from *every* line before
+        deconvolution/calibration, by default ``0.0`` (off).
+
+    Returns
+    -------
+    tuple[pandas.DataFrame, pandas.DataFrame, dict[int, dict]]
+        ``(calibrated_ppm, grid_index, deconvolution_provenance)``. The
+        first two share a ``(file_index, row_in_ablation)`` MultiIndex; both
+        are empty frames when ``pairs`` yields no rows.
+
+    Notes
+    -----
     ``deconvolution_settings``, when given, applies
     :func:`src.deconvolution.pipeline.correct_line` to each line's
     background-corrected signal (still pre-calibration counts) immediately
@@ -187,19 +300,35 @@ def _build_calibrated_ratios(
     pairs: list[tuple[LineFileData, BackgroundResult]], bias_fits: dict[str, BiasFit],
     dating_ratio_fits: dict[str, DatingRatioFit] | None = None,
 ) -> pd.DataFrame:
-    """Sibling to :func:`_build_calibrated_ppm_and_grid`: mass-bias-
-    corrected same-element isotope ratios (see ``massbias.corrected_ratio``,
-    one column per ``bias_fits`` entry) AND standard-bracketed cross-element
-    dating ratios (see ``dating_ratios.corrected_dating_ratio``, one column
-    per ``dating_ratio_fits`` entry) in a single shared frame -- both use
-    LaME's existing ``"<num> / <den>"`` ratio-field naming convention (see
-    ``src/common/geochronology.py``), on the SAME ``(file_index,
-    row_in_ablation)`` index ``_build_calibrated_ppm_and_grid`` produces
-    for the same ``pairs`` -- both iterate ``pairs`` in the same
-    ``acquired_at`` order and use every ablation row of every line (both
-    corrections read ``bg.background_corrected_signal`` at its full,
-    un-truncated length, same as ``apply_calibration`` does), so the two
-    frames stay row-aligned without sharing index-building code.
+    """Build the shared frame of corrected isotope and dating ratios.
+
+    Parameters
+    ----------
+    pairs : list[tuple[LineFileData, BackgroundResult]]
+        One ``(line, background)`` pair per file of a single sample label.
+        Sorted here by ``acquired_at``.
+    bias_fits : dict[str, BiasFit]
+        ``"<num>/<den>"`` -> mass-bias fit; one corrected column per entry
+        whose channels are present.
+    dating_ratio_fits : dict[str, DatingRatioFit] or None, optional
+        ``"<num>/<den>"`` -> cross-element dating-ratio fit; one corrected
+        column per entry whose channels are present.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Corrected ratios with a ``(file_index, row_in_ablation)``
+        MultiIndex, columns named ``"<num> / <den>"``. Empty when there are
+        no fits or no usable columns.
+
+    Notes
+    -----
+    Row-aligned with :func:`_build_calibrated_ppm_and_grid` without sharing
+    index-building code: both iterate ``pairs`` in ``acquired_at`` order and
+    use every ablation row of every line (reading
+    ``bg.background_corrected_signal`` at full length). Uses LaME's
+    ``"<num> / <den>"`` ratio-field naming convention (see
+    ``src/common/geochronology.py``).
     """
     dating_ratio_fits = dating_ratio_fits or {}
     if not bias_fits and not dating_ratio_fits:
@@ -241,12 +370,35 @@ def _build_isotopic_ppm(
     calibrated_ppm: pd.DataFrame, calibrated_ratios: pd.DataFrame, isotope_share_specs: list[IsotopeShareSpec],
     isotope_table: pd.DataFrame | str | Path | None = DEFAULT_ISOTOPE_TABLE_PATH,
 ) -> tuple[pd.DataFrame, dict[str, dict]]:
-    """Per-sample isotope apportionment (see ``isotope_apportion.py``) --
-    reads the already-built ``calibrated_ppm``/``calibrated_ratios`` frames'
-    columns, so this must run after both are built. Specs with no usable
-    data for this sample (missing total-ppm column, no resolvable ratio at
-    all) are silently omitted, matching how an unresolvable analyte is
-    handled elsewhere in this module."""
+    """Apportion per-isotope concentrations for a sample.
+
+    Parameters
+    ----------
+    calibrated_ppm : pandas.DataFrame
+        The sample's calibrated elemental ppm (already built).
+    calibrated_ratios : pandas.DataFrame
+        The sample's mass-bias-corrected ratios (already built). May be
+        empty.
+    isotope_share_specs : list[IsotopeShareSpec]
+        One entry per element to apportion.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Isotope table (or path) for ``"natural_abundance"`` mode. Defaults
+        to :data:`~src.calibration.massbias.DEFAULT_ISOTOPE_TABLE_PATH`.
+
+    Returns
+    -------
+    tuple[pandas.DataFrame, dict[str, dict]]
+        ``(isotopic_ppm, provenance)`` where ``isotopic_ppm`` has the
+        ``calibrated_ppm`` index and ``provenance`` maps each element to its
+        ``{"normalizer_mass", "included_masses", "missing_masses"}``. Both
+        empty when nothing resolves.
+
+    Notes
+    -----
+    Must run after both input frames are built. Specs with no usable data
+    for this sample (missing total-ppm column, no resolvable ratio) are
+    silently omitted.
+    """
     if not isotope_share_specs or calibrated_ppm.empty:
         return pd.DataFrame(), {}
 
@@ -315,9 +467,115 @@ def run(
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
 ) -> dict[str, SampleCalibratedResult]:
-    """Runs the full background/drift/calibration pipeline over one self-contained
-    raw-data folder (one or more sample labels, bracketed by standard files).
+    """Run the full background/drift/calibration pipeline over one raw-data folder.
 
+    Parameters
+    ----------
+    sample_dir : str or pathlib.Path
+        Folder of raw line files (one or more sample labels, bracketed by
+        standard files).
+    standard_names : Iterable[str] or Callable[[str], bool]
+        Which filename labels are reference standards.
+    reference_library : dict[str, ReferenceMaterial]
+        Certified compositions keyed by standard label.
+    drift_order, background_drift_order : int, optional
+        Polynomial order for the standard-signal and session-background
+        drift fits when the corresponding method is ``"fixed"``. Both
+        default to ``1``.
+    split_odd_even : bool, optional
+        Odd/even holdout split for standard accuracy QC. By default
+        ``False``.
+    accuracy_threshold : float, optional
+        ``z``/``t`` cutoff for flagging accuracy rows, by default ``2.0``.
+    primary_standards : list[str] or None, optional
+        Which calibrated standard(s) samples are calibrated against.
+        ``None``/empty auto-infers (exactly one standard -> use it, else
+        raise).
+    instrument_settings : InstrumentSettings or None, optional
+        Geometry/metadata; a blank :class:`InstrumentSettings` when
+        ``None``.
+    background_detection_kwargs : dict or None, optional
+        Extra keyword arguments for :func:`detect_background_window`.
+    reference_channel_top_n : int, optional
+        Number of background-detection reference channels, by default ``5``.
+    drift_method, background_drift_method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+        Order-selection strategy for the standard and background drift fits.
+        Both default to ``"fixed"``.
+    max_order : int, optional
+        Order ceiling for the ``auto_*`` methods, by default ``3``.
+    background_override : BackgroundWindowOverride or None, optional
+        Global manual background/edge-trim window replacing auto-detection.
+    per_file_overrides : dict[str, BackgroundWindowOverride] or None, optional
+        Per-filename overrides taking precedence over ``background_override``.
+    acquired_time_format : str or None, optional
+        :func:`datetime.datetime.strptime` pattern overriding header
+        timestamp auto-detection.
+    excluded_files : set[str] or None, optional
+        Filenames dropped entirely before any fitting.
+    manual_row_exclusions : dict[str, dict[str, set[int]]] or None, optional
+        ``filename -> analyte -> row indices`` to exclude (Time Series
+        viewer).
+    manual_occurrence_exclusions : dict[str, set[str]] or None, optional
+        ``filename -> analytes`` to drop from that analyte's drift
+        fit/calibration factor (Standards QC viewer).
+    detrend : bool, optional
+        Enable the post-hoc linear detrend per standard/analyte, by default
+        ``False``.
+    despike_noise : bool, optional
+        Apply :func:`~src.calibration.despike.noise_despike` to every
+        analyte immediately after parsing, by default ``False``.
+    force_zero_intercept : bool, optional
+        Force the multi-point calibration curve through the origin (2+
+        primary standards only), by default ``False``.
+    bias_specs : list[BiasSpec] or None, optional
+        Same-element mass-bias/isotope-ratio calibration requests.
+    bias_drift_order : int, optional
+        Polynomial order for the mass-bias log-ratio drift fit, by default
+        ``1``.
+    bias_drift_method : {"fixed", "auto_aic"}, optional
+        Order-selection strategy for the mass-bias fit, by default
+        ``"fixed"``.
+    bias_max_order : int, optional
+        Order ceiling for the mass-bias ``auto_aic`` path, by default ``3``.
+    isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
+        Natural-abundance table override; ``None`` uses the default path.
+    isotope_share_specs : list[IsotopeShareSpec] or None, optional
+        Per-isotope concentration apportionment requests (needs matching
+        ``bias_specs``).
+    pool_specs : list[PooledElementSpec] or None, optional
+        Pooled ``"<element> total"`` virtual channels to synthesize before
+        background detection.
+    dating_ratio_specs : list[DatingRatioSpec] or None, optional
+        Cross-element parent/daughter dating-ratio calibration requests.
+    dating_ratio_drift_order : int, optional
+        Polynomial order for the dating-ratio drift fit, by default ``1``.
+    dating_ratio_drift_method : {"fixed", "auto_aic"}, optional
+        Order-selection strategy for the dating-ratio fit, by default
+        ``"fixed"``.
+    dating_ratio_max_order : int, optional
+        Order ceiling for the dating-ratio ``auto_aic`` path, by default
+        ``3``.
+    deconvolution_settings : DeconvolutionSettings or None, optional
+        Dwell-offset shift / washout-tailing correction applied before
+        calibration.
+    ablation_onset_trim_s : float, optional
+        Seconds of leading ablation rows dropped from every line before
+        deconvolution/calibration, by default ``0.0``.
+
+    Returns
+    -------
+    dict[str, SampleCalibratedResult]
+        One entry per non-standard sample label found in ``sample_dir``
+        (usually one).
+
+    Raises
+    ------
+    PipelineError
+        If no raw files are found, all are excluded, or the primary
+        standard cannot be determined unambiguously.
+
+    Notes
+    -----
     ``deconvolution_settings``, when given, applies dwell-offset shift and/or
     washout-tailing correction (``src/deconvolution/``) to each line's
     background-corrected counts before standard calibration -- see
@@ -468,9 +726,6 @@ def run(
     method``/``dating_ratio_max_order`` mirror ``bias_drift_order``/
     ``bias_drift_method``/``bias_max_order`` above, but for this fit
     specifically.
-
-    Returns a dict keyed by sample label (non-standard files) -- usually one
-    entry, but a folder may hold more than one distinct sample label.
     """
     sample_dir = Path(sample_dir)
     instrument_settings = instrument_settings or InstrumentSettings()
@@ -555,18 +810,37 @@ def _run_from_files(
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
 ) -> dict[str, SampleCalibratedResult]:
-    """Shared implementation behind both ``run()`` (parses ``files`` fresh
-    from ``sample_dir``) and ``run_from_parsed()`` (reuses already-parsed
-    ``files``, e.g. from a prior Scan) -- everything from despike/pooling
-    through per-sample grid building is identical either way; the only
-    difference between the two public entry points is where ``files`` came
-    from. ``sample_dir`` is used only as a label (provenance/error
-    messages) here, not for any file I/O -- both callers have already
-    finished reading files before this runs.
+    """Shared implementation behind :func:`run` and :func:`run_from_parsed`.
 
-    See ``run()``'s own docstring for what every parameter does -- kept
-    there rather than duplicated here since both entry points share it
-    via the same parameter names.
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Already-parsed raw files. ``meta.is_standard`` must already be
+        correct for the current selection.
+    sample_dir : str or pathlib.Path
+        Used only as a provenance/error-message label here, not for file
+        I/O.
+    reference_library : dict[str, ReferenceMaterial]
+        Certified compositions keyed by standard label.
+    **kwargs
+        Every other option; see :func:`run` for the full description of
+        each (the names and defaults are identical).
+
+    Returns
+    -------
+    dict[str, SampleCalibratedResult]
+        One entry per non-standard sample label.
+
+    Raises
+    ------
+    PipelineError
+        If the primary standard cannot be determined unambiguously.
+
+    Notes
+    -----
+    Everything from despike/pooling through per-sample grid building is
+    identical whether ``files`` were parsed fresh (:func:`run`) or reused
+    from a prior Scan (:func:`run_from_parsed`).
     """
     instrument_settings = instrument_settings or InstrumentSettings()
     background_detection_kwargs = background_detection_kwargs or {}
@@ -591,6 +865,19 @@ def _run_from_files(
     reference_channels = select_reference_channels(files, top_n=reference_channel_top_n)
 
     def _override_window(f: LineFileData) -> tuple[BackgroundWindow, AblationWindow] | tuple[None, None]:
+        """Resolve the manual background window for one file, if any.
+
+        Parameters
+        ----------
+        f : LineFileData
+            The file to window.
+
+        Returns
+        -------
+        tuple[BackgroundWindow, AblationWindow] or tuple[None, None]
+            Explicit windows from the per-file or global override, or
+            ``(None, None)`` when neither applies (auto-detect).
+        """
         override = per_file_overrides.get(f.meta.path.name) or background_override
         if override is None:
             return None, None
@@ -839,14 +1126,40 @@ def run_from_parsed(
     excluded_files: set[str] | None = None,
     **kwargs,
 ) -> dict[str, SampleCalibratedResult]:
-    """Same as :func:`run`, but starting from already-parsed ``LineFileData``
-    (e.g. ``dock_widgets.py``'s ``self._scanned_files``, populated at Scan
-    time) instead of re-reading/re-parsing every raw file from disk --
-    ``run()`` currently re-parses unconditionally even when the exact same
-    files were already parsed once for the Scan preview. Useful for
-    quickly re-applying changed deconvolution/calibration settings without
-    waiting on file I/O again for a large session.
+    """Run the pipeline from already-parsed files instead of reading from disk.
 
+    Parameters
+    ----------
+    files : list[LineFileData]
+        Already-parsed raw files (e.g. ``dock_widgets.py``'s
+        ``self._scanned_files``). Each ``meta.is_standard`` must already be
+        correct for the current UI selection -- this function never calls
+        ``parse_line_file`` and so cannot re-apply a ``standard_names``
+        criterion.
+    sample_dir : str or pathlib.Path
+        Provenance/error-message label only; no file I/O.
+    reference_library : dict[str, ReferenceMaterial]
+        Certified compositions keyed by standard label.
+    excluded_files : set[str] or None, optional
+        Filenames (matched by ``f.meta.path.name``) dropped before
+        processing.
+    **kwargs
+        Every other :func:`run`/:func:`_run_from_files` parameter; see
+        :func:`run` for descriptions.
+
+    Returns
+    -------
+    dict[str, SampleCalibratedResult]
+        One entry per non-standard sample label.
+
+    Raises
+    ------
+    PipelineError
+        If all provided files were excluded, or the primary standard is
+        ambiguous.
+
+    Notes
+    -----
     Every ``LineFileData.meta.is_standard`` must already correctly reflect
     which labels are standards under the *current* UI selection -- unlike
     ``run()``, this function never calls ``parse_line_file`` itself, so it
@@ -872,8 +1185,19 @@ def run_from_parsed(
     )
 
 def discover_sample_directories(parent_dir: str | Path) -> list[Path]:
-    """Subfolders of ``parent_dir`` that look like self-contained raw-file sets
-    (i.e. contain at least one file matching '<label> - <N>.csv')."""
+    """Find sample subfolders under a parent directory.
+
+    Parameters
+    ----------
+    parent_dir : str or pathlib.Path
+        Directory whose immediate subfolders are inspected.
+
+    Returns
+    -------
+    list[pathlib.Path]
+        Subfolders (sorted) containing at least one file matching the raw
+        ``"<label> - <N>.csv"`` pattern.
+    """
     parent_dir = Path(parent_dir)
     return [child for child in sorted(p for p in parent_dir.iterdir() if p.is_dir()) if list_line_files(child)]
 
@@ -884,14 +1208,31 @@ def run_batch(
     reference_library: dict[str, ReferenceMaterial],
     **kwargs,
 ) -> dict[str, dict[str, SampleCalibratedResult]]:
-    """Runs :func:`run` independently over every sample subfolder discovered
-    under ``parent_dir``.
+    """Run :func:`run` independently over every discovered sample subfolder.
 
-    Standards are NOT shared across folders by default -- each subfolder
-    brackets and calibrates its own samples, matching what's observed on real
-    multi-sample sessions (each sibling folder has its own standard files).
-    This assumption is recorded in each result's provenance rather than
-    silently baked in.
+    Parameters
+    ----------
+    parent_dir : str or pathlib.Path
+        Directory holding one sample subfolder per session (see
+        :func:`discover_sample_directories`).
+    standard_names : Iterable[str] or Callable[[str], bool]
+        Which filename labels are reference standards.
+    reference_library : dict[str, ReferenceMaterial]
+        Certified compositions keyed by standard label.
+    **kwargs
+        Forwarded to each :func:`run` call.
+
+    Returns
+    -------
+    dict[str, dict[str, SampleCalibratedResult]]
+        ``subfolder name -> {sample label -> result}``. Each result's
+        provenance records ``standards_shared_across_folders=False`` and the
+        batch parent directory.
+
+    Notes
+    -----
+    Standards are not shared across folders -- each subfolder brackets and
+    calibrates its own samples, matching real multi-sample sessions.
     """
     results: dict[str, dict[str, SampleCalibratedResult]] = {}
     for sample_dir in discover_sample_directories(parent_dir):

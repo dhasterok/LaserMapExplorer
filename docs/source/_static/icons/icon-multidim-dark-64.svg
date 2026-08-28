@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #e6e7e8;
+        stroke-width: 4px;
+      }
+
+      .st0, .st1, .st2 {
+        stroke-miterlimit: 10;
+      }
+
+      .st1 {
+        stroke: #4774ba;
+      }
+
+      .st1, .st2 {
+        fill: #4774ba;
+      }
+
+      .st2 {
+        stroke: #fbb040;
+        stroke-width: 5px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_11" data-name="Layer_1">
+    <path id="Path" class="st2" d="M9.6,54.3L60,6.6"/>
+    <path id="Path1" data-name="Path" class="st2" d="M48.7,45.1L20.7,15.6"/>
+    <path id="Path_10" class="st0" d="M5,4v55h55"/>
+    <path id="Path_12" class="st1" d="M20.5,49.6c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_5" class="st1" d="M53.4,24.2c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_6" class="st1" d="M39.8,22.2c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_7" class="st1" d="M30.1,43.6c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_8" class="st1" d="M28.2,32.4c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_9" class="st1" d="M44.4,36.2c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+    <path id="Path_11" class="st1" d="M56.6,11c0,2.6-2.1,4.7-4.7,4.7s-4.7-2.1-4.7-4.7,2.1-4.7,4.7-4.7,4.7,2.1,4.7,4.7"/>
+  </g>
+</svg>

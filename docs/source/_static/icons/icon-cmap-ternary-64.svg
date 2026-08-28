@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #414042;
+        stroke-miterlimit: 10;
+        stroke-width: 2.1px;
+      }
+
+      .st1 {
+        fill: url(#linear-gradient);
+      }
+
+      .st2 {
+        fill: url(#linear-gradient2);
+        opacity: .3;
+      }
+
+      .st2, .st3 {
+        isolation: isolate;
+      }
+
+      .st3 {
+        fill: url(#linear-gradient1);
+        opacity: .5;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="52.5" y1="37.4" x2="11.5" y2="-3.6" gradientTransform="translate(0 63.9) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".1" stop-color="#d4daeb" stop-opacity=".2"/>
+      <stop offset=".2" stop-color="#a5b2d6" stop-opacity=".5"/>
+      <stop offset=".4" stop-color="#7f91c5" stop-opacity=".7"/>
+      <stop offset=".5" stop-color="#6177b8" stop-opacity=".8"/>
+      <stop offset=".7" stop-color="#4b65ae" stop-opacity=".9"/>
+      <stop offset=".8" stop-color="#3f5aa8" stop-opacity="1"/>
+      <stop offset="1" stop-color="#3b57a7"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="17" y1="31.9" x2="62" y2="5.9" gradientTransform="translate(0 63.9) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fafdfc" stop-opacity="0"/>
+      <stop offset=".1" stop-color="#c4ead8" stop-opacity=".3"/>
+      <stop offset=".3" stop-color="#95dab9" stop-opacity=".5"/>
+      <stop offset=".4" stop-color="#6ecd9f" stop-opacity=".7"/>
+      <stop offset=".5" stop-color="#50c38c" stop-opacity=".8"/>
+      <stop offset=".7" stop-color="#3bbb7e" stop-opacity=".9"/>
+      <stop offset=".8" stop-color="#2fb775" stop-opacity="1"/>
+      <stop offset="1" stop-color="#2bb673"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient2" x1="32" y1="5.9" x2="32" y2="57.9" gradientTransform="translate(0 63.9) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fffefd" stop-opacity="0"/>
+      <stop offset=".1" stop-color="#fff3c3" stop-opacity=".2"/>
+      <stop offset=".2" stop-color="#ffe991" stop-opacity=".4"/>
+      <stop offset=".4" stop-color="#ffe066" stop-opacity=".6"/>
+      <stop offset=".5" stop-color="#ffd943" stop-opacity=".8"/>
+      <stop offset=".6" stop-color="#ffd327" stop-opacity=".9"/>
+      <stop offset=".7" stop-color="#ffd014" stop-opacity=".9"/>
+      <stop offset=".9" stop-color="#ffcd08" stop-opacity="1"/>
+      <stop offset="1" stop-color="#ffcd05"/>
+    </linearGradient>
+  </defs>
+  <polygon class="st1" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="st3" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="st2" points="32 6 2 58 62 58 32 6"/>
+  <polygon class="st0" points="32 6 2 58 62 58 32 6"/>
+</svg>

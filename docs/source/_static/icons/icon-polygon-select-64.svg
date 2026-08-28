@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #414042;
+      }
+
+      .st1 {
+        fill: #fff;
+        stroke-width: 2px;
+      }
+
+      .st1, .st2 {
+        stroke: #414042;
+        stroke-miterlimit: 10;
+      }
+
+      .st2 {
+        fill: #7bb7e4;
+        stroke-width: 3px;
+      }
+    </style>
+  </defs>
+  <polygon class="st2" points="36.2 6.8 5.5 36.7 17.9 59.3 57.2 48.8 59.3 18.8 36.2 6.8"/>
+  <circle class="st1" cx="36.3" cy="7" r="3.4"/>
+  <circle class="st1" cx="59.3" cy="19" r="3.4"/>
+  <circle class="st1" cx="56.5" cy="48.9" r="3.4"/>
+  <circle class="st1" cx="17.3" cy="59.3" r="3.4"/>
+  <circle class="st1" cx="6" cy="36.5" r="3.4"/>
+  <polygon class="st0" points="47 54.6 61.2 53.5 36.4 29.4 36.3 64 47 54.6"/>
+</svg>

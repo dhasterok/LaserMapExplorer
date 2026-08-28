@@ -7,6 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+from datetime import datetime
+from pathlib import Path
 
 # Project root only -- every module in this codebase is imported as
 # src.app.X / src.common.X / src.ui.X (matching how the app itself imports
@@ -77,6 +79,16 @@ html_static_path = ['_static']
 
 #html_logo = "_static/LaME-wide-64.svg"
 
+# Stamps a "Last updated on <date>" line at the bottom of every page, using
+# *that page's own* .rst source file's last-modified-on-disk date -- not a
+# single build timestamp shared by every page (Sphinx's own html_last_
+# updated_fmt only does the latter; see the html-page-context hook in
+# setup() below, which overrides it per page instead). Rendered via
+# pydata_sphinx_theme's built-in `last-updated` footer component, enabled
+# below in html_theme_options's footer_start. This value just needs to be
+# non-None to turn the feature on -- setup()'s hook overwrites it per page.
+html_last_updated_fmt = ''
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'dateutil': ('https://dateutil.readthedocs.io/en/stable/', None),
@@ -117,6 +129,9 @@ html_theme_options = {
     "navbar_start": ["navbar-logo"],
     "navbar_center": ["navbar-nav"],
     "navbar_end": ["navbar-icon-links"],
+    # Site-wide footer (every page, not just the article content) -- shows
+    # the "Last updated on <date>" line from html_last_updated_fmt above.
+    "footer_start": ["last-updated"],
     "logo": {
         "text": "LaME v.0.0 beta",
         "image_light": "_static/LaME-wide-64.svg",
@@ -168,8 +183,29 @@ mathjax3_config = {
 # ------
 # fixes issues with js and fontawsome loading issues
 
+def _stamp_page_with_source_mtime(app, pagename, templatename, context, doctree):
+    """Overrides the 'last_updated' template variable (normally one
+    build-wide timestamp -- see html_last_updated_fmt above) with *this
+    page's own* source .rst file's last-modified-on-disk date, so the
+    footer answers "was this specific page's content touched recently"
+    rather than "when did someone last run sphinx-build".
+
+    doctree is None for pages not built from a source file (search,
+    genindex, ...) -- nothing to stamp there.
+    """
+    if doctree is None:
+        return
+    try:
+        src_path = Path(app.env.doc2path(pagename))
+        mtime = datetime.fromtimestamp(src_path.stat().st_mtime)
+    except OSError:
+        return
+    context['last_updated'] = mtime.strftime('%Y-%m-%d')
+
+
 def setup(app):
     app.add_js_file('custom.js')
+    app.connect('html-page-context', _stamp_page_with_source_mtime)
 # ------
 
 autoclass_content = 'both'

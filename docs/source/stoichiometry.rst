@@ -5,12 +5,6 @@ The *Stoichiometric Calculator* converts a per-pixel elemental (or oxide) analys
 
 For the underlying math: normalization basis, redox estimation, site allocation, end-member methods---see :doc:`stoichiometry_technical`. For the full, current content of every mineral's YAML config, see :doc:`mineral_configs`.
 
-.. toctree::
-   :maxdepth: 1
-   :caption: More on stoichiometry
-
-   stoichiometry_technical
-   mineral_configs
 
 .. figure:: _static/screenshots/LaME_Stoichiometry_Dock.png
     :align: center
@@ -22,7 +16,7 @@ For the underlying math: normalization basis, redox estimation, site allocation,
 Opening the Dock
 =================
 
-Open the dock from *Analyze* \> *Stoichiometry* in the main menu, or the *Stoichiometry* button (|icon-atom|) in the *Main Toolbar*. Like other docks, it can be toggled open/closed from the same button and floated or docked to the main window.
+Open the dock from *Analyze* \> *Stoichiometry* in the main menu, or the *Stoichiometry* button (|icon-silicate|) in the *Main Toolbar*. Like other docks, it can be toggled open/closed from the same button and floated or docked to the main window.
 
 Compute Scope
 ==============
@@ -54,10 +48,17 @@ Every column *LaME* writes back to the sample is prefixed with the mineral's sta
 
 Only pixels inside the compute scope are written; pixels outside it keep whatever value they already had from an earlier run, so results for different minerals or different ROIs/clusters can coexist on the same sample.
 
+.. toctree::
+   :maxdepth: 1
+   :caption: More on stoichiometry
+
+   stoichiometry_technical
+   mineral_configs
+
 .. _stoichiometry-mineral-table:
 
-Supported Minerals
-====================
+Appendix: Supported Minerals
+============================
 
 The table below lists every mineral config currently available. Click a mineral's name to view its full YAML config on the :doc:`mineral_configs` page.
 
@@ -238,5 +239,5 @@ The table below lists every mineral config currently available. Click a mineral'
      - Oxygen
      - --
 
-.. |icon-atom| image:: _static/icons/icon-atom-64.png
+.. |icon-silicate| image:: _static/icons/icon-silicate-64.svg
     :height: 2.5ex

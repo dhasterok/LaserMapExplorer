@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #4d4d4f;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .st1 {
+        fill: #fff;
+      }
+
+      .st2 {
+        fill: #ed1b30;
+      }
+    </style>
+  </defs>
+  <circle class="st0" cx="32" cy="32" r="26"/>
+  <g>
+    <polyline class="st1" points="28.4 31 27.4 49.8 35.6 33"/>
+    <polyline class="st2" points="35.6 33 36.6 14.2 28.4 31"/>
+    <polygon class="st0" points="28.4 31 27.4 49.8 35.6 33 35.6 33 36.6 14.2 28.4 31 28.4 31"/>
+  </g>
+  <line class="st0" x1="58" y1="32" x2="53.8" y2="32"/>
+  <line class="st0" x1="10.2" y1="32" x2="6" y2="32"/>
+  <line class="st0" x1="32" y1="6" x2="32" y2="10.2"/>
+  <line class="st0" x1="32" y1="53.8" x2="32" y2="58"/>
+  <line class="st0" x1="50.4" y1="13.6" x2="47.4" y2="16.6"/>
+  <line class="st0" x1="16.6" y1="47.4" x2="13.6" y2="50.4"/>
+  <line class="st0" x1="13.6" y1="13.6" x2="16.6" y2="16.6"/>
+  <line class="st0" x1="47.4" y1="47.4" x2="50.4" y2="50.4"/>
+</svg>

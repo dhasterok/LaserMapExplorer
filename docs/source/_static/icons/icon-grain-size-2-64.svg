@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #4d4d4f;
+      }
+
+      .st1 {
+        fill: #b8922e;
+      }
+
+      .st2 {
+        fill: none;
+        stroke: #b8922e;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+    </style>
+  </defs>
+  <line class="st2" y1="17.1" x2="64" y2="17.1"/>
+  <rect class="st1" x="3" y="17.1" width="58" height="12"/>
+  <line class="st2" y1="47.1" x2="64" y2="47.1"/>
+  <rect class="st1" x="3" y="47.1" width="58" height="12"/>
+  <circle class="st0" cx="12" cy="33.5" r="2"/>
+  <circle class="st0" cx="12" cy="40.5" r="2"/>
+  <circle class="st0" cx="22" cy="33.5" r="2"/>
+  <circle class="st0" cx="22" cy="40.5" r="2"/>
+  <circle class="st0" cx="32" cy="33.5" r="2"/>
+  <circle class="st0" cx="32" cy="40.5" r="2"/>
+  <circle class="st0" cx="42" cy="33.5" r="2"/>
+  <circle class="st0" cx="42" cy="40.5" r="2"/>
+  <circle class="st0" cx="52" cy="33.5" r="2"/>
+  <circle class="st0" cx="12" cy="8" r="2"/>
+  <circle class="st0" cx="22" cy="8" r="5"/>
+  <circle class="st0" cx="32" cy="8" r="1"/>
+  <circle class="st0" cx="42" cy="8" r="3.5"/>
+  <circle class="st0" cx="52" cy="8" r="2.5"/>
+  <circle class="st0" cx="52" cy="40.5" r="2"/>
+</svg>

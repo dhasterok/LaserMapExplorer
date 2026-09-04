@@ -113,29 +113,29 @@ Regression
 
 *Regression* is currently under development and not available.
 
-.. |icon-sort| image:: _static/icons/icon-sort-64.png
+.. |icon-sort| image:: _static/icons/icon-sort-64.svg
     :height: 2ex
 
-.. |icon-launch| image:: _static/icons/icon-launch-64.png
+.. |icon-launch| image:: _static/icons/icon-launch-64.svg
     :height: 2ex
 
-.. |icon-save| image:: _static/icons/icon-save-file-64.png
+.. |icon-save| image:: _static/icons/icon-save-file-64.svg
     :height: 2ex
 
-.. |icon-trash| image:: _static/icons/icon-delete-64.png
+.. |icon-trash| image:: _static/icons/icon-delete-64.svg
     :height: 2ex
 
-.. |icon-calculator| image:: _static/icons/icon-calculator-64.png
+.. |icon-calculator| image:: _static/icons/icon-calculator-64.svg
     :height: 2ex
 
-.. |icon-link| image:: _static/icons/icon-link-64.png
+.. |icon-link| image:: _static/icons/icon-link-64.svg
     :height: 2ex
 
-.. |icon-unlink| image:: _static/icons/icon-unlink-64.png
+.. |icon-unlink| image:: _static/icons/icon-unlink-64.svg
     :height: 2ex
 
-.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.svg
     :height: 2ex
 
-.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.svg
     :height: 2ex

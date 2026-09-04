@@ -80,5 +80,5 @@ Visualization Options
 - Cluster Scores: Degree of membership in each cluster
 - Cluster Performance: Metrics to help optimize cluster numbers
 
-.. |icon-atom| image:: _static/icons/icon-atom-64.png
+.. |icon-atom| image:: _static/icons/icon-atom-64.svg
     :height: 2ex

@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
@@ -54,7 +54,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
-    <meta name="docbuild:last-update" content="2024-12-11"/>
+    <meta name="docbuild:last-update" content="2026-08-31"/>
   
     
     <script src="_static/searchtools.js"></script>
@@ -374,6 +374,8 @@
 <li class="toctree-l2"><a class="reference internal" href="mineral_configs.html">Mineral Configuration Reference</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1"><a class="reference internal" href="geochronology.html">Geochronology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diffusion.html">Diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster_dock.html">Cluster Dock</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging_tool.html">Logging Tool</a></li>
@@ -446,30 +448,30 @@
 <section id="samples-and-fields">
 <h2>Samples and Fields<a class="headerlink" href="#samples-and-fields" title="Link to this heading">#</a></h2>
 <p>The <em>Samples and Fields</em> tab offers crucial functions for data management.  Here, reference values can be changed, which updates normalized data across plots and calculated fields.  Additionally, the correlation method can be adjusted, which automatically updates all correlation plots to reflect the chosen approach.  The tab also allows switching between linear and logarithmic scales, and setting units for display.</p>
-<figure class="align-center" id="id3">
+<figure class="align-center" id="id4">
 <a class="reference internal image-reference" href="_images/LaME_Samples_and_Fields.png"><img alt="LaME interface: left toolbox, samples and fields tab" src="_images/LaME_Samples_and_Fields.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Samples and Fields</em> tab with options for data manipulation and correlation visualization.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Samples and Fields</em> tab with options for data manipulation and correlation visualization.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Autoscaling (<a class="reference internal" href="_images/icon-autoscale-64.png"><img alt="icon-autoscale" src="_images/icon-autoscale-64.png" style="height: 2.5ex;" /></a>) addresses a common calibration issue where low counts convert to negative concentrations after calibration.  This often results from differences in ablation properties between calibration and sample minerals, causing particular problems with log-scaled data.  To mitigate this, <em>LaME</em> applies a linear compression to the data, fixing the upper end and shifting the lower end to a small positive value.  While this alters concentrations slightly, it minimally affects larger values.  The autoscaling process, performed by default, clips extreme high and low concentrations to the scale’s limits.  Although autoscaling can influence statistics, it generally improves mean estimates by reducing the impact of unreasonably high values.</p>
-<p>Histogram equalization (<a class="reference internal" href="_images/icon-histeq-64.png"><img alt="icon-histeq" src="_images/icon-histeq-64.png" style="height: 2.5ex;" /></a>) offers an alternative to autoscaling that preserves the original data.  This method assigns colors based on equal quantiles, proving particularly useful for datasets with wide value ranges or multi-modal distributions.  While effective for visualizing complex distributions, be aware that it may amplify noise at the expense of real features.</p>
+<p>Autoscaling (<a class="reference internal" href="_images/icon-autoscale-64.svg"><img alt="icon-autoscale" src="_images/icon-autoscale-64.svg" style="height: 2.5ex;" /></a>) addresses a common calibration issue where low counts convert to negative concentrations after calibration.  This often results from differences in ablation properties between calibration and sample minerals, causing particular problems with log-scaled data.  To mitigate this, <em>LaME</em> applies a linear compression to the data, fixing the upper end and shifting the lower end to a small positive value.  While this alters concentrations slightly, it minimally affects larger values.  The autoscaling process, performed by default, clips extreme high and low concentrations to the scale’s limits.  Although autoscaling can influence statistics, it generally improves mean estimates by reducing the impact of unreasonably high values.</p>
+<p>Histogram equalization (<a class="reference internal" href="_images/icon-histeq-64.svg"><img alt="icon-histeq" src="_images/icon-histeq-64.svg" style="height: 2.5ex;" /></a>) offers an alternative to autoscaling that preserves the original data.  This method assigns colors based on equal quantiles, proving particularly useful for datasets with wide value ranges or multi-modal distributions.  While effective for visualizing complex distributions, be aware that it may amplify noise at the expense of real features.</p>
 <p>Modifying data scaling is similar to cropping and clears existing filters, so these options should be used judiciously.</p>
 </section>
 <section id="preprocess">
 <h2>Preprocess<a class="headerlink" href="#preprocess" title="Link to this heading">#</a></h2>
 <p>The <em>Preprocessing</em> tab provides tools for data enhancement and noise reduction.  These modifications can improve performance, stability, and visual characteristics.  Note that these changes may impact certain statistical calculations, such as mean values and standard deviations.</p>
-<figure class="align-center" id="id4">
+<figure class="align-center" id="id5">
 <a class="reference internal image-reference" href="_images/LaME_Preprocess.png"><img alt="LaME interface: left toolbox, preprocessing tab" src="_images/LaME_Preprocess.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Preprocessing</em> tab with tools for data enhancement and noise reduction.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Preprocessing</em> tab with tools for data enhancement and noise reduction.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 <section id="noise-reduction">
-<h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
-<p>Noise reduction (<a class="reference internal" href="_images/icon-noise-reduction-64.png"><img alt="icon-noise-reduction" src="_images/icon-noise-reduction-64.png" style="height: 2.5ex;" /></a>) smooths data to enhance clarity.  It can be applied solely to maps for viewing or to Analysis Data before generating plots and analyses.  The application method can be selected from the Method dropdown. <em>LaME</em> offers five noise reduction methods:</p>
+<span id="id1"></span><h3>Noise Reduction<a class="headerlink" href="#noise-reduction" title="Link to this heading">#</a></h3>
+<p>Noise reduction (<a class="reference internal" href="_images/icon-noise-reduction-64.svg"><img alt="icon-noise-reduction" src="_images/icon-noise-reduction-64.svg" style="height: 2.5ex;" /></a>) smooths data to enhance clarity.  It can be applied solely to maps for viewing or to Analysis Data before generating plots and analyses.  The application method can be selected from the Method dropdown. <em>LaME</em> offers five noise reduction methods:</p>
 <ul class="simple">
 <li><p>Median: Computes the median value over a specified kernel size, smoothing across the entire image</p></li>
 <li><p>Gaussian: Applies Gaussian weighting over a specified kernel size, smoothing across the entire image</p></li>
@@ -491,55 +493,55 @@
 <section id="polygons">
 <h2>Polygons<a class="headerlink" href="#polygons" title="Link to this heading">#</a></h2>
 <p>The Polygons tab enables creation and management of polygon masks for data filtering.  Polygon masks are a powerful tool for isolating specific regions in your maps, such as individual minerals or zones of interest.  You can create multiple polygons and link them together for complex region selection.  For detailed instructions on creating and using polygon masks, see the Polygon Masking section in <a class="reference external" href="filtering.html#polygon-masking">Filtering</a>.</p>
-<figure class="align-center" id="id5">
+<figure class="align-center" id="id6">
 <a class="reference internal image-reference" href="_images/LaME_Polygons.png"><img alt="LaME interface: left toolbox, profiling tab" src="_images/LaME_Polygons.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Polygons</em> tab with tools for creating and editing polygons.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Polygons</em> tab with tools for creating and editing polygons.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="profiling">
 <h2>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">#</a></h2>
 <p>The <em>Profiling</em> tab provides tools for analyzing compositional variations along user-defined paths across your sample.  This functionality is particularly valuable for examining mineral zoning, reaction boundaries, and diffusion profiles.  When a profile is created, it appears in the <em>Profile</em> tab in <em>Lower Tabs</em> for detailed analysis. See <a class="reference internal" href="profiles.html"><span class="doc">Profiles</span></a> for comprehensive information about creating and analyzing compositional profiles.</p>
-<figure class="align-center" id="id6">
+<figure class="align-center" id="id7">
 <a class="reference internal image-reference" href="_images/LaME_Profiling.png"><img alt="LaME interface: left toolbox, profiling tab" src="_images/LaME_Profiling.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Profiling</em> tab with tools for creating cross-sections.</span><a class="headerlink" href="#id6" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Profiling</em> tab with tools for creating cross-sections.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="scatter-and-heatmaps">
 <h2>Scatter and Heatmaps<a class="headerlink" href="#scatter-and-heatmaps" title="Link to this heading">#</a></h2>
 <p>The <em>Scatter and Heatmaps</em> tab provides tools for creating scatter plots and heatmaps in both 2D (biplots) and 3D (ternary) dimensions.  See <a class="reference external" href="analysis_visualization.html#scatter-and-heatmaps">Scatter and Heatmaps</a> for comprehensive details about different visualization methods and their applications.  Scatter data can be colored by a field set in the Colormap dropdown list, allowing for multi-variable visualization.  Additionally, maps can be generated with colors defined by pixel positions within a ternary diagram, offering a unique perspective on three-component systems.</p>
-<figure class="align-center" id="id7">
+<figure class="align-center" id="id8">
 <a class="reference internal image-reference" href="_images/LaME_Scatter_and_Heatmaps.png"><img alt="LaME interface: left toolbox, scatter and heatmaps tab" src="_images/LaME_Scatter_and_Heatmaps.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Scatter and Heatmaps</em> tab for creating various 2D and 3D visualizations.</span><a class="headerlink" href="#id7" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Scatter and Heatmaps</em> tab for creating various 2D and 3D visualizations.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="n-dim">
 <h2>n-Dim<a class="headerlink" href="#n-dim" title="Link to this heading">#</a></h2>
 <p>The <em>n-Dim</em> tab enables visualization of multidimensional data through radar plots and trace element compatibility (spider) diagrams. Users can select reference values for normalization, build custom analyte sets or use predefined groups (majors, full trace, REE, metals), and control data representation through quantile selection.  For detailed information about these visualization techniques, see <a class="reference external" href="analysis_visualization.html#n-dim-analysis">n-Dim Analysis</a>.</p>
-<figure class="align-center" id="id8">
+<figure class="align-center" id="id9">
 <a class="reference internal image-reference" href="_images/LaME_n-Dim.png"><img alt="LaME interface: left toolbox, n-Dim tab" src="_images/LaME_n-Dim.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>n-Dim</em> tab for creating multidimensional plots like spider diagrams and radar plots.</span><a class="headerlink" href="#id8" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>n-Dim</em> tab for creating multidimensional plots like spider diagrams and radar plots.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
 <section id="dimensional-reduction">
 <h2>Dimensional Reduction<a class="headerlink" href="#dimensional-reduction" title="Link to this heading">#</a></h2>
 <p>The <em>Dimensional Reduction</em> tab offers tools for principal component analysis (PCA) visualization, a key technique for reducing the dimensionality of complex datasets.  See <a class="reference external" href="multidimensional.html#principal-component-analysis">Principal Component Analysis</a> for comprehensive details about PCA methodology and interpretation.</p>
-<figure class="align-center" id="id9">
+<figure class="align-center" id="id10">
 <a class="reference internal image-reference" href="_images/LaME_PCA.png"><img alt="LaME interface: left toolbox, PCA tab" src="_images/LaME_PCA.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Dimensional Reduction</em> tab with tools for principal component analysis visualization.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Dimensional Reduction</em> tab with tools for principal component analysis visualization.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -547,11 +549,11 @@
 <h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">#</a></h2>
 <p>The <em>Clustering</em> tab identifies data subsets with similar multidimensional characteristics.  This functionality is often used to isolate or exclude specific minerals from analyses.  <em>LaME</em> implements two clustering methods: K-means and Fuzzy c-means.  For detailed information about clustering methods and applications, see <a class="reference external" href="multidimensional.html#clustering">Clustering</a>.</p>
 <p>The interface provides essential controls for cluster number, distance metrics, and initialization parameters, with options to incorporate dimensional reduction through PCA.  Once clusters are computed, they can be used to create masks for subsequent analyses.</p>
-<figure class="align-center" id="id10">
+<figure class="align-center" id="id11">
 <a class="reference internal image-reference" href="_images/LaME_Clustering.png"><img alt="LaME interface: left toolbox, clustering tab" src="_images/LaME_Clustering.png" width="315" />
 </a>
 <figcaption>
-<p><span class="caption-text"><em>Clustering</em> tab for multivariate data classification and analysis.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+<p><span class="caption-text"><em>Clustering</em> tab for multivariate data classification and analysis.</span><a class="headerlink" href="#id11" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -647,8 +649,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -656,7 +658,7 @@
     <div class="footer-items__start">
       
         <div class="footer-item"><p class="last-updated">
-  Last updated on 2024-12-11.
+  Last updated on 2026-08-31.
   <br/>
 </p></div>
       
@@ -669,7 +671,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
 </p></div>
       
     </div>

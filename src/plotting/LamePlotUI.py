@@ -499,6 +499,7 @@ class ScatterUI(CustomPage):
             parent=scatter_group_box
         )
         self.toolButtonScatterSavePreset.setObjectName("toolButtonScatterSaveFields")
+        self.toolButtonScatterSavePreset.setToolTip("Save the current scatter field selection as a preset")
 
         preset_layout.addWidget(self.comboBoxScatterPreset)
         preset_layout.addWidget(self.toolButtonScatterSavePreset)

@@ -354,6 +354,7 @@ class ClusterPage(CustomPage, Clustering):
 
         self.toolButtonRandomSeed = CustomToolButton(text="Randomize", light_icon_unchecked="icon-randomize-64.svg", parent=self.groupBoxClustering)
         self.toolButtonRandomSeed.setObjectName("toolButtonRandomSeed")
+        self.toolButtonRandomSeed.setToolTip("Generate a new random seed for clustering")
         self.horizontalLayout.addWidget(self.toolButtonRandomSeed)
 
         self.lineEditSeed = CustomLineEdit(parent=self.groupBoxClustering)

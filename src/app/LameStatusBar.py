@@ -1,5 +1,16 @@
 from PyQt6.QtWidgets import QStatusBar, QLabel
-from lame_core.CustomWidgets import CustomToolButton
+from lame_core.CustomWidgets import CustomToolButton, IndicatorLight
+
+# Shared by both the Notes and Workflow status-bar lights (see
+# MainWindow._refresh_notes_indicator/_refresh_workflow_indicator, which
+# resolve each dock's current file-loaded/recording state to one of these
+# keys and push it via set_notes_status/set_workflow_status below).
+RECORDING_STATUS_DICT = {
+    'no_file':   {'tip_text': 'No file loaded', 'color': '#888888'},
+    'idle':      {'tip_text': 'Not recording',  'color': '#DAA520'},  # goldenrod
+    'recording': {'tip_text': 'Recording',      'color': '#e02020'},
+}
+
 
 class MainStatusBar(QStatusBar):
     def __init__(self, ui=None):
@@ -17,17 +28,6 @@ class MainStatusBar(QStatusBar):
         self.labelInvalidValues = QLabel("Negative/zeros: False, NaNs: False")
         self.addPermanentWidget(self.labelInvalidValues)
 
-        # Indicates whether the ActionRecorder is auto-pushing actions into the
-        # open Workflow dock's Blockly workspace (see MainWindow.toggle_action_capture).
-        # A separate lamp rather than relying on the CaptureToggle button's own
-        # visibility/checked state, since that button must always stay visible
-        # and clickable (clicking it while off is what creates/links a workflow
-        # file in the first place - see MainWindow.ensure_active_workflow_file).
-        self.workflowLamp = QLabel("●")  # filled circle
-        self.workflowLamp.setObjectName("workflowLamp")
-        self._set_lamp_style(False)
-        self.addPermanentWidget(self.workflowLamp)
-
         # Create a button to hide/show the dock
         self.toolButtonLeftDock = CustomToolButton(
             text="Left Dock",
@@ -36,6 +36,7 @@ class MainStatusBar(QStatusBar):
             parent=self
         )
         self.toolButtonLeftDock.setChecked(True)
+        self.toolButtonLeftDock.setToolTip("Show or hide the left dock")
         self.toolButtonRightDock = CustomToolButton(
             text="Right Dock",
             light_icon_unchecked='icon-right-toolbar-hide-64.svg',
@@ -43,6 +44,7 @@ class MainStatusBar(QStatusBar):
             parent=self
         )
         self.toolButtonRightDock.setChecked(True)
+        self.toolButtonRightDock.setToolTip("Show or hide the right dock")
         self.toolButtonBottomDock = CustomToolButton(
             text="BottomDock",
             light_icon_unchecked='icon-bottom-toolbar-hide-64.svg',
@@ -50,10 +52,28 @@ class MainStatusBar(QStatusBar):
             parent=self
         )
         self.toolButtonBottomDock.setChecked(True)
+        self.toolButtonBottomDock.setToolTip("Show or hide the bottom dock")
 
         self.addPermanentWidget(self.toolButtonLeftDock)
         self.addPermanentWidget(self.toolButtonBottomDock)
         self.addPermanentWidget(self.toolButtonRightDock)
+
+        # Notes/Workflow recording indicators -- added last so they land at
+        # the far right of the status bar (each addPermanentWidget call
+        # inserts further right than the previous one). Gray = no file
+        # loaded, golden = file loaded but not recording, red = recording;
+        # see MainWindow._refresh_notes_indicator/_refresh_workflow_indicator
+        # for what drives each state.
+        self.notesLight = IndicatorLight(
+            status_dict=RECORDING_STATUS_DICT, status='no_file',
+            label='Notes', label_position='right', size=14, parent=self,
+        )
+        self.workflowLight = IndicatorLight(
+            status_dict=RECORDING_STATUS_DICT, status='no_file',
+            label='Workflow', label_position='right', size=14, parent=self,
+        )
+        self.addPermanentWidget(self.notesLight)
+        self.addPermanentWidget(self.workflowLight)
 
     def connect_widgets(self):
         # dockWidgetLeftToolbox/dockWidgetStyling are just the Qt objectNames of
@@ -63,23 +83,41 @@ class MainStatusBar(QStatusBar):
         self.toolButtonLeftDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.ui.control_dock, button=self.toolButtonLeftDock))
         self.toolButtonRightDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.ui.style_dock, button=self.toolButtonRightDock))
 
-    def set_capture_status(self, enabled):
-        """Update the workflow lamp to reflect whether recording is happening.
+    def set_notes_status(self, has_file, recording):
+        """Update the Notes indicator light.
 
         Parameters
         ----------
-        enabled : bool
-            Whether workflow auto-capture is currently on.
+        has_file : bool
+            Whether a notes file is currently loaded (see
+            MainWindow._refresh_notes_indicator).
+        recording : bool
+            Whether the "Record to Notes" toggle is currently on. Ignored
+            (treated as not-recording) when `has_file` is False -- gray
+            always wins over red/golden.
         """
-        self._set_lamp_style(enabled)
+        self.notesLight.set_status(self._resolve_status(has_file, recording))
 
-    def _set_lamp_style(self, enabled):
-        color = "#e02020" if enabled else "#a0a0a0"
-        self.workflowLamp.setStyleSheet(f"color: {color}; font-size: 14px;")
-        self.workflowLamp.setToolTip(
-            "Recording: workflow actions are being captured" if enabled
-            else "Workflow capture is off"
-        )
+    def set_workflow_status(self, has_file, recording):
+        """Update the Workflow indicator light.
+
+        Parameters
+        ----------
+        has_file : bool
+            Whether a workflow file is currently active (see
+            MainWindow._refresh_workflow_indicator).
+        recording : bool
+            Whether workflow action-capture is currently on. Ignored
+            (treated as not-recording) when `has_file` is False -- gray
+            always wins over red/golden.
+        """
+        self.workflowLight.set_status(self._resolve_status(has_file, recording))
+
+    @staticmethod
+    def _resolve_status(has_file, recording):
+        if not has_file:
+            return 'no_file'
+        return 'recording' if recording else 'idle'
 
     def toggle_dock_visibility(self, dock, button=None):
         """Toggles the visibility and checked state of a dock and its controlling button
@@ -92,7 +130,7 @@ class MainStatusBar(QStatusBar):
             Dock widget to show or hide.
         button : QToolButton, QPushButton, QAction, optional
             Changes the checked state of button, by default None
-        """        
+        """
         if dock.isVisible():
             dock.hide()
             if button is not None:

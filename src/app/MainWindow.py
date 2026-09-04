@@ -147,6 +147,10 @@ class MainWindow(QMainWindow):
         # appends a live .rst report to the Notes dock while a workflow runs
         self.report_writer = ReportWriter(self)
 
+        # whether the "Record to Notes" toolbar toggle is on -- see
+        # toggle_notes_capture / _refresh_notes_indicator
+        self.notes_capture_enabled = False
+
         # used to schedule plot updates
         self.scheduler = Scheduler(callback=self.update_SV)
 
@@ -214,6 +218,8 @@ class MainWindow(QMainWindow):
         # Status bar
         self.statusbar = MainStatusBar(self)
         self.setStatusBar(self.statusbar)
+        self._refresh_workflow_indicator()
+        self._refresh_notes_indicator()
 
         # Central widget (canvas and toolbar)
         self.canvas_widget = CanvasWidget(ui=self, parent=self)
@@ -614,7 +620,56 @@ class MainWindow(QMainWindow):
             self.lame_action.CaptureToggle.setChecked(False)
             return
         self.action_recorder.set_capture_enabled(enabled)
-        self.statusbar.set_capture_status(enabled)
+        self._refresh_workflow_indicator()
+
+    def _refresh_workflow_indicator(self):
+        """Push the current workflow-file/capture state to the status bar's
+        Workflow light -- see LameStatusBar.set_workflow_status for what the
+        three colors mean. Called from every place that changes either
+        `app_data.active_workflow_file` or `action_recorder.capture_enabled`.
+        """
+        self.statusbar.set_workflow_status(
+            self.app_data.active_workflow_file is not None,
+            self.action_recorder.capture_enabled,
+        )
+
+    def toggle_notes_capture(self, enabled):
+        """Toggle auto-capture of recorded plot events into the open Notes file.
+
+        Independent of any Workflow run -- see `ReportWriter`'s module
+        docstring for why this only captures `plot` events (not every
+        recorded action) and how it composes safely with a workflow run's
+        own "Record notes" session via `reason='manual'`.
+
+        Unlike `toggle_action_capture`, there's no file-creation prompt:
+        Notes files are already auto-managed per sample
+        (`ProjectManager.notes_path_for_sample`), so this is safe to enable
+        even with no sample loaded yet -- nothing is written until a notes
+        file actually exists, and the indicator just stays gray.
+
+        Parameters
+        ----------
+        enabled : bool
+            New capture state, from the `RecordNotesToggle` toolbar/menu action.
+        """
+        self.notes_capture_enabled = enabled
+        if enabled:
+            self.report_writer.start_session(
+                reason='manual',
+                title=f"Notes recording - {datetime.now():%Y-%m-%d %H:%M:%S}",
+            )
+        else:
+            self.report_writer.end_session(reason='manual')
+        self._refresh_notes_indicator()
+
+    def _refresh_notes_indicator(self):
+        """Push the current notes-file/recording state to the status bar's
+        Notes light -- see LameStatusBar.set_notes_status for what the three
+        colors mean. Called from every place that changes `notes_dock.notes.
+        notes_file` or `notes_capture_enabled`.
+        """
+        has_file = hasattr(self, 'notes_dock') and self.notes_dock.notes.notes_file is not None
+        self.statusbar.set_notes_status(has_file, self.notes_capture_enabled)
 
     def ensure_active_workflow_file(self):
         """Return the project's active workflow file, prompting to create/open one if unset.
@@ -678,6 +733,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'workflow'):
             self.workflow.reload_active_file()
         self.project_manager.mark_dirty('workflow linked')
+        self._refresh_workflow_indicator()
 
     def open_workflow_file(self):
         """Open an existing workflow file and make it the project's active workflow.
@@ -729,6 +785,7 @@ class MainWindow(QMainWindow):
             self.workflow.clear_workflow()
         if had_active_file:
             self.project_manager.mark_dirty('workflow closed')
+        self._refresh_workflow_indicator()
         self.statusbar.showMessage("Workflow closed", 4000)
 
     def snapshot_workflow(self):
@@ -978,6 +1035,7 @@ class MainWindow(QMainWindow):
             # None (project not saved yet) is a valid value here -- the
             # notes_file setter handles it (status label only, no crash).
             self.notes_dock.notes.notes_file = self.project_manager.notes_path_for_sample(self.app_data.sample_id)
+            self._refresh_notes_indicator()
 
 
         if hasattr(self,"info_dock"):
@@ -1033,9 +1091,14 @@ class MainWindow(QMainWindow):
     def update_mask_and_profile_widgets(self):
         #update filters, polygon, profiles with existing data
         self.lame_action.ClearFilters.setEnabled(False)
-        # ROIMask covers both the live filter-table preview (filter_mask)
-        # and committed/selected ROIs (roi_selection_mask) -- it absorbed
-        # the old standalone FilterToggle action (see toggle_roi_mask).
+        # ROIMask covers committed/selected ROIs (roi_selection_mask) -- the
+        # only thing that actually filters the map now (see
+        # DataHandling.recompute_mask). filter_mask (the live filter table,
+        # which always mirrors whichever ROI is currently selected for
+        # editing, kept in sync on every edit -- see FilterTab._sync_
+        # active_roi_and_refresh) is checked here too, redundantly but
+        # harmlessly, since it always agrees with roi_selection_mask by the
+        # time this runs.
         if np.all(self.app_data.current_data.filter_mask) and np.all(self.app_data.current_data.roi_selection_mask):
             self.lame_action.ROIMask.setEnabled(False)
         else:
@@ -1754,6 +1817,8 @@ class MainWindow(QMainWindow):
 
             if self.notes_dock not in self.help_mapping:
                 self.help_mapping[self.notes_dock] = 'notes'
+
+            self._refresh_notes_indicator()
 
         self.notes_dock.show()
         #self.notes_dock.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)

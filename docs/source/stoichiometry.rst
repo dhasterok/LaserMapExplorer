@@ -145,7 +145,7 @@ The table below lists every mineral config currently available. Click a mineral'
    * - :ref:`Monazite <mineral-config-monazite>`
      - (REE,Th,U,Ca)(P,Si)O4
      - Oxygen
-     - monazite, huttonite
+     - monazite, huttonite, cheralite
    * - :ref:`Monosulfide <mineral-config-monosulfide>`
      - (Zn,Fe,Mn,Cd,Pb)S
      - Anion

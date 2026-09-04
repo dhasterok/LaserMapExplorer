@@ -54,8 +54,8 @@ Adding Analytes
 - Select analytes from the dropdown menu
 - Each new analyte appears in a different color for clear distinction
 
-.. |icon-profile| image:: _static/icons/icon-profile-64.png
+.. |icon-profile| image:: _static/icons/icon-profile-64.svg
     :height: 2ex
 
-.. |icon-save| image:: _static/icons/icon-save-file-64.png
+.. |icon-save| image:: _static/icons/icon-save-file-64.svg
     :height: 2ex

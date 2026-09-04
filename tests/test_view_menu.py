@@ -1,5 +1,5 @@
 """Headless check: paged toolbar (pinned row + pages) and the status bar's
-workflow-capture lamp.
+Notes/Workflow recording IndicatorLights.
 
 Run: .venv/bin/python <this file>
 """
@@ -32,8 +32,8 @@ paged = tb.paged
 # and in the Workflow menu, not the pinned row -- but it must always be
 # visible/clickable there (clicking it while off is what creates/links a
 # workflow file in the first place, so it can't be gated behind a workflow
-# already being active); the WorkflowLamp on the status bar is the actual
-# "is recording happening" indicator.
+# already being active); the Workflow IndicatorLight on the status bar is
+# the actual "is recording happening" indicator.
 # ------------------------------------------------------------------
 def action_texts(toolbar):
     return [a.text().replace('\n', ' ') for a in toolbar.actions() if not a.isSeparator()]
@@ -61,7 +61,7 @@ assert page_texts('Plot') == [
     'Correlation', 'Histogram', 'Scatter Plot', 'Ternary Plot', 'TEC Plot', 'Radar Plot',
 ], page_texts('Plot')
 assert page_texts('Processing') == ['Noise Reduction', 'Filters', 'Filter', 'Polygons', 'Clusers', 'ROI'], page_texts('Processing')
-assert page_texts('Log') == ['Notes', 'Workflow', 'Capture', 'Snapshot'], page_texts('Log')
+assert page_texts('Log') == ['Notes', 'Record', 'Workflow', 'Capture', 'Snapshot'], page_texts('Log')
 assert page_texts('Analysis') == [
     'Calculator', 'Regression', 'Dimensional Reduction', 'Cluster', 'Geochronology', 'Profiles', 'Diffusion', 'Stoichiometry',
 ], page_texts('Analysis')
@@ -86,15 +86,29 @@ assert height_home == height_processing, (height_home, height_processing)
 print("PASS: content row height is fixed across pages")
 
 # ------------------------------------------------------------------
-# WorkflowLamp on the status bar reflects actual capture state, not
-# whether a workflow file happens to be active
+# Workflow/Notes IndicatorLights on the status bar: gray with no file
+# loaded (regardless of the capture toggle's own state), golden once a
+# file is loaded but not recording, red while recording.
 # ------------------------------------------------------------------
-win.statusbar.set_capture_status(True)
-assert 'e02020' in win.statusbar.workflowLamp.styleSheet(), win.statusbar.workflowLamp.styleSheet()
+win.statusbar.set_workflow_status(has_file=False, recording=True)
+assert win.statusbar.workflowLight.status == 'no_file', win.statusbar.workflowLight.status
 
-win.statusbar.set_capture_status(False)
-assert 'a0a0a0' in win.statusbar.workflowLamp.styleSheet(), win.statusbar.workflowLamp.styleSheet()
-print("PASS: WorkflowLamp reflects capture on/off")
+win.statusbar.set_workflow_status(has_file=True, recording=True)
+assert win.statusbar.workflowLight.status == 'recording', win.statusbar.workflowLight.status
+
+win.statusbar.set_workflow_status(has_file=True, recording=False)
+assert win.statusbar.workflowLight.status == 'idle', win.statusbar.workflowLight.status
+print("PASS: Workflow IndicatorLight reflects file-loaded/capture state")
+
+win.statusbar.set_notes_status(has_file=False, recording=True)
+assert win.statusbar.notesLight.status == 'no_file', win.statusbar.notesLight.status
+
+win.statusbar.set_notes_status(has_file=True, recording=True)
+assert win.statusbar.notesLight.status == 'recording', win.statusbar.notesLight.status
+
+win.statusbar.set_notes_status(has_file=True, recording=False)
+assert win.statusbar.notesLight.status == 'idle', win.statusbar.notesLight.status
+print("PASS: Notes IndicatorLight reflects file-loaded/recording state")
 
 # ------------------------------------------------------------------
 # comboBoxSampleId / update_sample_id still work as external code expects

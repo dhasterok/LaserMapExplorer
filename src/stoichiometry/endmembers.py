@@ -420,21 +420,49 @@ def _titanite_ratio(site_allocation: SiteAllocationResult, config: MineralConfig
     return {member: 100.0 * oct_site.elements.get("Ti", 0.0) / oct_site.total for member in config.end_members.members}
 
 
-def _monazite_huttonite_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
-    """Monazite/huttonite mole fraction straight from the T site's P:Si
-    split. The huttonite substitution (REE3+ + P5+ = Th4+ + Si4+) pairs Si
-    1:1 with Th at the T/A sites respectively, so T's own P vs. Si occupancy
-    already *is* the monazite:huttonite ratio -- same "read one site's own
-    occupancy fraction" shape as ``_titanite_ratio``, just with two named
-    members instead of one.
+def _monazite_huttonite_cheralite_ratio(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
+    """Monazite/huttonite/cheralite mole fractions from the A/T sites'
+    coupled-substitution pairings.
+
+    Huttonite (REE3+ + P5+ <-> Th4+ + Si4+) pairs Si 1:1 with Th at the T/A
+    sites respectively, so the amount of Th that *can* be charge-balanced by
+    Si is ``min(Th, Si)`` -- same "read the paired cation's own occupancy"
+    logic the old monazite/huttonite-only version used, just written
+    explicitly now that a second Th-consuming substitution also exists.
+
+    Cheralite (2 REE3+ <-> Ca2+ + Th4+) pairs whatever Th is left over
+    (not already Si-paired) 1:1 with Ca. Since a cheralite formula unit is
+    Ca0.5Th0.5(PO4) on this config's 1-A-cation-per-formula-unit convention
+    (matching monazite's CePO4 and huttonite's ThSiO4), each unit consumes
+    2 apfu of *paired* Ca+Th together (0.5 Ca + 0.5 Th) per 1 apfu of A-site
+    occupancy it represents -- so the cheralite amount (on the same basis
+    monazite/huttonite are reported on) is ``2 * min(Ca, Th_remaining)``.
+
+    Any Th beyond what Si+Ca can charge-balance, or Ca beyond what
+    Th_remaining needs, stays uncoupled and simply falls into the
+    ``monazite`` bucket along with REE/U/Pb/Sr -- same fallback the
+    pre-cheralite version already used for all of Th's A-site occupancy.
+    Total A-site apfu is conserved exactly regardless: monazite + huttonite
+    + cheralite always sums back to the full A-site total.
     """
+    a_site = site_allocation.sites.get("A")
     t_site = site_allocation.sites.get("T")
-    if t_site is None:
-        raise ValueError("monazite_huttonite_ratio end-member calculation requires a 'T' site in the config.")
-    if t_site.total <= 0:
+    if a_site is None or t_site is None:
+        raise ValueError("monazite_huttonite_cheralite_ratio end-member calculation requires 'A' and 'T' sites in the config.")
+    if a_site.total <= 0:
         return {member: 0.0 for member in config.end_members.members}
-    fractions = {"monazite": t_site.elements.get("P", 0.0), "huttonite": t_site.elements.get("Si", 0.0)}
-    return {member: 100.0 * fractions.get(member, 0.0) / t_site.total for member in config.end_members.members}
+
+    th = a_site.elements.get("Th", 0.0)
+    ca = a_site.elements.get("Ca", 0.0)
+    si = t_site.elements.get("Si", 0.0)
+
+    huttonite_amt = min(th, si)
+    th_remaining = th - huttonite_amt
+    cheralite_amt = 2.0 * min(ca, th_remaining)
+    monazite_amt = a_site.total - huttonite_amt - cheralite_amt
+
+    fractions = {"monazite": monazite_amt, "huttonite": huttonite_amt, "cheralite": cheralite_amt}
+    return {member: 100.0 * fractions.get(member, 0.0) / a_site.total for member in config.end_members.members}
 
 
 def _mica_cascade(site_allocation: SiteAllocationResult, config: MineralConfig) -> dict[str, float]:
@@ -700,7 +728,7 @@ _METHODS = {
     "epidote_ratio": _epidote_ratio,
     "scapolite_ratio": _scapolite_ratio,
     "titanite_ratio": _titanite_ratio,
-    "monazite_huttonite_ratio": _monazite_huttonite_ratio,
+    "monazite_huttonite_cheralite_ratio": _monazite_huttonite_cheralite_ratio,
     "mica_cascade": _mica_cascade,
     "amphibole_ca_ratio": _amphibole_ca_ratio,
     "amphibole_na_ratio": _amphibole_na_ratio,

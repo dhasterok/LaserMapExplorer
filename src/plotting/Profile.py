@@ -271,6 +271,7 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
 
 
         self.add_field_button = QToolButton()
+        self.add_field_button.setToolTip("Add the selected field to the selected subplot")
         add_icon = QIcon(":resources/icons/icon-accept-64.svg")
         if not add_icon.isNull():
             self.add_field_button.setIcon(add_icon)
@@ -278,6 +279,7 @@ class ProfileDock(CustomDockWidget, FieldLogicUI):
             self.add_field_button.setText("Select a field to add it to the selected subplot")
 
         self.buttonRemoveField = QToolButton()
+        self.buttonRemoveField.setToolTip("Remove the field selected in the list below from the selected subplot")
         add_icon = QIcon(":resources/icons/icon-reject-64.svg")
         if not add_icon.isNull():
             self.buttonRemoveField.setIcon(add_icon)

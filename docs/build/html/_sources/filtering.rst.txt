@@ -73,35 +73,35 @@ Cluster masks utilize multivariate clustering results to filter data. Before cre
 
 For detailed information about clustering methods and implementation, see `Clustering <multidimensional.html#clustering>`_.
 
-.. |icon-filter| image:: _static/icons/icon-filter-64.png
+.. |icon-filter| image:: _static/icons/icon-filter-64.svg
     :height: 2.5ex
    
-.. |icon-map| image:: _static/icons/icon-map-64.png
+.. |icon-map| image:: _static/icons/icon-map-64.svg
     :height: 2.5ex
 
-.. |icon-link| image:: _static/icons/icon-link-64.png
+.. |icon-link| image:: _static/icons/icon-link-64.svg
     :height: 2.5ex
 
-.. |icon-unlink| image:: _static/icons/icon-unlink-64.png
+.. |icon-unlink| image:: _static/icons/icon-unlink-64.svg
     :height: 2.5ex
 
-.. |icon-open-file| image:: _static/icons/icon-open-file-64.png
+.. |icon-open-file| image:: _static/icons/icon-open-file-64.svg
     :height: 2.5ex
 
-.. |icon-save-file| image:: _static/icons/icon-save-file-64.png
+.. |icon-save-file| image:: _static/icons/icon-save-file-64.svg
     :height: 2.5ex
 
-.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.png
+.. |icon-mask-light| image:: _static/icons/icon-mask-light-64.svg
     :height: 2.5ex
 
-.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.png
+.. |icon-mask-dark| image:: _static/icons/icon-mask-dark-64.svg
     :height: 2.5ex
 
-.. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.png
+.. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.svg
     :height: 2.5ex
 
-.. |icon-spotlight| image:: _static/icons/icon-spotlight-64.png
+.. |icon-spotlight| image:: _static/icons/icon-spotlight-64.svg
     :height: 2.5ex
 
-.. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.png
+.. |icon-polygon-off| image:: _static/icons/icon-polygon-off-64.svg
     :height: 2.5ex

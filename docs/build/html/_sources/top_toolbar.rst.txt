@@ -71,47 +71,47 @@ The help and utilities section enhances your experience with *LaME*.  If you enc
 .. note::
    The reset interface button clears all current analyses and plots. Save your work before using this function if you want to preserve your analysis.
 
-.. |icon-add-directory| image:: _static/icons/icon-add-directory-64.png
+.. |icon-add-directory| image:: _static/icons/icon-add-directory-64.svg
     :height: 2ex
 
-.. |icon-open-file| image:: _static/icons/icon-open-file-64.png
+.. |icon-open-file| image:: _static/icons/icon-open-file-64.svg
     :height: 2ex
 
-.. |icon-save-session| image:: _static/icons/icon-save-session-64.png
+.. |icon-save-session| image:: _static/icons/icon-save-session-64.svg
     :height: 2ex
 
-.. |icon-open-session| image:: _static/icons/icon-open-session-64.png
+.. |icon-open-session| image:: _static/icons/icon-open-session-64.svg
     :height: 2ex
 
-.. |icon-atom| image:: _static/icons/icon-atom-64.png
+.. |icon-atom| image:: _static/icons/icon-atom-64.svg
     :height: 2ex
 
-.. |icon-crop| image:: _static/icons/icon-crop-64.png
+.. |icon-crop| image:: _static/icons/icon-crop-64.svg
     :height: 2ex
 
-.. |icon-fit-to-width| image:: _static/icons/icon-fit-to-width-64.png
+.. |icon-fit-to-width| image:: _static/icons/icon-fit-to-width-64.svg
     :height: 2ex
 
-.. |icon-swap| image:: _static/icons/icon-swap-64.png
+.. |icon-swap| image:: _static/icons/icon-swap-64.svg
     :height: 2ex
 
-.. |icon-noise-reduction-off| image:: _static/icons/icon-noise-reduction-off-64.png
+.. |icon-noise-reduction-off| image:: _static/icons/icon-noise-reduction-off-64.svg
     :height: 2ex
 
-.. |icon-tree| image:: _static/icons/icon-tree-64.png
+.. |icon-tree| image:: _static/icons/icon-tree-64.svg
     :height: 2ex
 
-.. |icon-calculator| image:: _static/icons/icon-calculator-64.png
+.. |icon-calculator| image:: _static/icons/icon-calculator-64.svg
     :height: 2ex
 
-.. |icon-bug| image:: _static/icons/icon-bugs-64.png
+.. |icon-bug| image:: _static/icons/icon-bugs-64.svg
     :height: 2ex
 
-.. |icon-question| image:: _static/icons/icon-question-64.png
+.. |icon-question| image:: _static/icons/icon-question-64.svg
     :height: 2ex
 
-.. |icon-nuke| image:: _static/icons/icon-nuke-64.png
+.. |icon-nuke| image:: _static/icons/icon-nuke-64.svg
     :height: 2ex
 
-.. |icon-sun-and-moon| image:: _static/icons/icon-sun-and-moon-64.png
+.. |icon-sun-and-moon| image:: _static/icons/icon-sun-and-moon-64.svg
     :height: 2ex

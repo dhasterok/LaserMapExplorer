@@ -50,6 +50,7 @@ class AxesPage(CustomPage):
             dark_icon_unchecked="icon-reset-dark-64.svg",
             parent=self)
         self.toolButtonXAxisReset.setObjectName("toolButtonXAxisReset")
+        self.toolButtonXAxisReset.setToolTip("Reset the x-axis limits to their default range")
         self.toolButtonXAxisReset.setFixedSize(QSize(20,20))
         self.toolButtonXAxisReset.setIconSize(QSize(14, 14))
 
@@ -98,6 +99,7 @@ class AxesPage(CustomPage):
             dark_icon_unchecked="icon-reset-dark-64.svg",
             parent=self)
         self.toolButtonYAxisReset.setObjectName("toolButtonYAxisReset")
+        self.toolButtonYAxisReset.setToolTip("Reset the y-axis limits to their default range")
         self.toolButtonYAxisReset.setFixedSize(QSize(20,20))
         self.toolButtonYAxisReset.setIconSize(QSize(14, 14))
 
@@ -148,6 +150,7 @@ class AxesPage(CustomPage):
             dark_icon_unchecked="icon-reset-dark-64.svg",
             parent=self)
         self.toolButtonZAxisReset.setObjectName("toolButtonZAxisReset")
+        self.toolButtonZAxisReset.setToolTip("Reset the z-axis limits to their default range")
         self.toolButtonZAxisReset.setFixedSize(QSize(20,20))
         self.toolButtonZAxisReset.setIconSize(QSize(14, 14))
 
@@ -407,6 +410,7 @@ class ColorsPage(CustomPage):
             dark_icon_unchecked="icon-reset-dark-64.svg",
             parent=self)
         self.toolButtonCAxisReset.setObjectName("toolButtonCAxisReset")
+        self.toolButtonCAxisReset.setToolTip("Reset the color-axis limits to their default range")
 
         c_lim_label_layout.addWidget(c_lim_label)
         c_lim_label_layout.addWidget(self.toolButtonCAxisReset)

@@ -71,12 +71,15 @@ class MainActions(QObject):
 
         self.Undo = QAction(parent=self.ui)
         self.Undo.setObjectName("actionUndo")
+        self.Undo.setToolTip("Undo the last action")
 
         self.Cut = QAction(parent=self.ui)
         self.Cut.setObjectName("actionCut")
+        self.Cut.setToolTip("Cut the selection")
 
         self.Copy = QAction(parent=self.ui)
         self.Copy.setObjectName("actionCopy")
+        self.Copy.setToolTip("Copy the selection")
 
         #self.Shortcuts = QAction(parent=self.ui)
         #self.Shortcuts.setObjectName("actionShortcuts")
@@ -89,6 +92,7 @@ class MainActions(QObject):
         )
         self.Calculator.setObjectName("actionCalculator")
         self.Calculator.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Calculator.setToolTip("Open the field calculator")
 
         self.SelectAnalytes = CustomAction(
             text = "Analytes",
@@ -98,6 +102,7 @@ class MainActions(QObject):
         )
         self.SelectAnalytes.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SelectAnalytes.setObjectName("actionSelectAnalytes")
+        self.SelectAnalytes.setToolTip("Select analytes and ratios to load and analyze")
 
         self.BiPlot = CustomAction(
             text="Scatter Plot",
@@ -107,6 +112,7 @@ class MainActions(QObject):
         )
         self.BiPlot.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.BiPlot.setObjectName("actionBiPlot")
+        self.BiPlot.setToolTip("Create a scatter or heatmap plot")
 
         self.Ternary = CustomAction(
             text="Ternary Plot",
@@ -116,6 +122,7 @@ class MainActions(QObject):
         )
         self.Ternary.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Ternary.setObjectName("actionTernary")
+        self.Ternary.setToolTip("Create a ternary plot or ternary map")
 
         self.DimRed = CustomAction(
             text="Dimensional Reduction",
@@ -126,6 +133,7 @@ class MainActions(QObject):
         )
         self.DimRed.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.DimRed.setObjectName("actionDimRed")
+        self.DimRed.setToolTip("Open the dimensional reduction (PCA) page")
 
         self.Cluster = CustomAction(
             text="Cluster",
@@ -135,6 +143,7 @@ class MainActions(QObject):
         )
         self.Cluster.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Cluster.setObjectName("actionCluster")
+        self.Cluster.setToolTip("Create a cluster map")
 
         self.TEC = CustomAction(
             text="TEC Plot",
@@ -145,6 +154,7 @@ class MainActions(QObject):
         )
         self.TEC.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.TEC.setObjectName("actionTEC")
+        self.TEC.setToolTip("Create a trace-element compatibility (TEC) diagram")
 
         self.Radar = CustomAction(
             text="Radar Plot",
@@ -152,6 +162,7 @@ class MainActions(QObject):
             icon_text="Radar",
             parent=self.ui)
         self.Radar.setObjectName("actionRadar")
+        self.Radar.setToolTip("Create a radar (spider) plot")
 
         self.Compare_Spot_Map = CustomAction(
             text="Compare Spot",
@@ -161,18 +172,21 @@ class MainActions(QObject):
         self.Compare_Spot_Map.setEnabled(False)
         self.Compare_Spot_Map.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Compare_Spot_Map.setObjectName("actionCompare_Spot_Map")
+        self.Compare_Spot_Map.setToolTip("Compare spot analyses against map data")
 
         # self.build menubar entry
         self.Preferences = QAction(parent=self.ui)
         self.Preferences.setObjectName("actionPreferences")
         self.Preferences.setMenuRole(QAction.MenuRole.PreferencesRole)
         self.Preferences.setText("Preferences")
+        self.Preferences.setToolTip("Open the preferences dialog")
         self.Preferences.triggered.connect(self.open_preferences)
 
         self.About = QAction(parent=self.ui)
         self.About.setObjectName("actionAbout")
         self.About.setMenuRole(QAction.MenuRole.AboutRole)
         self.About.setText("About")
+        self.About.setToolTip("About LaME")
 
         self.Quit_LaME = CustomAction(
             text="Quit",
@@ -193,6 +207,7 @@ class MainActions(QObject):
         self.Batch_Process.setEnabled(False)
         self.Batch_Process.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Batch_Process.setObjectName("actionBatch_Process")
+        self.Batch_Process.setToolTip("Batch process multiple samples")
 
         self.SpotData = CustomAction(
             text="Spot Data",
@@ -202,6 +217,7 @@ class MainActions(QObject):
         self.SpotData.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SpotData.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.SpotData.setObjectName("actionSpotData")
+        self.SpotData.setToolTip("Open the Spot Data page")
 
         self.Profiles = CustomAction(
             text="Profiles",
@@ -262,6 +278,7 @@ class MainActions(QObject):
         )
         self.Correlation.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Correlation.setObjectName("actionCorrelation")
+        self.Correlation.setToolTip("Create a correlation matrix plot")
 
         self.Histograms = CustomAction(
             text="Histogram",
@@ -271,6 +288,7 @@ class MainActions(QObject):
         )
         self.Histograms.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Histograms.setObjectName("actionHistograms")
+        self.Histograms.setToolTip("Create a histogram")
 
         self.Reset = CustomAction(
             text="Reset",
@@ -447,6 +465,7 @@ class MainActions(QObject):
         )
         self.ImportSpots.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.ImportSpots.setObjectName("actionImportSpots")
+        self.ImportSpots.setToolTip("Import spot analysis data")
         
         # --- Workflow Actions ---
         self.WorkflowTool = CustomAction(
@@ -523,6 +542,7 @@ class MainActions(QObject):
         )
         self.Logger.setObjectName("actionLogger")
         self.Logger.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Logger.setToolTip("Open the logger")
 
         self.Notes = CustomAction(
             text="Notes",
@@ -531,6 +551,22 @@ class MainActions(QObject):
         )
         self.Notes.setObjectName("actionNotes")
         self.Notes.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Notes.setToolTip("Open the notes editor")
+
+        # Mirrors CaptureToggle (Workflow's own auto-capture toggle), but for
+        # Notes -- see MainWindow.toggle_notes_capture / ReportWriter's module
+        # docstring for the (deliberately narrower, plot-events-only) scope.
+        self.RecordNotesToggle = CustomAction(
+            text="Record",
+            light_icon_unchecked="icon-capture-off-64.svg",
+            light_icon_checked="icon-capture-on-64.svg",
+            dark_icon_unchecked="icon-capture-off-dark-64.svg",
+            dark_icon_checked="icon-capture-on-dark-64.svg",
+            parent=self.ui,
+        )
+        self.RecordNotesToggle.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.RecordNotesToggle.setObjectName("actionRecordNotesToggle")
+        self.RecordNotesToggle.setToolTip("Auto-capture plots into the open Notes file")
 
         self.Filters = CustomAction(
             text="Filtering",
@@ -540,14 +576,17 @@ class MainActions(QObject):
         )
         self.Filters.setObjectName("actionFilters")
         self.Filters.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Filters.setToolTip("Open the filter dock")
 
         self.UserGuide = QAction( text="User Guide", parent=self.ui )
         self.UserGuide.setObjectName("actionUserGuide")
         self.UserGuide.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.UserGuide.setToolTip("Open the user guide")
 
         self.Tutorials = QAction( text="Tutorials", parent=self.ui )
         self.Tutorials.setObjectName("actionTutorials")
         self.Tutorials.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Tutorials.setToolTip("Open the tutorials")
 
         self.Polygons = CustomAction(
             text="Polygons",
@@ -557,6 +596,7 @@ class MainActions(QObject):
         )
         self.Polygons.setObjectName("actionPolygons")
         self.Polygons.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Polygons.setToolTip("Open the polygon mask dock")
 
         self.Clusters = CustomAction(
             text="Clusters",
@@ -566,6 +606,7 @@ class MainActions(QObject):
         )
         self.Clusters.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Clusters.setObjectName("actionClusters")
+        self.Clusters.setToolTip("Open the cluster mask dock")
 
         self.Info = CustomAction(
             text="Info",
@@ -574,6 +615,7 @@ class MainActions(QObject):
         )
         self.Info.setMenuRole(QAction.MenuRole.TextHeuristicRole)
         self.Info.setObjectName("actionInfo")
+        self.Info.setToolTip("Open the data and plot info dock")
 
         self.SpotTools = CustomAction(
             text="Spot Tools",
@@ -732,6 +774,7 @@ class MainActions(QObject):
 
         self.Calculator.triggered.connect(lambda _: self.ui.open_calculator())
         self.Notes.triggered.connect(lambda _: self.ui.open_notes())
+        self.RecordNotesToggle.toggled.connect(self.ui.toggle_notes_capture)
         self.Logger.triggered.connect(lambda _: self.ui.open_logger())
         self.WorkflowTool.triggered.connect(lambda _: self.ui.open_workflow())
         self.NewWorkflow.triggered.connect(lambda _: self.ui.new_workflow())
@@ -844,6 +887,7 @@ class MainActions(QObject):
         self.Profiles.setEnabled(enable)
         self.Info.setEnabled(enable)
         self.Notes.setEnabled(enable)
+        self.RecordNotesToggle.setEnabled(enable)
         self.Reset.setEnabled(enable)
         self.UpdatePlot.setEnabled(enable)
         self.SavePlotToTree.setEnabled(enable)
@@ -996,6 +1040,7 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.Logger)
         self.menuTools.addAction(lame_action.Calculator)
         self.menuTools.addAction(lame_action.Notes)
+        self.menuTools.addAction(lame_action.RecordNotesToggle)
 
         # View Menu -- the toolbar is now a single paged widget (pinned row +
         # page tabs + one swappable content row), so there's nothing left to
@@ -1206,6 +1251,7 @@ class MainToolbar(QToolBar):
         """
         toolbar = self._styled_page_toolbar()
         toolbar.addAction(lame_action.Notes)
+        toolbar.addAction(lame_action.RecordNotesToggle)
         toolbar.addAction(lame_action.WorkflowTool)
         toolbar.addAction(lame_action.CaptureToggle)
         toolbar.addAction(lame_action.Snapshot)

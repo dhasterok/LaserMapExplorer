@@ -1442,8 +1442,8 @@ class SampleObj(QObject):
 
     def recompute_mask(self):
         """Recomputes the combined ``self.mask`` from ``crop_mask`` and each
-        optional mask component (filter/polygon/cluster/ROI), respecting
-        whichever mask-type toggle actions are currently enabled.
+        optional mask component (polygon/cluster/ROI), respecting whichever
+        mask-type toggle actions are currently enabled.
 
         A *disabled* component contributes an all-True (no restriction)
         array to the AND chain rather than being dropped from it -- so
@@ -1452,16 +1452,26 @@ class SampleObj(QObject):
         ``cluster_mask_enabled``/``roi_mask_enabled`` are set by
         ``MainWindow.toggle_polygon_mask``/``toggle_cluster_mask``/
         ``toggle_roi_mask`` (the PolygonMask/ClusterMask/ROIMask toolbar
-        actions). ``roi_mask_enabled`` also gates ``filter_mask`` -- ROI
-        absorbed the old standalone filter toggle, since an ROI's
-        definition IS a filter definition (see ``add_roi``).
+        actions).
+
+        ``self.filter_mask`` (the live, uncommitted ``filter_df``'s own
+        evaluation) deliberately does *not* appear in this AND chain --
+        filtering only ever narrows the map through a committed ROI's own
+        stored definition (``roi_component``/``roi_selection_mask``, see
+        ``recompute_roi_assignments``). ``FilterTab`` keeps the live
+        ``filter_df`` and whichever ROI is currently selected for editing
+        in sync (``update_roi_filter``), so this is never a lag -- it's
+        just that the *display* filter table is no longer an independent
+        mask source, only a view onto one ROI's definition. ``filter_mask``
+        itself is still computed (see ``apply_field_filters``) since it's
+        read elsewhere (e.g. ``MainWindow.update_mask_and_profile_widgets``'s
+        enable/disable check, ``filtersApplied``/``ActionRecorder``).
         """
         n = len(self.crop_mask)
-        filter_component = self.filter_mask if self.roi_mask_enabled else np.ones(n, dtype=bool)
         polygon_component = self.polygon_mask if self.polygon_mask_enabled else np.ones(n, dtype=bool)
         cluster_component = self.cluster_mask if self.cluster_mask_enabled else np.ones(n, dtype=bool)
         roi_component = self.roi_selection_mask if self.roi_mask_enabled else np.ones(n, dtype=bool)
-        self.mask = self.crop_mask & filter_component & polygon_component & cluster_component & roi_component
+        self.mask = self.crop_mask & polygon_component & cluster_component & roi_component
 
     def _compute_filter_mask(self, filter_df):
         """Evaluate a filter table (min/max/operator rows) into a boolean mask.
@@ -1570,6 +1580,37 @@ class SampleObj(QObject):
         self.roi_stack = [r for r in self.roi_stack if r['id'] != roi_id]
         self.selected_rois = [r for r in self.selected_rois if r != roi_id]
         self.recompute_roi_assignments()
+
+    def duplicate_roi(self, roi_id):
+        """Copy an existing region's filter definition and color into a new,
+        independent region (``"{name} copy"``), appended to the top of the
+        stack (same priority convention as ``add_roi`` -- the newest region
+        wins overlapping pixels).
+
+        Parameters
+        ----------
+        roi_id : int
+            The region to duplicate.
+
+        Returns
+        -------
+        int or None
+            The new region's id, or None if ``roi_id`` isn't in ``roi_stack``.
+        """
+        entry = next((r for r in self.roi_stack if r['id'] == roi_id), None)
+        if entry is None:
+            return None
+
+        new_id = max((r['id'] for r in self.roi_stack), default=0) + 1
+        self.roi_stack.append({
+            'id': new_id,
+            'name': f"{entry['name']} copy",
+            'color': entry['color'],
+            'filter_df': entry['filter_df'].copy(),
+        })
+        self.selected_rois.append(new_id)
+        self.recompute_roi_assignments()
+        return new_id
 
     def reorder_roi_stack(self, new_id_order):
         """Reorders the priority stack to match ``new_id_order`` and recomputes assignments.

@@ -244,8 +244,14 @@ class ProjectManager(QObject):
 
         # Don't leave the Notes editor pointed at the closed project's last
         # sample -- the setter itself handles saving/autosave-stop/None safely.
+        # Turn "Record to Notes" off first (mirrors close_workflow_file's own
+        # capture-off-before-file-clear ordering below), so a reopened/new
+        # project doesn't inherit a still-on toggle silently recording into it.
+        if getattr(ui, 'notes_capture_enabled', False):
+            ui.lame_action.RecordNotesToggle.setChecked(False)
         if hasattr(ui, 'notes_dock'):
             ui.notes_dock.notes.notes_file = None
+            ui._refresh_notes_indicator()
 
         # Detach the workflow file and stop action-capture into it.
         ui.close_workflow_file()

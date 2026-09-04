@@ -1045,6 +1045,7 @@ class NavigationWidgetsSV(VisibilityWidget):
             parent=self
         )
         self.toolButtonHome.setObjectName("toolButtonHome")
+        self.toolButtonHome.setToolTip("Reset the axes to the original view")
 
         self.toolButtonPan = CustomToolButton(
             text = "Pan",
@@ -1053,6 +1054,7 @@ class NavigationWidgetsSV(VisibilityWidget):
             parent=self
         )
         self.toolButtonPan.setObjectName("toolButtonPan")
+        self.toolButtonPan.setToolTip("Pan the plot by dragging with the left mouse button")
         self.toolButtonPan.setCheckable(True)
         self.toolButtonPan.setChecked(False)
 
@@ -1064,6 +1066,7 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setObjectName("toolButtonZoom")
+        self.toolButtonZoom.setToolTip("Zoom to a rectangle drawn with the left mouse button")
         self.toolButtonZoom.setCheckable(True)
         self.toolButtonZoom.setChecked(False)
 
@@ -1075,6 +1078,7 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonAnnotate.setCheckable(True)
         self.toolButtonAnnotate.setObjectName("toolButtonAnnotate")
+        self.toolButtonAnnotate.setToolTip("Add text annotations to the plot")
         self.toolButtonAnnotate.setCheckable(True)
         self.toolButtonAnnotate.setChecked(False)
 
@@ -1086,6 +1090,7 @@ class NavigationWidgetsSV(VisibilityWidget):
         )
         self.toolButtonDistance.setCheckable(True)
         self.toolButtonDistance.setObjectName("toolButtonDistance")
+        self.toolButtonDistance.setToolTip("Measure the distance between two points on the map")
         self.toolButtonDistance.setCheckable(True)
         self.toolButtonDistance.setChecked(False)
 
@@ -1260,6 +1265,7 @@ class NavigationWidgetsMV(VisibilityWidget):
             parent=self,
         )
         self.toolButtonRemovePlot.setObjectName("toolButtonRemovePlot")
+        self.toolButtonRemovePlot.setToolTip("Remove the selected plot from the multiview canvas")
 
         navigation_spacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
@@ -1321,6 +1327,7 @@ class NavigationWidgetsQV(VisibilityWidget):
             parent=self,
         )
         self.toolButtonNewList.setObjectName("toolButtonNewList")
+        self.toolButtonNewList.setToolTip("Create a new Quick View list")
 
         self.labelQVColumns = QLabel(parent=self)
         self.labelQVColumns.setObjectName("labelQVColumns")
@@ -1387,6 +1394,7 @@ class CanvasToolBar(QGroupBox):
         )
         self.toolButtonSave.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.toolButtonSave.setObjectName("toolButtonSave")
+        self.toolButtonSave.setToolTip("Save the current figure")
         self.toolButtonSave.setShortcut("Ctrl+P")
         
         #SaveMenu_items = ['Figure', 'Data', 'Both']
@@ -1520,6 +1528,7 @@ class QuickView(QDialog):
             dark_icon_unchecked="icon-sort-64.svg",
             parent=toolbar,
         )
+        self.sort_action_menu.setToolTip("Choose how fields are sorted in the Quick View list")
 
         self.label = QLabel()
         self.label.setText("Enter name:")

@@ -208,11 +208,11 @@ Additional Resources
 * :doc:`filtering` - Advanced filtering techniques
 * `GitHub Issues <https://github.com/yourusername/LaME/issues>`_ - Known issues and feature requests
 
-.. |icon-crop| image:: _static/icons/icon-crop-64.png
+.. |icon-crop| image:: _static/icons/icon-crop-64.svg
     :height: 2ex
 
-.. |icon-refresh| image:: _static/icons/icon-refresh-64.png
+.. |icon-refresh| image:: _static/icons/icon-refresh-64.svg
     :height: 2ex
 
-.. |icon-bug| image:: _static/icons/icon-bug-64.png
+.. |icon-bug| image:: _static/icons/icon-bug-64.svg
     :height: 2ex

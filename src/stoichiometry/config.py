@@ -93,7 +93,7 @@ VALID_REDOX_METHODS = {"all_2plus", "all_3plus", "droop_1987", "fixed_ratio"}
 VALID_END_MEMBER_METHODS = {
     "locock_2008", "olivine_ratio", "feldspar_ratio", "pyroxene_quad", "spinel_xmg",
     "xmg_ratio", "ilmenite_ratio", "lawsonite_ratio", "epidote_ratio", "scapolite_ratio", "titanite_ratio",
-    "monazite_huttonite_ratio", "mica_cascade", "amphibole_ca_ratio", "amphibole_na_ratio", "carbonate_ratio",
+    "monazite_huttonite_cheralite_ratio", "mica_cascade", "amphibole_ca_ratio", "amphibole_na_ratio", "carbonate_ratio",
     "monosulfide_ratio", "pyrite_group_ratio", "pentlandite_ratio", "pyrrhotite_vacancy_ratio",
     "orthopyroxene_ratio", "pyroxene_quad_jd_ae", "nepheline_kalsilite_ratio", "pyroxenoid_ratio",
 }

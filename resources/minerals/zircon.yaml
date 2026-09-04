@@ -25,7 +25,7 @@
 # No end_members block -- the A-site's own REE+Y+U+Th occupancy (and T's P
 # occupancy) already exposes the xenotime-substitution degree directly in
 # the site results, same "read one site's own occupancy" information
-# monazite_huttonite_ratio provides for monazite; zircon and xenotime are
+# monazite_huttonite_cheralite_ratio provides for monazite; zircon and xenotime are
 # reported as separate mineral phases (see xenotime.yaml) rather than a
 # shared solid-solution end-member pair, since they don't form a continuous
 # solution in nature.

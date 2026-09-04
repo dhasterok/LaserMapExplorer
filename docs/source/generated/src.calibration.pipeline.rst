@@ -1,4 +1,4 @@
-src.calibration.pipeline
+﻿src.calibration.pipeline
 ========================
 
 .. automodule:: src.calibration.pipeline
@@ -8,7 +8,9 @@ src.calibration.pipeline
 
    .. autosummary::
    
+      apply_deconvolution
       discover_sample_directories
+      gather_session_line_files
       run
       run_batch
       run_from_parsed

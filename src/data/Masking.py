@@ -3,11 +3,11 @@ import os
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.app.MainWindow import MainWindow
-from PyQt6.QtCore import Qt, QSize, pyqtSignal
+from PyQt6.QtCore import Qt, QSize, QEvent, pyqtSignal
 from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
-from PyQt6.QtWidgets import ( 
+from PyQt6.QtWidgets import (
         QMessageBox, QToolButton, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QInputDialog,
-        QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QListView, QToolBar, QAbstractItemView,
+        QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QListView, QToolBar, QAbstractItemView, QMenu,
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget, QGridLayout,
         QSpacerItem,
     )
@@ -240,11 +240,6 @@ class FilterTab(QWidget):
 
         self.logger_key = 'Mask'
 
-        # id of the ROI currently recalled into filter_table for editing, or
-        # None when the live filter table represents a not-yet-committed
-        # region (see recall_roi/add_roi).
-        self._recalled_roi_id = None
-
         self.setup_ui()
 
         self.connect_widgets()
@@ -417,19 +412,11 @@ class FilterTab(QWidget):
 
         # Regions of interest -- a stack of named, colored, filter-defined
         # groups (see SampleObj.add_roi). Housed here rather than a separate
-        # tab: an ROI's definition IS a filter definition, recalled into
-        # filter_table above for editing via combo_roi_select, so a separate
-        # tab would just duplicate this same filter UI. Docked, this makes
-        # the tab tall; floating the dock gives it room to breathe.
-        roi_recall_layout = QHBoxLayout()
-        roi_recall_layout.setContentsMargins(0, 0, 0, 0)
-        roi_recall_layout.addWidget(QLabel("Recall:"))
-        self.combo_roi_select = QComboBox(self)
-        self.combo_roi_select.addItem("(new)")
-        roi_recall_layout.addWidget(self.combo_roi_select)
-        roi_recall_layout.addStretch(1)
-        tab_layout.addLayout(roi_recall_layout)
-
+        # tab: an ROI's definition IS a filter definition, live-edited via
+        # filter_table above whenever its row here is the sole selection
+        # (see _on_roi_selection_changed) -- no separate recall step, so a
+        # separate tab would just duplicate this same filter UI. Docked,
+        # this makes the tab tall; floating the dock gives it room to breathe.
         self.roi_table = ReorderableTableWidget(self)
         self.roi_table.setObjectName("roi_table")
         self.roi_table.setColumnCount(5)
@@ -444,6 +431,11 @@ class FilterTab(QWidget):
             header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         self.roi_table.setHorizontalHeaderLabels(["", "Name", "Color", "% Total", "% Filtered"])
         self.roi_table.setMaximumHeight(160)
+        # Right-click (and Ctrl+click, the traditional single-button-mouse
+        # convention -- see the eventFilter override below) opens Add/
+        # Duplicate/Delete -- see show_roi_context_menu.
+        self.roi_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.roi_table.viewport().installEventFilter(self)
         tab_layout.addWidget(self.roi_table)
 
         filter_icon = QIcon(":/resources/icons/icon-filter-64.svg")
@@ -472,7 +464,10 @@ class FilterTab(QWidget):
             light_icon_unchecked="icon-filter-add-64.svg",
             dark_icon_unchecked="icon-filter-add-dark-64.svg",
             parent=self )
-        self.action_add_filter.setToolTip("Add a filter using the properties set below")
+        self.action_add_filter.setToolTip(
+            "Add a filter using the properties set below, into the selected region of interest "
+            "(a new region is created automatically if none exist yet)"
+        )
 
         self.action_remove_filter = CustomAction(
             text="Delete filter",
@@ -504,17 +499,13 @@ class FilterTab(QWidget):
             text="Add ROI",
             light_icon_unchecked="icon-roi-add-64.svg",
             parent=self )
-        self.action_add_roi.setToolTip("Commit the current filter definition as a new region of interest")
+        self.action_add_roi.setToolTip("Start a new, empty region of interest and select it")
 
         self.action_delete_roi = CustomAction(
             text="Delete ROI",
             light_icon_unchecked="icon-roi-remove-64.svg",
             parent=self )
-        self.action_delete_roi.setToolTip("Delete the selected region of interest")
-
-        self.toolButtonRoiColor = ColorButton(ui=self.ui, parent=self)
-        self.toolButtonRoiColor.setMaximumSize(QSize(18, 18))
-        self.toolButtonRoiColor.setToolTip("Color of the selected region of interest")
+        self.action_delete_roi.setToolTip("Delete the selected region(s) of interest")
 
     def setup_toolbar_actions(self, toolbar):
         """Add filter tab actions to the common toolbar"""
@@ -528,14 +519,12 @@ class FilterTab(QWidget):
         toolbar.addSeparator()
         toolbar.addAction(self.action_add_roi)
         toolbar.addAction(self.action_delete_roi)
-        toolbar.addWidget(self.toolButtonRoiColor)
 
         self.update_roi_table_widget()
 
     def connect_widgets(self):
         # filter tab toolbar connections
-        self.action_add_filter.triggered.connect(lambda: self.update_filter_table())
-        self.action_add_filter.triggered.connect(lambda: self.apply_field_filters_update_plot())
+        self.action_add_filter.triggered.connect(self._on_add_filter_clicked)
         self.filter_table.rowsMoved.connect(self._on_filter_rows_moved)
         self.action_remove_filter.triggered.connect(lambda: self.remove_selected_rows())
         self.action_save_filters.triggered.connect(self.save_filter_table)
@@ -546,10 +535,9 @@ class FilterTab(QWidget):
         self.action_add_roi.triggered.connect(self.add_roi)
         self.action_delete_roi.triggered.connect(self.delete_selected_roi)
         self.roi_table.rowsMoved.connect(self._on_roi_rows_moved)
-        self.toolButtonRoiColor.colorChanged.connect(self.roi_color_callback)
-        self.combo_roi_select.currentIndexChanged.connect(self.recall_roi)
         self.roi_table.itemChanged.connect(self.roi_label_changed)
-        self.roi_table.itemSelectionChanged.connect(self.sync_roi_color_button)
+        self.roi_table.itemSelectionChanged.connect(self._on_roi_selection_changed)
+        self.roi_table.customContextMenuRequested.connect(self.show_roi_context_menu)
 
         # filter widget connections
         self.button_load_preset.clicked.connect(lambda: self.read_filter_table())
@@ -581,6 +569,7 @@ class FilterTab(QWidget):
         current_data.reorder_filters(new_order)
         self.update_filter_table(reload=True, apply=False)
         self.apply_field_filters_update_plot()
+        self._sync_active_roi_and_refresh()
 
     def add_to_workflow(self):
         """Force-record the current filter settings for the Workflow report.
@@ -711,6 +700,7 @@ class FilterTab(QWidget):
             if current_data and row < len(current_data.filter_df):
                 current_data.filter_df.at[row, 'use'] = bool(state)
                 self.apply_field_filters_update_plot()
+                self._sync_active_roi_and_refresh()
 
         # If reload is True, clear the table and repopulate it from filter_df
         if reload:
@@ -820,6 +810,7 @@ class FilterTab(QWidget):
 
         # Apply filters and update plot
         self.apply_field_filters_update_plot()
+        self._sync_active_roi_and_refresh()
 
     def save_filter_table(self):
         """Opens a dialog to save filter table
@@ -891,11 +882,32 @@ class FilterTab(QWidget):
                 if col in filter_info.columns:
                     filter_info[col] = filter_info[col].astype(str).str.strip().str.lower() == 'true'
 
+            # A preset is just a bundle of filter definitions, and filter
+            # definitions only live inside a region of interest -- so gate
+            # the load exactly like "Add filter" does (see
+            # ``_on_add_filter_clicked``):
+            #   - no regions yet   -> auto-create one to hold the preset
+            #   - regions present, none (or several) selected -> ask the
+            #     user to pick a single target; don't drop the preset into
+            #     a region-less filter table
+            if not current_data.roi_stack:
+                color = self.ui.style_data.set_default_cluster_colors(1)[-1]
+                new_id = current_data.add_roi(color=color)
+                self.update_roi_table_widget()
+                self._select_roi_row(new_id)
+            elif self._active_roi_id() is None:
+                QMessageBox.information(
+                    self, "Select a Region of Interest",
+                    "Select a single region of interest in the table below before loading a filter preset.",
+                )
+                return
+
             # append preset filters to existing filters
             current_data.filter_df = pd.concat([current_data.filter_df, filter_info], ignore_index=True)
 
             self.update_filter_table(reload=True, apply=False)
             self.apply_field_filters_update_plot()
+            self._sync_active_roi_and_refresh()
         except FileNotFoundError:
             QMessageBox.warning(self.ui, 'Error', f'Filter file {filter_file} not found.')
         except Exception as e:
@@ -905,55 +917,217 @@ class FilterTab(QWidget):
     # Regions of interest (ROI)
     # -------------------------------------
     def add_roi(self):
-        """Commit the live filter table as a new ROI, or -- if a region was
-        recalled via ``combo_roi_select`` for editing -- save the edits back
-        to that region instead of creating a new one.
-
-        Either way, the filter table is cleared afterward (see
-        ``SampleObj.add_roi``) so the next region starts from a clean slate.
+        """Start a new, empty region of interest and select it -- filters
+        added afterward (via "Add filter") go directly into this region
+        until a different one is selected. A deliberate "start fresh"
+        action, independent of the auto-create that happens the first time
+        a filter is added with no region defined yet (see
+        ``_on_add_filter_clicked``).
         """
         current_data = self.ui.app_data.current_data
         if not current_data:
             return
 
-        if self._recalled_roi_id is not None:
-            current_data.update_roi_filter(self._recalled_roi_id, current_data.filter_df)
-            current_data.filter_df = current_data.filter_df.iloc[0:0]
-            current_data.apply_field_filters()
-            self._recalled_roi_id = None
-        else:
-            n = len(current_data.roi_stack) + 1
-            color = self.ui.style_data.set_default_cluster_colors(n)[-1]
-            current_data.add_roi(color=color)
+        current_data.filter_df = current_data.filter_df.iloc[0:0]
+        n = len(current_data.roi_stack) + 1
+        color = self.ui.style_data.set_default_cluster_colors(n)[-1]
+        new_id = current_data.add_roi(color=color)
 
-        self.action_add_roi.setText("Add ROI")
-        self.action_add_roi.setToolTip("Commit the current filter definition as a new region of interest")
-        self.combo_roi_select.setCurrentIndex(0)
         self.update_filter_table(reload=True, apply=False)
         self.update_roi_table_widget()
+        self._select_roi_row(new_id)
         self.ui.schedule_update()
 
-    def _selected_roi_id(self):
-        """The id of the currently selected row in ``roi_table``, or None."""
+    def _active_roi_id(self):
+        """The id of the ROI currently selected for editing in
+        ``roi_table`` -- None unless *exactly one* row is selected (zero or
+        several rows are both "no single target"; see
+        ``_on_add_filter_clicked``/``_on_roi_selection_changed``).
+        """
         selection_model = self.roi_table.selectionModel()
         if selection_model is None:
             return None
         rows = selection_model.selectedRows()
-        if not rows:
+        if len(rows) != 1:
             return None
         item = self.roi_table.item(rows[0].row(), 1)
         return item.data(Qt.ItemDataRole.UserRole) if item is not None else None
 
-    def delete_selected_roi(self):
+    def _selected_roi_ids(self):
+        """Ids of every row currently selected in ``roi_table`` (any
+        count) -- for operations that act on a whole multi-selection, like
+        deleting several regions at once. See ``_active_roi_id`` for the
+        single-target ("editing") case.
+        """
+        selection_model = self.roi_table.selectionModel()
+        if selection_model is None:
+            return []
+        ids = []
+        for idx in selection_model.selectedRows():
+            item = self.roi_table.item(idx.row(), 1)
+            if item is not None:
+                rid = item.data(Qt.ItemDataRole.UserRole)
+                if rid is not None:
+                    ids.append(rid)
+        return ids
+
+    def _select_roi_row(self, roi_id):
+        """Row-select the table row for ``roi_id`` (rows are displayed in
+        reverse stack order -- see ``update_roi_table_widget``).
+        """
+        for row in range(self.roi_table.rowCount()):
+            item = self.roi_table.item(row, 1)
+            if item is not None and item.data(Qt.ItemDataRole.UserRole) == roi_id:
+                self.roi_table.selectRow(row)
+                return
+
+    def _on_roi_selection_changed(self):
+        """Loads whichever ROI is now the sole selection into
+        ``filter_table`` for live editing -- replaces the old
+        ``combo_roi_select``-driven recall. Zero or several rows selected
+        both clear the table (nothing single to show/edit).
+        """
         current_data = self.ui.app_data.current_data
-        roi_id = self._selected_roi_id()
-        if not current_data or roi_id is None:
+        if not current_data:
             return
-        current_data.remove_roi(roi_id)
-        if self._recalled_roi_id == roi_id:
-            self._recalled_roi_id = None
+
+        active_id = self._active_roi_id()
+        if active_id is None:
+            current_data.filter_df = current_data.filter_df.iloc[0:0]
+        else:
+            entry = next((r for r in current_data.roi_stack if r['id'] == active_id), None)
+            current_data.filter_df = entry['filter_df'].copy() if entry is not None else current_data.filter_df.iloc[0:0]
+        self.update_filter_table(reload=True, apply=False)
+
+    def _sync_active_roi_and_refresh(self):
+        """Writes the live ``filter_df`` back into whichever ROI is
+        currently the sole selection (see ``_active_roi_id``), then
+        refreshes ``roi_table`` (its "% Filtered" column depends on the
+        just-updated definition). A no-op when no single region is
+        selected -- the live filter table is empty in that case anyway
+        (see ``_on_roi_selection_changed``/``_on_add_filter_clicked``), so
+        there's nothing to write back.
+        """
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+        active_id = self._active_roi_id()
+        if active_id is None:
+            return
+        current_data.update_roi_filter(active_id, current_data.filter_df)
+        self.update_roi_table_widget()
+
+    def _on_add_filter_clicked(self):
+        """Gate for "Add filter": no filtering happens outside a region of
+        interest, so this makes sure exactly one is unambiguously being
+        edited before appending anything.
+
+        - No regions exist yet -> auto-create a blank one and select it
+          (the new filter becomes its first entry).
+        - Regions exist but none (or more than one) is selected -> ask the
+          user to select a single region first; nothing is added.
+        - Exactly one region selected -> append the filter as before, then
+          sync it into that region's stored definition.
+        """
+        current_data = self.ui.app_data.current_data
+        if not current_data:
+            return
+
+        if not current_data.roi_stack:
+            color = self.ui.style_data.set_default_cluster_colors(1)[-1]
+            new_id = current_data.add_roi(color=color)
+            self.update_roi_table_widget()
+            self._select_roi_row(new_id)
+        elif self._active_roi_id() is None:
+            QMessageBox.information(
+                self, "Select a Region of Interest",
+                "Select a single region of interest in the table below before adding a filter.",
+            )
+            return
+
+        self.update_filter_table()
+        self.apply_field_filters_update_plot()
+        self._sync_active_roi_and_refresh()
+
+    def delete_selected_roi(self):
+        """Deletes every currently-selected region (the toolbar's "Delete
+        ROI" action and the context menu's Delete both go through this).
+        """
+        current_data = self.ui.app_data.current_data
+        roi_ids = self._selected_roi_ids()
+        if not current_data or not roi_ids:
+            return
+        for roi_id in roi_ids:
+            current_data.remove_roi(roi_id)
         self.update_roi_table_widget()
         self.ui.schedule_update()
+
+    def show_roi_context_menu(self, pos):
+        """Right-click (and Ctrl+click, see ``eventFilter``) menu on
+        ``roi_table``: Add ROI (always available), Duplicate ROI (only for
+        a single target), and Delete ROI / Delete N ROIs (for one or more).
+
+        Right-clicking a row not already part of the current selection
+        replaces the selection with just that row first (standard table
+        convention); right-clicking within an existing multi-selection
+        acts on the whole selection. Right-clicking empty space (no row
+        under the cursor) still opens the menu, just with only "Add ROI"
+        available.
+        """
+        row = self.roi_table.rowAt(pos.y())
+        if row >= 0:
+            selection_model = self.roi_table.selectionModel()
+            selected_rows = {idx.row() for idx in selection_model.selectedRows()} if selection_model else set()
+            if row not in selected_rows:
+                self.roi_table.clearSelection()
+                self.roi_table.selectRow(row)
+
+        roi_ids = self._selected_roi_ids()
+
+        menu = QMenu(self.roi_table)
+        action_add = menu.addAction("Add ROI")
+        action_duplicate = menu.addAction("Duplicate ROI") if len(roi_ids) == 1 else None
+        action_delete = None
+        if roi_ids:
+            label = "Delete ROI" if len(roi_ids) == 1 else f"Delete {len(roi_ids)} ROIs"
+            action_delete = menu.addAction(label)
+        chosen = menu.exec(self.roi_table.viewport().mapToGlobal(pos))
+
+        current_data = self.ui.app_data.current_data
+        if not current_data or chosen is None:
+            return
+        if chosen is action_add:
+            self.add_roi()
+        elif action_duplicate is not None and chosen is action_duplicate:
+            new_id = current_data.duplicate_roi(roi_ids[0])
+            self.update_roi_table_widget()
+            if new_id is not None:
+                self._select_roi_row(new_id)
+            self.ui.schedule_update()
+        elif action_delete is not None and chosen is action_delete:
+            for roi_id in roi_ids:
+                current_data.remove_roi(roi_id)
+            self.update_roi_table_widget()
+            self.ui.schedule_update()
+
+    def eventFilter(self, obj, event):
+        """Ctrl+click on ``roi_table`` also opens the context menu -- the
+        traditional single-button-mouse convention for a right-click, kept
+        alongside real right-click (handled natively via
+        ``customContextMenuRequested``). Mouse events for item views are
+        delivered to the viewport, not the outer table widget, hence
+        filtering ``roi_table.viewport()`` rather than ``roi_table``
+        itself. Filtered on release (not press) so Qt's own click-to-
+        select/extend-selection handling for the press has already run --
+        the menu then acts on whatever selection that produced, same as a
+        real right-click would.
+        """
+        if obj is self.roi_table.viewport() and event.type() == QEvent.Type.MouseButtonRelease:
+            if event.button() == Qt.MouseButton.LeftButton and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+                pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
+                self.show_roi_context_menu(pos)
+                return True
+        return super().eventFilter(obj, event)
 
     def _on_roi_rows_moved(self, source_rows, target_row):
         """Reorders ``roi_stack`` priority to match a drag-and-drop move in ``roi_table``.
@@ -978,55 +1152,11 @@ class FilterTab(QWidget):
         self.update_roi_table_widget()
         self.ui.schedule_update()
 
-    def recall_roi(self, index):
-        """Load a committed ROI's stored filter definition back into
-        ``filter_table`` for editing (``combo_roi_select`` index 0 is the
-        "(new)" placeholder -- selecting it just clears recall state).
-        """
-        current_data = self.ui.app_data.current_data
-        if not current_data:
-            return
-
-        if index <= 0:
-            self._recalled_roi_id = None
-            self.action_add_roi.setText("Add ROI")
-            self.action_add_roi.setToolTip("Commit the current filter definition as a new region of interest")
-            return
-
-        stack_idx = index - 1
-        if stack_idx >= len(current_data.roi_stack):
-            return
-        entry = current_data.roi_stack[stack_idx]
-
-        current_data.filter_df = entry['filter_df'].copy()
-        current_data.apply_field_filters()
-        self._recalled_roi_id = entry['id']
-        self.action_add_roi.setText(f"Update '{entry['name']}'")
-        self.action_add_roi.setToolTip(f"Save these filter changes back to '{entry['name']}'")
-        self.update_filter_table(reload=True, apply=False)
-        self.ui.schedule_update()
-
-    def roi_color_callback(self, hexcolor=None):
-        current_data = self.ui.app_data.current_data
-        roi_id = self._selected_roi_id()
-        if not current_data or roi_id is None:
-            return
-
-        color = hexcolor if hexcolor else self.toolButtonRoiColor.color.name()
-        for entry in current_data.roi_stack:
-            if entry['id'] == roi_id:
-                entry['color'] = color
-                break
-        self.update_roi_table_widget()
-
-        if self.ui.app_data.c_field_type.lower() == 'roi':
-            self.ui.schedule_update()
-
     def _roi_row_color_changed(self, roi_id, hexcolor):
         """Updates an ROI's color when its own row's ColorButton (in
-        ``roi_table``'s Color column) is changed directly, keeping
-        ``SampleObj.roi_stack`` and the toolbar's ``toolButtonRoiColor``
-        (if ``roi_id`` is the currently-selected region) in sync.
+        ``roi_table``'s Color column) is changed, writing it back into
+        ``SampleObj.roi_stack`` and refreshing the map if it's currently
+        coloured by ROI.
         """
         current_data = self.ui.app_data.current_data
         if not current_data:
@@ -1036,28 +1166,8 @@ class FilterTab(QWidget):
                 entry['color'] = hexcolor
                 break
 
-        if roi_id == self._selected_roi_id():
-            self.toolButtonRoiColor.blockSignals(True)
-            self.toolButtonRoiColor.color = hexcolor
-            self.toolButtonRoiColor.blockSignals(False)
-
         if self.ui.app_data.c_field_type.lower() == 'roi':
             self.ui.schedule_update()
-
-    def sync_roi_color_button(self):
-        """Sync the color button's swatch to the newly-selected ROI row,
-        without re-triggering ``roi_color_callback``.
-        """
-        current_data = self.ui.app_data.current_data
-        roi_id = self._selected_roi_id()
-        if not current_data or roi_id is None:
-            return
-        entry = next((r for r in current_data.roi_stack if r['id'] == roi_id), None)
-        if entry is None:
-            return
-        self.toolButtonRoiColor.blockSignals(True)
-        self.toolButtonRoiColor.color = entry['color']
-        self.toolButtonRoiColor.blockSignals(False)
 
     def roi_label_changed(self, item):
         if item.column() != 1:
@@ -1102,18 +1212,24 @@ class FilterTab(QWidget):
         self.ui.schedule_update()
 
     def update_roi_table_widget(self):
-        """Rebuild ``roi_table`` and ``combo_roi_select`` from ``SampleObj.roi_stack``.
+        """Rebuild ``roi_table`` from ``SampleObj.roi_stack``.
 
         Displayed top-to-bottom in *reverse* stack order, so the top row is
         the highest-priority region (the one that wins overlapping pixels)
-        -- matching the usual "top of the layer stack" convention. The recall
-        combobox stays in stack order (append order), since it's just a
-        flat pick-list, not a priority display.
+        -- matching the usual "top of the layer stack" convention.
+
+        Re-selects whichever region was the sole active selection before
+        the rebuild (rows are recreated from scratch, so the row-selection
+        model doesn't survive on its own) -- callers throughout this class
+        rely on the active-editing-target selection surviving a table
+        refresh (e.g. ``_sync_active_roi_and_refresh`` calls this after
+        every filter edit).
         """
         current_data = self.ui.app_data.current_data
         if not current_data:
             return
 
+        active_id_before = self._active_roi_id()
         stack = current_data.roi_stack
         percentages = current_data.roi_percentages()
 
@@ -1134,9 +1250,9 @@ class FilterTab(QWidget):
 
             # ColorButton shows the hex code as its own text (see
             # blueberry.ColorButton) and opens a color picker on click --
-            # a direct, per-row way to recolor a region, alongside the
-            # toolbar's single ColorButton (self.toolButtonRoiColor, which
-            # acts on whichever row is currently selected).
+            # the per-row Color cell is the way to recolor a region (its
+            # colour drives the discrete ROI-map colormap, see
+            # StyleToolbox.get_roi_colormap).
             color_button = ColorButton(initial_color=entry['color'], ui=self.ui)
             color_button.colorChanged.connect(lambda hexcolor, roi_id=entry['id']: self._roi_row_color_changed(roi_id, hexcolor))
             self.roi_table.setCellWidget(row, 2, color_button)
@@ -1150,15 +1266,14 @@ class FilterTab(QWidget):
             pct_filtered_item.setFlags(pct_filtered_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.roi_table.setItem(row, 4, pct_filtered_item)
 
-        self.roi_table.blockSignals(False)
+        if active_id_before is not None and any(r['id'] == active_id_before for r in stack):
+            for row in range(self.roi_table.rowCount()):
+                item = self.roi_table.item(row, 1)
+                if item is not None and item.data(Qt.ItemDataRole.UserRole) == active_id_before:
+                    self.roi_table.selectRow(row)
+                    break
 
-        self.combo_roi_select.blockSignals(True)
-        self.combo_roi_select.clear()
-        self.combo_roi_select.addItem("(new)")
-        for entry in stack:
-            self.combo_roi_select.addItem(entry['name'])
-        self.combo_roi_select.setCurrentIndex(0)
-        self.combo_roi_select.blockSignals(False)
+        self.roi_table.blockSignals(False)
 
 @auto_log_methods(logger_key='Mask')
 class PolygonTab(QWidget):
@@ -1547,13 +1662,6 @@ class ClusterTab(QWidget):
 
     def create_actions(self):
         """Create toolbar actions for the cluster tab"""
-        self.labelClusterGroup = QLabel("Cluster")
-
-        self.spinBoxClusterGroup = QDoubleSpinBox()
-
-        self.toolButtonClusterColor = ColorButton(ui=self.ui, parent=self)
-        self.toolButtonClusterColor.setMaximumSize(QSize(18, 18))
-
         self.actionClusterColorReset = CustomAction(
             text="",
             light_icon_unchecked="icon-reset-64.svg",
@@ -1584,9 +1692,6 @@ class ClusterTab(QWidget):
 
     def setup_toolbar_actions(self, toolbar):
         """Add cluster tab actions to the common toolbar"""
-        toolbar.addWidget(self.labelClusterGroup)
-        toolbar.addWidget(self.spinBoxClusterGroup)
-        toolbar.addWidget(self.toolButtonClusterColor)
         toolbar.addAction(self.actionClusterColorReset)
         toolbar.addSeparator()
         toolbar.addAction(self.actionClusterLink)
@@ -1595,8 +1700,6 @@ class ClusterTab(QWidget):
         toolbar.addAction(self.actionGroupMask)
 
         if not getattr(self, '_cluster_signals_connected', False):
-            self.spinBoxClusterGroup.valueChanged.connect(self.select_cluster_group_callback)
-            self.toolButtonClusterColor.colorChanged.connect(self.cluster_color_callback)
             self.actionClusterColorReset.triggered.connect(lambda: self.reset_cluster_colors())
             self.cluster_table.itemChanged.connect(self.cluster_label_changed)
             self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
@@ -1606,57 +1709,17 @@ class ClusterTab(QWidget):
         self.update_table_widget()
 
     def toggle_cluster_actions(self):
-        if self.ui.data:
-            self.spinBoxClusterGroup.setEnabled(True)
-            self.toolButtonClusterColor.setEnabled(True)
-            self.actionClusterColorReset.setEnabled(True)
-            self.actionClusterLink.setEnabled(True)
-            self.actionClusterDelink.setEnabled(True)
-            self.actionGroupMask.setEnabled(True)
-        else:
-            self.spinBoxClusterGroup.setEnabled(False)
-            self.toolButtonClusterColor.setEnabled(False)
-            self.actionClusterColorReset.setEnabled(False)
-            self.actionClusterLink.setEnabled(False)
-            self.actionClusterDelink.setEnabled(False)
-            self.actionGroupMask.setEnabled(False)
-
-    def cluster_color_callback(self, hexcolor=None):
-        """Updates color of a cluster
-
-        Called when ``self.toolButtonClusterColor`` (a ``ColorButton``, which opens its own
-        color picker) changes color. Updates ``app_data.cluster_dict`` and the color cell in
-        ``self.cluster_table`` for the cluster selected by ``self.spinBoxClusterGroup``.
-        """
-        if self.cluster_table.rowCount() == 0:
-            return
-
-        selected_cluster = int(self.spinBoxClusterGroup.value() - 1)
-
-        color = hexcolor if hexcolor else self.toolButtonClusterColor.color.name()
-
-        app_data = self.ui.app_data
-        method = app_data.cluster_method
-        app_data.cluster_dict[method][selected_cluster]['color'] = color
-
-        # Color is column 3 (['', 'Name', 'Link', 'Color']), not column 2 (Link).
-        button = self.cluster_table.cellWidget(selected_cluster, 3)
-        if button is not None and button.color.name() == color:
-            return
-        if button is not None:
-            button.blockSignals(True)
-            button.color = color
-            button.blockSignals(False)
-
-        # update plot if currently coloring by cluster
-        if app_data.c_field_type.lower() == 'cluster':
-            self.ui.schedule_update()
+        enabled = bool(self.ui.data)
+        self.actionClusterColorReset.setEnabled(enabled)
+        self.actionClusterLink.setEnabled(enabled)
+        self.actionClusterDelink.setEnabled(enabled)
+        self.actionGroupMask.setEnabled(enabled)
 
     def _cluster_row_color_changed(self, row, hexcolor):
         """Updates a cluster's color when its own row's ColorButton (in
-        ``cluster_table``'s Color column) is changed directly, keeping
-        ``app_data.cluster_dict`` and the toolbar's ``toolButtonClusterColor``
-        (if ``row`` is the currently-selected group) in sync.
+        ``cluster_table``'s Color column) is changed, writing it back into
+        ``app_data.cluster_dict`` and refreshing the map if it's currently
+        coloured by cluster.
         """
         if self.updating_cluster_table_flag or self.cluster_table.rowCount() == 0:
             return
@@ -1665,38 +1728,17 @@ class ClusterTab(QWidget):
         method = app_data.cluster_method
         app_data.cluster_dict[method][row]['color'] = hexcolor
 
-        if row == int(self.spinBoxClusterGroup.value() - 1):
-            self.toolButtonClusterColor.blockSignals(True)
-            self.toolButtonClusterColor.color = hexcolor
-            self.toolButtonClusterColor.blockSignals(False)
-
         # update plot if currently coloring by cluster
         if app_data.c_field_type.lower() == 'cluster':
             self.ui.schedule_update()
 
-    def select_cluster_group_callback(self):
-        """Set cluster color button background after change of selected cluster group
-
-        Sets ``self.toolButtonClusterColor``'s displayed color on change of
-        ``self.spinBoxClusterGroup``, without re-triggering ``cluster_color_callback``.
-        """
-        if self.cluster_table.rowCount() == 0:
-            return
-        button = self.cluster_table.cellWidget(int(self.spinBoxClusterGroup.value() - 1), 3)
-        if button is None:
-            return
-        self.toolButtonClusterColor.blockSignals(True)
-        self.toolButtonClusterColor.color = button.color.name()
-        self.toolButtonClusterColor.blockSignals(False)
-
     def update_table_widget(self):
-        
+
         app_data = self.ui.app_data
         data = self.ui.data[app_data.sample_id]
-        
+
         # # block signals
         self.cluster_table.blockSignals(True)
-        self.spinBoxClusterGroup.blockSignals(True)
 
         # Clear the list widget
         self.cluster_table.clearContents()
@@ -1707,13 +1749,10 @@ class ClusterTab(QWidget):
             if not data.processed[method].empty:
                 clusters = data.processed[method].dropna().unique()
                 clusters.sort()
-                self.spinBoxClusterGroup.setMinimum(1)
                 if 99 in clusters:
                     self.cluster_table.setRowCount(len(clusters)-1)
-                    self.spinBoxClusterGroup.setMaximum(len(clusters)-1)
                 else:
                     self.cluster_table.setRowCount(len(clusters))
-                    self.spinBoxClusterGroup.setMaximum(len(clusters))
 
                 for c in clusters:
                     if c == 99:
@@ -1736,9 +1775,9 @@ class ClusterTab(QWidget):
 
                     # ColorButton shows the hex code as its own text (see
                     # blueberry.ColorButton) and opens a color picker on click --
-                    # a direct, per-row way to recolor a cluster, alongside the
-                    # toolbar's single ColorButton (self.toolButtonClusterColor,
-                    # which acts on whichever row spinBoxClusterGroup selects).
+                    # the per-row Color cell is the way to recolor a cluster (its
+                    # colour drives the discrete cluster-map colormap, see
+                    # StyleToolbox.get_cluster_colormap).
                     color_button = ColorButton(initial_color=hexcolor, ui=self.ui)
                     color_button.colorChanged.connect(lambda hexcolor, row=c: self._cluster_row_color_changed(row, hexcolor))
                     self.cluster_table.setCellWidget(c, 3, color_button)
@@ -1757,13 +1796,7 @@ class ClusterTab(QWidget):
 
         #print(app_data.cluster_dict)
         self.cluster_table.blockSignals(False)
-        self.spinBoxClusterGroup.blockSignals(False)
         self.updating_cluster_table_flag = False
-
-        # sync the color button to the now-selected cluster explicitly -- the
-        # spinbox's valueChanged signal won't fire on its own if the value
-        # happens to already match (e.g. it's still at its default of 1)
-        self.select_cluster_group_callback()
 
     def cluster_label_changed(self, item):
         # Initialize the flag
@@ -1833,9 +1866,9 @@ class ClusterTab(QWidget):
     def reset_cluster_colors(self):
         """Resets all cluster colors to the default colormap.
 
-        Updates ``app_data.cluster_dict``, the Color column in
-        ``self.cluster_table``, and the color button, then updates the
-        plot if currently coloring by cluster.
+        Updates ``app_data.cluster_dict`` and the Color column in
+        ``self.cluster_table``, then updates the plot if currently
+        coloring by cluster.
         """
         n = self.cluster_table.rowCount()
         if n == 0:
@@ -1856,47 +1889,5 @@ class ClusterTab(QWidget):
                 button.blockSignals(False)
         self.cluster_table.blockSignals(False)
 
-        self.select_cluster_group_callback()
-
         if app_data.c_field_type.lower() == 'cluster':
             self.ui.schedule_update()
-
-
-        # cluster styles
-    # -------------------------------------
-
-    def set_default_cluster_colors(self,style_data,cluster_tab, mask=False):
-        """Sets cluster group to default colormap
-
-        Sets the colors in ``self.cluster_table`` to the default colormap in
-        ``self.styles['cluster']['Colormap'].  Change the default colormap
-        by changing ``self.comboBoxColormap``, when ``self.comboBoxFieldTypeC.currentText()`` is ``Cluster``.
-
-        Returns
-        -------
-            str : hexcolor
-        """
-
-        #print('set_default_cluster_colors')
-        # cluster_tab = self.parent.mask_dock.cluster_tab
-
-        # cluster colormap
-        cmap = style_data.get_colormap(N=self.cluster_table.rowCount())
-
-        # set color for each cluster and place color in table
-        colors = [cmap(i) for i in range(cmap.N)]
-
-        hexcolor = []
-        for i in range(self.cluster_table.rowCount()):
-            hex_color = convert_color(colors[i], 'rgb', 'hex', norm_in=True)
-            hexcolor.append(hex_color if hex_color is not None else '#000000')
-            self.cluster_table.blockSignals(True)
-            self.cluster_table.setItem(i,2,QTableWidgetItem(hexcolor[i]))
-            self.cluster_table.blockSignals(False)
-
-        if mask:
-            hexcolor.append(style_data.style_dict['cluster']['OverlayColor'])
-
-        self.toolButtonClusterColor.setStyleSheet("background-color: %s;" % self.cluster_table.item(self.spinBoxClusterGroup.value()-1,2).text())
-
-        return hexcolor

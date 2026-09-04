@@ -89,6 +89,7 @@ class FieldDialog(QDialog):
             parent=self,
         )
         self.toolButtonSort.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.toolButtonSort.setToolTip("Choose a method for sorting the field list")
 
         self.dual_list = DualListWidget()
 

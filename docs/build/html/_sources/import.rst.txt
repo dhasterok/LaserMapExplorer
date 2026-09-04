@@ -112,5 +112,5 @@ The following data types and formats are planned for future implementation:
 - CL
 - Petrography (\*.png, \*.jpg, \*.tif)
 
-.. |icon-import-directory| image:: _static/icons/icon-import-directory-64.png
+.. |icon-import-directory| image:: _static/icons/icon-import-directory-64.svg
     :height: 2ex

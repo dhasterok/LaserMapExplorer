@@ -2992,8 +2992,15 @@ def plot_cluster_map(parent, data, app_data, style_data):
 
     reshaped_array = np.reshape(groups, data.array_size, order=data.order)
 
-    # count unique non-NaN clusters for the colormap
-    n_clusters = len(np.unique(groups[~np.isnan(groups)]))
+    # The norm has to span *every* cluster the colormap defines, so a raw
+    # label k always lands on cmap(k). Counting only the labels still
+    # visible (np.unique of the non-NaN pixels) collapses BoundaryNorm's
+    # range whenever the cluster table has a subset selected -- with one
+    # cluster shown that leaves a single [-0.5, 0.5] bin and every pixel
+    # clips to the first colour. Use the full cluster count instead, the
+    # same one get_cluster_colormap builds the colormap from (and that the
+    # cluster scatter path and plot_roi_map already use).
+    n_clusters = len([k for k in app_data.cluster_dict[method].keys() if isinstance(k, int) and k != 99])
 
     cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method], alpha=style_data.marker_alpha)
 

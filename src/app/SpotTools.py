@@ -70,6 +70,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotLocate.setIconSize(QSize(24, 24))
         self.toolButtonSpotLocate.setCheckable(True)
         self.toolButtonSpotLocate.setObjectName("toolButtonSpotLocate")
+        self.toolButtonSpotLocate.setToolTip("Add a spot by clicking a location on the map")
         self.toolbar.addWidget(self.toolButtonSpotLocate)
 
         self.toolButtonSpotMove = QToolButton(self.groupBox)
@@ -80,6 +81,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotMove.setIconSize(QSize(24, 24))
         self.toolButtonSpotMove.setCheckable(True)
         self.toolButtonSpotMove.setObjectName("toolButtonSpotMove")
+        self.toolButtonSpotMove.setToolTip("Move the selected spot by dragging it on the map")
         self.toolbar.addWidget(self.toolButtonSpotMove)
 
         self.toolButtonSpotToggle = QToolButton(self.groupBox)
@@ -90,6 +92,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotToggle.setIconSize(QSize(24, 24))
         self.toolButtonSpotToggle.setCheckable(True)
         self.toolButtonSpotToggle.setObjectName("toolButtonSpotToggle")
+        self.toolButtonSpotToggle.setToolTip("Show or hide spot markers on the map")
 
         self.toolbar.addWidget(self.toolButtonSpotToggle)
         self.toolButtonSpotSelectAll = QToolButton(self.groupBox)
@@ -99,6 +102,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotSelectAll.setIcon(select_all_icon)
         self.toolButtonSpotSelectAll.setIconSize(QSize(24, 24))
         self.toolButtonSpotSelectAll.setObjectName("toolButtonSpotSelectAll")
+        self.toolButtonSpotSelectAll.setToolTip("Select all spots in the table")
 
         self.toolbar.addWidget(self.toolButtonSpotSelectAll)
         self.toolButtonSpotAnalysis = QToolButton(self.groupBox)
@@ -108,6 +112,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotAnalysis.setIcon(analysis_icon)
         self.toolButtonSpotAnalysis.setIconSize(QSize(24, 24))
         self.toolButtonSpotAnalysis.setObjectName("toolButtonSpotAnalysis")
+        self.toolButtonSpotAnalysis.setToolTip("Compare spot data with map data")
         self.toolbar.addWidget(self.toolButtonSpotAnalysis)
 
         spacerItem4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
@@ -120,6 +125,7 @@ class SpotPage(CustomPage):
         self.toolButtonSpotRemove.setIcon(delete_icon)
         self.toolButtonSpotRemove.setIconSize(QSize(24, 24))
         self.toolButtonSpotRemove.setObjectName("toolButtonSpotRemove")
+        self.toolButtonSpotRemove.setToolTip("Remove the selected spot(s)")
         self.toolbar.addWidget(self.toolButtonSpotRemove)
 
         self.addLayout(self.toolbar)

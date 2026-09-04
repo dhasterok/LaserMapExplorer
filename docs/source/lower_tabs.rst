@@ -61,5 +61,5 @@ Help
 
 The *Help* tab provides access to the user manual within the program. It allows users to access detailed documentation and instructions on how to use various features and functionalities of the program.
 
-.. |icon-heading| image:: _static/icons/icon-heading-64.png
+.. |icon-heading| image:: _static/icons/icon-heading-64.svg
     :height: 2ex

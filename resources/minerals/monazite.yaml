@@ -1,4 +1,4 @@
-# Monazite-huttonite solid solution: (REE,Th,U,Ca)(P,Si)O4 -- two sites,
+# Monazite-huttonite-cheralite solid solution: (REE,Th,U,Ca)(P,Si)O4 -- two sites,
 # neither shared with the other (A = REE+actinide+Ca dodecahedral site, T =
 # P/Si tetrahedral site), so the generic priority_fill site method (the
 # default -- no site_allocation: block needed) already does the right thing:
@@ -8,22 +8,22 @@
 # across the whole solid solution under this engine's own O-per-cation
 # convention (STANDARD_OXIDES ratios; see apatite.yaml/mica.yaml for the
 # general derivation): REE2O3-type ratio 1.5 + P2O5 ratio 2.5 = 4 for pure
-# monazite (1 REE + 1 P), and ThO2 ratio 2 + SiO2 ratio 2 = 4 for pure
-# huttonite (1 Th + 1 Si) -- both end-members land on the same O target, so
-# ideal_oxygens=4 is valid for any REE:Th:Si:P mix in between. ideal_cations=2
+# monazite (1 REE + 1 P), ThO2 ratio 2 + SiO2 ratio 2 = 4 for pure huttonite
+# (1 Th + 1 Si), and 0.5*(CaO ratio 1) + 0.5*(ThO2 ratio 2) + 1*(P2O5 ratio
+# 2.5) = 0.5 + 1 + 2.5 = 4 for pure cheralite (0.5 Ca + 0.5 Th + 1 P) -- all
+# three end-members land on the same O target, so ideal_oxygens=4 is valid
+# for any REE:Th:Ca:Si:P mix across the whole solid solution. ideal_cations=2
 # (A=1 + T=1) for the cation-basis fallback.
 #
-# Only the huttonite substitution (REE3+ + P5+ = Th4+ + Si4+) is modeled.
-# Cheralite (2REE3+ = Ca2+ + Th4+, i.e. Th paired with Ca rather than Si) is
-# a separate, real substitution in natural monazite but isn't disentangled
-# here -- doing so from bulk apfu alone (splitting A-site Th into a
-# Si-paired "huttonite Th" share and a Ca-paired "cheralite Th" share) needs
-# an end-member formula this port has no validated reference for (same
-# "don't invent an unvalidated scheme" rule as epidote.yaml dropping
-# piemontite or pyroxene.yaml dropping the Na-pyroxene branch). Ca/U/Pb/Sr
+# Both the huttonite substitution (REE3+ + P5+ = Th4+ + Si4+) and the
+# cheralite substitution (2REE3+ = Ca2+ + Th4+, i.e. Th paired with Ca
+# rather than Si) are modeled -- see endmembers.py's
+# _monazite_huttonite_cheralite_ratio for exactly how A-site Th gets split
+# between the two (Si-paired first, then whatever's left over Ca-paired),
+# both standard charge-balance substitutions, not an invented scheme. U/Pb/Sr
 # are still tracked as A-site cations (real trace substituents, and Pb is
 # routinely used for monazite U-Th-Pb dating) -- just not resolved into a
-# separate end-member.
+# separate end-member (no brabantite/U-cheralite analogue is modeled either).
 #
 # No redox: block -- monazite has no Fe2+/Fe3+ split to model (Fe isn't a
 # structural cation here at all).
@@ -50,5 +50,5 @@ sites:
     elements: [P, Si]
     priority: [P, Si]
 end_members:
-  method: monazite_huttonite_ratio
-  members: [monazite, huttonite]
+  method: monazite_huttonite_cheralite_ratio
+  members: [monazite, huttonite, cheralite]

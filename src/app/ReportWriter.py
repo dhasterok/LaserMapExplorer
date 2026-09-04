@@ -15,6 +15,17 @@ always started/ended around a run, but nothing is actually written to Notes
 (and no PDF is compiled) unless that block turns recording on at some point
 during the run - see `_recording_enabled`.
 
+A session can also be started independently of any workflow run, via the
+"Record to Notes" toolbar toggle (`MainWindow.toggle_notes_capture`) - see
+`reason` below. That manual session only captures `plot` events (a plot
+registered in the PlotTree, exported to PNG and inserted into Notes) rather
+than every action type; a workflow-run session's own "Record notes" block
+still governs everything as before, unaffected by whether manual recording
+also happens to be on. This deliberately narrower manual scope avoids
+flooding Notes with sample changes/field selection/every filter tweak for
+what's meant to be an always-on, interactive-use toggle - see
+`_on_action_recorded`.
+
 Reuses the same note-writing primitives as the manual "Formatted Info" menu
 (`MainWindow.insert_info_note`): `NotesWidget.print_info`, `to_rst_table`, and
 (via `LameIO.add_figure_to_notes`) `insert_image`.
@@ -34,7 +45,13 @@ class ReportWriter:
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self._connected = False
+        # Which caller(s) currently want a session open -- 'workflow_run'
+        # (Workflow.run_workflow, one call per run) and/or 'manual' (the
+        # "Record to Notes" toggle, open-ended). Tracked as a set rather
+        # than a single bool so one caller ending its session doesn't tear
+        # down the actionRecorded connection while the other still wants it
+        # -- see start_session/end_session.
+        self._active_reasons = set()
         self._step = 0
         self._title = None
         self._header_written = False
@@ -54,41 +71,64 @@ class ReportWriter:
         lame_blockly = getattr(getattr(workflow, 'bridge', None), 'lame_blockly', None)
         return bool(getattr(lame_blockly, 'record_notes', False))
 
-    def start_session(self, title=None):
-        """Begin a report session: subscribe to the recorder.
+    def start_session(self, title=None, reason='workflow_run'):
+        """Begin (or join) a report session: subscribe to the recorder.
 
         Nothing is written to Notes yet -- whether anything gets written at
-        all depends on the workflow's "Record notes" setting, which is only
-        known once its generated code starts executing (after this call
-        returns), so it's checked per recorded action instead (see
-        `_on_action_recorded`).
+        all depends on `_on_action_recorded`'s per-event checks. If a
+        session is already open for a *different* reason, this just adds
+        `reason` to the active set and leaves the existing title/step/
+        header state alone (so e.g. a workflow run starting while manual
+        recording is already on doesn't reset the numbering or re-write the
+        header).
 
         Parameters
         ----------
         title : str, optional
             Section title for this run, by default a timestamped "Workflow run".
+        reason : str, optional
+            Which caller is starting this session -- `'workflow_run'`
+            (default) or `'manual'`. See `end_session`.
         """
-        if self._connected:
-            return
-        self._title = title or f"Workflow run - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        self._step = 0
-        self._header_written = False
-        self.main_window.action_recorder.actionRecorded.connect(self._on_action_recorded)
-        self._connected = True
+        if not self._active_reasons:
+            self._title = title or f"Workflow run - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            self._step = 0
+            self._header_written = False
+            self.main_window.action_recorder.actionRecorded.connect(self._on_action_recorded)
+        self._active_reasons.add(reason)
 
-    def end_session(self):
-        """End a report session: unsubscribe, and compile to PDF only if
-        recording was actually turned on and something was written.
+    def end_session(self, reason='workflow_run'):
+        """End this caller's interest in the report session.
+
+        Only actually unsubscribes (and compiles to PDF, if recording was
+        turned on and something was written) once every reason that called
+        `start_session` has also called `end_session` -- e.g. a workflow
+        run finishing while manual recording is separately still on leaves
+        the session open for manual recording to keep using.
+
+        Parameters
+        ----------
+        reason : str, optional
+            Matches the `reason` passed to the corresponding `start_session`
+            call, by default `'workflow_run'`.
         """
-        if not self._connected:
+        if reason not in self._active_reasons:
+            return
+        self._active_reasons.discard(reason)
+        if self._active_reasons:
             return
         self.main_window.action_recorder.actionRecorded.disconnect(self._on_action_recorded)
-        self._connected = False
         if self._header_written:
             self.notes.save_notes_to_pdf()
 
     def _on_action_recorded(self, event):
-        if not self._recording_enabled():
+        workflow_active = self._recording_enabled()
+        manual_active = 'manual' in self._active_reasons
+        if not workflow_active and not manual_active:
+            return
+        # Manual-only recording (no workflow run currently writing) is
+        # scoped to plot events -- see this module's docstring.
+        if not workflow_active and event['action_type'] != 'plot':
             return
 
         if not self._header_written:

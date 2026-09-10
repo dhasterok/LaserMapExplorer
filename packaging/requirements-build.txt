@@ -1,0 +1,11 @@
+# Extra packages needed only to build a distributable app -- not runtime dependencies.
+# Install alongside requirements.txt before running packaging/build_macos.sh or
+# .github/workflows/build.yml.
+
+pyinstaller
+
+# The in-app help browser reads docs/build/html, which is gitignored and has to be
+# generated. These are what docs/source/conf.py needs.
+sphinx
+pydata-sphinx-theme
+numpydoc

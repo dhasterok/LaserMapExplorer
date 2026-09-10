@@ -1,4 +1,4 @@
-src.control.Logger
+﻿src.control.Logger
 ==================
 
 .. automodule:: src.control.Logger
@@ -11,6 +11,7 @@ src.control.Logger
       auto_log_methods
       describe_arg
       get_global_logger
+      install_qt_message_handler
       log
       log_call
       no_log

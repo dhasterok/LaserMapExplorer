@@ -8,6 +8,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 from src.importers.SpotImportDialog import Ui_SpotImportDialog
 from src.data.ExtendedDF import AttributeDataFrame
+from src.control.Logger import log
 
 class SpotImporter(QDialog, Ui_SpotImportDialog):
     """A dialog for importing spot data into LaME
@@ -105,7 +106,7 @@ class SpotImporter(QDialog, Ui_SpotImportDialog):
 
         self.spotdata.columns = self.spotdata.columns.str.strip()
 
-        print(self.spotdata.columns)
+        log(f"{self.spotdata.columns}", prefix="IO")
 
         # update directory/filename
         if len(csv_files) > 1:

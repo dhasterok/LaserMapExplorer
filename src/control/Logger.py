@@ -72,9 +72,29 @@ This module provides a flexible logging system for PyQt6 GUI applications, featu
 - Save icon: Exports log to file (default "temp.log").
 - Clear icon: Clears current log view.
 
+**QUIET BY DEFAULT / VERBOSE MODE**
+
+The application is silent by default: tracing produced by ``@log_call`` and
+``@auto_log_methods`` is discarded unless a sink is listening. There are two sinks:
+
+- **Verbose mode** -- start the app with ``python main.py --verbose`` (or ``-v``)
+  to stream tracing to the terminal. Restrict it to particular categories with
+  ``--verbose Data,Plot``.
+- **LoggerDock** -- opening the dock at runtime turns capture on regardless of
+  how the app was started, and closing it turns capture back off.
+
+Messages prefixed ``Error`` or ``Warning`` always reach the terminal (via stderr),
+even when quiet, so genuine failures are never hidden.
+
+Keeping this gate cheap matters: these decorators wrap every method of ~50 classes,
+so ``log_call`` checks ``LoggerConfig.is_active()`` (a single attribute read) before
+doing any frame inspection.
+
 **LOGGERCONFIG OPTIONS (GLOBAL FLAGS)**
 
 - `LoggerConfig` stores persistent settings accessible globally across the app.
+- `LoggerConfig.set_verbose(True)`: Stream logs to the terminal
+- `LoggerConfig.set_category_filter(["Data"])`: Limit logging to given categories
 - `LoggerConfig.set_show_args(True)`: Print function arguments
 - `LoggerConfig.set_show_call_chain(True)`: Show simplified call stack
 - `LoggerConfig.set_paused(True)`: Suppress all logging output
@@ -111,7 +131,7 @@ subclass LoggerDock or modify:
 import sys, functools, inspect, types
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, QtMsgType, qInstallMessageHandler
 from PyQt6.QtWidgets import (
         QMainWindow, QTextEdit, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
         QToolBar, QSpacerItem, QSizePolicy, QDialog, QCheckBox, QDialogButtonBox, QToolButton, QWidgetAction
@@ -120,6 +140,7 @@ from PyQt6.QtGui import QFont, QColor
 
 from lame_core.CustomWidgets import CustomDockWidget, CustomAction, ToggleSwitch
 from lame_core.SearchTool import SearchWidget
+from lame_core.applog import set_log_handler
 
 _global_logger = None
 
@@ -147,6 +168,24 @@ def get_global_logger():
     """
     return _global_logger
 
+# Prefixes that always reach the user, even when logging is quiet or paused.
+# These indicate something actually went wrong rather than routine tracing.
+_ALWAYS_SHOW = ('error', 'warning')
+
+
+def _emit(text, error=False):
+    """Send an already-formatted message to the active log sink.
+
+    The LoggerDock takes precedence while it is visible; otherwise the message
+    goes to the terminal.
+    """
+    logger = get_global_logger()
+    if logger is not None and LoggerConfig.sink_active() and hasattr(logger, 'write'):
+        logger.write(text)
+        return
+    print(text, file=sys.stderr if error else sys.stdout)
+
+
 def log(msg, prefix=""):
     """
     Write a log message using the global logger, respecting pause state and formatting.
@@ -162,19 +201,62 @@ def log(msg, prefix=""):
 
     Notes
     -----
-    If logging is paused (via `LoggerConfig.set_paused(True)`), no output is produced.
-    If no global logger is set, output falls back to standard output using `print`.
+    Messages prefixed 'Error' or 'Warning' are always emitted (to stderr), even when
+    logging is paused or quiet -- they report real failures rather than tracing.
+
+    All other messages are suppressed unless a sink is active: either verbose mode
+    (``--verbose`` on the command line) or a visible LoggerDock. This keeps the
+    terminal clean by default.
     """
-    if LoggerConfig.is_paused():
+    prefix_key = prefix.strip().rstrip(':').lower()
+    text = f"{prefix}: {msg}" if prefix else f"{msg}"
+
+    if prefix_key in _ALWAYS_SHOW:
+        _emit(text, error=True)
         return
 
-    logger = get_global_logger()
-    if not (prefix == ""):
-        prefix = f"{prefix}: "
-    if logger and hasattr(logger, 'write'):
-        logger.write(f"{prefix}{msg}")
-    else:
-        print(f"{prefix}{msg}")
+    if LoggerConfig.is_paused() or not LoggerConfig.is_active():
+        return
+
+    # Honour the category toggles (settings dialog / --verbose Data,Plot) when the
+    # prefix names a known category. Unknown prefixes are always allowed through.
+    if prefix:
+        options = LoggerConfig.get_all()
+        for key in options:
+            if key.strip().lower() == prefix_key and not options[key]:
+                return
+
+    _emit(text, error=False)
+
+
+# lame_core and the sibling widget libraries sit below the app in the dependency
+# graph and cannot import this module, so they log through lame_core.applog.
+# Registering here routes their messages through the same gate.
+set_log_handler(log)
+
+
+def install_qt_message_handler():
+    """
+    Route Qt's own C++-level messages through the logger.
+
+    Qt writes warnings such as "QLayout: Attempting to add QLayout ..." straight to
+    stderr, bypassing Python entirely. This handler folds them into the same quiet
+    -by-default policy: Qt warnings and info are shown only in verbose mode, while
+    critical and fatal messages always surface.
+
+    Call once at startup, before the QApplication is created.
+    """
+    def handler(mode, context, message):
+        if mode in (QtMsgType.QtCriticalMsg, QtMsgType.QtFatalMsg):
+            log(message, prefix="Error")
+        elif mode == QtMsgType.QtWarningMsg:
+            # Qt warnings are mostly harmless layout/platform chatter, so they are
+            # treated as tracing rather than as the always-shown 'Warning' category.
+            log(message, prefix="Qt")
+        else:
+            log(message, prefix="Qt")
+
+    qInstallMessageHandler(handler)
 
 def log_call(logger_key=None):
     """Method decorator to log function whenever it is called
@@ -202,31 +284,42 @@ def log_call(logger_key=None):
     """    
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # skip logging if the caller is another wrapper (nested decorated call).
-            # Every call now passes through a signature-preserving shim first (see
-            # _make_signature_preserving_shim below), so the direct caller here is
-            # always that shim -- look one frame further to find the real caller.
-            stack = inspect.stack()
-            caller_idx = 1
-            if len(stack) > 1 and stack[1].function == '__log_call_shim__':
-                caller_idx = 2
-            if len(stack) > caller_idx and stack[caller_idx].function == 'wrapper':
+            # Fast path: when no sink is active (the default -- quiet terminal, no
+            # visible LoggerDock) do nothing but call through. This must stay ahead
+            # of any frame inspection: these wrappers sit on every method of ~50
+            # classes, so anything expensive here is paid on every call in the app.
+            if not LoggerConfig.is_active():
                 return func(*args, **kwargs)
 
-            # Determine if 'self' exists (bound method)
+            # Category is disabled -> nothing to report for this call.
+            if logger_key and not LoggerConfig.get_option(logger_key):
+                return func(*args, **kwargs)
+
+            # Per-instance override, if the owning object carries its own toggles.
             self_obj = args[0] if args else None
-            if logger_key and LoggerConfig.get_option(logger_key):
-                prefix = f"{logger_key.upper()}"
+            if logger_key and self_obj is not None and hasattr(self_obj, 'logger_options'):
+                if not self_obj.logger_options.get(logger_key, False):
+                    return func(*args, **kwargs)
 
-                if self_obj and hasattr(self_obj, 'logger_options'):
-                    if not self_obj.logger_options.get(logger_key, False):
-                        return func(*args, **kwargs)
-            else:
-                prefix = ""
+            # Walk the stack directly rather than via inspect.stack(), which
+            # materialises the *entire* stack and reads source files for context
+            # lines. Every call passes through a signature-preserving shim first
+            # (see _make_signature_preserving_shim), so skip those frames to find
+            # the real caller.
+            try:
+                frame = sys._getframe(1)
+            except ValueError:
+                frame = None
+            while frame is not None and frame.f_code.co_name == '__log_call_shim__':
+                frame = frame.f_back
 
-            # Build message
+            # Skip logging if the caller is another wrapper (nested decorated call).
+            if frame is not None and frame.f_code.co_name == 'wrapper':
+                return func(*args, **kwargs)
+
+            prefix = logger_key.upper() if logger_key else ""
             func_name = func.__qualname__
-            caller = stack[caller_idx].function if len(stack) > caller_idx else ""
+            caller = frame.f_code.co_name if frame is not None else ""
             parts = [f"{prefix}: [{caller} → {func_name}]"]
 
             if LoggerConfig.get_show_args():
@@ -235,10 +328,13 @@ def log_call(logger_key=None):
                 parts.append("args=[" + ", ".join(arg_list + kwarg_list) + "]")
 
             if LoggerConfig.get_show_call_chain():
-                # skip shim frames so the displayed chain shows real callers only
-                frames = [f for f in stack[caller_idx:caller_idx + 4] if f.function != '__log_call_shim__']
-                chain = " → ".join(f.function for f in reversed(frames))
-                parts.append(f"chain:/ {chain}")
+                names = []
+                f = frame
+                while f is not None and len(names) < 4:
+                    if f.f_code.co_name != '__log_call_shim__':
+                        names.append(f.f_code.co_name)
+                    f = f.f_back
+                parts.append("chain:/ " + " → ".join(reversed(names)))
 
             log(" | ".join(parts))
             return func(*args, **kwargs)
@@ -436,9 +532,77 @@ class LoggerConfig:
     # to pause the logging
     _paused = False
 
+    # verbose mode: emit tracing to the terminal (enabled with --verbose)
+    _verbose = False
+
+    # True while a LoggerDock is visible and capturing output
+    _sink_active = False
+
+    # Cached result of "is anything listening?" -- read on every decorated call,
+    # so it is kept as a plain attribute rather than recomputed each time.
+    _active = False
+
+    # Restricts which categories are enabled, e.g. --verbose=Data,Plot.
+    # None means no restriction.
+    _category_filter = None
+
+    @classmethod
+    def _recompute_active(cls):
+        cls._active = (not cls._paused) and (cls._verbose or cls._sink_active)
+
+    @classmethod
+    def is_active(cls):
+        """Return True if any sink (verbose terminal or visible dock) wants log output."""
+        return cls._active
+
+    @classmethod
+    def set_verbose(cls, value: bool):
+        """Enable or disable tracing output to the terminal."""
+        cls._verbose = bool(value)
+        cls._recompute_active()
+
+    @classmethod
+    def is_verbose(cls):
+        return cls._verbose
+
+    @classmethod
+    def set_sink_active(cls, value: bool):
+        """Record whether a LoggerDock is currently visible and capturing output."""
+        cls._sink_active = bool(value)
+        cls._recompute_active()
+
+    @classmethod
+    def sink_active(cls):
+        return cls._sink_active
+
+    @classmethod
+    def set_category_filter(cls, categories):
+        """Restrict logging to the named categories.
+
+        Parameters
+        ----------
+        categories : iterable of str or None
+            Category names to keep enabled. None removes the restriction.
+            'Error' and 'Warning' are always retained.
+        """
+        if categories:
+            cls._category_filter = {str(c).strip().lower() for c in categories}
+            cls._category_filter.update(_ALWAYS_SHOW)
+        else:
+            cls._category_filter = None
+        cls._apply_category_filter()
+
+    @classmethod
+    def _apply_category_filter(cls):
+        if cls._category_filter is None:
+            return
+        for key in cls._options:
+            cls._options[key] = key.strip().lower() in cls._category_filter
+
     @classmethod
     def set_options(cls, options_dict):
-        cls._options = options_dict
+        cls._options = dict(options_dict)
+        cls._apply_category_filter()
 
     @classmethod
     def get_option(cls, key):
@@ -471,6 +635,7 @@ class LoggerConfig:
     @classmethod
     def set_paused(cls, value: bool):
         cls._paused = value
+        cls._recompute_active()
 
 class LoggerDock(CustomDockWidget):
     """
@@ -622,10 +787,11 @@ class LoggerDock(CustomDockWidget):
         ----------
         event : QEvent
             Executed on a close event.
-        """        
+        """
         # Restore sys.stdout to its original state when the application closes
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
+        LoggerConfig.set_sink_active(False)
         super().closeEvent(event)
 
     def write(self, message):
@@ -703,13 +869,19 @@ class LoggerDock(CustomDockWidget):
 
 
     def logger_visibility_change(self):
-        """Redirect stdout based on the visibility of the logger dock."""
-        if self.isVisible():
+        """Redirect stdout and enable log capture based on the dock's visibility.
+
+        While the dock is visible it becomes the active log sink, so tracing is
+        collected here even when the app was not started with ``--verbose``.
+        """
+        visible = self.isVisible()
+        LoggerConfig.set_sink_active(visible)
+        if visible:
             sys.stdout = self   # Redirect stdout to logger
             sys.stderr = self   # Redirect stderr to logger
         else:
-            sys.stdout = sys.__stdout__  # Restore to default stdout    
-            sys.stderr = sys.__stderr__  # Restore to default stderr    
+            sys.stdout = sys.__stdout__  # Restore to default stdout
+            sys.stderr = sys.__stderr__  # Restore to default stderr
     
 
 class LoggerOptionsDialog(QDialog):

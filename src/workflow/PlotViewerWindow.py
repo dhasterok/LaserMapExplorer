@@ -9,7 +9,7 @@ from pyqtgraph.GraphicsScene import exportDialog
 from src.workflow.PlotViewer import Ui_widgetPlotViewer
 from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 import src.plotting.CustomMplCanvas as mplc
-from src.control.Logger import auto_log_methods
+from src.control.Logger import auto_log_methods, log
 
 # Analyte GUI
 # -------------------------------
@@ -165,7 +165,7 @@ class PlotViewer(QWidget, Ui_widgetPlotViewer):
             if isinstance(canvas,mplc.MplCanvas):
                 # Toggle pan mode in Matplotlib
                 self.mpl_toolbar.pan()
-                print(self.mpl_toolbar)
+                log(f"{self.mpl_toolbar}", prefix="Canvas")
                 #canvas.figure.canvas.toolbar.pan()
 
             elif isinstance(canvas,GraphicsLayoutWidget):

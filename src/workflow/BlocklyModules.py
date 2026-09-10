@@ -46,7 +46,7 @@ import lame_core.format as fmt
 # Removed unused imports: get_hex_color, get_rgb_color
 import src.app.config as config
 from src.app.help_mapping import create_help_mapping
-from src.control.Logger import LoggerDock
+from src.control.Logger import LoggerDock, log
 from src.app.AppData import AppData
 from src.app.Status import StatusMessageManager
 import os
@@ -587,7 +587,7 @@ class LameBlockly(QObject):
             # Get the code from the output_text_edit and execute it
             code = output_text_edit.toPlainText()
 
-        print(code)
+        log(f"{code}", prefix="Main")
         exec(code)
 
     ### Blockly functions ##
@@ -704,7 +704,7 @@ class LameBlockly(QObject):
         None
         """
         if not self.canvas_widget or not hasattr(self.canvas_widget, "single_view"):
-            print("Warning: canvas_widget or single_view not available")
+            log("canvas_widget or single_view not available", prefix="Warning")
             return
 
         if canvas:
@@ -713,7 +713,7 @@ class LameBlockly(QObject):
                 self.canvas_widget.clear_layout(layout)
                 layout.addWidget(canvas)
             else:
-                print("Warning: single_view.layout() is None")
+                log("single_view.layout() is None", prefix="Warning")
             self.mpl_canvas = canvas
 
 

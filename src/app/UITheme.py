@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QFrame, QToolButton, QWidget, QApplication, QStyle, QGridLayout
 )
 from lame_core.config import ICONPATH, STYLE_PATH, load_stylesheet
+from src.control.Logger import log
 
 def default_font():
     # set default font for application
@@ -429,7 +430,7 @@ class ThemeManager(QObject):
                 stylesheet = stylesheet.replace("{ICONPATH}", ICONPATH.as_posix())
                 self.parent.app.setStyleSheet(stylesheet)
         else:
-            print(f"Stylesheet not found: {qss_file}")
+            log(f"Stylesheet not found: {qss_file}", prefix="Warning")
 
     def _update_view_mode_action(self):
         """Update icon and tooltip based on current view_mode."""

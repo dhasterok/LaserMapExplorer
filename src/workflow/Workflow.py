@@ -11,6 +11,7 @@ from lame_core.config import BASEDIR
 from lame_core.CustomWidgets import CustomDockWidget, CustomAction
 import numpy as np
 from src.workflow.BlocklyModules import LameBlockly
+from src.control.Logger import log
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"]="9222" #uncomment to debug in chrome  
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 
@@ -623,7 +624,7 @@ class Workflow(CustomDockWidget):
         # Load the qwebchannel.js file and inject it into the page
         api_file = QFile(":/qtwebchannel/qwebchannel.js")
         if not api_file.open(QIODevice.OpenModeFlag.ReadOnly):
-            print("Couldn't load Qt's QWebChannel API!")
+            log("Couldn't load Qt's QWebChannel API!", prefix="Error")
         api_script = str(api_file.readAll(), 'utf-8')
         api_file.close()
         self.web_view.page().runJavaScript(api_script)

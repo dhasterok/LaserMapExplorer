@@ -168,7 +168,7 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
 
     def apply_theme(self, theme):
         """Apply theme to MaskDock and all its components"""
-        print(f"DEBUG: MaskDock.apply_theme called with theme: {theme}")
+        log(f"MaskDock.apply_theme called with theme: {theme}", prefix="Style")
         
         # Define theme-specific styles for QGroupBox
         if theme == "dark":
@@ -208,7 +208,7 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         
         # Apply to all QGroupBox widgets in this dock
         for groupbox in self.findChildren(QGroupBox):
-            print(f"DEBUG: Applying style to QGroupBox: {groupbox.objectName()}")
+            log(f"Applying style to QGroupBox: {groupbox.objectName()}", prefix="Style")
             groupbox.setStyleSheet(groupbox_style)
             # Force style refresh safely
             if groupbox.style():
@@ -218,14 +218,14 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         
         # Also apply specifically to filter_tools_groupbox if it exists
         if hasattr(self.filter_tab, 'filter_tools_groupbox'):
-            print("DEBUG: Applying style to filter_tools_groupbox")
+            log("Applying style to filter_tools_groupbox", prefix="Style")
             self.filter_tab.filter_tools_groupbox.setStyleSheet(groupbox_style)
             # Force style refresh safely
             if self.filter_tab.filter_tools_groupbox.style():
                 self.filter_tab.filter_tools_groupbox.style().unpolish(self.filter_tab.filter_tools_groupbox)
                 self.filter_tab.filter_tools_groupbox.style().polish(self.filter_tab.filter_tools_groupbox)
             self.filter_tab.filter_tools_groupbox.update()
-            print(f"Applied {theme} theme to filter_tools_groupbox")
+            log(f"Applied {theme} theme to filter_tools_groupbox", prefix="Style")
 
 @auto_log_methods(logger_key='Mask')
 class FilterTab(QWidget):
@@ -1792,7 +1792,7 @@ class ClusterTab(QWidget):
                     self.cluster_table.setItem(c, 5, pct_filtered_item)
 
         else:
-            print(f'(group_changed) Cluster method, ({method}) is not defined')
+            log(f"(group_changed) Cluster method, ({method}) is not defined", prefix="Error")
 
         #print(app_data.cluster_dict)
         self.cluster_table.blockSignals(False)

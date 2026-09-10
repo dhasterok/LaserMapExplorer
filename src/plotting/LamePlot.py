@@ -116,7 +116,7 @@ def create_plot(parent, data, app_data, style_data):
                 canvas, plot_info = plot_isochron(parent, data, app_data, style_data)
 
     except Exception as e:
-        print(f"Error in create_plot: {e}")
+        log(f"Error in create_plot: {e}", prefix="Error")
         traceback.print_exc()
         return None, None
         
@@ -242,9 +242,9 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
                 clim = style_data.clim
                 #clim = np.log10(style_data.clim)
             case 'logit':
-                print('Color limits for logit are not currently implemented')
+                log("Color limits for logit are not currently implemented", prefix="Warning")
             case 'symlog':
-                print('Color limits for symlog are not currently implemented')
+                log("Color limits for symlog are not currently implemented", prefix="Warning")
 
         cax.set_clim(clim[0], clim[1])
 
@@ -536,10 +536,10 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
     logflag = False
     # check the analyte map cscale, the histogram needs to be the same
     if style_data.cscale == 'log':
-        print('log scale')
+        log("log scale", prefix="Plot")
         logflag = True
         if any(array <= 0):
-            print(f"Warning issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}")
+            log(f"issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}", prefix="Warning")
             return
 
     bin_width = (np.nanmax(array) - np.nanmin(array)) / app_data._default_hist_num_bins
@@ -650,17 +650,17 @@ def plot_histogram(parent, data, app_data, style_data):
 
     x = dict()
     if app_data.hist_plot_style == 'log-scaling' and app_data.c_field_type == 'Analyte':
-        print('raw_data for log-scaling')
+        log("raw_data for log-scaling", prefix="Plot")
         scatter_data = get_scatter_data(data, app_data, style_data, processed=False)
         x = scatter_data['x'] if scatter_data and 'x' in scatter_data else None
     else:
-        print('processed_data for histogram')
+        log("processed_data for histogram", prefix="Plot")
         scatter_data = get_scatter_data(data, app_data, style_data, processed=True)
         x = scatter_data['x'] if scatter_data and 'x' in scatter_data else None
     
     # Check if x data was successfully retrieved
     if x is None or 'array' not in x or x['array'] is None:
-        print(f"Error: Unable to retrieve data for histogram. Field: {app_data.c_field}, Field Type: {app_data.c_field_type}")
+        log(f"Unable to retrieve data for histogram. Field: {app_data.c_field}, Field Type: {app_data.c_field_type}", prefix="Error")
         # Create empty canvas and return
         canvas = MplCanvas(parent=parent)
         canvas.plot_name = "error"
@@ -973,7 +973,7 @@ def logax(ax, lim, axis='y', label='', tick_label_rotation=0):
         if label:
             ax.set_ylabel(label)
     else:
-        print('Incorrect axis argument. Please use "x" or "y".')
+        log('Incorrect axis argument. Please use "x" or "y".', prefix="Error")
 
 def add_colorbar(style_data, canvas, cax, cbartype='continuous', grouplabels=None, groupcolors=None, alpha=1):
     """Adds a colorbar to a MPL figure
@@ -2213,7 +2213,7 @@ def plot_ndim(parent, data, app_data, style_data):
         else:
             cluster_dict = None
             cluster_flag = False
-            print(f'No cluster data found for {method}, recompute?')
+            log(f"No cluster data found for {method}, recompute?", prefix="Warning")
     elif app_data.c_field_type.lower() == 'roi' and app_data.c_field != '' and data.roi_stack:
         # ROI groups are per-sample (see SampleObj.roi_stack), not a global
         # algorithm setting like cluster_dict. `method` stays 'ROI' (the
@@ -2401,7 +2401,7 @@ def plot_score_map(parent,data, app_data, style_data):
             #field = f'{idx}'
             field = app_data.c_field
         case _:
-            print('(MainWindow.plot_score_map) Unknown score type'+plot_type)
+            log("(MainWindow.plot_score_map) Unknown score type" + plot_type, prefix="Error")
             return canvas, None
 
     reshaped_array = np.reshape(data.processed[field].values, data.array_size, order=data.order)
@@ -2500,7 +2500,7 @@ def plot_pca(parent, data, app_data, style_data):
             canvas, plot_data = plot_score_map(parent, data, app_data, style_data)
             plot_name = plot_type+f'_{app_data.c_field}'
         case _:
-            print(f'Unknown PCA plot type: {plot_type}')
+            log(f"Unknown PCA plot type: {plot_type}", prefix="Error")
             return
 
     update_figure_font(canvas, style_data.font)
@@ -3164,7 +3164,7 @@ def update_figure_font(canvas, font_name):
         for text_obj in canvas.fig.findobj(match=plt.Text):
             text_obj.set_fontname(font_name)
     except Exception as e:
-        print(f'Unable to update figure font: {e}')
+        log(f"Unable to update figure font: {e}", prefix="Warning")
 
 # def plot_colormap_annulus(cmap_name, r_inner=0.5, r_outer=1.0, n_points=512):
 #     """

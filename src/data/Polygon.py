@@ -190,7 +190,7 @@ class PolygonManager:
                 file_name = os.path.join(project_dir, sample_id, f'polygon_{p_id}.poly')
                 with open(file_name, 'wb') as file:
                     pickle.dump(polygon, file)
-            print("Polygons saved successfully.")
+            log("Polygons saved successfully.", prefix="Polygon")
 
     def load_polygons(self, project_dir, sample_id):
         directory = os.path.join(project_dir, sample_id)
@@ -216,7 +216,7 @@ class PolygonManager:
             self.canvas.draw_idle()
         if self.parent is not None and hasattr(self.parent, 'update_table_widget'):
             self.parent.update_table_widget()  # Update the table in the main window
-        print("Polygons loaded successfully.")
+        log("Polygons loaded successfully.", prefix="Polygon")
 
     # --- Helpers (Matplotlib) ---
     def _remove_temp(self):

@@ -117,7 +117,7 @@ class Clustering():
                             silhouette_scores.append(0)
                         else:
                             silhouette_scores.append(silhouette_score(array, kmeans.labels_, sample_size=1000))
-                        print(f"{nc}: {silhouette_scores}")
+                        log(f"{nc}: {silhouette_scores}", prefix="Analysis")
                         data.cluster_results[method] =cluster_results
                         data.silhouette_scores[method] = silhouette_scores
 
@@ -148,7 +148,7 @@ class Clustering():
                             silhouette_scores.append(0)
                         else:
                             silhouette_scores.append(silhouette_score(array, labels, sample_size=1000))
-                        print(f"{nc}: {silhouette_scores}")
+                        log(f"{nc}: {silhouette_scores}", prefix="Analysis")
             
                         data.cluster_results[method] = cluster_results
                         data.silhouette_scores[method] = silhouette_scores

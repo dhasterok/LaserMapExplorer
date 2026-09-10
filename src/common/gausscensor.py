@@ -96,7 +96,10 @@ def gausscensor(x, scale='linear', q=[0.05, 0.25, 0.5, 0.75, 0.95] , a=3/8):
         interp_func = interp1d(yy, uu)  # will raise an error if Q is out of bounds
         quantile_values[:, 1] = interp_func(q)
     except Exception as e:
-        print(f"Interpolation failed: {e}")
+        # Imported here so this module stays free of the Qt dependency that
+        # src.control.Logger pulls in, keeping it usable headlessly.
+        from src.control.Logger import log
+        log(f"Interpolation failed: {e}", prefix="Error")
         quantile_values[:, 1] = quantile_values[:, 0]
 
     return model, quantile_values

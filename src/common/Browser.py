@@ -8,6 +8,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineProfile
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtGui import QIcon, QMouseEvent
+from lame_core.config import BASEDIR
 from lame_core.CustomWidgets import CustomAction, CustomToolButton
 from src.control.Logger import LoggerConfig, auto_log_methods
     
@@ -76,7 +77,7 @@ class WebEngineView(QWebEngineView):
 
     def show_error_page(self):
         """Displays 404 error page."""
-        html = f"<html><body><img src={os.path.abspath('docs/build/html/404.html')} /></html>"
+        html = f"<html><body><img src={BASEDIR / 'docs' / 'build' / 'html' / '404.html'} /></html>"
         self.setHtml(html)
 
     def handle_console_message(self, level, message, line, source_id):

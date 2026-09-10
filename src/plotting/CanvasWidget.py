@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QFont, QCursor
 from lame_core.CustomWidgets import CustomActionMenu, CustomAction, CustomToolButton, CustomComboBox, VisibilityWidget
-from lame_core.config import APPDATA_PATH
+from lame_core.config import APPDATA_PATH, user_data_file
 from src.app.config import get_top_parent
 
 import gc
@@ -40,7 +40,7 @@ class CanvasWidget(QWidget):
 
         self.QV_analyte_list = {}
         try:
-            self.QV_analyte_list = csvdict.import_csv_to_dict(APPDATA_PATH / 'qv_lists.csv')
+            self.QV_analyte_list = csvdict.import_csv_to_dict(user_data_file('qv_lists.csv'))
         except:
             self.QV_analyte_list = {'default':['Si29','Ti47','Al27','Cr52','Fe56','Mn55','Mg24','Ca43','K39','Na23','P31',
                 'Ba137','Th232','U238','La139','Ce140','Pb206','Pr141','Sr88','Zr90','Hf178','Nd146','Eu153',
@@ -299,7 +299,7 @@ class CanvasWidget(QWidget):
                 layout.addWidget(self.mpl_toolbar)
         except Exception as e:
             # Canvas is not a MplCanvas or other error
-            print(f"Could not create navigation toolbar: {e}")
+            log(f"Could not create navigation toolbar: {e}", prefix="Warning")
             self.mpl_toolbar = None
 
         self.single_view.show()
@@ -356,46 +356,71 @@ class CanvasWidget(QWidget):
         # see them all
         ncol = self.toolbar.qv.spinBoxQVColumns.value()
 
+        # displayed height:width of a map -- the canvases are sized to this so
+        # rows sit flush; imshow(aspect=...) would otherwise letterbox each map
+        # inside a fixed 5x4 in figure, leaving a blank band between rows
+        data_obj = self.ui.data[self.ui.app_data.sample_id]
+        h_over_w = self.qv_aspect(data_obj)
+
         # clear the quickView layout
         self.clear_layout(self.quick_view.layout())
         for i, field in enumerate(qv_fields):
             field_type = 'Analyte' if field in analyte_fields else 'Ratio'
 
             # create plot canvas
-            canvas = MplCanvas(parent=self.ui)
+            canvas = MplCanvas(parent=self.ui, width=5, height=5 * h_over_w)
 
             # determine location of plot
             col = i % ncol
             row = i // ncol
 
             # get data for current field
-            current_plot_df = self.ui.data[self.ui.app_data.sample_id].get_map_data(field, field_type)
-            reshaped_array = np.reshape(current_plot_df['array'].values, self.ui.data[self.ui.app_data.sample_id].array_size, order=self.ui.data[self.ui.app_data.sample_id].order)
+            current_plot_df = data_obj.get_map_data(field, field_type)
+            reshaped_array = np.reshape(current_plot_df['array'].values, data_obj.array_size, order=data_obj.order)
 
             # add image to canvas
             cmap = self.ui.style_data.get_colormap()
-            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=self.ui.data[self.ui.app_data.sample_id].aspect_ratio, interpolation='none')
+            cax = canvas.axes.imshow(reshaped_array, cmap=cmap,  aspect=data_obj.aspect_ratio, interpolation='none')
             font = {'family': 'sans-serif', 'stretch': 'condensed', 'size': 8, 'weight': 'semibold'}
-            canvas.axes.text( 0.025*self.ui.data[self.ui.app_data.sample_id].array_size[0],
-                    0.1*self.ui.data[self.ui.app_data.sample_id].array_size[1],
+            canvas.axes.text( 0.025*data_obj.array_size[0],
+                    0.1*data_obj.array_size[1],
                     field,
                     fontdict=font,
                     color=self.ui.style_data.overlay_color,
                     ha='left', va='top' )
             canvas.axes.set_axis_off()
-            canvas.fig.tight_layout()
-
-            # add canvas to quickView grid layout
-            if self.quick_view.layout() is None:
-                layout_quick_view = QGridLayout()
-                layout_quick_view.setSpacing(0)
-                layout_quick_view.setContentsMargins(0, 0, 0, 0)
-                self.quick_view.setLayout(layout_quick_view)
+            # axes fill the figure -- set_axis_off() removed the ticks and labels
+            # that tight_layout()'s default pad was reserving room for
+            canvas.fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
             # add canvas to layout
             layout = self.quick_view.layout()
             if layout is not None:
                 layout.addWidget(canvas,row,col)
+
+        # let the tab resize the canvases to the grid geometry (see
+        # QuickViewTab._apply_canvas_heights)
+        self.quick_view.set_grid_metrics(ncol, h_over_w)
+
+    def qv_aspect(self, data_obj):
+        """Displayed height-to-width ratio of a sample's maps.
+
+        Parameters
+        ----------
+        data_obj : SampleObj
+            Sample whose ``array_size`` and ``aspect_ratio`` define the map shape.
+
+        Returns
+        -------
+        float
+            ``(ny * dy) / (nx * dx)``, clamped to [0.05, 20] so a malformed or
+            missing pixel size can't produce a degenerate canvas.
+        """
+        ny, nx = data_obj.array_size
+        aspect = data_obj.aspect_ratio
+        if not nx or not ny or not aspect:
+            return 1.0
+        return min(max((ny * aspect) / nx, 0.05), 20.0)
 
     def clear_layout(self, layout):
         """Clears a widget that contains plots.
@@ -505,7 +530,7 @@ class CanvasWidget(QWidget):
                     widget.deleteLater()
                     
                 except Exception as e:
-                    print(f"Error during widget cleanup: {e}")
+                    log(f"Error during widget cleanup: {e}", prefix="Error")
                     # Fallback to original method
                     widget.setParent(None)
                     try:
@@ -1002,6 +1027,9 @@ class MultiViewTab(QWidget):
         self.canvas_widget.drop_plot_on_multiview(tree, branch, leaf, row, col)
         event.acceptProposedAction()
 
+QWIDGETSIZE_MAX = 16777215  # Qt's "no maximum" sentinel, not exposed by PyQt6
+
+
 class QuickViewTab(QWidget):
     """Holds the grid of Quick View canvases.
 
@@ -1009,6 +1037,11 @@ class QuickViewTab(QWidget):
     being added to ``canvasWindow`` directly, since the number of canvases
     (and thus rows) can exceed the visible height once a column count is set.
     """
+    #: px of deliberate breathing room between neighbouring maps. The canvas
+    #: sizing subtracts it from the usable width, so changing it here tightens
+    #: or loosens the grid without leaving the rows misaligned.
+    GRID_SPACING = 10
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName("quickViewTab")
@@ -1020,10 +1053,76 @@ class QuickViewTab(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
+        # grid geometry, supplied by CanvasWidget.display_QV
+        self._ncol = 1
+        self._h_over_w = 1.0
+
         tab_layout = QGridLayout()
-        tab_layout.setSpacing(0) # Set margins to 0 if you want to remove margins as well
-        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.setSpacing(self.GRID_SPACING)
+        tab_layout.setContentsMargins(self.GRID_SPACING, self.GRID_SPACING,
+                                      self.GRID_SPACING, self.GRID_SPACING)
         self.setLayout(tab_layout)
+
+    def set_grid_metrics(self, ncol, h_over_w):
+        """Records the grid shape and resizes the canvases to match.
+
+        Parameters
+        ----------
+        ncol : int
+            Number of columns currently in the grid.
+        h_over_w : float
+            Displayed height-to-width ratio of the sample's maps.
+        """
+        self._ncol = max(int(ncol), 1)
+        self._h_over_w = float(h_over_w)
+        self._apply_canvas_heights()
+
+    def _apply_canvas_heights(self):
+        """Fixes each canvas's height to its cell width times the map aspect.
+
+        Qt's ``heightForWidth`` support in ``QGridLayout`` is unreliable, so the
+        heights are driven from the parent instead. This converges -- a child's
+        height never changes this widget's width, and the one case that can (the
+        enclosing QScrollArea gaining a scrollbar) settles after one more pass.
+        """
+        layout = self.layout()
+        if layout is None:
+            return
+
+        # usable width excludes the outer margins and the gutters between columns
+        spacing = self.GRID_SPACING
+        usable = self.width() - 2 * spacing - spacing * (self._ncol - 1)
+        cell_w = usable // self._ncol
+        if cell_w <= 0:
+            return
+
+        count = layout.count()
+        if count == 0:
+            # release the pinned height so an emptied grid doesn't leave the
+            # scroll area scrolling over nothing
+            self.setMinimumHeight(0)
+            self.setMaximumHeight(QWIDGETSIZE_MAX)
+            return
+
+        height = max(1, round(cell_w * self._h_over_w))
+        for i in range(count):
+            item = layout.itemAt(i)
+            widget = item.widget() if item is not None else None
+            if widget is not None and widget.height() != height:
+                widget.setFixedHeight(height)
+
+        # pin our own height to the grid content, otherwise the enclosing
+        # QScrollArea (widgetResizable) stretches this widget to the viewport
+        # and QGridLayout spreads the surplus as gaps between the fixed-height
+        # rows -- exactly the gap this sizing is meant to remove
+        nrows = -(-count // self._ncol)
+        total = nrows * height + spacing * (nrows - 1) + 2 * spacing
+        if self.height() != total:
+            self.setFixedHeight(total)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._apply_canvas_heights()
 
 class NavigationWidgetsSV(VisibilityWidget):
     def __init__(self, parent=None):
@@ -1707,7 +1806,7 @@ class QuickView(QDialog):
         QMessageBox.information
             If the save operation is successful.
         """
-        file_path = APPDATA_PATH / 'qv_lists.csv'
+        file_path = user_data_file('qv_lists.csv')
 
         # Ensure directory exists
         file_path.parent.mkdir(parents=True, exist_ok=True)

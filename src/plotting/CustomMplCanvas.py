@@ -17,6 +17,7 @@ from matplotlib.backends.backend_qt import NavigationToolbar2QT as _NavigationTo
 from matplotlib.backend_bases import MouseButton
 import matplotlib as mpl
 from lame_core.config import ICONPATH
+from src.control.Logger import log
 
 
 class NavigationToolbar(_NavigationToolbar2QT):
@@ -856,7 +857,7 @@ class MplCanvas(FigureCanvas):
                     self.annotations.append(canvas_ann)
                     
         except Exception as e:
-            print(f"Error loading annotations from registry: {e}")
+            log(f"Error loading annotations from registry: {e}", prefix="Error")
     
     def _registry_to_canvas_format(self, registry_ann):
         """Convert registry annotation format to canvas annotation format."""
@@ -888,7 +889,7 @@ class MplCanvas(FigureCanvas):
                     'positions': positions  # Store all positions for multi-point lines
                 }
         except KeyError as e:
-            print(f"Missing key in registry annotation: {e}")
+            log(f"Missing key in registry annotation: {e}", prefix="Error")
             return None
     
     def _recreate_matplotlib_object(self, canvas_ann):
@@ -935,7 +936,7 @@ class MplCanvas(FigureCanvas):
                 return line_obj
                 
         except Exception as e:
-            print(f"Error recreating matplotlib object: {e}")
+            log(f"Error recreating matplotlib object: {e}", prefix="Error")
             return None
     
     def _store_annotation_in_registry(self, canvas_annotation):
@@ -952,7 +953,7 @@ class MplCanvas(FigureCanvas):
                 canvas_annotation['registry_id'] = registry_ann.get('id')
                 
         except Exception as e:
-            print(f"Error storing annotation in registry: {e}")
+            log(f"Error storing annotation in registry: {e}", prefix="Error")
     
     def _canvas_to_registry_format(self, canvas_ann):
         """Convert canvas annotation format to registry format."""
@@ -987,7 +988,7 @@ class MplCanvas(FigureCanvas):
                     'visible': canvas_ann.get('Visible', True)
                 }
         except KeyError as e:
-            print(f"Missing key in canvas annotation: {e}")
+            log(f"Missing key in canvas annotation: {e}", prefix="Error")
             return None
 
     def closeEvent(self, event):

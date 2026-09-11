@@ -46,7 +46,10 @@ from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
 from src.workflow.Workflow import Workflow
 from src.app.InfoViewer import InfoDock
-from lame_core.config import BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet
+from lame_core.config import (
+    BASEDIR, APPDATA_PATH, ICONPATH, STYLE_PATH, load_stylesheet, user_data_dir,
+    user_data_file,
+)
 from src.app.settings import prefs
 from src.app.help_mapping import create_help_mapping
 from src.control.Logger import LoggerConfig, auto_log_methods, log, no_log, LoggerDock
@@ -107,6 +110,8 @@ class MainWindow(QMainWindow):
                 'Browser': True,
                 'Registry': True,
                 'Notes': True,
+                'Qt': True,
+                'Info': True,
                 'Error' : True,
                 'Warning' : True,
             }
@@ -387,9 +392,9 @@ class MainWindow(QMainWindow):
         # Apply styles to all QGroupBox widgets in MaskDock
         from PyQt6.QtWidgets import QGroupBox
         groupboxes = widget.findChildren(QGroupBox)
-        print(f"Found {len(groupboxes)} QGroupBox widgets in MaskDock")
+        log(f"Found {len(groupboxes)} QGroupBox widgets in MaskDock", prefix="Style")
         for groupbox in groupboxes:
-            print(f"Applying theme to QGroupBox: {groupbox.title()}")
+            log(f"Applying theme to QGroupBox: {groupbox.title()}", prefix="Style")
             groupbox.setStyleSheet(groupbox_style)
             groupbox.update()
             groupbox.repaint()  # Force immediate repaint
@@ -1451,7 +1456,7 @@ class MainWindow(QMainWindow):
                     self.canvas_widget.clear_layout(layout)
                     layout.addWidget(canvas)
                 else:
-                    print("Warning: single_view.layout() is None")
+                    log("single_view.layout() is None", prefix="Warning")
                 
                 # Store reference after successful addition
                 self.mpl_canvas = canvas
@@ -1461,8 +1466,8 @@ class MainWindow(QMainWindow):
                 self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
         except Exception as e:
-            print(f"Error in update_SV: {e}")
-            print("Type of object:", type(e))
+            log(f"Error in update_SV: {e}", prefix="Error")
+            log(f"Type of object: {type(e)}", prefix="Error")
             traceback.print_exc()
             # Restore old canvas if new one failed
             if old_canvas is not None:
@@ -2024,7 +2029,7 @@ class MainWindow(QMainWindow):
         custom fields.
         """            
         if not hasattr(self, 'calculator'):
-            calc_file = APPDATA_PATH / "calculator.txt"
+            calc_file = user_data_file("calculator.txt")
             self.calculator = CalculatorDock(ui=self, filename=calc_file)
 
             if self.calculator not in self.help_mapping:
@@ -2067,7 +2072,7 @@ class MainWindow(QMainWindow):
         passed and record changes to the data.
         """            
         if not hasattr(self, 'logger_dock'):
-            logfile = BASEDIR / 'resources' / 'log' / 'lame.log'
+            logfile = user_data_dir('logs') / 'lame.log'
             self.logger_dock = LoggerDock(logfile, self)
 
             if self.logger_dock not in self.help_mapping:

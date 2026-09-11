@@ -28,7 +28,7 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, QSettings, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
-from lame_core.config import BASEDIR
+from lame_core.config import BASEDIR, user_data_dir
 from src.app.Status import StatusMessageManager
 from src.control.Logger import auto_log_methods
 from src.project.ProjectModel import (
@@ -135,8 +135,7 @@ class ProjectManager(QObject):
             Manifest file to open. If `None`, a file dialog is shown.
         """
         if path is None:
-            projects_dir = BASEDIR / "projects"
-            projects_dir.mkdir(parents=True, exist_ok=True)
+            projects_dir = user_data_dir("projects")
             file_str, _ = QFileDialog.getOpenFileName(
                 self.ui, "Open Project", str(projects_dir),
                 f"LaME Project (*{PROJECT_FILE_SUFFIX})"
@@ -798,8 +797,7 @@ class ProjectManager(QObject):
             ui.app_data.sample_id = previous_id
 
     def _prompt_save_location(self):
-        projects_dir = BASEDIR / "projects"
-        projects_dir.mkdir(parents=True, exist_ok=True)
+        projects_dir = user_data_dir("projects")
         default_name = (self.current_project.name or 'project').replace(' ', '_')
         file_str, _ = QFileDialog.getSaveFileName(
             self.ui, "Save Project",

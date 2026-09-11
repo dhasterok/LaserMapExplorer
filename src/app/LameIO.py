@@ -10,7 +10,7 @@ from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import QSettings, QDir, Qt
 import src.importers.SpotImporter as SpotImporter
 import src.importers.MapImporter as MapImporter
-from lame_core.config import BASEDIR
+from lame_core.config import BASEDIR, user_data_dir
 from src.app.config import get_top_parent
 from src.data.DataHandling import LaserSampleObj, XRFSampleObj
 from src.plotting.CustomMplCanvas import MplCanvas
@@ -448,7 +448,7 @@ class LameIO():
             Filename to save data to
         """
         filters = "CSV Files (*.csv);;Excel Files (*.xlsx);;Parquet Files (*.parquet);;All Files (*)"
-        save_dir = BASEDIR / "saved" / "data"
+        save_dir = user_data_dir("saved", "data")
         if filename is None:
             file_path = self._get_save_path(self, save_dir, "data", filters)
         else:
@@ -470,7 +470,7 @@ class LameIO():
 
     def save_figure(self, fig, filename=None):
         filters = "PNG Files (*.png);;SVG Files (*.svg);;PDF Files (*.pdf);;All Files (*)"
-        save_dir = BASEDIR / "saved" / "figures"
+        save_dir = user_data_dir("saved", "figures")
         if filename is None:
             file_path = self._get_save_path(self, save_dir, "figure", filters)
         else:

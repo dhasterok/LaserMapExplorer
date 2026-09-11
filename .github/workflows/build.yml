@@ -1,0 +1,176 @@
+name: Build desktop apps
+
+# Produces unsigned, self-contained builds for testers: a DMG for Apple Silicon macOS
+# and a zip for 64-bit Windows. Run it by hand from the Actions tab for a test round,
+# or push a v* tag to attach both to a Release.
+#
+# LaME depends on four sibling repositories that requirements.txt installs through
+# relative paths (-e ../lame-core, ...), so every job checks all five out side by side
+# and builds from that layout. All five are public, so no secrets are needed.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14          # Apple Silicon runner
+            name: macos-arm64
+          - os: windows-latest
+            name: windows-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out LaserMapExplorer
+        uses: actions/checkout@v4
+        with:
+          path: LaserMapExplorer
+
+      # The sibling packages. global_geochemistry is on master; the rest on main.
+      - name: Check out lame-core
+        uses: actions/checkout@v4
+        with:
+          repository: dhasterok/lame-core
+          ref: main
+          path: lame-core
+
+      - name: Check out blueberry-colortools
+        uses: actions/checkout@v4
+        with:
+          repository: dhasterok/blueberry-colortools
+          ref: main
+          path: blueberry-colortools
+
+      - name: Check out siesta-rest-editor
+        uses: actions/checkout@v4
+        with:
+          repository: dhasterok/siesta-rest-editor
+          ref: main
+          path: siesta-rest-editor
+
+      - name: Check out global_geochemistry
+        uses: actions/checkout@v4
+        with:
+          repository: dhasterok/global_geochemistry
+          ref: master
+          path: global_geochemistry
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: LaserMapExplorer/requirements.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        working-directory: LaserMapExplorer
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r packaging/requirements-build.txt
+
+      # blockly/dist is gitignored, so a fresh clone has no bundle and the workflow
+      # designer would load a blank page.
+      - name: Build the blockly bundle
+        working-directory: LaserMapExplorer/blockly
+        run: |
+          npm install --no-audit --no-fund
+          npx webpack
+
+      # Call sphinx directly rather than scripts/update_docs.sh, which builds all five
+      # repos and contains a known `cd ..LaserMapExplorer` typo.
+      - name: Build the user guide
+        working-directory: LaserMapExplorer
+        run: python -m sphinx -b html docs/source docs/build/html
+
+      - name: Generate application icons
+        working-directory: LaserMapExplorer
+        run: python packaging/make_icons.py
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+      - name: Freeze with PyInstaller
+        working-directory: LaserMapExplorer
+        run: python -m PyInstaller --noconfirm --clean packaging/LaME.spec
+
+      # Catches a data file the spec forgot or a module PyInstaller's static analysis
+      # never saw -- failures that would otherwise only surface when a tester clicks
+      # the affected feature.
+      - name: Smoke-test the frozen build (macOS)
+        if: runner.os == 'macOS'
+        working-directory: LaserMapExplorer
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: ./dist/LaME.app/Contents/MacOS/LaME --selftest
+
+      # A windowed build detaches from the console, so the exit code is the signal.
+      # Start-Process -Wait is what makes PowerShell actually wait for it; the selftest
+      # also writes %APPDATA%\LaME\selftest.log when it has no usable stderr.
+      - name: Smoke-test the frozen build (Windows)
+        if: runner.os == 'Windows'
+        working-directory: LaserMapExplorer
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          $p = Start-Process -FilePath .\dist\LaME\LaME.exe -ArgumentList '--selftest' -Wait -PassThru
+          $log = Join-Path $env:APPDATA 'LaME\selftest.log'
+          if (Test-Path $log) { Get-Content $log }
+          if ($p.ExitCode -ne 0) { throw "selftest failed with exit code $($p.ExitCode)" }
+
+      # An arm64 bundle needs at least an ad-hoc signature or macOS refuses to launch it.
+      - name: Package the DMG
+        if: runner.os == 'macOS'
+        working-directory: LaserMapExplorer
+        run: |
+          codesign --force --deep --sign - dist/LaME.app
+          codesign --verify --deep --strict dist/LaME.app
+          STAGE="$(mktemp -d)"
+          cp -R dist/LaME.app "$STAGE/"
+          ln -s /Applications "$STAGE/Applications"
+          cp packaging/README-testers.md "$STAGE/README.md"
+          hdiutil create -volname "LaME" -srcfolder "$STAGE" -ov -format UDZO \
+            dist/LaME-macos-arm64.dmg
+
+      - name: Package the zip
+        if: runner.os == 'Windows'
+        working-directory: LaserMapExplorer
+        shell: pwsh
+        run: |
+          Copy-Item packaging/README-testers.md dist/LaME/README.md
+          Compress-Archive -Path dist/LaME -DestinationPath dist/LaME-windows-x64.zip
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: LaME-${{ matrix.name }}
+          path: |
+            LaserMapExplorer/dist/LaME-macos-arm64.dmg
+            LaserMapExplorer/dist/LaME-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            LaserMapExplorer/dist/LaME-macos-arm64.dmg
+            LaserMapExplorer/dist/LaME-windows-x64.zip
+          body_path: LaserMapExplorer/packaging/README-testers.md
+          fail_on_unmatched_files: false

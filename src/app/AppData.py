@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import src.common.csvdict as csvdict
 from PyQt6.QtCore import QObject, pyqtSignal
-from lame_core.config import APPDATA_PATH
+from lame_core.config import APPDATA_PATH, user_data_file
 from src.control.Logger import auto_log_methods, log
 from src.data.SortAnalytes import resolve_element_tokens
 
@@ -371,7 +371,7 @@ class AppData(QObject):
 
         self._scatter_preset = ""
         # get scatter presets list
-        self.scatter_list_path = APPDATA_PATH / 'scatter_presets.csv'
+        self.scatter_list_path = user_data_file('scatter_presets.csv')
         try:
             self.scatter_preset_dict = csvdict.import_csv_to_dict(self.scatter_list_path)
         except FileNotFoundError:
@@ -382,7 +382,7 @@ class AppData(QObject):
         self._norm_reference = ""
 
         # get N-Dim lists
-        self.ndim_list_path = APPDATA_PATH / 'TEC_presets.csv'
+        self.ndim_list_path = user_data_file('TEC_presets.csv')
         try:
             self.ndim_list_dict = csvdict.import_csv_to_dict(self.ndim_list_path)
         except FileNotFoundError:
@@ -1677,4 +1677,4 @@ class AppData(QObject):
                 else:
                     self.cluster_dict[method]['selected_clusters'] = clusters
         else:
-            print(f'(group_changed) Cluster method, ({method}) is not defined')
+            log(f"(group_changed) Cluster method, ({method}) is not defined", prefix="Error")

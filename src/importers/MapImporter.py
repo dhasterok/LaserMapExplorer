@@ -16,7 +16,8 @@ import src.common.csvdict as csvdict
 from src.plotting.CustomMplCanvas import SimpleMplCanvas
 from src.importers.MapImportDialog import Ui_MapImportDialog
 from src.importers.FileSelectorDialog import Ui_FileSelectorDialog
-from lame_core.config import BASEDIR, ICONPATH
+from lame_core.config import BASEDIR, ICONPATH, user_data_file
+from src.control.Logger import log
 
 # Recognized data-file extensions, shared between parse_filenames() (guesses
 # analyte/filetype from filenames) and FileSelectData (the file-selection
@@ -95,7 +96,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             self.toolButtonPrevSample.setIcon(QIcon(os.path.join(ICONPATH,'icon-back-arrow-dark-64.svg')))
         
         # dictionary with standards (files to ignore or use as calibration...once we add that capability)
-        self.standards_dict = csvdict.import_csv_to_dict(os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
+        self.standards_dict = csvdict.import_csv_to_dict(user_data_file('standards_list.csv'))
 
         self.toolButtonAddStandard.clicked.connect(self.add_standard)
         self.sample_ids = []
@@ -448,7 +449,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         self.standard_list = [s for s in self.standards_dict[data_type] if s]
 
         # save updated standards dictionary
-        lameio.export_dict_to_csv(self.standards_dict,os.path.join(BASEDIR,'resources/app_data/standards_list.csv'))
+        lameio.export_dict_to_csv(self.standards_dict, user_data_file('standards_list.csv'))
 
         # if tableWidgetMetadata has information and a Standards column, update with new standards list
         n_rows = self.tableWidgetMetadata.rowCount()
@@ -1274,8 +1275,8 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                         break
 
             # Debugging: Print analytes
-            print(f"Analyte 1: {analyte1}")
-            print(f"Analyte 2: {analyte2}")
+            log(f"Analyte 1: {analyte1}", prefix="IO")
+            log(f"Analyte 2: {analyte2}", prefix="IO")
 
             # If all numbers, probably a line number            
             if filetype is None and analyte1 is None and analyte2 is None:
@@ -1867,7 +1868,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
     def process_file(self, filepath, analyte, units):
         # Implement the logic to process each file according to your specific needs
-        print(f"Processing file: {filepath} with analyte {analyte} and units {units}")
+        log(f"Processing file: {filepath} with analyte {analyte} and units {units}", prefix="IO")
         # Implement your file handling logic here
 
     def select_sample_files(self, row):

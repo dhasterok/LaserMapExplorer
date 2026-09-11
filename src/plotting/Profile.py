@@ -10,13 +10,13 @@ from PyQt6.QtWidgets import (
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QAbstractItemView
     )
 from lame_core.CustomWidgets import CustomDockWidget, CustomLineEdit, CustomComboBox, ToggleSwitch
-from lame_core.config import BASEDIR
+from lame_core.config import BASEDIR, user_data_dir
 from src.control.FieldLogic import FieldLogicUI
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
-from src.control.Logger import LoggerConfig, auto_log_methods
+from src.control.Logger import LoggerConfig, auto_log_methods, log
 
 @auto_log_methods(logger_key='Profile')
 class ProfileDock(CustomDockWidget, FieldLogicUI):
@@ -1368,7 +1368,7 @@ class Profiling:
             }
             with open(file_name, 'wb') as file:
                 pickle.dump(data, file)
-        print("Profile saved successfully.")
+        log("Profile saved successfully.", prefix="Profile")
 
     def load_profiles(self, project_dir, sample_id):
         """Load saved profiles from ``*.prfl`` files."""
@@ -1390,7 +1390,7 @@ class Profiling:
                 profile.excluded = data.get('excluded', {})
                 self.profiles[sample_id][data['name']] = profile
         self.populate_combobox()
-        print("All profiles loaded successfully.")
+        log("All profiles loaded successfully.", prefix="Profile")
 
     def save_current_profile(self):
         """UI-facing save: writes all of the current sample's profiles to
@@ -1400,8 +1400,7 @@ class Profiling:
             return
 
         if self.project_dir is None:
-            projects_dir = BASEDIR / "projects"
-            projects_dir.mkdir(parents=True, exist_ok=True)
+            projects_dir = user_data_dir("projects")
             selected = QFileDialog.getExistingDirectory(
                 self.profile_dock, "Save Profile To", str(projects_dir)
             )
@@ -1419,8 +1418,7 @@ class Profiling:
         if sample_id == '':
             return
 
-        projects_dir = BASEDIR / "projects"
-        projects_dir.mkdir(parents=True, exist_ok=True)
+        projects_dir = user_data_dir("projects")
         selected = QFileDialog.getExistingDirectory(
             self.profile_dock, "Load Profiles From", str(projects_dir)
         )

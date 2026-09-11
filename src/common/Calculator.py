@@ -1,6 +1,6 @@
 import os, re
 import numexpr as ne
-from lame_core.config import BASEDIR
+from lame_core.config import BASEDIR, user_data_file
 import numpy as np
 import pandas as pd
 from src.common.varfunc import partial_match
@@ -79,7 +79,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         self.cfc = CustomFieldCalculator(parent=self)
 
         if filename is None:
-            self.calc_filename = os.path.join(BASEDIR,f'resources/app_data/calculator.txt')
+            self.calc_filename = user_data_file('calculator.txt')
         else:
             self.calc_filename = filename
 
@@ -325,7 +325,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
             self.ui.browser.show()
             self.ui.browser.go_to_page('calculator')
         except Exception as e:
-            print("Could not open browser to load calculator help page.")
+            log("Could not open browser to load calculator help page.", prefix="Warning")
         
     def calc_insert_operator(self, operator):
         """Inserts an operator into the calculator
@@ -640,7 +640,7 @@ class CustomFieldCalculator():
             return None, None
         
         field_list = re.findall(r'\{.*?\}', txt)
-        print(field_list)
+        log(f"{field_list}", prefix="Calculator")
         var = {}
         for field_str in field_list:
             field_str = field_str.replace('{','')
@@ -668,7 +668,7 @@ class CustomFieldCalculator():
             var = None
         expr = [txt, var]
 
-        print(expr)
+        log(f"{expr}", prefix="Calculator")
 
         return cond, expr
 

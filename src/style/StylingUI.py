@@ -2027,7 +2027,7 @@ class StylingDock(CustomDockWidget):
         amin, amax, scale, label = self.ui.style_data.get_axis_values(self.ui.app_data.current_data, field)
         
         # Debug output to help verify the method is called and values are correct
-        print(f"DEBUG: axis_variable_changed called for field '{field}', ax '{ax}': min={amin}, max={amax}, scale={scale}, label={label}")
+        log(f"axis_variable_changed called for field '{field}', ax '{ax}': min={amin}, max={amax}, scale={scale}, label={label}", prefix="Style")
 
         plot_type = self.ui.style_data.plot_type
 

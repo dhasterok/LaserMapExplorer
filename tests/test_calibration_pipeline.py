@@ -23,10 +23,12 @@ from src.calibration.pipeline import (
     apply_deconvolution,
     discover_sample_directories,
     gather_session_line_files,
+    parse_files_with_progress,
     run,
     run_batch,
     run_from_parsed,
 )
+from src.calibration.progress import STAGE_BACKGROUND, STAGE_CALIBRATION, STAGE_DECONVOLUTION, STAGE_DRIFT, STAGE_READING, STAGE_SAMPLE
 from src.deconvolution.config import DeconvolutionSettings
 from src.calibration.rawfile import list_line_files, parse_line_file
 from src.calibration.pooling import PooledElementSpec, combined_abundance_fraction
@@ -111,6 +113,37 @@ def test_run_end_to_end_produces_calibrated_ppm(tmp_path):
     assert result.provenance["drift_order"] == 0
     assert result.provenance["raw_dir"] == str(sample_dir)
     assert "NIST610" in result.standard_results
+
+
+@pytest.mark.parametrize("method", ["lowess", "spline", "kriging"])
+def test_run_with_nonparametric_background_drift_method(tmp_path, method):
+    """A long session (enough gas-blank windows for a local fit) run with a
+    non-parametric background drift method still produces calibrated ppm,
+    and the session drift fit for a well-populated analyte is the
+    non-parametric kind."""
+    from src.calibration.nonparametric_drift import NonparametricDriftFit
+
+    sample_dir = tmp_path / "long_session"
+    sample_dir.mkdir()
+    base = datetime(2026, 3, 1, 10, 0, 0)
+    # 12 files interleaved standard/sample -> 12 background windows, well
+    # past nonparametric_drift._MIN_POINTS.
+    for i in range(12):
+        label = "NIST610" if i % 3 == 0 else "SAMPLE"
+        _write_raw_file(sample_dir, label, i, base + timedelta(minutes=90 * i), seed=i + 1)
+
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_method=method,
+    )
+
+    result = results["SAMPLE"]
+    assert not result.calibrated_ppm.empty
+    assert "Al27" in result.calibrated_ppm.columns
+    assert result.calibrated_ppm["Al27"].notna().all()
+    assert result.provenance["background_drift_method"] == method
+    assert isinstance(result.session_background_drift["Al27"], NonparametricDriftFit)
+    assert result.session_background_drift["Al27"].method == method
 
 
 def test_ablation_onset_trim_shortens_every_line(tmp_path):
@@ -901,3 +934,179 @@ def test_apply_deconvolution_is_a_separate_rerunnable_stage(tmp_path):
     # Turning it back off restores the Stage-1 values.
     apply_deconvolution(results, DeconvolutionSettings())
     pd.testing.assert_frame_equal(results["SAMPLE"].calibrated_ppm, stage1_ppm)
+
+
+def test_parse_files_with_progress_reports_one_event_per_file_grouped_by_label(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)  # NIST610 x2, SAMPLE x2, interleaved by acquisition time
+
+    paths = gather_session_line_files(sample_dir)
+    events = []
+    files = parse_files_with_progress(
+        paths, standard_names={"NIST610"}, progress_callback=events.append,
+    )
+
+    assert len(events) == len(paths) == len(files)
+    assert all(e.stage == STAGE_READING for e in events)
+    # grouped by label, not by original (acquisition-time-sorted) order --
+    # every NIST610 event before every SAMPLE event, or vice versa.
+    labels_in_event_order = [e.sample_label for e in events]
+    assert labels_in_event_order == sorted(labels_in_event_order, key=labels_in_event_order.index)
+    for label in {"NIST610", "SAMPLE"}:
+        label_events = [e for e in events if e.sample_label == label]
+        assert [e.current for e in label_events] == list(range(1, len(label_events) + 1))
+        assert all(e.total == len(label_events) for e in label_events)
+    assert {e.sample_total for e in events} == {2}  # two labels total
+
+
+def test_run_reports_reading_then_background_drift_calibration_sample_stages(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+
+    events = []
+    run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0, progress_callback=events.append,
+    )
+
+    stages_seen = [e.stage for e in events]
+    assert STAGE_READING in stages_seen
+    assert STAGE_BACKGROUND in stages_seen
+    assert STAGE_DRIFT in stages_seen
+    assert STAGE_CALIBRATION in stages_seen
+    assert STAGE_SAMPLE in stages_seen
+    # reading happens before any processing stage
+    first_non_reading = next(i for i, s in enumerate(stages_seen) if s != STAGE_READING)
+    assert all(s == STAGE_READING for s in stages_seen[:first_non_reading])
+    assert STAGE_READING not in stages_seen[first_non_reading:]
+
+
+def test_run_from_parsed_never_reports_reading_stage(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    files = [
+        parse_line_file(p, standard_names={"NIST610"})
+        for p in gather_session_line_files(sample_dir)
+    ]
+
+    events = []
+    run_from_parsed(
+        files, sample_dir, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0, progress_callback=events.append,
+    )
+
+    assert events  # some progress was reported...
+    assert STAGE_READING not in {e.stage for e in events}  # ...but never reading, since files were pre-parsed
+
+
+def test_run_without_progress_callback_is_unchanged(tmp_path):
+    # progress_callback=None (the default) must not change behavior or raise.
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+    assert set(results.keys()) == {"SAMPLE"}
+
+
+def test_apply_deconvolution_reports_progress_per_sample(tmp_path):
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    _make_sample_dir(sample_dir)
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+
+    events = []
+    settings = DeconvolutionSettings(apply_washout=True, washout_tau_s={a: 0.5 for a in ANALYTES})
+    apply_deconvolution(results, settings, progress_callback=events.append)
+
+    assert len(events) == len(results) == 1
+    assert events[0].stage == STAGE_DECONVOLUTION
+    assert events[0].current == 1 and events[0].total == 1
+
+
+def test_run_produces_calibrated_ppm_with_mass_shifted_raw_columns(tmp_path):
+    """Regression test: some instrument exports (reaction/collision-cell
+    methods) name a column "<element><mass> -> <product mass>", e.g.
+    "Ca43 -> 43" or "Ti47 -> 113" -- calibration must still recognize the
+    isotope (the part before the arrow) and produce ppm, with clean
+    "<element><mass>" column names in the result (not the raw, decorated
+    ones)."""
+    shifted_analytes = ["Al27 -> 27", "Ca43 -> 43"]
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    base = datetime(2026, 3, 1, 10, 0, 0)
+    _write_raw_file(sample_dir, "NIST610", 1, base, seed=1, analytes=shifted_analytes)
+    _write_raw_file(sample_dir, "SAMPLE", 1, base + timedelta(minutes=15), seed=2, analytes=shifted_analytes)
+    _write_raw_file(sample_dir, "SAMPLE", 2, base + timedelta(minutes=30), seed=3, analytes=shifted_analytes)
+    _write_raw_file(sample_dir, "NIST610", 2, base + timedelta(minutes=45), seed=4, analytes=shifted_analytes)
+
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=_reference_library(),
+        drift_order=0, background_drift_order=0,
+    )
+
+    result = results["SAMPLE"]
+    assert not result.calibrated_ppm.empty
+    assert set(result.calibrated_ppm.columns) == {"Al27", "Ca43"}  # clean names, no " -> "
+    assert result.calibrated_ppm["Al27"].notna().all()
+    assert result.calibrated_ppm["Ca43"].notna().all()
+    # sanity: values are in the right ballpark of the reference (500/300 ppm)
+    assert 400 < result.calibrated_ppm["Al27"].mean() < 600
+    assert 240 < result.calibrated_ppm["Ca43"].mean() < 360
+
+    # The standard's own calibration bookkeeping is also clean-keyed.
+    standard_result = result.standard_results["NIST610"]
+    assert set(standard_result.calibration_factor) == {"Al27", "Ca43"}
+    assert not standard_result.skipped_analytes
+
+
+def test_run_with_bias_specs_and_mass_shifted_columns(tmp_path):
+    """Mass-bias correction (an isotope-ratio-space calibration step) must
+    also see through the raw mass-shift decoration -- both when fitting the
+    bias curve from standard occurrences and when applying it to a
+    sample's own ratio. Mirrors
+    test_run_with_bias_specs_produces_mass_bias_corrected_ratio with
+    "Pb204 -> 204"/"Pb206 -> 206" style columns."""
+    sample_dir = tmp_path / "25B-1"
+    sample_dir.mkdir()
+    base = datetime(2026, 3, 1, 10, 0, 0)
+    pb_analytes = ["Pb204 -> 204", "Pb206 -> 206"]
+    std_bg, std_abl = (500.0, 8500.0), (100000.0, 1700000.0)   # ratio 17.0, matches certified truth
+    sample_bg, sample_abl = (500.0, 7500.0), (100000.0, 1500000.0)  # ratio 15.0 -- the sample's own true ratio
+    _write_raw_file(sample_dir, "NIST610", 1, base, seed=1, analytes=pb_analytes, bg_level=std_bg, ablation_level=std_abl)
+    _write_raw_file(sample_dir, "SAMPLE", 1, base + timedelta(minutes=15), seed=2, analytes=pb_analytes, bg_level=sample_bg, ablation_level=sample_abl)
+    _write_raw_file(sample_dir, "NIST610", 2, base + timedelta(minutes=45), seed=4, analytes=pb_analytes, bg_level=std_bg, ablation_level=std_abl)
+
+    library = {"NIST610": parse_reference_material({
+        "standard": "NIST610",
+        "analytes": {"Pb204": {"element": "Pb", "mass": 204, "value": 2.0, "uncertainty": 0.1, "uncertainty_type": "1SD"}},
+        "isotope_ratios": {
+            "Pb206/Pb204": {
+                "numerator_element": "Pb", "numerator_mass": 206, "denominator_element": "Pb", "denominator_mass": 204,
+                "value": 17.0, "uncertainty": 0.01, "uncertainty_type": "1SD", "source": "test",
+            },
+        },
+    })}
+
+    results = run(
+        sample_dir, standard_names={"NIST610"}, reference_library=library,
+        drift_order=0, background_drift_order=0,
+        bias_specs=[BiasSpec(element="Pb", numerator_mass=206, denominator_mass=204)],
+        bias_drift_order=0,
+    )
+    result = results["SAMPLE"]
+
+    assert "Pb206/Pb204" in result.bias_fits  # bias curve was actually fit from the shifted-name standard occurrences
+    assert not result.calibrated_ratios.empty
+    assert "Pb206 / Pb204" in result.calibrated_ratios.columns  # output ratio column is clean-named
+    mean_ratio = result.calibrated_ratios["Pb206 / Pb204"].mean()
+    assert abs(mean_ratio - 15.0) < abs(mean_ratio - 17.0)  # reflects the sample's own ratio, not the standard's
+    assert mean_ratio == pytest.approx(15.0, rel=0.3)

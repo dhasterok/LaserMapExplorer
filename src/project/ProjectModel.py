@@ -299,7 +299,7 @@ def _to_absolute(rel_or_abs, base_dir):
     return p if p.is_absolute() else (base_dir / p).resolve()
 
 
-def save_project(project, manifest_path):
+def save_project(project, manifest_path, update_project_state=True):
     """Write `project` to `manifest_path` as JSON, creating parent directories
     as needed.
 
@@ -313,6 +313,11 @@ def save_project(project, manifest_path):
     ----------
     project : Project
     manifest_path : str or Path
+    update_project_state : bool, optional
+        When False, write the file but leave `project.dirty` and
+        `project.manifest_path` alone -- for writing a copy the project
+        doesn't "live" at, e.g. `ProjectManager.autosave`'s scratch manifest
+        for a still-untitled project. Defaults to True.
     """
     manifest_path = Path(manifest_path)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -346,8 +351,9 @@ def save_project(project, manifest_path):
     with open(manifest_path, 'w') as f:
         json.dump(payload, f, indent=2)
 
-    project.dirty = False
-    project.manifest_path = manifest_path
+    if update_project_state:
+        project.dirty = False
+        project.manifest_path = manifest_path
 
 
 def load_project(manifest_path):

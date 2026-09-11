@@ -503,9 +503,20 @@ class AttributeDataFrame(pd.DataFrame):
                 if j == len(sorted_columns):
                     break
 
-        # Reorder the DataFrame and attributes accordingly
-        self[:] = self.reindex(columns=new_order, copy=False)
-        self.columns = new_order
+        # Reorder the DataFrame and attributes accordingly.
+        #
+        # Done by popping each column and re-appending it in the target order,
+        # which moves whole columns and so preserves each one's own dtype.
+        # The previous approach -- `self[:] = self.reindex(columns=new_order)`
+        # followed by renaming `self.columns` -- wrote *values* into the
+        # existing column slots positionally, so a column landing on a slot
+        # of a different dtype raised LossySetitemError/TypeError. That is
+        # not hypothetical: a CPS channel whose float32 values are around 1e9
+        # is written to .lame.csv with no decimal point and reads back as
+        # int64, so sorting any float analyte onto its slot aborted the sort
+        # (and, through get_field_list, whatever UI action triggered it).
+        for col in new_order:
+            self[col] = self.pop(col)
         self.column_attributes = {col: self.column_attributes[col] for col in new_order if col in self.column_attributes}
 
         return self

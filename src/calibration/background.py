@@ -23,10 +23,12 @@ from src.calibration.drift import (
     DriftFitError,
     DriftFitLike,
     fit_polynomial,
+    fit_polynomial_with_order_fallback,
     select_drift_fit,
     select_order_by_aic,
 )
 from src.calibration.lod import compute_lod
+from src.calibration.nonparametric_drift import NONPARAMETRIC_DRIFT_METHODS, fit_nonparametric_drift
 from src.calibration.poisson_drift import PoissonFitError, detect_poisson_file_outliers
 from src.calibration.rawfile import LineFileData, LineFileMeta
 
@@ -511,7 +513,7 @@ def fit_session_background_drift(
     order : int, optional
         Polynomial order for ``method="fixed"`` (with automatic reduction),
         by default ``1``.
-    method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+    method : {"fixed", "auto_aic", "auto_poisson_lrt", "lowess", "spline", "kriging"}, optional
         Per-analyte fitting strategy, by default ``"fixed"``.
     max_order : int, optional
         Highest order for the ``auto_*`` methods, by default ``3``.
@@ -554,6 +556,15 @@ def fit_session_background_drift(
       means instead -- the returned dict can be `isinstance()`-checked
       (:class:`PoissonDriftFit` vs :class:`DriftFit`) to see which analytes
       actually used the Poisson path.
+    - ``"lowess"`` / ``"spline"`` / ``"kriging"``: non-parametric fits of
+      the Gaussian background means versus time (see
+      :mod:`src.calibration.nonparametric_drift`), for long multi-day
+      sessions whose gas blank rises and falls several times -- structure a
+      single low-order polynomial cannot follow. Per analyte, if there are
+      too few background measurements for the non-parametric fit (see
+      ``nonparametric_drift._MIN_POINTS``) or it fails outright, that
+      analyte falls back to an OLS polynomial at ``order`` with automatic
+      order reduction (:func:`~src.calibration.drift.fit_polynomial_with_order_fallback`).
     """
     if not backgrounds:
         return {}
@@ -600,6 +611,17 @@ def fit_session_background_drift(
                 fits[analyte] = select_order_by_aic(fit_times, values, max_order=max_order, analyte=analyte)
             except DriftFitError:
                 continue
+        elif method in NONPARAMETRIC_DRIFT_METHODS:
+            try:
+                fits[analyte] = fit_nonparametric_drift(fit_times, values, method, analyte=analyte)
+            except DriftFitError:
+                # Not enough background points for a local fit -- fall back
+                # to a plain OLS polynomial (order-reduced as needed) so
+                # this analyte still gets a drift curve rather than
+                # per-file-constant correction.
+                fallback = fit_polynomial_with_order_fallback(fit_times, values, order=order, analyte=analyte)
+                if fallback is not None:
+                    fits[analyte] = fallback
         else:  # "fixed"
             eff_order = order
             while eff_order > 0 and len(values) < eff_order + 2:

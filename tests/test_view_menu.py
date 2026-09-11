@@ -1,154 +1,148 @@
-"""Headless check: paged toolbar (pinned row + pages) and the status bar's
+"""Paged toolbar (pinned row + pages), the View menu, and the status bar's
 Notes/Workflow recording IndicatorLights.
 
-Run: .venv/bin/python <this file>
+The per-page action lists below pin the *current* layout. They were stale
+when this file was converted from a script -- the toolbar had since moved
+'Add Plot to Tree' to the pinned row and reworked the Processing page --
+which the script never reported, because it was never run by pytest.
+
+Headless MainWindow integration tests -- shared setup (QApplication, modal
+dialog stubbing, sample files) comes from tests/conftest.py.
 """
-import os
-import sys
-from pathlib import Path
-
-os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
-
-project_root = Path("/Users/dhasterok/Documents/GitHub/LaserMapExplorer")
-sys.path.insert(0, str(project_root))
-
+import pytest
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication
-QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
 
-app = QApplication(sys.argv)
+#: Page name -> its actions, in order.
+PAGE_ACTIONS = {
+    'Home': ['Open Project', 'Add Samples', 'Import Files', 'Help', 'Theme'],
+    'Plot': ['Full Map', 'Crop', 'Swap Axes', 'Correlation', 'Histogram',
+             'Scatter Plot', 'Ternary Plot', 'TEC Plot', 'Radar Plot'],
+    # 'Clusers' is a typo in the UI itself, pinned here as-is so this test
+    # tracks the toolbar rather than asserting what it ought to say.
+    'Processing': ['Noise Reduction', 'Filters', 'ROI', 'Polygons', 'Clusers'],
+    'Log': ['Notes', 'Record', 'Workflow', 'Capture', 'Snapshot'],
+    'Analysis': ['Calculator', 'Regression', 'Dimensional Reduction', 'Cluster',
+                 'Geochronology', 'Profiles', 'Diffusion', 'Stoichiometry'],
+}
 
-import src.app.config  # noqa: F401
 
-from src.app.MainWindow import MainWindow
-
-win = MainWindow(app)
-win.show()  # isVisible() reflects the whole ancestor chain, not just a widget's own state
-tb = win.toolbar
-paged = tb.paged
-
-# ------------------------------------------------------------------
-# Pinned row has the expected actions. Capture itself lives on the Log page
-# and in the Workflow menu, not the pinned row -- but it must always be
-# visible/clickable there (clicking it while off is what creates/links a
-# workflow file in the first place, so it can't be gated behind a workflow
-# already being active); the Workflow IndicatorLight on the status bar is
-# the actual "is recording happening" indicator.
-# ------------------------------------------------------------------
 def action_texts(toolbar):
-    return [a.text().replace('\n', ' ') for a in toolbar.actions() if not a.isSeparator()]
+    """Visible action labels, newlines flattened, separators/spacers dropped."""
+    return [a.text().replace('\n', ' ') for a in toolbar.actions()
+            if not a.isSeparator() and a.text()]
 
-pinned_texts = action_texts(paged.pinned_bar)
-assert 'Analytes' in pinned_texts
-assert 'Update Plot' in pinned_texts
-assert 'Save Project' in pinned_texts
-assert win.lame_action.CaptureToggle.isVisible(), "Capture should always be visible/clickable"
-print("PASS: pinned row has the expected actions, Capture is always visible")
 
-# ------------------------------------------------------------------
-# Five pages exist with the expected actions
-# ------------------------------------------------------------------
-assert paged.pages.count() == 5
-for name in ('Home', 'Plot', 'Processing', 'Log', 'Analysis'):
-    assert name in paged._page_names, f"missing page {name!r}"
-print("PASS: all 5 pages are registered (Home, Plot, Processing, Log, Analysis)")
+@pytest.fixture
+def shown_window(lame_window):
+    """A shown window -- isVisible() reflects the whole ancestor chain, not a
+    widget's own state, so the toolbar checks need this."""
+    lame_window.show()
+    return lame_window
 
-def page_texts(name):
-    return action_texts(paged.pages.widget(paged._page_names.index(name)))
 
-assert page_texts('Plot') == [
-    'Add Plot to Tree', 'Full Map', 'Crop', 'Swap Axes',
-    'Correlation', 'Histogram', 'Scatter Plot', 'Ternary Plot', 'TEC Plot', 'Radar Plot',
-], page_texts('Plot')
-assert page_texts('Processing') == ['Noise Reduction', 'Filters', 'Filter', 'Polygons', 'Clusers', 'ROI'], page_texts('Processing')
-assert page_texts('Log') == ['Notes', 'Record', 'Workflow', 'Capture', 'Snapshot'], page_texts('Log')
-assert page_texts('Analysis') == [
-    'Calculator', 'Regression', 'Dimensional Reduction', 'Cluster', 'Geochronology', 'Profiles', 'Diffusion', 'Stoichiometry',
-], page_texts('Analysis')
-print("PASS: Plot/Processing/Log/Analysis pages have the expected actions in order")
+@pytest.fixture
+def paged(shown_window):
+    return shown_window.toolbar.paged
 
-# ------------------------------------------------------------------
-# Page tabs actually switch the stacked widget's current page
-# ------------------------------------------------------------------
-assert paged.current_page_name() == 'Home'
-paged.set_current_page('Plot')
-assert paged.current_page_name() == 'Plot'
-assert paged.pages.currentIndex() == paged._page_names.index('Plot')
-print("PASS: set_current_page() switches the visible page")
 
-# ------------------------------------------------------------------
-# Persistent toolbar height doesn't change across pages (bounded footprint)
-# ------------------------------------------------------------------
-height_home = paged.pages.height()
-paged.set_current_page('Processing')
-height_processing = paged.pages.height()
-assert height_home == height_processing, (height_home, height_processing)
-print("PASS: content row height is fixed across pages")
+def test_pinned_row_has_the_expected_actions(paged):
+    texts = action_texts(paged.pinned_bar)
+    assert 'Analytes' in texts
+    assert 'Update Plot' in texts
+    assert 'Save Project' in texts
+    assert 'Add Plot to Tree' in texts
 
-# ------------------------------------------------------------------
-# Workflow/Notes IndicatorLights on the status bar: gray with no file
-# loaded (regardless of the capture toggle's own state), golden once a
-# file is loaded but not recording, red while recording.
-# ------------------------------------------------------------------
-win.statusbar.set_workflow_status(has_file=False, recording=True)
-assert win.statusbar.workflowLight.status == 'no_file', win.statusbar.workflowLight.status
 
-win.statusbar.set_workflow_status(has_file=True, recording=True)
-assert win.statusbar.workflowLight.status == 'recording', win.statusbar.workflowLight.status
+def test_capture_is_always_visible(shown_window):
+    """Capture lives on the Log page and in the Workflow menu, not the pinned
+    row, but must always be visible/clickable: clicking it while off is what
+    creates and links a workflow file in the first place, so it can't be
+    gated behind a workflow already being active. The Workflow
+    IndicatorLight is the actual "is recording happening" signal."""
+    assert shown_window.lame_action.CaptureToggle.isVisible()
 
-win.statusbar.set_workflow_status(has_file=True, recording=False)
-assert win.statusbar.workflowLight.status == 'idle', win.statusbar.workflowLight.status
-print("PASS: Workflow IndicatorLight reflects file-loaded/capture state")
 
-win.statusbar.set_notes_status(has_file=False, recording=True)
-assert win.statusbar.notesLight.status == 'no_file', win.statusbar.notesLight.status
+def test_all_five_pages_are_registered(paged):
+    assert paged.pages.count() == 5
+    assert set(paged._page_names) == set(PAGE_ACTIONS)
 
-win.statusbar.set_notes_status(has_file=True, recording=True)
-assert win.statusbar.notesLight.status == 'recording', win.statusbar.notesLight.status
 
-win.statusbar.set_notes_status(has_file=True, recording=False)
-assert win.statusbar.notesLight.status == 'idle', win.statusbar.notesLight.status
-print("PASS: Notes IndicatorLight reflects file-loaded/recording state")
+@pytest.mark.parametrize("page_name, expected", sorted(PAGE_ACTIONS.items()))
+def test_page_actions(paged, page_name, expected):
+    widget = paged.pages.widget(paged._page_names.index(page_name))
+    assert action_texts(widget) == expected
 
-# ------------------------------------------------------------------
-# comboBoxSampleId / update_sample_id still work as external code expects
-# (tests/test_menu_wiring.py depends on this surface)
-# ------------------------------------------------------------------
-assert hasattr(tb, 'comboBoxSampleId')
-assert hasattr(tb, 'update_sample_id')
-print("PASS: comboBoxSampleId / update_sample_id preserved")
 
-# ------------------------------------------------------------------
-# View menu no longer references the old grouped toolbars, just the text
-# style toggle
-# ------------------------------------------------------------------
-view_actions = win.menu_bar.menuView.actions()
-assert [a.text() for a in view_actions] == ['Show Button Text'], [a.text() for a in view_actions]
-print("PASS: View menu only has the Show Button Text toggle")
+def test_set_current_page_switches_the_visible_page(paged):
+    assert paged.current_page_name() == 'Home'
 
-# ------------------------------------------------------------------
-# Show Button Text toggle switches pinned row + every page between
-# icon+text and icon-only (page tabs stay text-only either way)
-# ------------------------------------------------------------------
-assert win.lame_action.ShowToolbarText.isChecked()
-assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonTextUnderIcon
+    paged.set_current_page('Plot')
 
-win.lame_action.ShowToolbarText.setChecked(False)
-assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonIconOnly
-for i in range(paged.pages.count()):
-    assert paged.pages.widget(i).toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonIconOnly
+    assert paged.current_page_name() == 'Plot'
+    assert paged.pages.currentIndex() == paged._page_names.index('Plot')
 
-win.lame_action.ShowToolbarText.setChecked(True)
-assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonTextUnderIcon
-print("PASS: 'Show Button Text' toggles icon-only vs icon+text across pinned row and pages")
 
-# ------------------------------------------------------------------
-# Auto-advance to Plot page when a project is loaded
-# ------------------------------------------------------------------
-paged.set_current_page('Home')
-assert paged.current_page_name() == 'Home'
-win.project_manager.new_project()
-assert paged.current_page_name() == 'Plot', "opening/creating a project should auto-advance to the Plot page"
-print("PASS: creating a project auto-advances the toolbar to the Plot page")
+def test_content_row_height_is_fixed_across_pages(paged):
+    """A bounded toolbar footprint -- switching pages must not resize it."""
+    paged.set_current_page('Home')
+    height_home = paged.pages.height()
 
-print("\nALL paged-toolbar TESTS PASSED")
+    paged.set_current_page('Processing')
+
+    assert paged.pages.height() == height_home
+
+
+@pytest.mark.parametrize("has_file, recording, expected", [
+    # No file loaded reads as 'no_file' regardless of the capture toggle.
+    (False, True, 'no_file'),
+    (True, True, 'recording'),
+    (True, False, 'idle'),
+])
+def test_workflow_indicator_light(shown_window, has_file, recording, expected):
+    shown_window.statusbar.set_workflow_status(has_file=has_file, recording=recording)
+    assert shown_window.statusbar.workflowLight.status == expected
+
+
+@pytest.mark.parametrize("has_file, recording, expected", [
+    (False, True, 'no_file'),
+    (True, True, 'recording'),
+    (True, False, 'idle'),
+])
+def test_notes_indicator_light(shown_window, has_file, recording, expected):
+    shown_window.statusbar.set_notes_status(has_file=has_file, recording=recording)
+    assert shown_window.statusbar.notesLight.status == expected
+
+
+def test_sample_id_combobox_surface_is_preserved(shown_window):
+    """tests/test_menu_wiring.py depends on this surface."""
+    assert hasattr(shown_window.toolbar, 'comboBoxSampleId')
+    assert hasattr(shown_window.toolbar, 'update_sample_id')
+
+
+def test_view_menu_only_has_the_show_button_text_toggle(shown_window):
+    """The old grouped-toolbar entries are gone."""
+    assert [a.text() for a in shown_window.menu_bar.menuView.actions()] == ['Show Button Text']
+
+
+def test_show_button_text_toggles_icon_only_across_pinned_row_and_pages(shown_window, paged):
+    assert shown_window.lame_action.ShowToolbarText.isChecked()
+    assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonTextUnderIcon
+
+    shown_window.lame_action.ShowToolbarText.setChecked(False)
+
+    assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonIconOnly
+    for i in range(paged.pages.count()):
+        assert paged.pages.widget(i).toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonIconOnly
+
+    shown_window.lame_action.ShowToolbarText.setChecked(True)
+
+    assert paged.pinned_bar.toolButtonStyle() == Qt.ToolButtonStyle.ToolButtonTextUnderIcon
+
+
+def test_creating_a_project_auto_advances_to_the_plot_page(shown_window, paged):
+    paged.set_current_page('Home')
+    assert paged.current_page_name() == 'Home'
+
+    shown_window.project_manager.new_project()
+
+    assert paged.current_page_name() == 'Plot'

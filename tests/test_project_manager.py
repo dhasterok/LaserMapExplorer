@@ -1,122 +1,140 @@
-"""Headless integration check for ProjectManager against a real MainWindow.
+"""ProjectManager against a real MainWindow.
 
-Run: .venv/bin/python <this file>
+Covers: the untitled project created on the first add_samples(), gathering
+files from two *different* directories into one project (the scenario that
+required the initialize_sample_object() path-resolution fix), preserving the
+current selection across a resync, the save/load round-trip, and
+close_project() clearing ui.data/AppData sample state.
 
-Exercises: new/untitled project on first add_samples(), add_samples() pulling
-files from TWO different directories into one project (the scenario that
-required the initialize_sample_object() path-resolution fix), previous-
-selection preservation, save/load round-trip, and close_project() clearing
-ui.data/AppData sample state.
+Headless MainWindow integration tests -- shared setup (QApplication, modal
+dialog stubbing, sample files) comes from tests/conftest.py.
 """
-import os
-import sys
 from pathlib import Path
 
-os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+import pytest
 
-project_root = Path("/Users/dhasterok/Documents/GitHub/LaserMapExplorer")
-assert (project_root / 'src' / 'app' / 'MainWindow.py').exists()
-sys.path.insert(0, str(project_root))
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication
-QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
+@pytest.fixture
+def two_dir_samples(sample_factory):
+    """Two samples in two different directories.
 
-app = QApplication(sys.argv)
+    Different parents is the point: ``selected_directory`` only ever holds
+    one, so this is what proves ``initialize_sample_object()`` resolves each
+    sample's own absolute path rather than indexing one shared directory.
+    """
+    rm01 = sample_factory('RM01', subdir='dir_a')
+    rm02 = sample_factory('RM02', subdir='dir_b')
+    assert rm01.parent != rm02.parent
+    return rm01, rm02
 
-import src.app.config  # noqa: F401 -- runs lame_core.config.setup()
-from PyQt6.QtWidgets import QMessageBox
-QMessageBox.warning = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Discard)
-QMessageBox.information = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Ok)
-QMessageBox.question = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)
 
-from src.app.MainWindow import MainWindow
+def test_first_add_samples_creates_an_untitled_project(lame_window, sample_factory):
+    pm = lame_window.project_manager
+    assert pm.current_project is None
 
-RM01 = Path("/Users/dhasterok/maps/processed data/RM01.lame.csv")
-RM02 = project_root / "maps" / "Alex_garnet_maps" / "processed data" / "RM02.lame.csv"
+    added = pm.add_samples([sample_factory('RM01')])
 
-assert RM01.exists(), f"missing fixture: {RM01}"
-assert RM02.exists(), f"missing fixture: {RM02}"
-assert RM01.parent != RM02.parent, "fixtures must come from different directories for this test to be meaningful"
+    assert added == ['RM01'], added
+    assert pm.current_project is not None
+    assert pm.current_project.name == "Untitled Project"
+    assert pm.current_project.dirty is True
 
-win = MainWindow(app)
-pm = win.project_manager
 
-# --- untitled project created on first add_samples() ---
-assert pm.current_project is None
-added = pm.add_samples([RM01])
-assert added == ['RM01'], added
-assert pm.current_project is not None
-assert pm.current_project.name == "Untitled Project"
-assert pm.current_project.dirty is True
-print("PASS: add_samples() with no project open silently creates an untitled project")
+def test_adding_from_a_second_directory_keeps_the_first_sample(lame_window, two_dir_samples):
+    pm = lame_window.project_manager
+    rm01, rm02 = two_dir_samples
 
-# --- adding from a second, different directory ---
-added2 = pm.add_samples([RM02])
-assert added2 == ['RM02'], added2
-assert set(pm.current_project.samples) == {'RM01', 'RM02'}
-assert pm.current_project.samples['RM01'].sample_path == RM01.resolve()
-assert pm.current_project.samples['RM02'].sample_path == RM02.resolve()
-assert win.app_data.sample_list == ['RM01', 'RM02']
-print("PASS: add_samples() from a second directory adds without losing the first sample's entry")
+    assert pm.add_samples([rm01]) == ['RM01']
+    assert pm.add_samples([rm02]) == ['RM02']
 
-# --- re-adding an already-present sample is a safe no-op ---
-added_again = pm.add_samples([RM01])
-assert added_again == [], added_again
-print("PASS: re-adding an already-present sample returns no new IDs")
+    assert set(pm.current_project.samples) == {'RM01', 'RM02'}
+    assert pm.current_project.samples['RM01'].sample_path == rm01.resolve()
+    assert pm.current_project.samples['RM02'].sample_path == rm02.resolve()
+    assert lame_window.app_data.sample_list == ['RM01', 'RM02']
 
-# --- selecting RM02, then adding more shouldn't jump selection back to RM01 ---
-win.app_data.sample_id = 'RM02'
-assert win.app_data.sample_id == 'RM02'
-pm._sync_app_data_from_project()  # simulate what add_samples() does internally
-assert win.app_data.sample_id == 'RM02', "current selection should be preserved across a resync"
-print("PASS: current sample selection is preserved when AppData is resynced from the project")
 
-# --- initialize_sample_object() resolves each sample's own absolute path,
-#     not directory/csv_files[index] (which only reflects ONE directory) ---
-win.app_data.sample_id = 'RM01'
-win.change_sample()
-assert 'RM01' in win.data, "RM01 should have loaded via initialize_sample_object()"
-assert Path(win.data['RM01'].file_path).resolve() == RM01.resolve()
+def test_re_adding_an_existing_sample_returns_no_new_ids(lame_window, sample_factory):
+    pm = lame_window.project_manager
+    path = sample_factory('RM01')
+    pm.add_samples([path])
 
-win.app_data.sample_id = 'RM02'
-win.change_sample()
-assert 'RM02' in win.data, "RM02 should have loaded via initialize_sample_object()"
-assert Path(win.data['RM02'].file_path).resolve() == RM02.resolve()
-print("PASS: both samples loaded from their own directories despite selected_directory only holding one")
+    assert pm.add_samples([path]) == []
 
-# --- save / load round-trip ---
-import tempfile
-tmp_dir = Path(tempfile.mkdtemp(prefix='lame_project_manager_test_'))
-manifest = tmp_dir / "TestProject.lame_project.json"
-pm.save_project(manifest)
-assert pm.current_project.dirty is False
-assert manifest.exists()
-print("PASS: save_project() writes a manifest and clears dirty")
 
-original_sample_ids = set(pm.current_project.samples)
-pm.open_project(manifest)
-assert set(pm.current_project.samples) == original_sample_ids
-assert pm.current_project.dirty is False
-assert win.app_data.sample_list and set(win.app_data.sample_list) == original_sample_ids
-print("PASS: open_project() reloads the same sample set and resyncs AppData")
+def test_current_selection_survives_a_resync(lame_window, two_dir_samples):
+    pm = lame_window.project_manager
+    rm01, rm02 = two_dir_samples
+    pm.add_samples([rm01, rm02])
 
-# --- close_project() clears ui.data and AppData sample state in place (aliasing) ---
-win.app_data.sample_id = 'RM01'
-win.change_sample()
-assert win.data  # something loaded
-data_ref_before = win.data
-pm.close_project()
-assert pm.current_project is None
-assert win.data == {}
-assert win.data is data_ref_before, "ui.data must be cleared in place, not reassigned (AppData.data aliases it)"
-assert win.app_data.data is win.data, "AppData.data must still be the same object as ui.data after close"
-assert win.app_data.sample_list == []
-print("PASS: close_project() clears ui.data in place (preserving the AppData alias) and resets sample_list")
+    lame_window.app_data.sample_id = 'RM02'
+    pm._sync_app_data_from_project()     # what add_samples() does internally
 
-# --- recent projects ---
-recents = pm.recent_projects()
-assert Path(manifest) in recents, recents
-print("PASS: recent_projects() includes the just-saved manifest")
+    assert lame_window.app_data.sample_id == 'RM02'
 
-print("\nALL ProjectManager INTEGRATION TESTS PASSED")
+
+def test_each_sample_loads_from_its_own_directory(lame_window, two_dir_samples):
+    """The path-resolution fix: loading must use each sample's own absolute
+    path, not ``directory/csv_files[index]``, which only reflects one
+    directory."""
+    pm = lame_window.project_manager
+    rm01, rm02 = two_dir_samples
+    pm.add_samples([rm01, rm02])
+
+    for sample_id, path in (('RM01', rm01), ('RM02', rm02)):
+        lame_window.app_data.sample_id = sample_id
+        lame_window.change_sample()
+        assert sample_id in lame_window.data, f"{sample_id} should have loaded"
+        assert Path(lame_window.data[sample_id].file_path).resolve() == path.resolve()
+
+
+def test_save_project_writes_a_manifest_and_clears_dirty(lame_window, sample_factory, tmp_path):
+    pm = lame_window.project_manager
+    pm.add_samples([sample_factory('RM01')])
+    manifest = tmp_path / 'TestProject.lame_project.json'
+
+    pm.save_project(manifest)
+
+    assert manifest.exists()
+    assert pm.current_project.dirty is False
+
+
+def test_open_project_reloads_the_same_samples_and_resyncs_app_data(lame_window, two_dir_samples, tmp_path):
+    pm = lame_window.project_manager
+    pm.add_samples(list(two_dir_samples))
+    manifest = tmp_path / 'TestProject.lame_project.json'
+    pm.save_project(manifest)
+    original_sample_ids = set(pm.current_project.samples)
+
+    pm.open_project(manifest)
+
+    assert set(pm.current_project.samples) == original_sample_ids
+    assert pm.current_project.dirty is False
+    assert set(lame_window.app_data.sample_list) == original_sample_ids
+
+
+def test_close_project_clears_ui_data_in_place(lame_window, sample_factory):
+    """``AppData.data`` aliases ``ui.data``, so the dict must be cleared, not
+    reassigned."""
+    pm = lame_window.project_manager
+    pm.add_samples([sample_factory('RM01')])
+    lame_window.app_data.sample_id = 'RM01'
+    lame_window.change_sample()
+    assert lame_window.data
+    data_ref_before = lame_window.data
+
+    pm.close_project()
+
+    assert pm.current_project is None
+    assert lame_window.data == {}
+    assert lame_window.data is data_ref_before
+    assert lame_window.app_data.data is lame_window.data
+    assert lame_window.app_data.sample_list == []
+
+
+def test_recent_projects_includes_the_just_saved_manifest(lame_window, sample_factory, tmp_path):
+    pm = lame_window.project_manager
+    pm.add_samples([sample_factory('RM01')])
+    manifest = tmp_path / 'TestProject.lame_project.json'
+    pm.save_project(manifest)
+
+    assert Path(manifest) in pm.recent_projects()

@@ -47,7 +47,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.calibration.massbias import DEFAULT_ISOTOPE_TABLE_PATH, load_isotope_table
-from src.calibration.rawfile import LineFileData
+from src.calibration.rawfile import LineFileData, find_analyte_column
 from src.calibration.reflib import POOLED_TOTAL_SUFFIX
 
 TOTAL_SUFFIX = POOLED_TOTAL_SUFFIX  # re-exported for convenience -- reflib owns the naming constant (see its own comment)
@@ -184,13 +184,19 @@ def synthesize_pooled_channels(
     for spec in specs:
         name = pooled_channel_name(spec.element)
         for f in files:
-            available_masses = [m for m in spec.masses if f"{spec.element}{m}" in f.signal.columns]
+            # This runs on the raw, not-yet-cleaned signal (see the
+            # docstring: before background detection), so a mass's column
+            # may carry a raw mass-shift/reaction-product suffix (e.g.
+            # "Ca43 -> 43") -- find_analyte_column tolerates that; the
+            # pooled channel itself is created with a plain name either way.
+            mass_to_col = {m: find_analyte_column(f.signal.columns, spec.element, m) for m in spec.masses}
+            available_masses = [m for m, col in mass_to_col.items() if col is not None]
             if not available_masses:
                 continue
             fraction = combined_abundance_fraction(spec.element, available_masses, isotope_table)
             if not fraction:
                 continue
-            available_cols = [f"{spec.element}{m}" for m in available_masses]
+            available_cols = [mass_to_col[m] for m in available_masses]
             f.signal[name] = f.signal[available_cols].sum(axis=1) / fraction
             if name not in f.analytes:
                 f.analytes.append(name)

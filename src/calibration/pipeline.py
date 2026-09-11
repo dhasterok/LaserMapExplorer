@@ -39,7 +39,8 @@ from src.calibration.dating_ratios import DatingRatioFit, DatingRatioSpec, corre
 from src.calibration.isotope_apportion import IsotopeShareSpec, apportion_from_spec
 from src.calibration.massbias import BiasFit, BiasSpec, DEFAULT_ISOTOPE_TABLE_PATH, corrected_ratio, fit_session_bias
 from src.calibration.pooling import PooledElementSpec, synthesize_pooled_channels
-from src.calibration.rawfile import LineFileData, list_line_files, parse_line_file
+from src.calibration.progress import ProgressCallback, ProgressEvent, STAGE_BACKGROUND, STAGE_CALIBRATION, STAGE_DECONVOLUTION, STAGE_DRIFT, STAGE_READING, STAGE_SAMPLE
+from src.calibration.rawfile import LineFileData, clean_signal_columns, list_line_files, parse_filename_label, parse_line_file
 from src.calibration.reflib import ReferenceMaterial
 from src.calibration.standards import (
     MultiStandardCalibrationResult,
@@ -270,9 +271,22 @@ def _build_calibrated_ppm_and_grid(
         abl_time = line_data.absolute_time[bg.ablation.start_idx + onset_trim_rows:bg.ablation.end_idx]
         signal = bg.background_corrected_signal.iloc[onset_trim_rows:].reset_index(drop=True)
         if deconvolution_settings is not None:
+            # Deconvolution still needs line_data.analytes' *raw* names --
+            # correct_shift is purely positional, but apply_washout keys off
+            # settings.washout_tau_s, which the GUI populates from the same
+            # raw analyte list, so it has to line up with signal's columns
+            # here too.
             line_result = correct_line(signal, line_data.analytes, deconvolution_settings, instrument_settings, line_number)
             signal = line_result.corrected
             deconvolution_provenance[line_number] = line_result.provenance
+        # Calibration (and _build_calibrated_ratios below) match analytes
+        # against reference/isotope-table entries keyed by plain
+        # "<element><mass>" names -- clean any raw mass-shift/
+        # reaction-product suffix (e.g. "Ca43 -> 43") now, once, so
+        # calibrated_ppm's own columns come out clean for free (see
+        # rawfile.clean_signal_columns) rather than needing apply_calibration/
+        # apply_multi_point_calibration to each do their own renaming.
+        signal = clean_signal_columns(signal)
         if multi_result is not None:
             calibrated = apply_multi_point_calibration(signal, abl_time, multi_result, standard_results)
         else:
@@ -346,7 +360,11 @@ def _build_calibrated_ratios(
     index_tuples = []
     for line_data, bg in ordered:
         abl_time = line_data.absolute_time[bg.ablation.start_idx:bg.ablation.end_idx]
-        signal = bg.background_corrected_signal.reset_index(drop=True)
+        # Cleaned for the same reason as _build_calibrated_ppm_and_grid:
+        # bias_fits/dating_ratio_fits keys are plain "<element><mass>",
+        # matched against signal.columns below and passed straight into
+        # corrected_ratio/corrected_dating_ratio.
+        signal = clean_signal_columns(bg.background_corrected_signal.reset_index(drop=True))
         n = len(signal)
         row_data = {}
         for key, fit in bias_fits.items():
@@ -436,6 +454,61 @@ def _build_isotopic_ppm(
     return isotopic_ppm, isotopic_ppm_provenance
 
 
+def parse_files_with_progress(
+    paths: list[Path],
+    standard_names: Iterable[str] | Callable[[str], bool],
+    acquired_time_format: str | None = None,
+    progress_callback: ProgressCallback | None = None,
+) -> list[LineFileData]:
+    """Parses every path in ``paths``, reporting one ``STAGE_READING`` event
+    per file before it is parsed.
+
+    Grouped by label (from the filename alone, via
+    :func:`~src.calibration.rawfile.parse_filename_label` -- no file I/O)
+    so progress reads as "sample by sample": ``current``/``total`` track
+    files read *within* the sample currently being read,
+    ``sample_current``/``sample_total``/``sample_label`` track the sample
+    itself. Used by :func:`run` (parsing every file fresh from disk) and by
+    ``dock_widgets``'s combined Run action (parsing only whichever files
+    aren't already cached from a prior load).
+
+    Parameters
+    ----------
+    paths : list[pathlib.Path]
+        Files to parse, in the order given -- grouping by label preserves
+        each label's own relative order, but labels are visited in the
+        order their first path appears in ``paths``.
+    standard_names, acquired_time_format : see :func:`~src.calibration.rawfile.parse_line_file`.
+    progress_callback : ProgressCallback or None, optional
+        See ``src.calibration.progress``. ``None`` (default) reports nothing.
+
+    Returns
+    -------
+    list[LineFileData]
+        One entry per path, in the same label-grouped order they were
+        parsed in (not necessarily ``paths``' original order).
+    """
+    by_label: dict[str, list[Path]] = {}
+    for p in paths:
+        label, _ = parse_filename_label(p)
+        by_label.setdefault(label, []).append(p)
+    labels = list(by_label)
+
+    files: list[LineFileData] = []
+    for sample_idx, label in enumerate(labels, start=1):
+        label_paths = by_label[label]
+        for file_idx, p in enumerate(label_paths, start=1):
+            if progress_callback is not None:
+                progress_callback(ProgressEvent(
+                    stage=STAGE_READING,
+                    message=f"Reading {label} ({sample_idx}/{len(labels)} samples) — line {file_idx}/{len(label_paths)}",
+                    current=file_idx, total=len(label_paths),
+                    sample_current=sample_idx, sample_total=len(labels), sample_label=label,
+                ))
+            files.append(parse_line_file(p, standard_names=standard_names, acquired_time_format=acquired_time_format))
+    return files
+
+
 def run(
     sample_dir: str | Path,
     standard_names: Iterable[str] | Callable[[str], bool],
@@ -474,6 +547,7 @@ def run(
     dating_ratio_max_order: int = 3,
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
+    progress_callback: ProgressCallback | None = None,
 ) -> dict[str, SampleCalibratedResult]:
     """Run the full background/drift/calibration pipeline over one session folder.
 
@@ -510,9 +584,15 @@ def run(
         Extra keyword arguments for :func:`detect_background_window`.
     reference_channel_top_n : int, optional
         Number of background-detection reference channels, by default ``5``.
-    drift_method, background_drift_method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
-        Order-selection strategy for the standard and background drift fits.
-        Both default to ``"fixed"``.
+    drift_method : {"fixed", "auto_aic", "auto_poisson_lrt"}, optional
+        Order-selection strategy for the standard drift fit. Defaults to
+        ``"fixed"``.
+    background_drift_method : {"fixed", "auto_aic", "auto_poisson_lrt", "lowess", "spline", "kriging"}, optional
+        Strategy for the session background drift fit. The last three are
+        non-parametric fits for long multi-day sessions whose blank drifts
+        non-monotonically (see
+        :func:`~src.calibration.background.fit_session_background_drift`).
+        Defaults to ``"fixed"``.
     max_order : int, optional
         Order ceiling for the ``auto_*`` methods, by default ``3``.
     background_override : BackgroundWindowOverride or None, optional
@@ -580,6 +660,10 @@ def run(
     ablation_onset_trim_s : float, optional
         Seconds of leading ablation rows dropped from every line before
         deconvolution/calibration, by default ``0.0``.
+    progress_callback : ProgressCallback or None, optional
+        See ``src.calibration.progress``. Reports file-reading progress
+        (:func:`parse_files_with_progress`) then every stage inside
+        :func:`_run_from_files`. ``None`` (default) reports nothing.
 
     Returns
     -------
@@ -613,7 +697,10 @@ def run(
     (OLS at ``drift_order``/``background_drift_order``, the original
     behavior), ``"auto_aic"``, and ``"auto_poisson_lrt"`` -- see
     ``standards.calibrate_standard``/``background.fit_session_background_drift``.
-    ``max_order`` is the ceiling used by both ``"auto_*"`` methods.
+    ``background_drift_method`` additionally accepts ``"lowess"``,
+    ``"spline"``, and ``"kriging"`` (non-parametric, for long sessions with
+    non-monotonic blank drift). ``max_order`` is the ceiling used by both
+    ``"auto_*"`` methods.
 
     ``background_override`` (applied to every file) and ``per_file_overrides``
     (keyed by filename, taking precedence over the global override for that
@@ -767,10 +854,10 @@ def run(
     if not paths:
         raise PipelineError(f"All raw line files under {sample_dir} were excluded via excluded_files.")
 
-    files = [
-        parse_line_file(p, standard_names=standard_names, acquired_time_format=acquired_time_format)
-        for p in paths
-    ]
+    files = parse_files_with_progress(
+        paths, standard_names=standard_names, acquired_time_format=acquired_time_format,
+        progress_callback=progress_callback,
+    )
 
     return _run_from_files(
         files=files, sample_dir=sample_dir, reference_library=reference_library,
@@ -791,6 +878,7 @@ def run(
         dating_ratio_specs=dating_ratio_specs, dating_ratio_drift_order=dating_ratio_drift_order,
         dating_ratio_drift_method=dating_ratio_drift_method, dating_ratio_max_order=dating_ratio_max_order,
         deconvolution_settings=deconvolution_settings, ablation_onset_trim_s=ablation_onset_trim_s,
+        progress_callback=progress_callback,
     )
 
 
@@ -831,6 +919,7 @@ def _run_from_files(
     dating_ratio_max_order: int = 3,
     deconvolution_settings: DeconvolutionSettings | None = None,
     ablation_onset_trim_s: float = 0.0,
+    progress_callback: ProgressCallback | None = None,
 ) -> dict[str, SampleCalibratedResult]:
     """Shared implementation behind :func:`run` and :func:`run_from_parsed`.
 
@@ -909,7 +998,13 @@ def _run_from_files(
     # First pass: auto-detect (or apply a manual override) and compute naive
     # per-file backgrounds.
     initial_backgrounds = []
-    for f in files:
+    for i, f in enumerate(files, start=1):
+        if progress_callback is not None:
+            progress_callback(ProgressEvent(
+                stage=STAGE_BACKGROUND,
+                message=f"Detecting background: {f.meta.path.name} ({i}/{len(files)})",
+                current=i, total=len(files),
+            ))
         window, ablation = _override_window(f)
         initial_backgrounds.append(
             compute_background_result(
@@ -924,6 +1019,10 @@ def _run_from_files(
     # Session-level background drift: standards AND samples both contribute,
     # minus any labels the caller explicitly held out of the fit (their
     # blanks are still corrected below using the model fit from the rest).
+    if progress_callback is not None:
+        progress_callback(ProgressEvent(
+            stage=STAGE_DRIFT, message="Fitting session background drift…", current=0, total=0,
+        ))
     drift_fit_backgrounds = [
         b for b in initial_backgrounds if b.file_meta.label not in session_drift_exclude_labels
     ]
@@ -934,16 +1033,23 @@ def _run_from_files(
 
     # Second pass: recompute with the session drift model, reusing the same
     # detected/overridden windows (no re-running changepoint detection).
-    backgrounds = [
-        compute_background_result(
-            f, window=b.window, ablation=b.ablation, reference_channels=reference_channels,
-            session_background_drift=session_background_drift,
-            dwell_time_ms=instrument_settings.dwell_time_ms,
-            sweeps_per_reading=instrument_settings.sweeps_per_reading,
-            manual_row_exclusions=manual_row_exclusions.get(f.meta.path.name),
+    backgrounds = []
+    for i, (f, b) in enumerate(zip(files, initial_backgrounds), start=1):
+        if progress_callback is not None:
+            progress_callback(ProgressEvent(
+                stage=STAGE_BACKGROUND,
+                message=f"Applying background/drift correction: {f.meta.path.name} ({i}/{len(files)})",
+                current=i, total=len(files),
+            ))
+        backgrounds.append(
+            compute_background_result(
+                f, window=b.window, ablation=b.ablation, reference_channels=reference_channels,
+                session_background_drift=session_background_drift,
+                dwell_time_ms=instrument_settings.dwell_time_ms,
+                sweeps_per_reading=instrument_settings.sweeps_per_reading,
+                manual_row_exclusions=manual_row_exclusions.get(f.meta.path.name),
+            )
         )
-        for f, b in zip(files, initial_backgrounds)
-    ]
 
     pairs_by_label = _group_by_label(files)
     backgrounds_by_label: dict[str, list[BackgroundResult]] = {}
@@ -955,7 +1061,13 @@ def _run_from_files(
 
     standard_results: dict[str, StandardCalibrationResult] = {}
     missing_reference_for: list[str] = []
-    for label in standard_labels:
+    for i, label in enumerate(standard_labels, start=1):
+        if progress_callback is not None:
+            progress_callback(ProgressEvent(
+                stage=STAGE_CALIBRATION,
+                message=f"Calibrating standard {label} ({i}/{len(standard_labels)})",
+                current=i, total=len(standard_labels),
+            ))
         reference = reference_library.get(label)
         if reference is None:
             missing_reference_for.append(label)
@@ -1065,7 +1177,13 @@ def _run_from_files(
         if len(chosen_standards) > 1 else None
     )
 
-    for label in sample_labels:
+    for i, label in enumerate(sample_labels, start=1):
+        if progress_callback is not None:
+            progress_callback(ProgressEvent(
+                stage=STAGE_SAMPLE,
+                message=f"Building calibrated grid: {label} ({i}/{len(sample_labels)})",
+                current=i, total=len(sample_labels),
+            ))
         sample_files = pairs_by_label[label]
         sample_backgrounds = backgrounds_by_label[label]
         pairs = list(zip(sample_files, sample_backgrounds))
@@ -1156,6 +1274,7 @@ def apply_deconvolution(
     deconvolution_settings: DeconvolutionSettings,
     *,
     isotope_table: pd.DataFrame | str | Path | None = None,
+    progress_callback: ProgressCallback | None = None,
 ) -> dict[str, SampleCalibratedResult]:
     """Re-derive each sample's calibrated ppm with deconvolution applied.
 
@@ -1178,6 +1297,9 @@ def apply_deconvolution(
     isotope_table : pandas.DataFrame or str or pathlib.Path or None, optional
         Natural-abundance table for isotope apportionment. Defaults to
         :data:`DEFAULT_ISOTOPE_TABLE_PATH`.
+    progress_callback : ProgressCallback or None, optional
+        See ``src.calibration.progress``. One ``STAGE_DECONVOLUTION`` event
+        per sample. ``None`` (default) reports nothing.
 
     Returns
     -------
@@ -1199,7 +1321,15 @@ def apply_deconvolution(
     """
     isotope_table_resolved = isotope_table if isotope_table is not None else DEFAULT_ISOTOPE_TABLE_PATH
 
-    for result in results.values():
+    labels = list(results)
+    for i, label in enumerate(labels, start=1):
+        result = results[label]
+        if progress_callback is not None:
+            progress_callback(ProgressEvent(
+                stage=STAGE_DECONVOLUTION,
+                message=f"Applying deconvolution: {label} ({i}/{len(labels)})",
+                current=i, total=len(labels),
+            ))
         pairs = list(zip(result.files, result.backgrounds))
         multi_result = result.multi_standard_calibration
         if multi_result is not None:
@@ -1268,7 +1398,10 @@ def run_from_parsed(
         processing.
     **kwargs
         Every other :func:`run`/:func:`_run_from_files` parameter; see
-        :func:`run` for descriptions.
+        :func:`run` for descriptions. Includes ``progress_callback`` --
+        since ``files`` are already parsed, this only reports the
+        background/drift/calibration/sample stages, never
+        ``STAGE_READING``.
 
     Returns
     -------

@@ -421,10 +421,12 @@ def test_mineral_preset_save_and_load_round_trips_check_states(tmp_path, main_wi
     main_window._set_all_minerals_checked(True)
 
 
-def test_reprocess_toolbar_action_reruns_without_rescanning(tmp_path, qtbot, main_window):
-    """actionReprocess (run_from_parsed) must reuse self._scanned_files --
-    not re-read raw files from disk -- while still reflecting settings
-    changed after the original Run (here: ablation_onset_trim_s)."""
+def test_run_action_reruns_without_rereading_when_nothing_changed(tmp_path, qtbot, mocker, main_window):
+    """The combined Run action (which replaced the separate Run/Reprocess
+    actions) must behave like the old Reprocess once every Used file is
+    already in self._scanned_files -- reruns from there, not re-reading raw
+    files from disk -- while still reflecting settings changed after the
+    original Run (here: ablation_onset_trim_s)."""
     sample_dir = tmp_path / "25B-1"
     sample_dir.mkdir()
     _make_sample_dir(sample_dir)
@@ -445,10 +447,13 @@ def test_reprocess_toolbar_action_reruns_without_rescanning(tmp_path, qtbot, mai
     main_window._on_run()
     qtbot.waitUntil(lambda: len(main_window.results) > 0, timeout=10000)
     baseline_rows = len(main_window._current_result().calibrated_ppm)
+    assert len(main_window._scanned_files) == 4  # every Used file was read on the first Run
 
     main_window.spinAblationOnsetTrim.setValue(0.9)  # 3 rows/line at dt=0.30s, 2 sample lines
-    main_window.actionReprocess.trigger()
+    parse_spy = mocker.spy(dw.pipeline, "parse_files_with_progress")
+    main_window.actionRun.trigger()
     qtbot.waitUntil(lambda: len(main_window._current_result().calibrated_ppm) == baseline_rows - 6, timeout=10000)
+    parse_spy.assert_not_called()  # nothing needed (re)reading -- a pure reprocess
 
     main_window.spinAblationOnsetTrim.setValue(0.0)
 
@@ -541,6 +546,7 @@ def test_classify_populates_map_and_summary_tab(tmp_path, qtbot, main_window):
     assert result.classification.empty  # nothing classified until Classify is clicked
 
     main_window._on_classify()
+    qtbot.waitUntil(lambda: not main_window._current_result().classification.empty, timeout=10000)
 
     result = main_window._current_result()
     assert not result.classification.empty
@@ -568,19 +574,44 @@ def test_scan_populates_time_series_lines_and_override_table(tmp_path, main_wind
     main_window.lineEditDataDir.setText(str(sample_dir))
     main_window._on_scan()
 
+    # Scan discovers every file (for the tables/Use-Use checkboxes) but only
+    # parses one representative file (to seed the analyte list) -- actual
+    # parsing of the rest is deferred to the combined Run action.
     assert main_window.tableTimeSeriesFiles.rowCount() == 4  # 2 NIST610 + 2 SAMPLE files, "(all)" focus by default
     assert main_window.tablePerLineOverrides.rowCount() == 4
     assert main_window.analyte_list.combo_box.count() == 2  # Al27, Ca43
-    assert len(main_window._scanned_files) == 4
-    # Every scanned file gets default View=False, Use=True state.
-    assert all(main_window._file_view_state[n] is False for n in main_window._scanned_files)
-    assert all(main_window._file_use_state[n] is True for n in main_window._scanned_files)
+    assert len(main_window._discovered_paths) == 4
+    assert len(main_window._scanned_files) == 1
+    # Every discovered file gets default View=False, Use=True state, not
+    # just the one that's actually been parsed.
+    assert all(main_window._file_view_state[n] is False for n in main_window._discovered_paths)
+    assert all(main_window._file_use_state[n] is True for n in main_window._discovered_paths)
 
 
 def test_drift_method_combo_defaults_to_auto_poisson(main_window):
     assert main_window.comboDriftMethod.currentText() == "Auto (Poisson GLM+LRT)"
     assert main_window.comboBackgroundDriftMethod.currentText() == "Auto (Poisson GLM+LRT)"
     assert dw.DRIFT_METHOD_LABELS[main_window.comboDriftMethod.currentText()] == "auto_poisson_lrt"
+
+
+def test_background_drift_combo_offers_nonparametric_methods(main_window):
+    combo = main_window.comboBackgroundDriftMethod
+    labels = [combo.itemText(i) for i in range(combo.count())]
+    # The three polynomial methods (shared with the standard drift combo)
+    # plus the three long-session non-parametric fits.
+    assert "LOWESS (local regression)" in labels
+    assert "Smoothing spline" in labels
+    assert "Kriging (Gaussian process)" in labels
+    assert set(dw.DRIFT_METHOD_LABELS).issubset(labels)
+    for label, expected in {
+        "LOWESS (local regression)": "lowess",
+        "Smoothing spline": "spline",
+        "Kriging (Gaussian process)": "kriging",
+    }.items():
+        assert dw.BACKGROUND_DRIFT_METHOD_LABELS[label] == expected
+    # The standard drift combo stays polynomial-only.
+    std_labels = [main_window.comboDriftMethod.itemText(i) for i in range(main_window.comboDriftMethod.count())]
+    assert "Smoothing spline" not in std_labels
 
 
 def test_background_override_group_disabled_by_default(main_window):

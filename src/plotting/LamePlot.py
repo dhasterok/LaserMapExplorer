@@ -2592,6 +2592,47 @@ def plot_pca_variance(parent,pca_results, style_data):
     return canvas, plot_data
 
 @log_call(logger_key='Plot')
+def pca_field_labels(pca_results, data):
+    """Names of the fields the PCA was actually fit on, one per column of ``components_``.
+
+    Not the same as the sample's Analyte list: `get_processed_data()` builds
+    the analysis matrix from every field flagged ``use``/``use_normalized``
+    across Analyte *and* Ratio types, so it also contains ratios and
+    ``' (normalized)'`` variants, and omits analytes that aren't selected.
+    Labelling with the Analyte list instead is what made
+    `plot_pca_vectors` fail with "The number of FixedLocator locations (21)
+    ... does not match the number of labels (17)".
+
+    `compute_pca` fits on a DataFrame so scikit-learn records these as
+    ``feature_names_in_``; the fallbacks cover a PCA result computed before
+    that (e.g. restored from an older session).
+
+    Parameters
+    ----------
+    pca_results : PCA
+        Fitted scikit-learn PCA object.
+    data : SampleObj
+        Sample the PCA was computed from.
+
+    Returns
+    -------
+    list of str
+        One label per variable, always matching ``components_.shape[1]``.
+    """
+    n_variables = pca_results.components_.shape[1]
+
+    names = getattr(pca_results, 'feature_names_in_', None)
+    if names is not None and len(names) == n_variables:
+        return list(names)
+
+    analytes = data.processed.match_attribute('data_type', 'Analyte')
+    if len(analytes) == n_variables:
+        return analytes
+
+    return [f'Var{i+1}' for i in range(n_variables)]
+
+
+@log_call(logger_key='Plot')
 def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
     """Displays a heat map of PCA vector components
 
@@ -2619,7 +2660,7 @@ def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
 
     # pca_dict contains 'components_' from PCA analysis with columns for each variable
     # No need to transpose for heatmap representation
-    analytes = data.processed.match_attribute('data_type','Analyte')
+    fields = pca_field_labels(pca_results, data)
 
     components = pca_results.components_
     # Number of components and variables
@@ -2671,10 +2712,10 @@ def plot_pca_vectors(parent,pca_results, data, app_data, style_data):
 
     #ax.set_yticks(n_components, labels=[f'Var{i+1}' for i in range(len(n_components))])
     canvas.axes.set_yticks(range(0, n_variables,1), minor=False)
-    canvas.axes.set_yticklabels(style_data.toggle_mass(analytes), ha='right', va='center')
+    canvas.axes.set_yticklabels(style_data.toggle_mass(fields), ha='right', va='center')
 
     canvas.fig.tight_layout()
-    plot_data = pd.DataFrame(components, columns = list(map(str, range(n_variables))))
+    plot_data = pd.DataFrame(components, columns=fields)
     return canvas, plot_data
 
 @log_call(logger_key='Plot')
@@ -2706,16 +2747,23 @@ def plot_pca_components(pca_results,data, app_data, style_data,canvas):
     if style_data.line_width == 0:
         return
 
-    # field labels
-    analytes = data.processed.match_attribute('data_type','Analyte')
-    nfields = len(analytes)
+    # field labels -- one per variable the PCA was fit on, see pca_field_labels
+    fields = pca_field_labels(pca_results, data)
+    nfields = len(fields)
 
-    # components
-    pc_x = int(app_data.dim_red_x)
-    pc_y = int(app_data.dim_red_y)
+    # components. dim_red_x/dim_red_y are 1-based PC numbers (straight off the
+    # PC spinboxes, and rendered as "PC{n}" in the plot name), hence the -1.
+    # Each row of components_ is one PC's loading across every variable, so
+    # it's the row -- not the column -- that gives one arrow per field.
+    pc_x = int(app_data.dim_red_x) - 1
+    pc_y = int(app_data.dim_red_y) - 1
 
-    x = pca_results.components_[:,pc_x]
-    y = pca_results.components_[:,pc_y]
+    n_components = pca_results.components_.shape[0]
+    if not (0 <= pc_x < n_components and 0 <= pc_y < n_components):
+        return
+
+    x = pca_results.components_[pc_x,:]
+    y = pca_results.components_[pc_y,:]
 
     # mulitiplier for scale
     m = style_data.length_multiplier #np.min(np.abs(np.sqrt(x**2 + y**2)))
@@ -2726,15 +2774,15 @@ def plot_pca_components(pca_results,data, app_data, style_data,canvas):
         linewidth=style_data.line_width, headlength=2, headaxislength=2) # arrow properties
 
     # labels
-    for i, analyte in enumerate(analytes):
+    for i, field in enumerate(fields):
         if x[i] > 0 and y[i] > 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='bottom', color=style_data.line_color)
+            canvas.axes.text(m*x[i], m*y[i], field, fontsize=8, ha='left', va='bottom', color=style_data.line_color)
         elif x[i] < 0 and y[i] > 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='left', va='top', color=style_data.line_color)
+            canvas.axes.text(m*x[i], m*y[i], field, fontsize=8, ha='left', va='top', color=style_data.line_color)
         elif x[i] > 0 and y[i] < 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='bottom', color=style_data.line_color)
+            canvas.axes.text(m*x[i], m*y[i], field, fontsize=8, ha='right', va='bottom', color=style_data.line_color)
         elif x[i] < 0 and y[i] < 0:
-            canvas.axes.text(m*x[i], m*y[i], analyte, fontsize=8, ha='right', va='top', color=style_data.line_color)
+            canvas.axes.text(m*x[i], m*y[i], field, fontsize=8, ha='right', va='top', color=style_data.line_color)
 
     plot_data = pd.DataFrame(np.vstack((x,y)).T, columns = ['PC x', 'PC Y'])
     return plot_data

@@ -17,7 +17,7 @@ from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QAbstractItemView, QCheckBox, QComboBox, QDoubleSpinBox, QFileDialog,
     QFormLayout, QGroupBox, QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit,
-    QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
+    QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit, QProgressBar,
     QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QSpinBox, QSplitter, QTableWidget,
     QTableWidgetItem, QTabWidget, QToolBar, QToolBox, QVBoxLayout, QWidget, QGridLayout, QStatusBar,
 )
@@ -31,6 +31,7 @@ from src.calibration.geometry import InstrumentSettings
 from src.calibration.isotope_apportion import IsotopeShareSpec
 from src.calibration.massbias import BiasSpec, most_abundant_mass, natural_abundance_ratio
 from src.calibration.pipeline import PipelineError, SampleCalibratedResult
+from src.calibration.progress import ProgressEvent
 from src.calibration.pooling import PooledElementSpec
 from src.calibration.rawfile import LineFileData, list_line_files, parse_filename_label, parse_line_file
 from src.classification.cosine import classify_batch
@@ -53,6 +54,17 @@ DRIFT_METHOD_LABELS = {
     "Fixed order": "fixed",
     "Auto (AIC)": "auto_aic",
     "Auto (Poisson GLM+LRT)": "auto_poisson_lrt",
+}
+
+# The background drift combo offers three extra non-parametric fits on top
+# of the polynomial methods above -- for long multi-day sessions whose gas
+# blank drifts non-monotonically (rises, falls, rises again), where no
+# low-order polynomial fits. See src.calibration.nonparametric_drift.
+BACKGROUND_DRIFT_METHOD_LABELS = {
+    **DRIFT_METHOD_LABELS,
+    "LOWESS (local regression)": "lowess",
+    "Smoothing spline": "spline",
+    "Kriging (Gaussian process)": "kriging",
 }
 
 
@@ -153,16 +165,27 @@ def _resolve_element_columns(references: list[MineralReference], available_colum
 class _PipelineWorker(QThread):
     """Run a pipeline callable off the UI thread.
 
-    Runs ``pipeline.run``/``run_batch``/``run_from_parsed`` on a background
-    thread so scanning/parsing a full session (potentially 100+ files) does
-    not freeze the GUI.
+    Runs ``pipeline.run``/``run_batch``/``run_from_parsed``/
+    ``apply_deconvolution``/``_load_missing_then_run``/``classify_batch`` on
+    a background thread so scanning/parsing a full session (potentially
+    100+ files) does not freeze the GUI.
 
     Attributes
     ----------
     finished_ok : PyQt6.QtCore.pyqtSignal
-        Emitted with the result ``dict`` on success.
+        Emitted with ``fn``'s return value on success -- a plain ``dict``
+        for ``run``/``run_from_parsed``/``apply_deconvolution``, a
+        ``_RunAndLoadResult`` for the combined Run action, or a
+        ``pandas.DataFrame`` for ``classify_batch``. ``_on_*_finished``
+        slots know which shape to expect from which caller.
     failed : PyQt6.QtCore.pyqtSignal
         Emitted with the exception's string message on failure.
+    progress : PyQt6.QtCore.pyqtSignal
+        Emitted with a ``src.calibration.progress.ProgressEvent`` whenever
+        ``fn`` reports one -- callers inject ``kwargs["progress_callback"]
+        = worker.progress.emit`` after constructing the worker (before
+        ``.start()``) to wire this up; a normal queued cross-thread
+        signal/slot connection, no extra plumbing needed.
 
     Parameters
     ----------
@@ -174,8 +197,9 @@ class _PipelineWorker(QThread):
         Qt parent.
     """
 
-    finished_ok = pyqtSignal(dict)
+    finished_ok = pyqtSignal(object)
     failed = pyqtSignal(str)
+    progress = pyqtSignal(object)
 
     def __init__(self, fn, kwargs, parent=None):
         """Store the callable and its keyword arguments (see the class docstring)."""
@@ -190,7 +214,90 @@ class _PipelineWorker(QThread):
         except Exception as e:  # noqa: BLE001 -- surfaced to the user via a message box
             self.failed.emit(str(e))
             return
-        self.finished_ok.emit(result if isinstance(result, dict) else {})
+        self.finished_ok.emit(result)
+
+
+@dataclasses.dataclass
+class _RunAndLoadResult:
+    """Return type of :func:`_load_missing_then_run` -- carries the newly
+    parsed files back to the UI thread alongside the pipeline result,
+    since ``_PipelineWorker`` only round-trips whatever ``fn`` returns.
+
+    Attributes
+    ----------
+    results : dict[str, SampleCalibratedResult]
+        Same shape :func:`pipeline.run_from_parsed` returns.
+    newly_parsed : dict[str, LineFileData]
+        Filename -> parsed file, for whichever files ``_load_missing_then_run``
+        had to read from disk. :meth:`CalibrationMainWindow._on_run_and_load_finished`
+        merges this into ``self._scanned_files`` so a later Run doesn't
+        read them again.
+    """
+
+    results: dict[str, SampleCalibratedResult]
+    newly_parsed: dict[str, LineFileData]
+
+
+def _load_missing_then_run(
+    paths_to_parse: dict[str, Path],
+    cached_files: list[LineFileData],
+    standard_names: set[str],
+    acquired_time_format: str | None,
+    run_kwargs: dict,
+    progress_callback=None,
+) -> _RunAndLoadResult:
+    """Worker-thread body for the combined Run action (see
+    ``CalibrationMainWindow._on_run``): parses whatever isn't already
+    cached, then reprocesses from the full (cached + newly-parsed) file
+    set. A module-level function (not a method) since ``_PipelineWorker``
+    just calls ``fn(**kwargs)`` on whatever's handed to it -- this needs no
+    ``self``, only plain data, so it stays as easy to reason about off the
+    UI thread as ``pipeline.run``/``run_from_parsed`` themselves.
+
+    Parameters
+    ----------
+    paths_to_parse : dict[str, pathlib.Path]
+        Filename -> path, for files that need reading (see ``_on_run``'s
+        ``to_parse``). Empty means every currently-Used file is already in
+        ``cached_files`` -- a pure reprocess, no disk I/O.
+    cached_files : list[LineFileData]
+        Already-parsed files (``self._scanned_files.values()`` at call
+        time) to reuse as-is.
+    standard_names : set[str]
+        Currently-checked standard labels -- both the ``standard_names``
+        criterion for any newly-parsed file and, for every file (cached or
+        new), what ``meta.is_standard`` must be corrected to reflect (a
+        cached file may have been parsed back when a different set of
+        labels was checked -- see :func:`pipeline.run_from_parsed`'s
+        docstring).
+    acquired_time_format : str or None
+        Forwarded to :func:`~src.calibration.rawfile.parse_line_file` for
+        anything in ``paths_to_parse``.
+    run_kwargs : dict
+        Every other :func:`pipeline.run_from_parsed` parameter (excludes
+        ``files``/``progress_callback``, supplied here).
+    progress_callback : ProgressCallback or None, optional
+        See ``src.calibration.progress``. Forwarded to both the parse step
+        and :func:`pipeline.run_from_parsed`.
+
+    Returns
+    -------
+    _RunAndLoadResult
+    """
+    newly_parsed: dict[str, LineFileData] = {}
+    if paths_to_parse:
+        parsed = pipeline.parse_files_with_progress(
+            list(paths_to_parse.values()), standard_names=standard_names,
+            acquired_time_format=acquired_time_format, progress_callback=progress_callback,
+        )
+        newly_parsed = {f.meta.path.name: f for f in parsed}
+
+    files = [
+        dataclasses.replace(f, meta=dataclasses.replace(f.meta, is_standard=f.meta.label in standard_names))
+        for f in (*cached_files, *newly_parsed.values())
+    ]
+    results = pipeline.run_from_parsed(files=files, progress_callback=progress_callback, **run_kwargs)
+    return _RunAndLoadResult(results=results, newly_parsed=newly_parsed)
 
 
 class ReferenceMaterialEditDialog(QMainWindow):
@@ -562,17 +669,36 @@ class CalibrationMainWindow(QMainWindow):
             self._mineral_library_error = str(e)
         self.results: dict[str, SampleCalibratedResult] = {}
         self._worker: _PipelineWorker | None = None
-        # Eagerly parsed at Scan time (before any pipeline Run) so the Time
-        # Series tab can preview raw lines while the user is still deciding
-        # what background/edge-trim overrides to set -- keyed by filename.
+        # Discovered (not necessarily parsed) at Scan time -- filename ->
+        # path, from gather_session_line_files()/parse_filename_label()
+        # alone (no file I/O). Source of truth for which files exist and
+        # what tableTimeSeriesFiles lists; see _on_scan.
+        self._discovered_paths: dict[str, Path] = {}
+        # Actually parsed so far -- a subset of _discovered_paths. Starts
+        # with just one file (Scan parses one, to seed the analyte-derived
+        # settings tables -- see _on_scan) and grows as the combined Run
+        # action reads whichever currently-Used files aren't in here yet
+        # (see _on_run). Never evicted just because a file's Use box is
+        # later unchecked -- cheap to keep, and it's what makes toggling
+        # Use back on free instead of triggering another disk read.
         self._scanned_files: dict[str, LineFileData] = {}
+        # Which directory/time-format _discovered_paths was built from --
+        # a change to either invalidates everything above (new data
+        # source: _on_scan clears and rediscovers from scratch) since a
+        # different directory means different files entirely, and a
+        # different time format means every already-parsed file's
+        # timestamps are stale.
+        self._loaded_dir: Path | None = None
+        self._loaded_time_format: str | None = None
         # Per-file state backing tableTimeSeriesFiles's View/Use columns --
         # keyed by filename, initialized (View=False, Use=True) the first
         # time a file is seen at Scan time and preserved across focus-combo
         # changes/re-scans of the same directory. View drives which lines
-        # plot on the Time Series tab (purely a display filter); Use drives
-        # which files are excluded from the next pipeline Run entirely (see
-        # pipeline.run's excluded_files).
+        # plot on the Time Series tab (purely a display filter, and only
+        # for files that have actually been parsed); Use drives which
+        # files are excluded from the next pipeline Run entirely (see
+        # pipeline.run's excluded_files) and, before that, which
+        # not-yet-parsed files the combined Run action needs to read.
         self._file_view_state: dict[str, bool] = {}
         self._file_use_state: dict[str, bool] = {}
         # Point-index DataFrames from the last redraw of each canvas (see
@@ -737,7 +863,7 @@ class CalibrationMainWindow(QMainWindow):
         self.checkHideMaskedPoints.setVisible(is_maskable)
 
     def _build_status_bar(self) -> QStatusBar:
-        """Build the status bar carrying the run-status label.
+        """Build the status bar carrying the run-status label and progress bar.
 
         Returns
         -------
@@ -749,6 +875,18 @@ class CalibrationMainWindow(QMainWindow):
         self.labelRunStatus.setWordWrap(True)
         statusbar.addWidget(self.labelRunStatus, stretch=1)
 
+        # Reports Stage 1 (reading raw files, then background detection /
+        # session drift fit / standard calibration / per-sample grid
+        # assembly), Stage 2 (deconvolution), and Stage 3 (classification)
+        # progress -- see _on_pipeline_progress, fed by each worker's
+        # `progress` signal. Hidden except while a stage is actually
+        # running (see _on_run/_on_deconvolve/_on_classify and each
+        # stage's *_finished/_on_run_failed).
+        self.progressBarStage = QProgressBar(self)
+        self.progressBarStage.setMaximumWidth(220)
+        self.progressBarStage.setVisible(False)
+        statusbar.addPermanentWidget(self.progressBarStage)
+
         return statusbar
 
     def _build_toolbar(self) -> QToolBar:
@@ -757,29 +895,24 @@ class CalibrationMainWindow(QMainWindow):
         Returns
         -------
         PyQt6.QtWidgets.QToolBar
-            Stage 1 "Run" (background / drift / calibration) and its fast
-            "Reprocess" variant, Stage 2 "Deconvolve", Stage 3 "Classify",
-            then the export and reference-library actions.
+            Stage 1 "Run" (reads whatever raw files are needed, then
+            background / drift / calibration), Stage 2 "Deconvolve", Stage
+            3 "Classify", then the export and reference-library actions.
         """
         toolbar = QToolBar("Calibration", self)
         toolbar.setIconSize(QSize(24, 24))
         toolbar.setMovable(False)
         toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
-        self.actionRun = CustomAction(text="Run", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionRun = CustomAction(text="Drift", light_icon_unchecked="icon-background-64.svg", parent=self)
         self.actionRun.setToolTip(
             "Stage 1: background subtraction, session drift correction, and standard "
-            "calibration to ppm. QC the Background / Standards / Calibration / Maps tabs, "
-            "then Deconvolve."
+            "calibration to ppm. Reads from disk only whichever Used files aren't already "
+            "loaded (nothing, on a plain re-run with no changes) -- QC the Background / "
+            "Standards / Calibration / Maps tabs, then Deconvolve."
         )
 
-        self.actionReprocess = CustomAction(text="Reprocess", light_icon_unchecked="icon-run-64.svg", parent=self)
-        self.actionReprocess.setToolTip(
-            "Stage 1, fast: re-run from already-scanned files (re-applies settings without "
-            "re-parsing raw files from disk)."
-        )
-
-        self.actionDeconvolve = CustomAction(text="Deconvolve", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionDeconvolve = CustomAction(text="Deconvolve", light_icon_unchecked="icon-deconvolution-64.svg", parent=self)
         self.actionDeconvolve.setToolTip(
             "Stage 2: apply the dwell-offset shift / washout correction (Deconvolution page) "
             "to the Stage-1 calibrated data. Re-runnable -- always starts from the "
@@ -787,7 +920,7 @@ class CalibrationMainWindow(QMainWindow):
         )
         self.actionDeconvolve.setEnabled(False)
 
-        self.actionClassify = CustomAction(text="Classify", light_icon_unchecked="icon-run-64.svg", parent=self)
+        self.actionClassify = CustomAction(text="Classify", light_icon_unchecked="icon-classification-64.svg", parent=self)
         self.actionClassify.setToolTip(
             "Stage 3: classify the current sample's calibrated pixels against the selected "
             "reference minerals."
@@ -804,7 +937,6 @@ class CalibrationMainWindow(QMainWindow):
         self.actionOpenRefLibrary.setToolTip("Open the reference library of standards to view, edit or add.")
 
         toolbar.addAction(self.actionRun)
-        toolbar.addAction(self.actionReprocess)
         toolbar.addAction(self.actionDeconvolve)
         toolbar.addAction(self.actionClassify)
         toolbar.addSeparator()
@@ -1071,8 +1203,14 @@ class CalibrationMainWindow(QMainWindow):
         form_layout.addRow("Drift: max/fixed order", self.spinDriftOrder)
 
         self.comboBackgroundDriftMethod = QComboBox()
-        self.comboBackgroundDriftMethod.addItems(list(DRIFT_METHOD_LABELS))
+        self.comboBackgroundDriftMethod.addItems(list(BACKGROUND_DRIFT_METHOD_LABELS))
         self.comboBackgroundDriftMethod.setCurrentText("Auto (Poisson GLM+LRT)")
+        self.comboBackgroundDriftMethod.setToolTip(
+            "How the session gas-blank drift is fitted vs. time. The polynomial "
+            "methods suit a short session; LOWESS, smoothing spline, and kriging "
+            "are non-parametric fits for a long multi-day session whose blank "
+            "rises and falls several times."
+        )
         form_layout.addRow("Background drift method", self.comboBackgroundDriftMethod)
 
         self.checkSplitOddEven = QCheckBox("Std Split QC")
@@ -1838,11 +1976,14 @@ class CalibrationMainWindow(QMainWindow):
     def _on_classify(self):
         """Classify the current sample's calibrated pixels against checked minerals.
 
-        Stores the result on ``result.classification`` /
-        ``result.classification_categories`` and refreshes the
-        Classification tab. Warns (and aborts) if there is no run, no
-        mineral library, no checked minerals, or no matching analyte
-        columns.
+        Runs :func:`classify_batch` on a worker (a large map can be tens of
+        thousands of pixels, each an independent Python-level classification
+        call -- see that function's docstring) reporting progress the same
+        way Stage 1/2 do; :meth:`_on_classify_finished` stores the result on
+        ``result.classification``/``result.classification_categories`` and
+        refreshes the Classification tab. Warns (and aborts, before
+        starting the worker) if there is no run, no mineral library, no
+        checked minerals, or no matching analyte columns.
         """
         result = self._current_result()
         if result is None:
@@ -1864,11 +2005,38 @@ class CalibrationMainWindow(QMainWindow):
 
         tau_min = self.sliderMatchThreshold.value()
         g_min = self.sliderAmbiguityGap.value()
-        result.classification = classify_batch(
-            result.calibrated_ppm, selected_refs, element_columns, tau_min=tau_min, g_min=g_min,
+        worker_kwargs = dict(
+            data=result.calibrated_ppm, references=selected_refs, element_columns=element_columns,
+            tau_min=tau_min, g_min=g_min,
         )
-        result.classification_categories = sorted({r.mineral_name for r in selected_refs})
+        self._set_stage_actions_enabled(False)
+        self.labelRunStatus.setText("Stage 3: classifying pixels…")
+        self._worker = _PipelineWorker(classify_batch, worker_kwargs, parent=self)
+        worker_kwargs["progress_callback"] = self._worker.progress.emit
+        self._worker.progress.connect(self._on_pipeline_progress)
+        self._worker.finished_ok.connect(lambda df: self._on_classify_finished(df, result, selected_refs))
+        self._worker.failed.connect(self._on_run_failed)
+        self._worker.start()
 
+    def _on_classify_finished(self, classification: pd.DataFrame, result: SampleCalibratedResult, selected_refs: list):
+        """Store Stage 3's result and refresh the Classification tab.
+
+        Parameters
+        ----------
+        classification : pandas.DataFrame
+            :func:`classify_batch`'s return value.
+        result : SampleCalibratedResult
+            The sample result classification was run against (captured at
+            :meth:`_on_classify` time, since the sample-result focus could
+            in principle change while the worker runs).
+        selected_refs : list
+            The mineral references classification was run against.
+        """
+        result.classification = classification
+        result.classification_categories = sorted({r.mineral_name for r in selected_refs})
+        self._set_stage_actions_enabled(True)
+        self.progressBarStage.setVisible(False)
+        self.labelRunStatus.setText("Stage 3 complete: classification applied — see the Classification tab.")
         self._refresh_classification_tab()
 
     def _build_results_tabs(self) -> QTabWidget:
@@ -2045,7 +2213,6 @@ class CalibrationMainWindow(QMainWindow):
         self.lineEditTimeFormat.editingFinished.connect(self._on_time_format_changed)
         self.actionOpenRefLibrary.triggered.connect(self._on_edit_standard)
         self.actionRun.triggered.connect(self._on_run)
-        self.actionReprocess.triggered.connect(self._on_reprocess)
         self.actionDeconvolve.triggered.connect(self._on_deconvolve)
         self.actionClassify.triggered.connect(self._on_classify)
         self.comboBoxSampleResult.currentIndexChanged.connect(self._on_sample_selected)
@@ -2092,40 +2259,75 @@ class CalibrationMainWindow(QMainWindow):
             self._on_scan()
 
     def _on_scan(self):
-        """Discover and eagerly parse every raw file, then repopulate the panels.
+        """Discover every raw file (filenames/labels only) and repopulate the panels.
 
         Line files are gathered from the session folder and each immediate
-        subfolder (see :func:`pipeline.gather_session_line_files`) and pooled
-        into one session. Parses each file (not just its label) so the Time
-        Series tab can preview raw lines pre-Run; parse failures are
-        collected into the scan summary. Repopulates the standard-label,
-        focus, file, per-line-override, isotope-calibration,
-        dating-systems, and washout-tau tables.
+        subfolder (see :func:`pipeline.gather_session_line_files`) and
+        pooled into one session -- but only *discovered*
+        (``self._discovered_paths``), not parsed: labels come from
+        :func:`~src.calibration.rawfile.parse_filename_label`'s filename
+        parsing alone, no file I/O. Actual ``parse_line_file`` calls are
+        deferred to the combined Run action (:meth:`_on_run`), which reads
+        only whichever files are currently marked Used -- the point of
+        splitting discovery from parsing at all (see that method's
+        docstring).
+
+        One exception: the settings tables driven by the analyte list
+        (isotope calibration, dating ratios, washout tau, per-line
+        overrides) need at least one parsed file to know what analytes
+        exist, so the first discovered file is parsed here too (into
+        ``self._scanned_files``, same as any other file Run would parse) --
+        an arbitrary but deterministic choice, same as the
+        ``next(iter(self._scanned_files.values()))`` those tables already
+        make internally.
+
+        A new data source -- a different directory, or a time format that
+        would reinterpret every already-parsed file's timestamps --
+        invalidates everything discovered/parsed so far and starts over;
+        this is what makes picking a new directory or editing "Acquired
+        time format" (both call this method, via :meth:`_on_browse_dir` /
+        :meth:`_on_time_format_changed`) "clear and re-read" rather than
+        silently mixing old and new data.
+
+        Since most files are never parsed here, most parse failures (bad
+        timestamps, malformed rows, …) aren't caught until :meth:`_on_run`
+        actually reads them -- an inherent trade-off of not reading files
+        before it's known they're wanted.
         """
         if self._data_dir is None:
             QMessageBox.warning(self, "Scan", "Choose a raw data directory first.")
             return
 
         time_format = self.lineEditTimeFormat.text().strip() or None
+        if self._data_dir != self._loaded_dir or time_format != self._loaded_time_format:
+            self._scanned_files = {}
+            self._discovered_paths = {}
+            self._file_use_state = {}
+            self._file_view_state = {}
+
         paths = pipeline.gather_session_line_files(self._data_dir)
 
         labels: set[str] = set()
-        self._scanned_files = {}
-        failures: list[str] = []
+        self._discovered_paths = {}
         for path in paths:
             try:
                 label, _ = parse_filename_label(path)
                 labels.add(label)
             except Exception:
                 continue
-            # Parsed eagerly (not just the filename label) so the Time
-            # Series tab can preview raw lines before any pipeline Run.
+            self._discovered_paths[path.name] = path
+
+        failures: list[str] = []
+        if not self._scanned_files and self._discovered_paths:
+            # Parse one representative file (see docstring) to seed the
+            # analyte-derived tables before the first Run.
+            first_name, first_path = next(iter(self._discovered_paths.items()))
             try:
-                self._scanned_files[path.name] = parse_line_file(
-                    path, standard_names=labels, validate_isotopes=False, acquired_time_format=time_format,
+                self._scanned_files[first_name] = parse_line_file(
+                    first_path, standard_names=labels, validate_isotopes=False, acquired_time_format=time_format,
                 )
             except Exception as e:
-                failures.append(f"{path.name}: {e}")
+                failures.append(f"{first_name}: {e}")
 
         subfolders = sorted({p.parent.name for p in paths if p.parent != self._data_dir})
         summary = f"{len(paths)} file(s), labels: {sorted(labels)}"
@@ -2133,8 +2335,6 @@ class CalibrationMainWindow(QMainWindow):
             summary += f"\nsubfolders: {subfolders}"
         if failures:
             summary += f"\n{len(failures)} file(s) failed to parse:\n" + "\n".join(failures[:10])
-            if len(failures) > 10:
-                summary += f"\n... and {len(failures) - 10} more."
             summary += (
                 "\nIf these are timestamp errors, set 'Acquired time format' above to an explicit "
                 "datetime.strptime pattern matching this instrument export and scan again."
@@ -2147,6 +2347,8 @@ class CalibrationMainWindow(QMainWindow):
         self._populate_isotope_calibration_table()
         self._populate_dating_systems_table()
         self._populate_washout_tau_table()
+        self._loaded_dir = self._data_dir
+        self._loaded_time_format = time_format
 
     def _populate_focus_combo(self, labels: set[str]):
         """Fill ``comboBoxSampleResult`` with "(all)" plus every scanned label.
@@ -2649,8 +2851,12 @@ class CalibrationMainWindow(QMainWindow):
         file for "(all)"/blank). View/Use state
         (``_file_view_state``/``_file_use_state``) is initialized once per
         filename and persists across focus changes and re-population.
+        Listed from ``_discovered_paths`` (every file Scan found), not
+        ``_scanned_files`` (only what's actually been parsed so far) --
+        the Use checkbox has to be settable before a file is ever read, so
+        the combined Run action knows to read it.
         """
-        for name in self._scanned_files:
+        for name in self._discovered_paths:
             self._file_view_state.setdefault(name, False)
             self._file_use_state.setdefault(name, True)
 
@@ -2667,7 +2873,7 @@ class CalibrationMainWindow(QMainWindow):
                 return False
             return label == focus_label
 
-        names = sorted(n for n in self._scanned_files if _matches_focus(n))
+        names = sorted(n for n in self._discovered_paths if _matches_focus(n))
 
         self.tableTimeSeriesFiles.blockSignals(True)
         self.tableTimeSeriesFiles.setRowCount(0)
@@ -2862,9 +3068,15 @@ class CalibrationMainWindow(QMainWindow):
     # Per-line background/edge-trim override table
     # ------------------------------------------------------------------
     def _populate_per_line_override_table(self):
-        """Rebuild ``tablePerLineOverrides`` with one blank row per scanned file."""
+        """Rebuild ``tablePerLineOverrides`` with one blank row per discovered file.
+
+        Keyed purely by filename (see :meth:`_gather_per_file_overrides`),
+        so this lists every file Scan discovered, not just what's been
+        parsed so far -- overrides can be set for a file before it's ever
+        read.
+        """
         self.tablePerLineOverrides.setRowCount(0)
-        for name in sorted(self._scanned_files):
+        for name in sorted(self._discovered_paths):
             row = self.tablePerLineOverrides.rowCount()
             self.tablePerLineOverrides.insertRow(row)
             item = QTableWidgetItem(name)
@@ -3019,15 +3231,29 @@ class CalibrationMainWindow(QMainWindow):
     # Run
     # ------------------------------------------------------------------
     def _on_run(self):
-        """Gather every setting and launch :func:`pipeline.run` on a worker.
+        """Combined Stage 1 action: read whatever raw files are still
+        needed, then (re)process.
+
+        Replaces the old separate Run ("parse everything from disk again")
+        and Reprocess ("reuse Scan's cache") actions with one: this reads a
+        file only if it's currently marked Used and isn't already in
+        ``self._scanned_files`` -- covering "never loaded yet" (first Run
+        after a Scan, everything Used is unread), "a sample's Use box was
+        just turned back on" (only its files are unread), and "nothing
+        changed" (nothing is unread, so this behaves exactly like the old
+        Reprocess, no disk I/O at all) with the same code path. A new data
+        source (different directory, or a time format that would
+        reinterpret every timestamp) is handled by :meth:`_on_scan` itself
+        clearing ``self._scanned_files``, so by the time this runs "loaded"
+        vs. "not loaded" is simply "does ``self._scanned_files`` already
+        have everything ``self._file_use_state`` currently wants".
 
         Resolves per-label reference overrides, merges the isotope and
-        dating-ratio spec lists, and disables the Run/Reprocess actions
-        until the worker signals back to :meth:`_on_run_finished` /
-        :meth:`_on_run_failed`. The whole session folder (plus its
-        immediate subfolders) is processed as one pooled run.
+        dating-ratio spec lists, and disables the workflow-stage actions
+        until the worker signals back to :meth:`_on_run_and_load_finished` /
+        :meth:`_on_run_failed`.
         """
-        if self._data_dir is None:
+        if self._data_dir is None or not self._discovered_paths:
             QMessageBox.warning(self, "Run", "Choose and scan a raw data directory first.")
             return
         standard_names = self._checked_standard_names()
@@ -3035,16 +3261,22 @@ class CalibrationMainWindow(QMainWindow):
             QMessageBox.warning(self, "Run", "Mark at least one label as a standard.")
             return
 
+        to_parse = {
+            name: path for name, path in self._discovered_paths.items()
+            if self._file_use_state.get(name, True) and name not in self._scanned_files
+        }
+
         primary_standards = self._primary_standard_names()
         # Per-label reference-material overrides (tableStandardLabels'
         # Reference column) are resolved here into an exact-name-keyed
-        # library, since pipeline.run's label->reference matching is still
-        # simple exact-name lookup (reference_library.get(label)) -- this
-        # is the only place that needs to know about the override UI.
+        # library, since pipeline.run_from_parsed's label->reference
+        # matching is still simple exact-name lookup
+        # (reference_library.get(label)) -- this is the only place that
+        # needs to know about the override UI.
         overrides = self._reference_overrides()
         remapped_library = {
             label: self.reference_library[overrides[label]]
-            for label in self._checked_standard_names()
+            for label in standard_names
             if overrides.get(label) in self.reference_library
         }
 
@@ -3062,13 +3294,13 @@ class CalibrationMainWindow(QMainWindow):
             bias_spec_by_key.setdefault((s.element, s.numerator_mass, s.denominator_mass), s)
         bias_specs = list(bias_spec_by_key.values())
 
-        common_kwargs = dict(
-            standard_names=standard_names,
+        run_kwargs = dict(
+            sample_dir=self._data_dir,
             reference_library=remapped_library,
             drift_order=self.spinDriftOrder.value(),
             background_drift_order=self.spinDriftOrder.value(),
             drift_method=DRIFT_METHOD_LABELS[self.comboDriftMethod.currentText()],
-            background_drift_method=DRIFT_METHOD_LABELS[self.comboBackgroundDriftMethod.currentText()],
+            background_drift_method=BACKGROUND_DRIFT_METHOD_LABELS[self.comboBackgroundDriftMethod.currentText()],
             max_order=self.spinDriftOrder.value(),
             split_odd_even=self.checkSplitOddEven.isChecked(),
             accuracy_threshold=self.spinAccuracyThreshold.value(),
@@ -3076,7 +3308,6 @@ class CalibrationMainWindow(QMainWindow):
             instrument_settings=self._current_instrument_settings(),
             background_override=self._current_background_override(),
             per_file_overrides=self._gather_per_file_overrides(),
-            acquired_time_format=self.lineEditTimeFormat.text().strip() or None,
             excluded_files={name for name, used in self._file_use_state.items() if not used},
             session_drift_exclude_labels=self._session_drift_exclude_labels(),
             manual_row_exclusions=self._manual_row_exclusions,
@@ -3093,93 +3324,22 @@ class CalibrationMainWindow(QMainWindow):
             ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
         )
 
-        kwargs = dict(sample_dir=self._data_dir, **common_kwargs)
-
-        self._set_stage_actions_enabled(False)
-        self.labelRunStatus.setText("Stage 1: background / drift / calibration…")
-        self._worker = _PipelineWorker(pipeline.run, kwargs, parent=self)
-        self._worker.finished_ok.connect(self._on_run_finished)
-        self._worker.failed.connect(self._on_run_failed)
-        self._worker.start()
-
-    def _on_reprocess(self):
-        """Re-run from already-parsed Scan files via :func:`pipeline.run_from_parsed`.
-
-        Notes
-        -----
-        Reuses ``self._scanned_files`` (already pooled from the session
-        folder and every subfolder at Scan time) instead of re-reading raw
-        files from disk, for quickly re-applying changed
-        deconvolution/calibration settings. Fixes up each file's
-        ``meta.is_standard`` for the current selection first.
-        """
-        if not self._scanned_files:
-            QMessageBox.warning(self, "Reprocess", "Scan a raw data directory first.")
-            return
-        standard_names = self._checked_standard_names()
-        if not standard_names:
-            QMessageBox.warning(self, "Reprocess", "Mark at least one label as a standard.")
-            return
-
-        # self._scanned_files was parsed at Scan time with every label
-        # treated as a standard (see _on_scan's docstring) -- correct
-        # is_standard here to reflect what's actually checked now, since
-        # run_from_parsed never re-parses and so never re-derives this.
-        files = [
-            dataclasses.replace(f, meta=dataclasses.replace(f.meta, is_standard=f.meta.label in standard_names))
-            for f in self._scanned_files.values()
-        ]
-
-        primary_standards = self._primary_standard_names()
-        overrides = self._reference_overrides()
-        remapped_library = {
-            label: self.reference_library[overrides[label]]
-            for label in standard_names
-            if overrides.get(label) in self.reference_library
-        }
-
-        bias_specs, isotope_share_specs = self._gather_isotope_specs(remapped_library)
-        pool_specs = self._gather_pool_specs()
-        dating_bias_specs, dating_ratio_specs = self._gather_dating_ratio_specs()
-        bias_spec_by_key = {(s.element, s.numerator_mass, s.denominator_mass): s for s in bias_specs}
-        for s in dating_bias_specs:
-            bias_spec_by_key.setdefault((s.element, s.numerator_mass, s.denominator_mass), s)
-        bias_specs = list(bias_spec_by_key.values())
-
-        kwargs = dict(
-            files=files,
-            sample_dir=self._data_dir,
-            reference_library=remapped_library,
-            drift_order=self.spinDriftOrder.value(),
-            background_drift_order=self.spinDriftOrder.value(),
-            drift_method=DRIFT_METHOD_LABELS[self.comboDriftMethod.currentText()],
-            background_drift_method=DRIFT_METHOD_LABELS[self.comboBackgroundDriftMethod.currentText()],
-            max_order=self.spinDriftOrder.value(),
-            split_odd_even=self.checkSplitOddEven.isChecked(),
-            accuracy_threshold=self.spinAccuracyThreshold.value(),
-            primary_standards=primary_standards,
-            instrument_settings=self._current_instrument_settings(),
-            background_override=self._current_background_override(),
-            per_file_overrides=self._gather_per_file_overrides(),
-            excluded_files={name for name, used in self._file_use_state.items() if not used},
-            session_drift_exclude_labels=self._session_drift_exclude_labels(),
-            manual_row_exclusions=self._manual_row_exclusions,
-            manual_occurrence_exclusions=self._manual_occurrence_exclusions,
-            detrend=self.checkDetrend.isChecked(),
-            despike_noise=self.checkDespikeNoise.isChecked(),
-            force_zero_intercept=self.checkForceZeroIntercept.isChecked(),
-            bias_specs=bias_specs,
-            isotope_share_specs=isotope_share_specs,
-            pool_specs=pool_specs,
-            dating_ratio_specs=dating_ratio_specs,
-            # Stage 1 only -- see _on_run.
-            ablation_onset_trim_s=self.spinAblationOnsetTrim.value(),
+        worker_kwargs = dict(
+            paths_to_parse=to_parse,
+            cached_files=list(self._scanned_files.values()),
+            standard_names=standard_names,
+            acquired_time_format=self.lineEditTimeFormat.text().strip() or None,
+            run_kwargs=run_kwargs,
         )
 
         self._set_stage_actions_enabled(False)
-        self.labelRunStatus.setText("Stage 1: reprocessing…")
-        self._worker = _PipelineWorker(pipeline.run_from_parsed, kwargs, parent=self)
-        self._worker.finished_ok.connect(self._on_run_finished)
+        self.labelRunStatus.setText(
+            f"Stage 1: loading {len(to_parse)} file(s)…" if to_parse else "Stage 1: reprocessing…"
+        )
+        self._worker = _PipelineWorker(_load_missing_then_run, worker_kwargs, parent=self)
+        worker_kwargs["progress_callback"] = self._worker.progress.emit
+        self._worker.progress.connect(self._on_pipeline_progress)
+        self._worker.finished_ok.connect(self._on_run_and_load_finished)
         self._worker.failed.connect(self._on_run_failed)
         self._worker.start()
 
@@ -3189,15 +3349,31 @@ class CalibrationMainWindow(QMainWindow):
         Parameters
         ----------
         enabled : bool
-            ``False`` disables all four (a stage is running). ``True``
-            re-enables Run/Reprocess unconditionally, and Deconvolve/Classify
-            only once a Stage-1 result exists.
+            ``False`` disables all three (a stage is running). ``True``
+            re-enables Run unconditionally, and Deconvolve/Classify only
+            once a Stage-1 result exists.
         """
         self.actionRun.setEnabled(enabled)
-        self.actionReprocess.setEnabled(enabled)
         have_results = enabled and bool(self.results)
         self.actionDeconvolve.setEnabled(have_results)
         self.actionClassify.setEnabled(have_results)
+
+    def _on_pipeline_progress(self, event: ProgressEvent):
+        """Update the status bar's progress bar/label from one worker report.
+
+        Connected to each worker's ``progress`` signal (:meth:`_on_run`,
+        :meth:`_on_deconvolve`, :meth:`_on_classify`) -- a normal queued
+        cross-thread signal/slot delivery, safe to touch widgets from
+        directly despite ``event`` having been built on the worker thread.
+
+        Parameters
+        ----------
+        event : src.calibration.progress.ProgressEvent
+        """
+        self.progressBarStage.setVisible(True)
+        self.progressBarStage.setRange(0, event.total)  # (0, 0) is Qt's built-in busy/marquee mode
+        self.progressBarStage.setValue(event.current)
+        self.labelRunStatus.setText(event.message)
 
     def _on_run_failed(self, message: str):
         """Re-enable the stage actions and surface a worker failure.
@@ -3208,6 +3384,7 @@ class CalibrationMainWindow(QMainWindow):
             The exception message from the worker.
         """
         self._set_stage_actions_enabled(True)
+        self.progressBarStage.setVisible(False)
         self.labelRunStatus.setText(f"Failed: {message}")
         QMessageBox.critical(self, "Run pipeline", message)
 
@@ -3223,13 +3400,12 @@ class CalibrationMainWindow(QMainWindow):
             QMessageBox.warning(self, "Deconvolve", "Run Stage 1 first.")
             return
         settings = self._current_deconvolution_settings()
+        worker_kwargs = dict(results=self.results, deconvolution_settings=settings)
         self._set_stage_actions_enabled(False)
         self.labelRunStatus.setText("Stage 2: applying deconvolution…")
-        self._worker = _PipelineWorker(
-            pipeline.apply_deconvolution,
-            dict(results=self.results, deconvolution_settings=settings),
-            parent=self,
-        )
+        self._worker = _PipelineWorker(pipeline.apply_deconvolution, worker_kwargs, parent=self)
+        worker_kwargs["progress_callback"] = self._worker.progress.emit
+        self._worker.progress.connect(self._on_pipeline_progress)
         self._worker.finished_ok.connect(self._on_deconvolve_finished)
         self._worker.failed.connect(self._on_run_failed)
         self._worker.start()
@@ -3245,6 +3421,7 @@ class CalibrationMainWindow(QMainWindow):
         """
         self.results = dict(raw_results)
         self._set_stage_actions_enabled(True)
+        self.progressBarStage.setVisible(False)
         applied = any(
             r.deconvolution_settings and (r.deconvolution_settings.apply_shift or r.deconvolution_settings.apply_washout)
             for r in self.results.values()
@@ -3257,6 +3434,25 @@ class CalibrationMainWindow(QMainWindow):
         self._on_sample_selected()
         self._refresh_time_series_tab()
 
+    def _on_run_and_load_finished(self, raw_result: _RunAndLoadResult):
+        """Merge newly-read files into the cache, then finish like a plain Run.
+
+        Parameters
+        ----------
+        raw_result : _RunAndLoadResult
+            From :func:`_load_missing_then_run` (the combined Run action's
+            worker body, see :meth:`_on_run`).
+
+        Notes
+        -----
+        ``self._scanned_files`` is only touched here, on the UI thread,
+        after the worker has fully finished (``finished_ok`` fires once,
+        after ``run()`` returns) -- never from inside the worker thread
+        itself, so there's no concurrent read/write to guard against.
+        """
+        self._scanned_files.update(raw_result.newly_parsed)
+        self._on_run_finished(raw_result.results)
+
     def _on_run_finished(self, raw_results: dict):
         """Store Stage-1 results, refill the sample combo, and refresh every tab.
 
@@ -3264,10 +3460,11 @@ class CalibrationMainWindow(QMainWindow):
         ----------
         raw_results : dict
             ``{sample label -> SampleCalibratedResult}`` from
-            :func:`pipeline.run` / :func:`pipeline.run_from_parsed`.
+            :func:`pipeline.run_from_parsed` (via :meth:`_on_run_and_load_finished`).
         """
         self.results = dict(raw_results)
         self._set_stage_actions_enabled(True)
+        self.progressBarStage.setVisible(False)
 
         n = len(self.results)
         self.labelRunStatus.setText(

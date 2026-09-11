@@ -15,6 +15,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from src.calibration.progress import ProgressCallback, ProgressEvent, STAGE_CLASSIFICATION
 from src.classification.reference import MineralReference
 
 
@@ -92,6 +93,7 @@ def classify_batch(
     tau_min: float = 0.95,
     g_min: float = 0.02,
     n_min: int = 3,
+    progress_callback: ProgressCallback | None = None,
 ) -> pd.DataFrame:
     """Per-row wrapper over :func:`classify_pixel`.
 
@@ -106,13 +108,26 @@ def classify_batch(
     "simplicity over micro-optimization for desktop-map-sized data"
     precedent as ``src/stoichiometry/dock.py``'s per-pixel
     ``pipeline.calculate`` loop.
+
+    ``progress_callback`` (see ``src.calibration.progress``), when given,
+    is called every ``max(1, n_rows // 200)`` rows (i.e. about 200 times
+    over the whole batch, regardless of map size) rather than every row --
+    a map can have tens of thousands of pixels, and a Qt signal emission
+    per row would swamp the very loop it's reporting on. ``None`` (default)
+    reports nothing.
     """
+    n = len(data)
+    report_every = max(1, n // 200)
     rows = []
-    for _, row in data.iterrows():
+    for i, (_, row) in enumerate(data.iterrows(), start=1):
         sample = {
             el: float(row[col]) for el, col in element_columns.items()
             if col in row.index and pd.notna(row[col])
         }
         result = classify_pixel(sample, references, tau_min=tau_min, g_min=g_min, n_min=n_min)
         rows.append({"label": result.label, "score": result.score, "gap": result.gap, "ambiguous": result.ambiguous})
+        if progress_callback is not None and (i % report_every == 0 or i == n):
+            progress_callback(ProgressEvent(
+                stage=STAGE_CLASSIFICATION, message=f"Classifying pixels ({i}/{n})", current=i, total=n,
+            ))
     return pd.DataFrame(rows, index=data.index)

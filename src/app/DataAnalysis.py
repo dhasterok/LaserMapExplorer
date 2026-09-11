@@ -813,25 +813,44 @@ class DimensionalReduction():
     
     def compute_pca(self,data, app_data):
         #print('compute_pca')
+        # get_processed_data() returns a full-height frame *and* folds its own
+        # all-fields-present check into data.mask, so read the mask after it,
+        # then analyse only the unmasked rows -- same order and same masking
+        # as compute_clusters(). Fitting the full frame instead would train
+        # PCA on filtered-out (and NaN) pixels, and leave pca_scores with more
+        # rows than add_columns()'s mask has True values ("The number of rows
+        # in (array) must match the number of `True` values in the mask.").
         df_filtered, _ = data.get_processed_data()
+        mask = data.mask
+        df_analysis = df_filtered[mask]
 
-        # Preprocess the data
+        # Preprocess the data. Kept as a DataFrame (rather than the bare array
+        # StandardScaler returns) so that fitting below records the analysis
+        # field names on the PCA object as `feature_names_in_` -- the plots
+        # need them to label one row/arrow per variable, and the set of
+        # analysis fields (ratios and ' (normalized)' variants included, see
+        # get_processed_data) is not the plain Analyte list.
         scaler = StandardScaler()
-        df_scaled = scaler.fit_transform(df_filtered)
+        df_scaled = pd.DataFrame(
+            scaler.fit_transform(df_analysis),
+            columns=df_analysis.columns,
+            index=df_analysis.index,
+        )
 
         # Perform PCA
         pca_results = PCA(n_components=min(len
-                                           (df_filtered.columns), len(df_filtered)))  # Adjust n_components as needed
-        
+                                           (df_analysis.columns), len(df_analysis)))  # Adjust n_components as needed
+
         # store PCA results in data
         data.dim_red_results[app_data.dim_red_method] = pca_results
 
         # compute pca scores
         pca_scores = pd.DataFrame(pca_results.fit_transform(df_scaled), columns=[f'PC{i+1}' for i in range(pca_results.n_components_)])
-        
 
-        # Add PCA scores to DataFrame for easier plotting
-        data.add_columns('PCA score',pca_scores.columns,pca_scores.values,data.mask)
+
+        # Add PCA scores to DataFrame for easier plotting -- one row per
+        # unmasked pixel, placed back into the masked rows (the rest stay NaN).
+        data.add_columns('PCA score',pca_scores.columns,pca_scores.values,mask)
         
         # update_pca_flag to prevent PCA running during when app_data.dim_red_y is being set
         app_data.update_pca_flag = False

@@ -20,6 +20,13 @@ from PyQt6.QtWidgets import QMessageBox
 from src.app.Status import StatusMessageManager
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
+# Column names that are whole-map instrument channels rather than an
+# element concentration, and so are typed 'Special' (not 'Analyte') on load.
+# 'TotalBeam' is the ion beam summed over every mass, exported alongside the
+# per-isotope maps by Iolite/XMapTools-style pipelines -- see
+# MapImporter.parse_filenames, which writes the column under this name.
+SPECIAL_FIELD_NAMES = {'TotalBeam'}
+
 
 @auto_log_methods(logger_key='Data')
 class SampleObj(QObject):
@@ -749,6 +756,24 @@ class SampleObj(QObject):
         if 'Xc' not in sample_df.columns and 'X' in sample_df.columns:
             sample_df = sample_df.rename(columns={'X': 'Xc', 'Y': 'Yc'})
 
+        # One dtype for the whole frame. Which columns arrive as int64 is an
+        # accident of formatting, not of meaning: a CPS channel whose float32
+        # values sit near 1e9 is written out with no decimal point and reads
+        # back as int64, while the identical channel on a smaller map reads as
+        # float64. A mixed-dtype frame then breaks anything that moves columns
+        # or writes into them (see ExtendedDF.sort_columns), so normalise once
+        # here rather than defending against it downstream. Non-numeric
+        # columns are left alone -- coercing them would silently turn real
+        # content into NaN.
+        numeric_cols = sample_df.columns[
+            [pd.api.types.is_numeric_dtype(sample_df[c]) for c in sample_df.columns]
+        ]
+        sample_df[numeric_cols] = sample_df[numeric_cols].astype('float64')
+        non_numeric = [c for c in sample_df.columns if c not in set(numeric_cols)]
+        if non_numeric:
+            log(f"'{os.path.basename(self.file_path)}' has non-numeric column(s), "
+                f"left as-is: {non_numeric}", prefix="Data")
+
         # determine column data types
         # initialize all as 'Analyte'
         data_type = ['Analyte']*sample_df.shape[1]
@@ -767,6 +792,17 @@ class SampleObj(QObject):
         for col in ratio_columns:
             col_index = sample_df.columns.get_loc(col)
             data_type[col_index] = 'Ratio'
+
+        # Whole-map instrument channels that aren't a concentration. Typed
+        # from the column name for the same reason ratios are: the sidecar
+        # .lmdf.json carries an equivalent 'Field Type', but only for samples
+        # imported since it was added, and only the name survives into the
+        # .lame.csv itself. Left as 'Analyte' (the default above) these join
+        # every analyte list and get treated as an element by anything that
+        # sweeps all analytes -- normalization, PCA, clustering.
+        for col in sample_df.columns:
+            if col in SPECIAL_FIELD_NAMES:
+                data_type[sample_df.columns.get_loc(col)] = 'Special'
 
         # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
         # may includes analytes, ratios, and special data
@@ -865,6 +901,29 @@ class SampleObj(QObject):
         # linear/log scale
         self.raw.set_attribute(analyte_columns, 'norm', 'linear')
         self.raw.set_attribute(analyte_columns, 'auto_scale', True)
+
+        # Whole-map instrument channels (TotalBeam -- see SPECIAL_FIELD_NAMES).
+        # prep_data() below reads lower_bound/upper_bound off *every*
+        # non-coordinate column, so these need the same bounds as an analyte
+        # or np.nanpercentile is handed None and raises. 'use' is False,
+        # matching add_columns()' treatment of every other non-analyte column
+        # (PCA scores, cluster scores, computed fields): still viewable and
+        # plottable, but not an input to analyses -- which matters here, since
+        # TotalBeam is the sum of the isotope channels and so is exactly
+        # collinear with them.
+        special_columns = self.raw.match_attribute(attribute='data_type', value='Special')
+        self.raw.set_attribute(special_columns, 'units', None)
+        self.raw.set_attribute(special_columns, 'use', False)
+        self.raw.set_attribute(special_columns, 'use_normalized', False)
+        # quantile bounds
+        self.raw.set_attribute(special_columns, 'lower_bound', self._default_lower_bound)
+        self.raw.set_attribute(special_columns, 'upper_bound', self._default_upper_bound)
+        # quantile bounds for differences
+        self.raw.set_attribute(special_columns, 'diff_lower_bound', self._default_difference_lower_bound)
+        self.raw.set_attribute(special_columns, 'diff_upper_bound', self._default_difference_upper_bound)
+        # linear/log scale
+        self.raw.set_attribute(special_columns, 'norm', 'linear')
+        self.raw.set_attribute(special_columns, 'auto_scale', True)
 
         # cluster data
         # This determines the optimal number of clusters and creates cluster indicies that are used for preprocessing.
@@ -2068,6 +2127,13 @@ class SampleObj(QObject):
 
             lq = self.processed.get_attribute(col, 'lower_bound')
             uq = self.processed.get_attribute(col, 'upper_bound')
+            # A column whose data_type reset_data_handling() doesn't initialize
+            # has no bounds at all, and np.nanpercentile(data, None) raises a
+            # bare TypeError that aborts the whole sample load. Leave such a
+            # column unclipped rather than taking the app down over it -- the
+            # data is still perfectly displayable.
+            if lq is None or uq is None:
+                continue
             # skip is autoscale is False for column
             if not self.processed.get_attribute(col, 'autoscale'):
                 #clip data using ub and lb

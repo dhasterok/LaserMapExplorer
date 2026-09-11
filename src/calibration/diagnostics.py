@@ -14,6 +14,7 @@ import pandas as pd
 from src.calibration.background import BackgroundResult, classify_rows
 from src.calibration.dating_ratios import DatingRatioFit, resolve_dating_ratio_truth
 from src.calibration.drift import DriftFit
+from src.calibration.nonparametric_drift import NonparametricDriftFit
 from src.calibration.massbias import BiasFit, DEFAULT_ISOTOPE_TABLE_PATH, resolve_truth_ratio
 from src.calibration.rawfile import LineFileData
 from src.calibration.standards import CalibrationCurve, StandardCalibrationResult
@@ -50,8 +51,22 @@ _LABEL_COLOR_CYCLE = [
 ]
 
 
+def _drift_fit_label(drift_fit) -> str:
+    """Legend label for a session background drift fit.
+
+    A polynomial fit reads as ``"drift fit (order 2)"``; a non-parametric
+    one (:class:`~src.calibration.nonparametric_drift.NonparametricDriftFit`,
+    whose ``.order`` is a ``-1`` sentinel) reads as ``"drift fit (spline)"``.
+    """
+    method = getattr(drift_fit, "method", None)
+    if method in ("lowess", "spline", "kriging"):
+        return f"drift fit ({method})"
+    return f"drift fit (order {drift_fit.order})"
+
+
 def plot_background_drift(
-    ax, groups: dict[str, list[BackgroundResult]], drift_fit: DriftFit | None, analyte: str,
+    ax, groups: dict[str, list[BackgroundResult]],
+    drift_fit: DriftFit | NonparametricDriftFit | None, analyte: str,
     reference_labels: set[str] | None = None,
 ) -> None:
     """Plot background level versus time for every label, with the drift fit.
@@ -99,10 +114,9 @@ def plot_background_drift(
         is_reference = label in reference_labels
         color = _LABEL_COLOR_CYCLE[i % len(_LABEL_COLOR_CYCLE)]
         marker = "o" if is_reference else "s"
-        role = "reference" if is_reference else "sample"
         ax.errorbar(
             times, means, yerr=sems, fmt=marker, color=color, markersize=5, capsize=2,
-            label=f"{label} ({role})",
+            label=label,
         )
         all_times.extend(times)
 
@@ -113,11 +127,35 @@ def plot_background_drift(
     if drift_fit is not None:
         curve_times = pd.date_range(min(all_times), max(all_times), periods=100)
         ax.plot(curve_times, drift_fit.predict(curve_times), "--", color="black",
-                 label=f"drift fit (order {drift_fit.order})")
+                 label=_drift_fit_label(drift_fit))
     ax.set_xlabel("Time")
     ax.set_ylabel(f"{analyte} background (CPS)")
     ax.set_title(f"Background drift: {analyte}")
-    ax.legend(loc="best", fontsize="small")
+
+    # Drift fit is added last (it needs all_times, computed after the
+    # per-label loop above) but reads as the headline result, so it's
+    # moved to the front of the legend -- top of the stack, not the
+    # bottom -- rather than left trailing after every sample/standard.
+    # Found by its exact label rather than assumed to be last in
+    # get_legend_handles_labels()'s own order: that order groups artists
+    # by type (Line2D before ErrorbarContainer, at least in current
+    # matplotlib), not by creation order, so the drift line isn't
+    # reliably at either end of it.
+    handles, labels = ax.get_legend_handles_labels()
+    if drift_fit is not None:
+        drift_label = _drift_fit_label(drift_fit)
+        if drift_label in labels:
+            idx = labels.index(drift_label)
+            handles = [handles[idx], *handles[:idx], *handles[idx + 1:]]
+            labels = [labels[idx], *labels[:idx], *labels[idx + 1:]]
+    # Below the axes (not "best"/inside the plot area) so it never
+    # overlaps the data, in a single wide band capped at 6 columns --
+    # wraps to more rows on its own once there are more than 6 entries.
+    ax.legend(
+        handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.15),
+        ncol=6, fontsize="small",
+    )
+    ax.figure.subplots_adjust(bottom=0.3)
 
 
 def plot_standard_vs_reference(

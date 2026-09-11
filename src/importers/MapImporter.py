@@ -41,6 +41,22 @@ def valid_extensions_for(data_type):
     """Returns the tuple of recognized file extensions for a given data type."""
     return VALID_IMPORT_EXTENSIONS.get(data_type, TABULAR_EXTENSIONS)
 
+
+def _as_check_state(value) -> bool:
+    """Interprets a value loaded from a metadata CSV as a checkbox state.
+
+    ``read_csv`` infers a real bool dtype for a column holding only
+    True/False, but the same column comes back as *strings* as soon as it
+    picks up anything else (a blank cell, a value written by an older save),
+    so both have to be accepted. A blank/NaN reads as unchecked -- ``bool(nan)``
+    is ``True``, which would silently mark an unconfigured sample for import.
+    """
+    if pd.isna(value):
+        return False
+    if isinstance(value, str):
+        return value.strip().lower() in ('true', '1', 'yes', 'y')
+    return bool(value)
+
 # Import Tool Dialog
 # -------------------------------
 class MapImporter(QDialog, Ui_MapImportDialog):       
@@ -172,6 +188,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             'Sweep\n(s)': 'Sweep', 'Speed\n(µm/s)':'Speed',
             'Length\n(µm)': 'Length', 'Width\n(µm)': 'Width',
         })
+
+        # Normalize the checkbox-backed columns to real bools here, once, so
+        # every consumer can rely on it. to_dataframe() returns a bool for a
+        # live QCheckBox but the cell's *item* text if one was ever written
+        # over it, and the truthiness of those strings is actively wrong:
+        # bool('False') is True, and `.loc[<string series>]` is a label lookup
+        # rather than a mask (which is how a loaded metadata CSV used to turn
+        # an import into a KeyError).
+        for column in ('Import', 'Reverse X', 'Reverse Y', 'Swap XY'):
+            if column in data.columns:
+                data[column] = data[column].map(_as_check_state).astype(bool)
 
         return data
 
@@ -503,14 +530,25 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 self.statusBar.showMessage("Some metadata sample IDs do not match sample IDs in directory")
     
     def update_table_row(self, row_pos, row_data):
+        """Writes one saved metadata row back into ``tableWidgetMetadata``.
+
+        Restores each value into whatever *widget* holds that cell, rather
+        than stamping a QTableWidgetItem over it. That distinction matters
+        because ``CustomTableWidget.to_dataframe()`` reads ``item(row, col)``
+        first and only falls back to the cell widget: an item written over a
+        checkbox permanently shadows it, so the Import column came back as
+        the string ``'True'`` instead of a bool, and ``import_la_icp_ms_data``
+        then read ``.loc[<string series>]`` as a label lookup and raised
+        ``KeyError``.
+        """
         # Ensure the table has enough rows
         if self.tableWidgetMetadata.rowCount() <= row_pos:
             self.tableWidgetMetadata.insertRow(row_pos)
-    
+
         for col_index, (col_name, value) in enumerate(row_data.items()):
             if col_name == 'Sample ID':
                 continue  # Skip the sample ID since it's just a reference, not to be edited
-    
+
             # Handling different widget types in the table
             cell_widget = self.tableWidgetMetadata.cellWidget(row_pos, col_index)
             if isinstance(cell_widget, QComboBox):
@@ -520,11 +558,22 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     cell_widget.setCurrentIndex(index)
                 else:
                     self.statusBar.showMessage(f"Value {value} not found in ComboBox options at column {col_index}")
+            elif isinstance(cell_widget, QCheckBox):
+                cell_widget.setChecked(_as_check_state(value))
+            elif isinstance(cell_widget, QPushButton):
+                # 'Select files'. Its label counts the files picked in *this*
+                # session's file-selection dialog (which populates
+                # self.metadata[sample_id]); a metadata CSV carries only the
+                # per-sample acquisition settings, not those per-file choices.
+                # Restoring a stale count would claim files are selected when
+                # none are, so leave the button showing the real count.
+                continue
             else:
                 # For QTableWidgetItem, just set the text
-                item = QTableWidgetItem(str(value))
+                item = QTableWidgetItem('' if pd.isna(value) else str(value))
                 self.tableWidgetMetadata.setItem(row_pos, col_index, item)
-                        
+
+
     def save_metadata(self):
         """Save table widget metadata to a csv file
 
@@ -1063,6 +1112,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             unit = None
             analyte1, analyte2 = None, None
             lineno = None
+            special_field = None
 
             # Extract the filename without the directory path
             file = file.split('/')[-1].lower()
@@ -1093,11 +1143,23 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             elif extension in IMAGE_EXTENSIONS:
                 filetype = 'matrix'
 
+            # "TotalBeam" (the ion beam summed over every mass) is a whole-map
+            # QC channel, not an isotope. The element/mass matcher below can't
+            # name it, so left to fall through it imported as a nameless
+            # column -- named here explicitly, and typed 'Special' so it stays
+            # out of the analyte list downstream (see DataHandling.reset_data).
+            if re.search(r'total[\s_-]*beam', filename):
+                special_field = 'TotalBeam'
+
             # Strip a "total" qualifier (e.g. "PbTotal") so the remaining text is just
             # the element symbol; `filename` is already lowercased (via `file` above),
-            # so this comparison is case-insensitive.
-            if 'total' in filename:
-                filename = filename.replace('total', '')
+            # so this comparison is case-insensitive. Only stripped where the word
+            # *ends* -- at a delimiter (the same set `delimiters` splits on; note a
+            # plain \b won't do, since "_" is a word character) or end of string. That
+            # keeps "pbtotal"/"pb_total"/"pb total" working while leaving a name that
+            # merely begins with those letters intact ("totalbeam" above), which a
+            # bare substring replace used to gut into an unmatchable "beam".
+            filename = re.sub(r'total(?=$|[\s\-_,.])', '', filename)
 
             # Step 1: Split the filename by the specified delimiters
             filename_lower = filename.lower()
@@ -1126,6 +1188,28 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                                 analyte2 = element + mass2
                                 used_masses.add(mass2)
                         continue  # Skip to the next part since we've already handled this part
+
+            # Tokens that carry an element and its mass together ("lu176",
+            # "hf176"), consumed in filename order. This has to run before the
+            # element-vs-mass cross-match below, which searches by mass *value*
+            # and can therefore only spend "176" once -- that silently turned
+            # the same-mass ratio Lu176/Hf176 into a bare Lu176 analyte,
+            # dropping the denominator. Pairing within a token can't confuse
+            # the two, since each token names its own element.
+            for part in parts:
+                pair = re.fullmatch(r'([a-z]+)(\d+)', part)
+                if not pair:
+                    continue
+                element, mass = pair.groups()
+                if element not in isotopes_lower or mass not in isotopes_lower[element]:
+                    continue
+                if not analyte1:
+                    analyte1 = element + mass
+                    used_masses.add(mass)
+                elif not analyte2 and element + mass != analyte1:
+                    analyte2 = element + mass
+                    used_masses.add(mass)
+                    break
 
             # If analytes are still not assigned, check remaining parts
             if not analyte1 or not analyte2:
@@ -1168,6 +1252,26 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     if len(unique_elements) == 1 and not analyte1:
                         analyte1 = unique_elements[0]
 
+            # A reaction/collision-cell method reports the reaction *product*
+            # m/z rather than the measured isotope -- Lu175 measured as a
+            # reaction product at m/z 257 (the raw instrument file writes it
+            # "Lu175 -> 257") is exported here as "Lu257". The mass is real, but
+            # it isn't an isotope of that element, so every check above
+            # rejects it and the column arrived unnamed. Keep the label the
+            # instrument wrote: the product mass alone doesn't identify the
+            # parent isotope, so back-solving it here would be a guess.
+            #
+            # Restricted to matrix files on purpose. An element symbol
+            # followed by any number would otherwise also swallow a raw
+            # per-line filename ("n12" -> analyte N12), pre-empting the
+            # line-number branch below, which only runs while analyte1 is
+            # still None.
+            if analyte1 is None and special_field is None and filetype == 'matrix':
+                for part in parts:
+                    pair = re.fullmatch(r'([a-z]+)(\d+)', part)
+                    if pair and pair.group(1) in isotopes_lower:
+                        analyte1 = pair.group(1) + pair.group(2)
+                        break
 
             # Debugging: Print analytes
             print(f"Analyte 1: {analyte1}")
@@ -1179,7 +1283,12 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     filetype = 'line'
                     lineno = possible_masses[0]
 
-            if analyte2 is not None:
+            if special_field is not None:
+                # Already carries its display capitalization ("TotalBeam") --
+                # .capitalize() would flatten it to "Totalbeam".
+                analyte1, analyte2 = special_field, None
+                fieldtype = 'Special'
+            elif analyte2 is not None:
                 analyte1 = analyte1.capitalize()
                 analyte2 = analyte2.capitalize()
                 fieldtype = 'Ratio'
@@ -1310,8 +1419,60 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
             self.parent.project_manager.add_samples([self.root_path])
 
+            # Record how each sample was imported, now that it's part of a
+            # project and therefore has somewhere to put a sidecar.
+            self.save_import_settings(save_path, data_type, method)
+
             if self.parent.app_data.sample_id in self.sample_ids:
                 self.parent.change_sample()
+
+    def save_import_settings(self, save_path, data_type, method):
+        """Writes each imported sample's import parameters to its project sidecar.
+
+        Saved automatically on import (no "save metadata" step required of
+        the user) so an import is reproducible from the project alone:
+        instrument/method, the directories involved, the sample's row of the
+        metadata table, and the files actually selected for it. See
+        `ProjectManager.save_import_settings` for where it lands.
+
+        Parameters
+        ----------
+        save_path : str
+            Directory the reformatted ``*.lame.csv`` files were written to.
+        data_type : str
+            ``'LA-ICP-MS'`` or ``'XRF'``.
+        method : str
+            Instrument method, e.g. ``'quadrupole'``, ``'TOF'``, ``'image'``.
+        """
+        project_manager = getattr(self.parent, 'project_manager', None)
+        if project_manager is None:
+            return
+
+        directory_data = self.metadata['directory_data']
+        for i, sample_id in enumerate(self.sample_ids):
+            if not directory_data['Import'][i]:
+                continue
+
+            files = self.metadata.get(sample_id)
+            file_list = (
+                list(files.loc[files['Import'], 'Filename']) if files is not None else []
+            )
+
+            try:
+                project_manager.save_import_settings(sample_id, {
+                    'sample_id': sample_id,
+                    'data_type': data_type,
+                    'method': method,
+                    'root_path': str(self.root_path),
+                    'source_path': str(self.paths[i]),
+                    'save_path': str(save_path),
+                    'metadata': directory_data.iloc[i].to_dict(),
+                    'files': file_list,
+                })
+            except Exception as e:
+                # A sidecar is a convenience -- never fail a completed import
+                # over one, just say so.
+                self.statusBar.showMessage(f"Could not save import settings for {sample_id}: {e}")
 
     def import_la_icp_ms_data(self, save_path):
         """Reads LA-ICP-MS (or XRF 'image') data into a DataFrame
@@ -1327,10 +1488,24 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             Location to save DataFrame reformatted into CSV for use in LaME
         """
         # The total number of files to parse are the number of selected files for samples with the import checkbox set to True.
-        total_files = self.metadata['directory_data'].loc[self.metadata['directory_data']['Import'],'Select files'].sum()
+        directory_data = self.metadata['directory_data']
+        # 'Import' is guaranteed bool by get_metadata(), so this is a mask.
+        import_mask = directory_data['Import']
+        total_files = directory_data.loc[import_mask, 'Select files'].sum()
         if total_files == 0:
+            # Distinguish "nothing chosen to import" from "samples are marked
+            # for import but no files were picked for them" -- the latter is
+            # what loading a metadata CSV leaves behind, since the CSV carries
+            # per-sample settings but not per-file selections.
+            if import_mask.any():
+                self.statusBar.showMessage(
+                    "No files selected for import -- use 'Select files' to choose files for each sample."
+                )
+            else:
+                self.statusBar.showMessage("No samples marked for import.")
             return
-        
+
+
         # Initialize progress bar
         current_progress = 0
         self.progressBar.setMaximum(total_files)
@@ -1866,7 +2041,10 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
 
             # Analyte Type ComboBox (editable)
             analyte_type_combo = QComboBox()
-            analyte_type_combo.addItems(['Analyte', 'Ratio', 'computed'])
+            # 'Special' covers whole-map channels that aren't a concentration
+            # (TotalBeam, and anything else the user retypes as such) -- see
+            # parse_filenames and DataHandling.reset_data.
+            analyte_type_combo.addItems(['Analyte', 'Ratio', 'Special', 'computed'])
             analyte_type_combo.setCurrentText(result[3])
             self.tableWidgetFileMetadata.setCellWidget(row, 2, analyte_type_combo)
 

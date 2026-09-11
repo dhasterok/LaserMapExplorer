@@ -13,8 +13,10 @@ sys.path.insert(0, str(project_root))
 
 from src.calibration.reflib import (
     ReferenceLibraryError,
+    clean_analyte_name,
     load_reference_library,
     load_reference_material,
+    parse_analyte_name,
     parse_reference_material,
     resolve_elemental_value,
     save_reference_material,
@@ -258,3 +260,35 @@ def test_load_reference_material_rejects_empty_file(tmp_path):
     path.write_text("")
     with pytest.raises(ReferenceLibraryError):
         load_reference_material(path)
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Ca43", "Ca43"),
+    ("Ca43 -> 43", "Ca43"),
+    ("Ti47 -> 113", "Ti47"),
+    ("Hf178 -> 260", "Hf178"),
+    ("Pb total", "Pb total"),          # pooled channel: no arrow, unchanged
+    ("Ca43->43", "Ca43"),              # tolerant of missing spaces
+    ("Ca43  ->  43", "Ca43"),          # ...and extra ones
+])
+def test_clean_analyte_name(raw, expected):
+    assert clean_analyte_name(raw) == expected
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Ca43", ("Ca", 43)),
+    ("Ca43 -> 43", ("Ca", 43)),
+    ("Ti47 -> 113", ("Ti", 47)),   # 47 (measured isotope), not 113 (reaction-product m/z)
+    ("Hf178 -> 260", ("Hf", 178)),
+])
+def test_parse_analyte_name_tolerates_mass_shift_suffix(raw, expected):
+    assert parse_analyte_name(raw) == expected
+
+
+def test_resolve_elemental_value_matches_mass_shifted_name():
+    material = parse_reference_material({
+        "standard": "STD",
+        "analytes": {"Ca43": {"element": "Ca", "mass": 43, "value": 300.0, "uncertainty": 3.0, "uncertainty_type": "1SD"}},
+    })
+    assert resolve_elemental_value(material, "Ca43 -> 43") is not None
+    assert resolve_elemental_value(material, "Ca43 -> 43").value == 300.0

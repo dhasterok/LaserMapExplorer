@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 
 project_root = Path(__file__).resolve().parent.parent
@@ -16,6 +17,9 @@ sys.path.insert(0, str(project_root))
 from src.calibration.rawfile import (
     RawFileFormatError,
     _parse_acquired_line,
+    clean_signal_columns,
+    clean_signal_dict,
+    find_analyte_column,
     list_line_files,
     parse_filename_label,
     parse_line_file,
@@ -132,3 +136,39 @@ def test_validate_analyte_columns_flags_unknown_names():
     unknown = validate_analyte_columns(["Al27", "NotAnIsotope99"])
     assert "NotAnIsotope99" in unknown
     assert "Al27" not in unknown
+
+
+def test_clean_signal_columns_strips_mass_shift_suffix():
+    df = pd.DataFrame({"Ca43 -> 43": [1.0, 2.0], "Ti47 -> 113": [3.0, 4.0], "Al27": [5.0, 6.0]})
+    cleaned = clean_signal_columns(df)
+    assert list(cleaned.columns) == ["Ca43", "Ti47", "Al27"]
+    assert cleaned["Ca43"].tolist() == [1.0, 2.0]  # data unchanged, just renamed
+    assert list(df.columns) == ["Ca43 -> 43", "Ti47 -> 113", "Al27"]  # input not mutated
+
+
+def test_clean_signal_columns_keeps_first_on_collision():
+    # Two product channels for the same nominal isotope -- first wins the
+    # clean name, second keeps its (still unique) raw name.
+    df = pd.DataFrame({"Fe56 -> 56": [1.0], "Fe56 -> 72": [2.0]})
+    cleaned = clean_signal_columns(df)
+    assert list(cleaned.columns) == ["Fe56", "Fe56 -> 72"]
+
+
+def test_clean_signal_dict_strips_and_dedups():
+    assert clean_signal_dict({"Ca43 -> 43": 1.0, "Al27": 2.0}) == {"Ca43": 1.0, "Al27": 2.0}
+    assert clean_signal_dict({"Fe56 -> 56": 1.0, "Fe56 -> 72": 2.0}) == {"Fe56": 1.0}
+
+
+def test_find_analyte_column():
+    cols = ["Ca43 -> 43", "Ti47 -> 113", "Al27"]
+    assert find_analyte_column(cols, "Ca", 43) == "Ca43 -> 43"
+    assert find_analyte_column(cols, "Al", 27) == "Al27"
+    assert find_analyte_column(cols, "Zr", 90) is None
+
+
+def test_validate_analyte_columns_accepts_mass_shifted_names(tmp_path):
+    table = tmp_path / "iso.csv"
+    table.write_text("symbol,atomic_mass,mass\nCa,43,42.9\nAl,27,26.98\n")
+    # both recognized despite the "-> N" decoration; an unknown one still flagged
+    assert validate_analyte_columns(["Ca43 -> 43", "Al27 -> 27"], table) == []
+    assert validate_analyte_columns(["Zr90 -> 173"], table) == ["Zr90 -> 173"]

@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from src.calibration.geometry import InstrumentSettings
+from src.calibration.reflib import clean_analyte_name
 from src.deconvolution.config import DeconvolutionSettings
 from src.deconvolution.shift import correct_shift, sweep_offset_pixels
 from src.deconvolution.washout import invert_washout
@@ -76,8 +77,15 @@ def correct_line(
             info["shift_applied"] = True
             info["shift_pixels"] = shift_pixels
 
-        if settings.apply_washout and analyte in settings.washout_tau_s and dt_s:
-            tau_s = settings.washout_tau_s[analyte]
+        # `analytes` here are still the raw instrument column names -- a
+        # reaction/collision-cell method decorates them, e.g. "Hf178 ->
+        # 260". Accept a washout tau keyed by either that raw name or the
+        # plain "Hf178" it cleans to (see reflib.clean_analyte_name), so
+        # the Deconvolution page's tau table lines up with the clean
+        # isotope names calibration uses everywhere else.
+        tau_key = analyte if analyte in settings.washout_tau_s else clean_analyte_name(analyte)
+        if settings.apply_washout and tau_key in settings.washout_tau_s and dt_s:
+            tau_s = settings.washout_tau_s[tau_key]
             line_signal = col[::-1] if reverse_line else col
             result = invert_washout(line_signal, tau_s, dt_s)
             col = result.corrected[::-1] if reverse_line else result.corrected

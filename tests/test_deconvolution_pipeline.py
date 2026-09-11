@@ -45,6 +45,24 @@ def test_correct_line_applies_washout_only_for_configured_analytes():
     assert np.allclose(result.corrected["Ca43"].to_numpy(), df["Ca43"].to_numpy())
 
 
+def test_correct_line_matches_washout_tau_by_clean_or_raw_analyte_name():
+    """A reaction/collision-cell method's raw column names carry a
+    mass-shift suffix ("Hf178 -> 260"); the washout tau table may be keyed
+    by that raw name or by the plain "Hf178" it cleans to -- either must
+    match."""
+    df = _line_df(analytes=("Hf178 -> 260", "Ca43 -> 43"))
+    instrument = InstrumentSettings(sweep_s=0.5, dwell_time_ms=10.0)
+
+    for tau_key in ("Hf178", "Hf178 -> 260"):
+        result = correct_line(
+            df, list(df.columns),
+            DeconvolutionSettings(apply_washout=True, washout_tau_s={tau_key: 2.0}),
+            instrument, line_number=0,
+        )
+        assert result.provenance["Hf178 -> 260"]["washout_applied"] is True, tau_key
+        assert result.provenance["Ca43 -> 43"]["washout_applied"] is False
+
+
 def test_correct_line_applies_shift_using_column_order_as_sweep_order():
     df = _line_df(analytes=("Si29", "Ca43", "Fe57"))
     settings = DeconvolutionSettings(apply_shift=True)

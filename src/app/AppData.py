@@ -1639,18 +1639,21 @@ class AppData(QObject):
                 clusters.sort()
 
                 self.cluster_dict[method]['selected_clusters'] = []
-                try:
-                    self.cluster_dict[method].pop(str(99))
-                except Exception as e:
-                    pass
 
-                i = 0
-                while True:
-                    try:
-                        self.cluster_dict[method].pop(str(i))
-                        i += 1
-                    except Exception as e:
-                        break
+                # Clear every per-cluster entry from the previous run before
+                # repopulating below. Only the cluster ids are int keys (0..n-1,
+                # plus 99 for the mask/noise group); the method's settings
+                # ('n_clusters', 'seed', ...) are str keys and must survive.
+                #
+                # Reducing the cluster count is what makes this matter: the new
+                # run only overwrites ids 0..n-1, so going 6 -> 3 would leave 3,
+                # 4 and 5 behind. get_cluster_colormap sizes the colormap and the
+                # legend from exactly these keys, so the map kept drawing patches
+                # for clusters that no longer existed. (The loop this replaces
+                # popped str(i)/str(99) against int keys, so it raised KeyError on
+                # its first iteration and never removed anything.)
+                for cluster_id in [k for k in self.cluster_dict[method] if isinstance(k, int)]:
+                    del self.cluster_dict[method][cluster_id]
 
                 if 99 in clusters:
                     hexcolor = style_data.set_default_cluster_colors(mask=True,n = len(clusters)-1)

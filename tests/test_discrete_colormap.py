@@ -126,3 +126,86 @@ def test_plot_roi_map_sizes_norm_from_full_roi_count():
     src = inspect.getsource(LamePlot.plot_roi_map)
     assert "len(data.roi_stack)" in src
     assert "np.unique" not in src
+
+
+# --- stale cluster entries after reducing the cluster count ------------------
+#
+# The legend/colormap is sized from cluster_dict's int keys (see
+# get_cluster_colormap). AppData.cluster_group_changed is responsible for
+# clearing the previous run's per-cluster entries before repopulating; when it
+# didn't, reducing the cluster count left the high-numbered entries behind and
+# the map kept drawing legend patches for clusters that no longer existed.
+
+
+def _cluster_dict_after_runs(*cluster_counts):
+    """Replay cluster_group_changed's dict bookkeeping for successive runs.
+
+    Mirrors the method's clear-then-repopulate on a plain dict, so the
+    behaviour can be pinned without a MainWindow (the method needs a real
+    AppData parent, and StyleData for the colours).
+    """
+    entry = {'n_clusters': 0, 'seed': 23, 'selected_clusters': []}
+    for n in cluster_counts:
+        entry['selected_clusters'] = []
+        # the clear step under test
+        for cluster_id in [k for k in entry if isinstance(k, int)]:
+            del entry[cluster_id]
+        for c in range(n):
+            entry[c] = {'name': f'Cluster {c + 1}', 'link': [], 'color': '#ff0000'}
+        entry['n_clusters'] = n
+    return entry
+
+
+def test_reducing_the_cluster_count_drops_the_stale_entries():
+    entry = _cluster_dict_after_runs(6, 3)
+
+    assert sorted(k for k in entry if isinstance(k, int)) == [0, 1, 2]
+    _colors, labels, cmap = StyleData.get_cluster_colormap(None, entry, alpha=100)
+    assert labels == ['Cluster 1', 'Cluster 2', 'Cluster 3']
+    assert cmap.N == 3
+
+
+def test_increasing_the_cluster_count_still_works():
+    entry = _cluster_dict_after_runs(3, 8)
+
+    _colors, labels, cmap = StyleData.get_cluster_colormap(None, entry, alpha=100)
+    assert len(labels) == 8
+    assert cmap.N == 8
+
+
+def test_clearing_cluster_entries_keeps_the_methods_settings():
+    """Only cluster ids are int keys -- 'n_clusters', 'seed' and friends are
+    str keys and have to survive the clear."""
+    entry = _cluster_dict_after_runs(6, 2)
+
+    assert entry['seed'] == 23
+    assert entry['n_clusters'] == 2
+    assert entry['selected_clusters'] == []
+
+
+def test_a_stale_mask_group_is_cleared_too():
+    """99 is the mask/noise group. It's an int key like any other cluster id,
+    so a run that produces no mask must not leave the old one behind."""
+    entry = _cluster_dict_after_runs(4)
+    entry[99] = {'name': 'Mask', 'link': [], 'color': '#888888'}
+
+    entry = {**entry}
+    for cluster_id in [k for k in entry if isinstance(k, int)]:
+        del entry[cluster_id]
+    for c in range(2):
+        entry[c] = {'name': f'Cluster {c + 1}', 'link': [], 'color': '#ff0000'}
+
+    assert 99 not in entry
+    _colors, labels, _cmap = StyleData.get_cluster_colormap(None, entry, alpha=100)
+    assert labels == ['Cluster 1', 'Cluster 2']
+
+
+def test_cluster_group_changed_clears_int_keys_not_str_keys():
+    """Pin the fix in the source: the clear must key off int-ness. The loop it
+    replaced popped str(i) against int keys, so it raised on its first
+    iteration and removed nothing at all."""
+    from src.app.AppData import AppData
+
+    src = inspect.getsource(AppData.cluster_group_changed)
+    assert "isinstance(k, int)" in src
+    assert "pop(str(i))" not in src

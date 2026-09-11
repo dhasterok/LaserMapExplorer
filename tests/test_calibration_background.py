@@ -362,6 +362,55 @@ def test_fit_session_background_drift_empty_list_returns_empty_dict():
     assert fit_session_background_drift([]) == {}
 
 
+@pytest.mark.parametrize("method", ["lowess", "spline", "kriging"])
+def test_fit_session_background_drift_nonparametric_tracks_nonmonotonic_drift(method):
+    """A long session whose blank rises, falls, and rises again -- structure
+    no low-order polynomial follows. LOWESS / spline / kriging should track
+    it far better than a degree-1 OLS fit does."""
+    from src.calibration.nonparametric_drift import NonparametricDriftFit
+
+    base_time = datetime(2026, 3, 1, 10, 0, 0)
+    files, truth = [], []
+    for i in range(40):
+        # 500 + a full sine wave across the session + mild upward trend
+        level = 500.0 + 60.0 * np.sin(2 * np.pi * i / 20.0) + 1.5 * i
+        truth.append(level)
+        files.append(
+            _make_line_data_with_bg_level(
+                base_time + timedelta(minutes=45 * i), bg_level=level, seed=i, index=i + 1
+            )
+        )
+    backgrounds = [compute_background_result(f, reference_channels=["Al27"]) for f in files]
+    truth = np.array(truth)
+
+    np_fit = fit_session_background_drift(backgrounds, method=method)["Al27"]
+    assert isinstance(np_fit, NonparametricDriftFit)
+    assert np_fit.method == method
+    assert np_fit.order == -1  # sentinel -- not a polynomial
+
+    times = [b.window.start_time for b in backgrounds]
+    np_err = np.sqrt(np.mean((np_fit.predict(times) - truth) ** 2))
+    lin_fit = fit_session_background_drift(backgrounds, order=1, method="fixed")["Al27"]
+    lin_err = np.sqrt(np.mean((lin_fit.predict(times) - truth) ** 2))
+    assert np_err < 0.5 * lin_err
+
+
+@pytest.mark.parametrize("method", ["lowess", "spline", "kriging"])
+def test_fit_session_background_drift_nonparametric_falls_back_when_too_few_points(method):
+    base_time = datetime(2026, 3, 1, 10, 0, 0)
+    backgrounds = [
+        compute_background_result(
+            _make_line_data_with_bg_level(base_time + timedelta(minutes=10 * i), bg_level=500.0, seed=i, index=i + 1),
+            reference_channels=["Al27"],
+        )
+        for i in range(3)  # below nonparametric_drift._MIN_POINTS
+    ]
+    session_fit = fit_session_background_drift(backgrounds, order=1, method=method)
+    # Falls back to a plain OLS polynomial rather than dropping the analyte.
+    assert "Al27" in session_fit
+    assert isinstance(session_fit["Al27"], DriftFit)
+
+
 # ---------------------------------------------------------------------------
 # Poisson-statistics additions (poisson_background_spec.md)
 # ---------------------------------------------------------------------------

@@ -16,6 +16,33 @@ import yaml
 
 _ANALYTE_RE = re.compile(r"^([A-Za-z]{1,2})(\d+)$")
 
+# Some instrument exports (reaction/collision-cell mass-shift methods) name a
+# column "<element><mass> -> <product mass>", e.g. "Ca43 -> 43" (no shift) or
+# "Ti47 -> 113" (monitored as a reacted product at m/z 113). The measured
+# isotope is still the part before the arrow -- the product mass is instrument
+# bookkeeping, not a second isotope -- so every element+mass parse in this
+# module tolerates and discards it via clean_analyte_name.
+_MASS_SHIFT_SUFFIX_RE = re.compile(r"\s*->\s*\d+\s*$")
+
+
+def clean_analyte_name(analyte: str) -> str:
+    """Strips a raw instrument mass-shift/reaction-product-channel suffix.
+
+    Parameters
+    ----------
+    analyte : str
+        A raw analyte column name, e.g. ``"Ca43"`` or ``"Ca43 -> 43"``.
+
+    Returns
+    -------
+    str
+        ``analyte`` with any trailing ``" -> <mass>"`` removed. Returned
+        unchanged if there is no such suffix (including non-isotope names
+        like a pooled ``"<element> total"`` channel, which never has one).
+    """
+    return _MASS_SHIFT_SUFFIX_RE.sub("", analyte)
+
+
 # Naming convention for a pooled-isotope virtual channel (see pooling.py) --
 # owned here (not pooling.py) so resolve_elemental_value can recognize one
 # without pooling.py needing to import reflib (avoiding an import cycle,
@@ -259,7 +286,9 @@ def parse_analyte_name(analyte: str) -> tuple[str, int] | None:
     Parameters
     ----------
     analyte : str
-        Column name, e.g. ``"Pb206"``.
+        Column name, e.g. ``"Pb206"`` -- or a raw mass-shifted instrument
+        name like ``"Pb206 -> 220"`` (see :func:`clean_analyte_name`, applied
+        here first).
 
     Returns
     -------
@@ -272,7 +301,7 @@ def parse_analyte_name(analyte: str) -> tuple[str, int] | None:
     Public so callers outside ``reflib``/``rawfile`` (e.g. the GUI's
     isotope-grouping table) do not need their own copy of ``_ANALYTE_RE``.
     """
-    m = _ANALYTE_RE.match(analyte)
+    m = _ANALYTE_RE.match(clean_analyte_name(analyte))
     if not m:
         return None
     return m.group(1), int(m.group(2))
@@ -286,8 +315,10 @@ def resolve_elemental_value(reference: ReferenceMaterial, analyte: str) -> Refer
     reference : ReferenceMaterial
         The reference material to look in.
     analyte : str
-        An analyte column name (e.g. ``"U238"``) or a pooled-isotope
-        virtual channel name (e.g. ``"Pb total"``, see ``pooling.py``).
+        An analyte column name (e.g. ``"U238"``, or a raw mass-shifted
+        instrument name like ``"U238 -> 254"`` -- see
+        :func:`clean_analyte_name`) or a pooled-isotope virtual channel
+        name (e.g. ``"Pb total"``, see ``pooling.py``).
 
     Returns
     -------

@@ -26,7 +26,7 @@ from src.calibration.drift import (
     select_order_by_aic,
 )
 from src.calibration.poisson_drift import PoissonFitError
-from src.calibration.rawfile import LineFileMeta
+from src.calibration.rawfile import LineFileMeta, clean_signal_dict
 from src.calibration.reflib import ReferenceMaterial, resolve_elemental_value
 
 
@@ -343,8 +343,20 @@ def assemble_occurrences(
         ablation = dataclasses.replace(ablation, row_outlier_mask=row_outlier_mask)
         b = dataclasses.replace(b, ablation=ablation)
 
-        mean_signal = {analyte: float(s.mean()) if len(s) else float("nan") for analyte, s in clean_cols.items()}
-        sem_signal = {analyte: float(s.sem()) if len(s) > 1 else 0.0 for analyte, s in clean_cols.items()}
+        # Cleaned to plain "<element><mass>" names (see
+        # rawfile.clean_signal_dict) -- everything downstream that matches
+        # an analyte here against a reference/isotope table (calibrate_standard,
+        # massbias.fit_bias_curve, dating_ratios' equivalent) expects that
+        # convention, not a raw mass-shifted instrument name like "Ca43 ->
+        # 43". `ablation.row_outlier_mask` above is deliberately left
+        # raw-keyed -- it pairs with `b.background_corrected_signal`
+        # (unchanged, still raw-named) for the Time Series/QC viewer.
+        mean_signal = clean_signal_dict(
+            {analyte: float(s.mean()) if len(s) else float("nan") for analyte, s in clean_cols.items()}
+        )
+        sem_signal = clean_signal_dict(
+            {analyte: float(s.sem()) if len(s) > 1 else 0.0 for analyte, s in clean_cols.items()}
+        )
         occurrences.append(
             StandardOccurrence(
                 file_meta=b.file_meta, background=b, mean_signal=mean_signal,

@@ -66,7 +66,9 @@ def test_plot_background_drift_draws_without_error(sample_result):
 def test_plot_background_drift_uses_circles_for_reference_squares_for_sample(sample_result):
     """Regression test: sample and reference-standard background points
     are combined into one plot, distinguished by marker shape (circle for
-    reference, square for sample) and a legend entry per label."""
+    reference, square for sample) and a legend entry per label -- the
+    label text itself is just the label, no "(sample)"/"(reference)"
+    suffix (that distinction is carried by the marker shape only)."""
     groups = {
         sample_result.sample_label: sample_result.backgrounds,
         "NIST610": [occ.background for occ in sample_result.standard_results["NIST610"].occurrences],
@@ -75,12 +77,44 @@ def test_plot_background_drift_uses_circles_for_reference_squares_for_sample(sam
     plot_background_drift(ax, groups, None, "Al27", reference_labels={"NIST610"})
 
     legend_labels = {t.get_text() for t in ax.get_legend().get_texts()}
-    assert f"{sample_result.sample_label} (sample)" in legend_labels
-    assert "NIST610 (reference)" in legend_labels
+    assert sample_result.sample_label in legend_labels
+    assert "NIST610" in legend_labels
 
     markers_by_label = {c.get_label(): c.lines[0].get_marker() for c in ax.containers}
-    assert markers_by_label[f"{sample_result.sample_label} (sample)"] == "s"
-    assert markers_by_label["NIST610 (reference)"] == "o"
+    assert markers_by_label[sample_result.sample_label] == "s"
+    assert markers_by_label["NIST610"] == "o"
+    plt.close(fig)
+
+
+def test_plot_background_drift_legend_is_below_axes_in_six_columns(sample_result):
+    fig, ax = plt.subplots()
+    drift_fit = sample_result.session_background_drift.get("Al27")
+    groups = {sample_result.sample_label: sample_result.backgrounds}
+    groups.update({
+        label: [occ.background for occ in sr.occurrences] for label, sr in sample_result.standard_results.items()
+    })
+    plot_background_drift(ax, groups, drift_fit, "Al27", reference_labels=set(sample_result.standard_results))
+
+    legend = ax.get_legend()
+    assert legend._ncols == 6
+    # anchored below the axes (negative y in axes-fraction bbox_to_anchor),
+    # not "best"/inside the plot area.
+    assert legend.get_bbox_to_anchor().transformed(ax.transAxes.inverted()).y0 < 0
+    plt.close(fig)
+
+
+def test_plot_background_drift_drift_fit_is_first_legend_entry(sample_result):
+    fig, ax = plt.subplots()
+    drift_fit = sample_result.session_background_drift.get("Al27")
+    assert drift_fit is not None
+    groups = {sample_result.sample_label: sample_result.backgrounds}
+    groups.update({
+        label: [occ.background for occ in sr.occurrences] for label, sr in sample_result.standard_results.items()
+    })
+    plot_background_drift(ax, groups, drift_fit, "Al27", reference_labels=set(sample_result.standard_results))
+
+    legend_labels = [t.get_text() for t in ax.get_legend().get_texts()]
+    assert legend_labels[0] == f"drift fit (order {drift_fit.order})"
     plt.close(fig)
 
 

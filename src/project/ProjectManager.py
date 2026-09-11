@@ -18,9 +18,14 @@ being collapsed into one.
 app-exit unsaved-changes prompt -- there's one dirty-check implementation,
 not two.
 """
+import json
+import re
+import shutil
+import tempfile
+from datetime import datetime
 from pathlib import Path
 
-from PyQt6.QtCore import QObject, QSettings, pyqtSignal
+from PyQt6.QtCore import QObject, QSettings, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from lame_core.config import BASEDIR
@@ -36,6 +41,23 @@ from src.project.ProjectModel import (
 PROJECT_FILE_SUFFIX = '.lame_project.json'
 RECENT_PROJECTS_KEY = 'recent_projects'
 MAX_RECENT_PROJECTS = 10
+
+#: QSettings key for the autosave period, in minutes. Exposed as
+#: `ProjectManager.autosave_interval_minutes` and clamped to
+#: [`MIN_AUTOSAVE_MINUTES`, `MAX_AUTOSAVE_MINUTES`]; a future preferences
+#: dialog only has to write this key.
+AUTOSAVE_INTERVAL_KEY = 'project/autosave_interval_minutes'
+DEFAULT_AUTOSAVE_MINUTES = 10
+MIN_AUTOSAVE_MINUTES = 5
+MAX_AUTOSAVE_MINUTES = 30
+
+#: Name of the per-sample JSON written by the import tool (see
+#: `ProjectManager.save_import_settings`).
+IMPORT_SETTINGS_FILENAME = 'import_settings.json'
+
+#: Parent of every untitled project's scratch directory, under the system
+#: temp dir.
+SCRATCH_ROOT_NAME = 'LaME-untitled'
 
 
 def _project_dir_for_manifest(manifest_path):
@@ -70,6 +92,14 @@ class ProjectManager(QObject):
         self.ui = ui
         self.status_manager = StatusMessageManager(ui)
         self.current_project: Project | None = None
+
+        # Scratch directory standing in for `project_dir` until the project is
+        # saved somewhere real -- created lazily, see `scratch_dir`.
+        self._scratch_dir = None
+
+        self.autosave_timer = QTimer(self)
+        self.autosave_timer.timeout.connect(self.autosave)
+        self.apply_autosave_interval()
 
         self.projectChanged.connect(self._update_window_title)
         self.dirtyChanged.connect(lambda _dirty: self._update_window_title())
@@ -175,13 +205,40 @@ class ProjectManager(QObject):
             [self.ui.app_data.active_workflow_file] if self.ui.app_data.active_workflow_file else []
         )
 
+        # Write the live Notes editor to its current file *before* the scratch
+        # directory is copied across below -- otherwise a save-on-switch after
+        # the copy would land in the old (about to be deleted) location.
+        self._flush_notes()
+
         _save_project_file(self.current_project, path)  # also sets current_project.manifest_path
 
-        # Profile/polygon geometry round-trips through their own per-sample
-        # sidecar files (.prfl/.poly), not the JSON manifest -- save one set
-        # per currently-loaded sample now that project_dir is known (it's
-        # derived from manifest_path, only just set above).
         project_dir = self.project_dir
+
+        # Sidecars written while the project was untitled live in the scratch
+        # directory; the project now has a real home, so they move into it.
+        self._migrate_scratch_dir(project_dir)
+        self._save_sidecars(project_dir)
+
+        # Point the open Notes editor at the relocated file (a no-op if it was
+        # already under project_dir) *before* the scratch copy goes away --
+        # the notes_file setter saves the outgoing file on the way out, and
+        # that file is still the scratch one.
+        self._refresh_notes_file()
+        self._discard_scratch_dir()
+
+        self._add_to_recent_projects(path)
+        self.dirtyChanged.emit(False)
+        self.status_manager.show_message(f"Project saved: {Path(path).name}")
+
+    def _save_sidecars(self, project_dir):
+        """Write every loaded sample's profile/polygon sidecars under `project_dir`.
+
+        Profile/polygon geometry round-trips through its own per-sample files
+        (``.prfl``/``.poly``), not the JSON manifest, so saving the project
+        has to save these separately.
+        """
+        if project_dir is None:
+            return
         for sample_id in self.ui.data:
             if hasattr(self.ui, 'profile_dock'):
                 self.ui.profile_dock.profiling.save_profiles(project_dir, sample_id)
@@ -189,9 +246,82 @@ class ProjectManager(QObject):
             if hasattr(self.ui, 'mask_dock'):
                 self.ui.mask_dock.polygon_tab.polygon_manager.save_polygons(project_dir, sample_id)
 
-        self._add_to_recent_projects(path)
-        self.dirtyChanged.emit(False)
-        self.status_manager.show_message(f"Project saved: {Path(path).name}")
+    def _flush_notes(self):
+        """Write the open Notes editor's content to its current file, if any."""
+        if hasattr(self.ui, 'notes_dock'):
+            self.ui.notes_dock.notes.save_notes_file()
+
+    def _refresh_notes_file(self):
+        """Re-point the open Notes editor at the current sample's notes file."""
+        if hasattr(self.ui, 'refresh_notes_file'):
+            self.ui.refresh_notes_file()
+
+    # ------------------------------------------------------------------
+    # Autosave
+    # ------------------------------------------------------------------
+
+    @property
+    def autosave_interval_minutes(self):
+        """int : Minutes between autosaves, from `QSettings`.
+
+        Clamped to [`MIN_AUTOSAVE_MINUTES`, `MAX_AUTOSAVE_MINUTES`]; setting
+        it stores the value and restarts the timer, so a preferences dialog
+        only needs to assign to this.
+        """
+        settings = QSettings("Adelaide University", "LaME")
+        try:
+            minutes = int(settings.value(AUTOSAVE_INTERVAL_KEY, DEFAULT_AUTOSAVE_MINUTES))
+        except (TypeError, ValueError):
+            minutes = DEFAULT_AUTOSAVE_MINUTES
+        return max(MIN_AUTOSAVE_MINUTES, min(MAX_AUTOSAVE_MINUTES, minutes))
+
+    @autosave_interval_minutes.setter
+    def autosave_interval_minutes(self, minutes):
+        try:
+            minutes = int(minutes)
+        except (TypeError, ValueError):
+            minutes = DEFAULT_AUTOSAVE_MINUTES
+        minutes = max(MIN_AUTOSAVE_MINUTES, min(MAX_AUTOSAVE_MINUTES, minutes))
+        QSettings("Adelaide University", "LaME").setValue(AUTOSAVE_INTERVAL_KEY, minutes)
+        self.apply_autosave_interval()
+
+    def apply_autosave_interval(self):
+        """(Re)start the autosave timer from the stored interval."""
+        self.autosave_timer.start(self.autosave_interval_minutes * 60 * 1000)
+
+    def autosave(self):
+        """Periodically persist the project without any user interaction.
+
+        A saved project is written back to its own manifest; an untitled one
+        goes to `scratch_manifest_path`, leaving it untitled (its
+        `manifest_path` stays unset and its dirty flag stands) so the user is
+        still prompted for a real location on save, but nothing is lost if
+        the session ends first.
+
+        Returns
+        -------
+        Path or None
+            The manifest written, or None if there was nothing to do.
+        """
+        if self.current_project is None or not self.current_project.dirty:
+            return None
+
+        self._pull_processing_state_from_loaded_samples()
+        self._flush_notes()
+
+        manifest_path = self.current_project.manifest_path
+        if manifest_path is not None:
+            _save_project_file(self.current_project, manifest_path)
+            self.dirtyChanged.emit(False)
+        else:
+            manifest_path = self.scratch_manifest_path
+            # update_project_state=False: an autosave into scratch must not
+            # make an untitled project look saved.
+            _save_project_file(self.current_project, manifest_path, update_project_state=False)
+
+        self._save_sidecars(self.project_dir)
+        self.status_manager.show_message(f"Project autosaved: {manifest_path.name}")
+        return manifest_path
 
     def save_project_as(self):
         """Prompt for a new location and save the current project there."""
@@ -261,6 +391,11 @@ class ProjectManager(QObject):
         # combobox widget state (whether currentText() already reads '')
         # and isn't a reliable place to hang this on.
         ui.lame_action.toggle_actions(False)
+
+        # Nothing in the scratch directory outlives the project it belonged
+        # to -- a closed untitled project's notes/sidecars were either
+        # migrated by a save or deliberately discarded.
+        self._discard_scratch_dir()
 
         self.current_project = None
         self.projectChanged.emit()
@@ -447,18 +582,98 @@ class ProjectManager(QObject):
     @property
     def project_dir(self):
         """Directory for this project's per-sample sidecars (profiles,
-        polygons, Notes), derived from the manifest's own location.
+        polygons, Notes, import settings).
+
+        Once the project has been saved this is derived from the manifest's
+        own location. Before that it's the session's scratch directory (see
+        `scratch_dir`) -- an untitled project still needs somewhere to put
+        notes and sidecars *while* it's being worked on, and everything
+        written there is moved under the real project directory on the first
+        save (see `_migrate_scratch_dir`).
 
         Returns
         -------
         Path or None
-            None until the project has been saved at least once -- for an
-            untitled project, nothing is written to disk yet, so there's
-            nowhere for sidecars to live either.
+            None only when there's no project open at all.
         """
-        if self.current_project is None or self.current_project.manifest_path is None:
+        if self.current_project is None:
             return None
+        if self.current_project.manifest_path is None:
+            return self.scratch_dir
         return _project_dir_for_manifest(self.current_project.manifest_path)
+
+    @property
+    def scratch_dir(self):
+        """This session's scratch directory for the current untitled project,
+        created on first use under the system temp directory.
+
+        Returns
+        -------
+        Path or None
+            None if no project is open; otherwise a directory that exists.
+        """
+        if self.current_project is None:
+            return None
+        if self._scratch_dir is None:
+            root = Path(tempfile.gettempdir()) / SCRATCH_ROOT_NAME
+            root.mkdir(parents=True, exist_ok=True)
+            self._scratch_dir = Path(tempfile.mkdtemp(prefix=f'{self._safe_name()}-', dir=root))
+        return self._scratch_dir
+
+    @property
+    def scratch_manifest_path(self):
+        """Where `autosave` writes an untitled project's manifest, so a
+        session interrupted before its first real save can still be
+        recovered from `scratch_dir`.
+        """
+        if self.current_project is None:
+            return None
+        return self.scratch_dir / f'{self._safe_name()}{PROJECT_FILE_SUFFIX}'
+
+    def _safe_name(self):
+        """The project name reduced to a filesystem-safe stem."""
+        name = (self.current_project.name if self.current_project else '') or 'project'
+        return re.sub(r'[^A-Za-z0-9._-]+', '_', name).strip('_') or 'project'
+
+    def _discard_scratch_dir(self):
+        """Forget (and delete) the current scratch directory, if any.
+
+        Called once its contents have been migrated into a real project
+        directory, and when the project it belonged to is closed.
+        """
+        scratch, self._scratch_dir = self._scratch_dir, None
+        if scratch is not None and scratch.exists():
+            shutil.rmtree(scratch, ignore_errors=True)
+
+    def _migrate_scratch_dir(self, project_dir):
+        """Copy everything written to the scratch directory into `project_dir`.
+
+        Runs on the first save of a previously-untitled project: notes,
+        profiles, polygons and import settings written while the project had
+        no home on disk follow it to its real one. Existing files in
+        `project_dir` are overwritten -- the scratch copy is the live session
+        state, and this only ever runs for a project that had no directory of
+        its own until now.
+
+        The scratch manifest itself is left behind: `save_project` has
+        already written the real one. The scratch directory is *not* deleted
+        here -- widgets still pointing into it (the Notes editor) have to be
+        moved across first; `save_project` calls `_discard_scratch_dir()`
+        once they have been.
+        """
+        scratch = self._scratch_dir
+        if scratch is None or not scratch.exists():
+            return
+
+        project_dir.mkdir(parents=True, exist_ok=True)
+        for entry in scratch.iterdir():
+            target = project_dir / entry.name
+            if entry.is_dir():
+                shutil.copytree(entry, target, dirs_exist_ok=True)
+            elif entry.name.endswith(PROJECT_FILE_SUFFIX):
+                continue
+            else:
+                shutil.copy2(entry, target)
 
     def notes_path_for_sample(self, sample_id):
         """Path to a sample's Notes ``.rst`` file under the current project
@@ -473,15 +688,65 @@ class ProjectManager(QObject):
         Returns
         -------
         Path or None
-            None if there's no sample selected or no project directory yet
-            (see `project_dir`) -- Notes has nowhere to save until the
-            project has been saved once.
+            None if there's no sample selected or no project open. An
+            unsaved project resolves to its scratch directory rather than
+            None, so Notes always has somewhere to write.
         """
-        if not sample_id or self.project_dir is None:
+        return self._sidecar_path(sample_id, 'notes.rst')
+
+    def import_settings_path_for_sample(self, sample_id):
+        """Path to a sample's import-settings JSON under the current project
+        directory (see `save_import_settings`).
+
+        Parameters
+        ----------
+        sample_id : str
+
+        Returns
+        -------
+        Path or None
+        """
+        return self._sidecar_path(sample_id, IMPORT_SETTINGS_FILENAME)
+
+    def _sidecar_path(self, sample_id, filename):
+        """``<project_dir>/<sample_id>/<filename>``, with the parent created."""
+        project_dir = self.project_dir
+        if not sample_id or project_dir is None:
             return None
-        notes_path = self.project_dir / sample_id / "notes.rst"
-        notes_path.parent.mkdir(parents=True, exist_ok=True)
-        return notes_path
+        path = project_dir / sample_id / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def save_import_settings(self, sample_id, settings):
+        """Record the settings a sample was imported with, alongside its other
+        per-sample sidecars.
+
+        Written automatically by the import tool (`MapImporter.import_data`)
+        so an import can be traced -- and repeated -- without the user having
+        to remember to save the metadata table by hand. Like every other
+        sidecar it lands in the scratch directory for an untitled project and
+        moves under the project directory on the first save.
+
+        Parameters
+        ----------
+        sample_id : str
+        settings : dict
+            JSON-serializable import parameters. Values that aren't (numpy
+            scalars from the metadata table, `Path`s) are stringified.
+
+        Returns
+        -------
+        Path or None
+            Where it was written, or None if there was nowhere to write it.
+        """
+        path = self.import_settings_path_for_sample(sample_id)
+        if path is None:
+            return None
+        payload = dict(settings)
+        payload.setdefault('saved', datetime.now().isoformat(timespec='seconds'))
+        with open(path, 'w') as f:
+            json.dump(payload, f, indent=2, default=str)
+        return path
 
     # ------------------------------------------------------------------
     # Internal helpers

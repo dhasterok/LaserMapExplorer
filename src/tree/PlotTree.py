@@ -50,9 +50,16 @@ class PlotTree(CustomDockWidget):
         self.logger_key = 'Tree'
 
         self.ui = parent
-        
+
         # Initialize plot registry (will be properly connected when MainWindow initializes)
         self.plot_registry = None
+
+        # Guard for on_tree_item_changed while the tree is being built/synced
+        # programmatically.  NOTE: do not use treeModel.blockSignals() for this
+        # -- that also suppresses rowsInserted/dataChanged, so the view never
+        # learns about leaves added while blocked (e.g. new ratios stay
+        # invisible until some later, unblocked insert forces a relayout).
+        self._suppress_item_changed = False
 
         #create plot tree
         self.setup_ui()
@@ -197,7 +204,7 @@ class PlotTree(CustomDockWidget):
         are ever made checkable (see `add_sample()`/`update_tree()`), so this
         only fires for user-driven toggles there.
         """
-        if not item.isCheckable():
+        if self._suppress_item_changed or not item.isCheckable():
             return
 
         path = self.treeView.get_item_path(item)
@@ -214,6 +221,20 @@ class PlotTree(CustomDockWidget):
             return
 
         data.processed.set_attribute(field, attr, item.checkState() == Qt.CheckState.Checked)
+
+    def expand_branch(self, item):
+        """Expands a newly created branch (and its parent) so its leaves are visible.
+
+        `initialize_tree()` only expands what exists at startup, so branches
+        added later (e.g. a sample's first ratio) would otherwise appear
+        collapsed.
+        """
+        if item is None:
+            return
+        index = self.treeView.treeModel.indexFromItem(item)
+        if index.isValid():
+            self.treeView.setExpanded(index.parent(), True)
+            self.treeView.setExpanded(index, True)
 
     def show_tree_context_menu(self, pos):
         """Right-click "Select All"/"Select None" for a data branch or one sample within it."""
@@ -257,7 +278,7 @@ class PlotTree(CustomDockWidget):
         top_level = item.parent() is None
         sample_branches = [item.child(r) for r in range(item.rowCount())] if top_level else [item]
 
-        self.treeView.treeModel.blockSignals(True)
+        self._suppress_item_changed = True
         try:
             for sample_branch in sample_branches:
                 data = self.ui.app_data.data.get(sample_branch.text())
@@ -269,7 +290,7 @@ class PlotTree(CustomDockWidget):
                     if data is not None:
                         data.processed.set_attribute(leaf.text(), attr, check_state == Qt.CheckState.Checked)
         finally:
-            self.treeView.treeModel.blockSignals(False)
+            self._suppress_item_changed = False
 
     def add_sample(self, sample_id):
         """Create plot selector tree
@@ -294,6 +315,7 @@ class PlotTree(CustomDockWidget):
         analyte_branch = treeView.branch_exists(self.tree['Analyte'], sample_id)
         if not analyte_branch:
             analyte_branch = treeView.add_branch(self.tree['Analyte'], sample_id)
+            self.expand_branch(analyte_branch)
         else:
             return
 
@@ -301,12 +323,13 @@ class PlotTree(CustomDockWidget):
         norm_analyte_branch = treeView.branch_exists(self.tree['Analyte (normalized)'], sample_id)
         if not norm_analyte_branch:
             norm_analyte_branch = treeView.add_branch(self.tree['Analyte (normalized)'], sample_id)
+            self.expand_branch(norm_analyte_branch)
         else:
             return
 
-        # block itemChanged while bulk-creating leaves so initial check-state
+        # suppress itemChanged while bulk-creating leaves so initial check-state
         # doesn't get written back into column_attributes as a user toggle
-        treeView.treeModel.blockSignals(True)
+        self._suppress_item_changed = True
         try:
             # add leaves for analytes
             for analyte in data.match_attribute('data_type','Analyte'):
@@ -325,6 +348,7 @@ class PlotTree(CustomDockWidget):
             ratio_branch = treeView.branch_exists(self.tree['Ratio'], sample_id)
             if not ratio_branch:
                 ratio_branch = treeView.add_branch(self.tree['Ratio'], sample_id)
+                self.expand_branch(ratio_branch)
             else:
                 return
 
@@ -332,6 +356,7 @@ class PlotTree(CustomDockWidget):
             norm_ratio_branch = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
             if not norm_ratio_branch:
                 norm_ratio_branch = treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
+                self.expand_branch(norm_ratio_branch)
             else:
                 return
 
@@ -345,7 +370,7 @@ class PlotTree(CustomDockWidget):
                 if not leaf:
                     treeView.add_leaf(norm_ratio_branch, ratio, checkable=True, checked=bool(data.get_attribute(ratio, 'use_normalized')))
         finally:
-            treeView.treeModel.blockSignals(False)
+            self._suppress_item_changed = False
 
     def add_calculated_leaf(self, new_field):
 
@@ -356,6 +381,7 @@ class PlotTree(CustomDockWidget):
         calculated_branch = treeView.branch_exists(self.tree['Calculated'], sample_id)
         if not calculated_branch:
             sample_branch = treeView.add_branch(self.tree['Calculated'], sample_id)
+            self.expand_branch(sample_branch)
         else:
             sample_branch = calculated_branch
 
@@ -654,13 +680,14 @@ class PlotTree(CustomDockWidget):
         # 'use'/'use_normalized' are set authoritatively by AnalyteDialog, the
         # PlotTree checkboxes below, and their bulk select/none actions -- this
         # method only reflects that state (highlighting + checkbox sync), it
-        # must not reset or overwrite it on every tree rebuild. Block signals
-        # for the *whole* method, including unhighlight_tree() below: setting
-        # an item's background also fires itemChanged (it's not exclusive to
-        # checkState changes), which would otherwise write a leaf's current
-        # (possibly stale) checkbox state back over a real 'use' value that
-        # was just set elsewhere but not yet reflected in the checkbox.
-        treeView.treeModel.blockSignals(True)
+        # must not reset or overwrite it on every tree rebuild. Suppress
+        # itemChanged for the *whole* method, including unhighlight_tree()
+        # below: setting an item's background also fires itemChanged (it's not
+        # exclusive to checkState changes), which would otherwise write a
+        # leaf's current (possibly stale) checkbox state back over a real
+        # 'use' value that was just set elsewhere but not yet reflected in
+        # the checkbox.
+        self._suppress_item_changed = True
         try:
             # Un-highlight all leaf in the trees
             self.unhighlight_tree(self.tree['Ratio'])
@@ -675,11 +702,13 @@ class PlotTree(CustomDockWidget):
                     sample_branch = treeView.branch_exists(self.tree['Ratio'],sample_id)
                     if not sample_branch:
                         sample_branch = self.treeView.add_branch(self.tree['Ratio'], sample_id)
+                        self.expand_branch(sample_branch)
 
                     # find sample_id (branch) in ratio normalized (tree), if it does not exist, create it
                     sample_branch_norm = treeView.branch_exists(self.tree['Ratio (normalized)'], sample_id)
                     if not sample_branch_norm:
                         sample_branch_norm = self.treeView.add_branch(self.tree['Ratio (normalized)'], sample_id)
+                        self.expand_branch(sample_branch_norm)
 
                     # check if ratio (leaf) exists in sample_id (branch) and create if necessesary
                     leaf_item = treeView.find_leaf(sample_branch, analyte)
@@ -737,7 +766,7 @@ class PlotTree(CustomDockWidget):
                 if norm_update: #update if analytes are returned from analyte selection window
                     data.update_norm(norm, analyte)
         finally:
-            treeView.treeModel.blockSignals(False)
+            self._suppress_item_changed = False
 
     def add_tree_item(self, plot_info=None):
         """Updates plot selector list and adds plot information data to tree item

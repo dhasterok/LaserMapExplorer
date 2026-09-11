@@ -12,7 +12,7 @@ def test_import_directory(qtbot, main_window, mocker):
     mocker.patch.object(QFileDialog, 'getExistingDirectory', return_value='maps/Alex_garnet_maps/processed data')
 
     # Mock the exec_ method of QFileDialog to simulate the dialog being accepted
-    mocker.patch.object(QFileDialog, 'exec_', return_value=QFileDialog.Accepted)
+    mocker.patch.object(QFileDialog, 'exec_', return_value=QFileDialog.DialogCode.Accepted)
     mocker.patch.object(QFileDialog, 'selectedFiles', return_value=['maps/Alex_garnet_maps/processed data'])
 
     # Find the action and trigger it

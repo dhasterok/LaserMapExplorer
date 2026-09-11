@@ -146,3 +146,35 @@ def test_classify_batch_skips_missing_values():
     element_columns = {"Ca": "Ca43", "Al": "Al27", "Si": "Si29", "O": "O16"}
     result = classify_batch(data, [ANORTHITE, ALBITE], element_columns, tau_min=0.9, n_min=3)
     assert result.loc[0, "label"] == "Anorthite"
+
+
+def test_classify_batch_reports_progress():
+    from src.calibration.progress import STAGE_CLASSIFICATION
+
+    data = pd.DataFrame({
+        "Ca43": [13.72] * 5,
+        "Al27": [18.97] * 5,
+        "Si29": [20.75] * 5,
+        "O16": [46.14] * 5,
+    })
+    element_columns = {"Ca": "Ca43", "Al": "Al27", "Si": "Si29", "O": "O16"}
+    events = []
+    classify_batch(data, [ANORTHITE, ALBITE], element_columns, tau_min=0.9, progress_callback=events.append)
+
+    assert events  # small batches still report at least a final event
+    assert all(e.stage == STAGE_CLASSIFICATION for e in events)
+    assert events[-1].current == events[-1].total == len(data)
+
+
+def test_classify_batch_without_progress_callback_is_unchanged():
+    data = pd.DataFrame({
+        "Ca43": [13.72, 0.0],
+        "Al27": [18.97, 10.3],
+        "Si29": [20.75, 32.1],
+        "O16": [46.14, 48.9],
+        "Na23": [0.0, 8.6],
+    })
+    element_columns = {"Ca": "Ca43", "Al": "Al27", "Si": "Si29", "O": "O16", "Na": "Na23"}
+    result = classify_batch(data, [ANORTHITE, ALBITE], element_columns, tau_min=0.9)
+    assert result.loc[0, "label"] == "Anorthite"
+    assert result.loc[1, "label"] == "Albite"

@@ -642,10 +642,11 @@ class MainWindow(QMainWindow):
         own "Record notes" session via `reason='manual'`.
 
         Unlike `toggle_action_capture`, there's no file-creation prompt:
-        Notes files are already auto-managed per sample
-        (`ProjectManager.notes_path_for_sample`), so this is safe to enable
-        even with no sample loaded yet -- nothing is written until a notes
-        file actually exists, and the indicator just stays gray.
+        Notes files are auto-managed per sample
+        (`ProjectManager.notes_path_for_sample`), so turning capture on just
+        creates/loads the current sample's file via `refresh_notes_file()`.
+        With no sample loaded there's still nowhere to write, and the
+        indicator stays gray.
 
         Parameters
         ----------
@@ -654,12 +655,39 @@ class MainWindow(QMainWindow):
         """
         self.notes_capture_enabled = enabled
         if enabled:
+            # Recording into Notes implies a notes file to record into --
+            # open_notes() creates the dock (if needed) and, through
+            # refresh_notes_file(), the current sample's file. ReportWriter
+            # would otherwise only do this on the first recorded event.
+            self.open_notes()
             self.report_writer.start_session(
                 reason='manual',
                 title=f"Notes recording - {datetime.now():%Y-%m-%d %H:%M:%S}",
             )
         else:
             self.report_writer.end_session(reason='manual')
+        self._refresh_notes_indicator()
+
+    def refresh_notes_file(self):
+        """Point the open Notes editor at the current sample's notes file.
+
+        The file is created if it doesn't exist yet and loaded if it does --
+        both handled by the `notes_file` setter, which also (re)starts the
+        Notes autosave timer. Every place the answer can change routes
+        through here: opening Notes, switching sample, turning notes
+        recording on, and saving a previously-untitled project (whose notes
+        move out of the scratch directory, see
+        `ProjectManager._migrate_scratch_dir`).
+
+        A no-op when Notes has never been opened, and safe with no project or
+        sample -- `notes_path_for_sample()` returns None there and the setter
+        handles it (status message only, no crash).
+        """
+        if not hasattr(self, 'notes_dock'):
+            return
+        self.notes_dock.notes.notes_file = self.project_manager.notes_path_for_sample(
+            self.app_data.sample_id
+        )
         self._refresh_notes_indicator()
 
     def _refresh_notes_indicator(self):
@@ -1030,12 +1058,9 @@ class MainWindow(QMainWindow):
         if hasattr(self, "mask_dock"):
             self.update_mask_dock()
 
-        if hasattr(self, 'notes_dock'):
-            # change notes file to new sample.  This will initiate the new file and autosave timer.
-            # None (project not saved yet) is a valid value here -- the
-            # notes_file setter handles it (status label only, no crash).
-            self.notes_dock.notes.notes_file = self.project_manager.notes_path_for_sample(self.app_data.sample_id)
-            self._refresh_notes_indicator()
+        # change notes file to new sample.  This creates the file (or loads an
+        # existing one) and restarts the autosave timer.
+        self.refresh_notes_file()
 
 
         if hasattr(self,"info_dock"):
@@ -1801,6 +1826,11 @@ class MainWindow(QMainWindow):
             notes_file = self.project_manager.notes_path_for_sample(self.app_data.sample_id)
 
             self.notes_dock = NotesDock(self, filename=notes_file)
+            # Keeps the status bar's Notes indicator correct even when the
+            # ribbon's New/Open/Save As change notes_file from inside the
+            # dock, not just when this class changes it directly (see the
+            # other _refresh_notes_indicator() call sites).
+            self.notes_dock.notes.notesFileChanged.connect(lambda _: self._refresh_notes_indicator())
             info_menu_items = [
                 ('Sample info', lambda: self.insert_info_note('sample info')),
                 ('List analytes used', lambda: self.insert_info_note('analytes')),
@@ -1819,6 +1849,10 @@ class MainWindow(QMainWindow):
                 self.help_mapping[self.notes_dock] = 'notes'
 
             self._refresh_notes_indicator()
+        else:
+            # Already-open dock: the sample (or the project's location) may
+            # have changed since it was last pointed at a file.
+            self.refresh_notes_file()
 
         self.notes_dock.show()
         #self.notes_dock.setWindowFlags(Qt.Window | Qt.CustomizeWindowHint | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint)

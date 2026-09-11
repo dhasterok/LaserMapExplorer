@@ -20,6 +20,8 @@ from typing import Callable, Iterable
 import numpy as np
 import pandas as pd
 
+from src.calibration.reflib import clean_analyte_name
+
 _ACQUIRED_RE = re.compile(r"^Acquired\s*:\s*(.+)$")
 _FILENAME_RE = re.compile(r"^(?P<label>.+?)\s-\s(?P<index>\d+)$")
 _ANALYTE_RE = re.compile(r"^([A-Za-z]{1,2})(\d+)$")
@@ -279,6 +281,11 @@ def validate_analyte_columns(
     Non-fatal by design: an unrecognized column is reported for the caller
     to warn about, not treated as a parse failure, since instruments can
     report isotopes absent from any particular local reference table.
+
+    Tolerates a raw mass-shift/reaction-product suffix (e.g. ``"Ca43 ->
+    43"``, ``"Ti47 -> 113"`` -- see :func:`~src.calibration.reflib.clean_analyte_name`)
+    before matching, so a reaction-cell method's columns aren't all reported
+    as unrecognized just for carrying that decoration.
     """
     path = Path(isotope_table_path)
     if not path.exists():
@@ -289,7 +296,7 @@ def validate_analyte_columns(
     known = set(zip(table["symbol"], table["atomic_mass"].astype(int)))
     unknown = []
     for col in analytes:
-        m = _ANALYTE_RE.match(col)
+        m = _ANALYTE_RE.match(clean_analyte_name(col))
         if not m:
             unknown.append(col)
             continue
@@ -297,6 +304,83 @@ def validate_analyte_columns(
         if (element, mass) not in known:
             unknown.append(col)
     return unknown
+
+
+def clean_signal_columns(signal: pd.DataFrame) -> pd.DataFrame:
+    """Renames a signal frame's columns from raw instrument analyte names
+    to the plain ``"<element><mass>"`` form the rest of this package
+    expects, stripping any mass-shift/reaction-product suffix (see
+    :func:`~src.calibration.reflib.clean_analyte_name`).
+
+    Parameters
+    ----------
+    signal : pandas.DataFrame
+        One column per raw analyte, e.g. ``["Ca43 -> 43", "Ti47 -> 113"]``.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A new frame (``signal`` itself is not mutated) with cleaned column
+        names, e.g. ``["Ca43", "Ti47"]``.
+
+    Notes
+    -----
+    If two raw columns clean to the same name (an isotope monitored on two
+    different product channels within one method -- unusual, but not
+    impossible), only the first (in column order) is renamed; the second
+    keeps its original, still-unique raw name rather than silently
+    colliding with/overwriting the first under the shared clean name.
+    """
+    seen: set[str] = set()
+    rename: dict[str, str] = {}
+    for col in signal.columns:
+        clean = clean_analyte_name(col)
+        if clean in seen:
+            continue
+        seen.add(clean)
+        rename[col] = clean
+    return signal.rename(columns=rename)
+
+
+def clean_signal_dict(mapping: dict) -> dict:
+    """Same idea as :func:`clean_signal_columns`, for a plain
+    ``analyte -> value`` dict (e.g. a per-occurrence mean-signal mapping)
+    rather than a DataFrame's columns. First raw key wins a clean-name
+    collision, same as :func:`clean_signal_columns`.
+    """
+    out = {}
+    for key, value in mapping.items():
+        clean = clean_analyte_name(key)
+        if clean not in out:
+            out[clean] = value
+    return out
+
+
+def find_analyte_column(columns, element: str, mass: int) -> str | None:
+    """Finds which of ``columns`` (raw instrument column names) represents
+    isotope ``element``/``mass``, tolerating a mass-shift/reaction-product
+    suffix (see :func:`~src.calibration.reflib.clean_analyte_name`).
+
+    Parameters
+    ----------
+    columns : Iterable[str]
+        Raw column names to search, e.g. a signal DataFrame's ``.columns``.
+    element : str
+        Element symbol, e.g. ``"Ca"``.
+    mass : int
+        Isotope mass number, e.g. ``43``.
+
+    Returns
+    -------
+    str or None
+        The exact raw name from ``columns`` (e.g. ``"Ca43"`` or ``"Ca43 ->
+        43"``), or ``None`` if no column cleans down to ``f"{element}{mass}"``.
+    """
+    target = f"{element}{mass}"
+    for col in columns:
+        if clean_analyte_name(col) == target:
+            return col
+    return None
 
 
 def parse_line_file(
@@ -359,7 +443,22 @@ def parse_line_file(
     header = next(csv.reader([lines[3]]))
     if not header or header[0].strip().lower() != "time [sec]":
         raise RawFileFormatError(f"{path}: unexpected column header row: {lines[3]!r}")
-    analytes = [c.strip() for c in header[1:]]
+    # Reaction/collision-cell exports name a column "<element><mass> ->
+    # <product mass>" (e.g. "Ca43 -> 43", "Ti47 -> 113"). The measured
+    # isotope is the part before the arrow -- clean it here, once, at the
+    # single parse entry point, so the whole calibration package and its
+    # GUI use one plain "<element><mass>" name everywhere (matching the
+    # isotope/reference tables, and the calibrated_ppm columns). A raw
+    # header that would collide with an already-taken clean name keeps its
+    # original, still-unique form rather than producing a duplicate column.
+    seen: set[str] = set()
+    analytes: list[str] = []
+    for raw in header[1:]:
+        name = clean_analyte_name(raw.strip())
+        if name in seen:
+            name = raw.strip()
+        seen.add(name)
+        analytes.append(name)
 
     if validate_isotopes:
         unknown = validate_analyte_columns(analytes)

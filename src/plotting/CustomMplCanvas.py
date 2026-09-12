@@ -168,6 +168,14 @@ class MplCanvas(FigureCanvas):
             self.axes = self.fig.add_subplot(sub)
         super(MplCanvas, self).__init__(self.fig)
 
+        # An embedded FigureCanvasQTAgg defaults to Qt.FocusPolicy.NoFocus
+        # (only pyplot's own FigureManagerQT sets this), so matplotlib
+        # 'key_press_event's never fire and every keyboard shortcut bound to
+        # the canvas is dead -- e.g. the polygon tool's z/Escape/Delete.
+        # StrongFocus gives the canvas focus on click, which is when those
+        # shortcuts are meant to apply.
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         if parent is None:
             return
         self.ui = parent

@@ -64,7 +64,9 @@ class CanvasWidget(QWidget):
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
 
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(0, 450))
+        # modest minimum: bottom docks (e.g. MaskDock) stack under this widget,
+        # so a tall minimum here forces the main window taller than the screen
+        self.setMinimumSize(QSize(0, 250))
         self.setObjectName("centralwidget")
 
         canvas_widget_layout = QVBoxLayout(self)
@@ -98,8 +100,9 @@ class CanvasWidget(QWidget):
 
         self.toolbar = CanvasToolBar(self)
 
-        canvas_widget_layout.addWidget(self.canvasWindow)
-        canvas_widget_layout.addWidget(self.toolbar)
+        # the plot tabs absorb any height change; the toolbar stays fixed
+        canvas_widget_layout.addWidget(self.canvasWindow, 1)
+        canvas_widget_layout.addWidget(self.toolbar, 0)
 
     def connect_widgets(self):
         """Connects widgets to their respective functions"""
@@ -1464,6 +1467,7 @@ class CanvasToolBar(QGroupBox):
     def setupUI(self):
         self.setMinimumSize(QSize(200, 50))
         self.setMaximumSize(QSize(16777215, 50))
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self.setTitle("")
         self.setObjectName("groupBoxPlotToolBar")
 

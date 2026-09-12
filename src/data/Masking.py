@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
         QMessageBox, QToolButton, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QInputDialog,
         QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QListView, QToolBar, QAbstractItemView, QMenu,
         QLabel, QHeaderView, QTableWidget, QScrollArea, QMainWindow, QWidgetAction, QTabWidget, QDockWidget, QGridLayout,
-        QSpacerItem,
+        QSpacerItem, QFrame,
     )
 from lame_core.CustomWidgets import (
     CustomDockWidget, CustomTableWidget, CustomLineEdit, CustomComboBox, ToggleSwitch, CustomToolButton, CustomAction
@@ -90,7 +90,12 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(855, 367))
+        # Keep the minimum small: the central CanvasWidget sits directly above
+        # this dock, so their minimum heights add up. A tall minimum here forced
+        # QMainWindow to grow (and then refuse to shrink), or squished the canvas
+        # toolbar when the window was already screen-height. The contents scroll
+        # (see the QScrollArea below) instead of imposing their own minimum.
+        self.setMinimumSize(QSize(400, 150))
         self.setMaximumSize(QSize(524287, 524287))
         self.setFloating(False)
         # Closable in addition to floatable -- the status bar's 'BottomDock'
@@ -121,7 +126,14 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         self.cluster_tab = ClusterTab(self)
 
         dock_layout.addWidget(self.tab_widgets)
-        self.setWidget(container)
+
+        # scroll rather than enforce the contents' minimum height on the dock
+        scroll_area = QScrollArea()
+        scroll_area.setObjectName("Mask Dock Scroll Area")
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setWidget(container)
+        self.setWidget(scroll_area)
 
         # Connect tab change signal to update toolbar visibility
         self.tab_widgets.currentChanged.connect(self.update_toolbar_for_tab)

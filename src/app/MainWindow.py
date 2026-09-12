@@ -1660,7 +1660,8 @@ class MainWindow(QMainWindow):
             Will open the dock to the requested tab, options include 'filter', 'polygon'
             and cluster', by default None
         """
-        if not hasattr(self, 'mask_dock'):
+        first_open = not hasattr(self, 'mask_dock')
+        if first_open:
             self.mask_dock = MaskDock(self)
 
             self.mask_tab = {}
@@ -1692,7 +1693,14 @@ class MainWindow(QMainWindow):
             self.mask_dock.filter_tab.callback_edit_filter_max()
 
         self.mask_dock.show()
-        
+
+        if first_open and not self.mask_dock.isFloating():
+            # Size the dock by taking height from the canvas rather than letting
+            # QMainWindow grow the window; later opens keep the user's height.
+            available = self.canvas_widget.height() + self.mask_dock.height()
+            height = min(self.mask_dock.widget().sizeHint().height(), int(0.45 * available))
+            self.resizeDocks([self.mask_dock], [height], Qt.Orientation.Vertical)
+
         # Apply current theme to the newly created MaskDock
         self._force_widget_style_refresh(self.mask_dock)
 

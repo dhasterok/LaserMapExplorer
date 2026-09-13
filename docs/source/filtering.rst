@@ -45,7 +45,27 @@ Polygons can be used to filter specific regions of your data, to create a polygo
 2. Left-click to place vertices on the map
 3. Right-click to complete the polygon
 
-*LaME* allows you to create multiple polygons, which can be analyzed as separate regions or linked for combined analysis. To link or delink polygons, select multiple entries in the *Polygon Table* and click the |icon-link| or |icon-unlink| button. You can toggle the use of individual polygons in analyses by clicking the associated checkbox in the *Polygon Table*.
+While placing vertices, press ``z`` to remove the last one or ``Esc`` to abandon the polygon.
+These shortcuts act on the map, so click the map once first to give it keyboard focus.
+
+To delete polygons, select one or more rows in the *Polygon Table* and either click the
+Delete button on the tab's toolbar, press ``Delete``, or right-click the selection and choose
+*Delete Polygon*. A polygon selected on the map (click inside it) can also be removed with
+``Delete`` without going through the table.
+
+While a polygon is being drawn, the map is shown in full so the area being outlined stays
+visible; once it is complete, everything outside the selection is dimmed to keep the focus
+on the selected region. The color and strength of that dimming can be set with *Mask color*
+and *Mask opacity* on the *Text and Scales* page of the *Styling Toolbox*.
+
+*LaME* allows you to create multiple polygons. Regions are **combined**, so several polygons
+select all of their areas together, and every polygon is drawn on the map. Each row of the
+*Polygon Table* has an *In/out* setting: *In* keeps the enclosed area, while *Out* removes it
+from the selection, which is how a hole is cut in a larger region (an *Out* polygon is drawn
+with a dashed outline). With no *In* polygon, an *Out* polygon simply excludes its own area.
+You can toggle the use of individual polygons in analyses by clicking the associated checkbox
+in the *Analysis* column of the *Polygon Table*, and use the |icon-polygon-new| toolbar
+button to turn the whole polygon mask on or off without discarding the polygons.
 
 Edge-detection
 --------------

@@ -1167,6 +1167,11 @@ class MainWindow(QMainWindow):
             if hasattr(self.mask_dock, "polygon_tab"):
                 # self.polygon is created in mask_dock.polygon_tab
                 self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
+                # The table belongs to whichever sample is now current, so it
+                # has to be rebuilt here -- clear_polygons only removes the
+                # artists (it deliberately leaves the table alone, since it
+                # also runs on every replot).
+                self.mask_dock.polygon_tab.refresh_polygons()
 
         #clear profiling
         if hasattr(self, "profile_dock"):
@@ -1379,9 +1384,10 @@ class MainWindow(QMainWindow):
                         if (hasattr(self, "profile_dock") and self.profile_dock.profile_toggle.isChecked()) and (self.app_data.sample_id in self.profile_dock.profiling.profiles):
                             self.profile_dock.profiling.clear_plot()
                             self.profile_dock.profiling.plot_existing_profile(canvas)
-                        elif (hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked()) and (self.app_data.sample_id in self.mask_dock.polygon_tab.polygon_manager.polygons):  
-                            self.mask_dock.polygon_tab.polygon_manager.clear_polygons()
-                            self.mask_dock.polygon_tab.polygon_manager.plot_existing_polygon(canvas)
+                        elif hasattr(self, "mask_dock") and self.mask_dock.polygon_tab.polygon_toggle.isChecked():
+                            # draws every polygon of this sample (and copes
+                            # with a sample that has none)
+                            self.mask_dock.polygon_tab.polygon_manager.draw_polygons(canvas)
                     else:
                         # Always use create_plot for main canvas
                         canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)

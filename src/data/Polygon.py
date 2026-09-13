@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 from matplotlib.patches import Polygon as MplPolygon
 from matplotlib.lines import Line2D
+import copy
 import os
 import pickle
 from src.control.Logger import auto_log_methods, log
@@ -66,15 +67,61 @@ class InteractivePolygon:
         self._remove_markers()
         self.ax.figure.canvas.draw_idle()
 
+def detached_copy(polygon):
+    """A copy of `polygon` with its matplotlib artists stripped.
+
+    The live ``patch``/``vertex_markers`` reference the axes and figure, so
+    pickling a polygon while it is on screen drags the whole figure into the
+    file (megabytes instead of a few hundred bytes).
+
+    Module-level rather than a ``PolygonManager`` staticmethod: the class's
+    ``@auto_log_methods`` decorator rewraps static methods as plain functions,
+    which loses the static binding.
+    """
+    clone = copy.copy(polygon)
+    clone.patch = None
+    clone.vertex_markers = []
+    clone.is_selected = False
+    return clone
+
+
 class SerializablePolygon:
-    def __init__(self, p_id, verts, color='b', alpha=0.3):
+    """One polygon's geometry and mask role, as stored in a ``.poly`` file.
+
+    ``in_out``, ``enabled`` and ``name`` are also declared as *class*
+    attributes so polygons pickled before they existed still unpickle: the
+    instance ``__dict__`` simply lacks them and attribute lookup falls back to
+    these defaults. Don't remove the class-level values.
+    """
+    #: 'in' keeps the enclosed area, 'out' removes it (see `polygon_mask`).
+    in_out = 'in'
+    #: Whether this polygon contributes to the mask at all (the table's
+    #: 'Analysis' checkbox).
+    enabled = True
+    #: Display name; None falls back to "Polygon <p_id>".
+    name = None
+
+    def __init__(self, p_id, verts, color='b', alpha=0.3, in_out='in', enabled=True, name=None):
         self.p_id = p_id
         self.verts = verts  # list of (x, y) tuples
         self.color = color
         self.alpha = alpha
+        self.in_out = in_out
+        self.enabled = enabled
+        self.name = name
         self.patch: Optional[MplPolygon] = None  # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
         self.is_selected = False
+
+    @property
+    def display_name(self):
+        """str : The polygon's name, or a default derived from its id."""
+        return self.name or f'Polygon {self.p_id}'
+
+    @property
+    def is_out(self):
+        """bool : True when this polygon removes its area from the mask."""
+        return str(self.in_out).lower() == 'out'
 
     def select(self):
         self.is_selected = True
@@ -141,17 +188,51 @@ class PolygonManager:
         self.p_id_gen = 0
         self.p_id = 0
 
+    def _seed_pid(self):
+        """Raise the id counter above every id already in use.
+
+        Without this, a freshly loaded project starts counting from 0 again and
+        the next new polygon overwrites a loaded one.
+        """
+        used = [p_id for polys in self.polygons.values() for p_id in polys]
+        if used:
+            self.p_id_gen = max(self.p_id_gen, max(used))
+
     def increment_pid(self):
         """Creates a new polygon ID"""
+        self._seed_pid()
         self.p_id_gen += 1
         self.p_id = self.p_id_gen
         return self.p_id
 
     def initiate_axes(self,canvas):
+        # Drop the handlers bound to the previous canvas first -- `update_SV`
+        # builds a new canvas on every replot, and stale connections otherwise
+        # keep firing (and calling draw_idle) on a detached figure.
+        self.disconnect()
         self.ax = canvas.axes
         self.canvas = canvas
         self.canvas.disable_distance_mode()
         self.enable_connections()
+
+    def set_mask_overlay_visible(self, visible):
+        """Show/hide the field map's masked-area overlay without replotting.
+
+        The overlay (see `LamePlot.plot_map_mpl`) dims everything outside the
+        current mask, which is what makes an existing selection stand out --
+        but it also dims the area being outlined. Hiding the artist keeps the
+        canvas and the in-progress event connections intact; triggering a
+        replot instead would swap the canvas out mid-draw.
+        """
+        canvas = getattr(self, 'canvas', None)
+        overlay = getattr(canvas, 'mask_overlay', None)
+        if overlay is None:
+            return
+        try:
+            overlay.set_visible(visible)
+            canvas.draw_idle()
+        except Exception as e:
+            log(f"could not toggle mask overlay: {e}", prefix="Polygon")
 
     def start_polygon(self,canvas):
         """Start polygon drawing for a particular sample_id."""
@@ -159,8 +240,11 @@ class PolygonManager:
         self._drawing = True
         self.current_verts = []
         self._remove_temp()
+        # show the full map while outlining
+        self.set_mask_overlay_visible(False)
 
     def finish_polygon(self):
+        added = False
         if len(self.current_verts) >= 3:
             pid = self.p_id  # already incremented by Create Polygon button click
             verts: list[tuple[float, float]] = [(float(v[0]), float(v[1])) for v in self.current_verts]
@@ -172,25 +256,54 @@ class PolygonManager:
                 self.polygons[sample_id] = {}
             polygon_obj = SerializablePolygon(pid, verts, color, alpha)
             self.polygons[sample_id][pid] = polygon_obj
-            # Draw on plot
-            poly_patch = MplPolygon(verts, closed=True, edgecolor=color, fill=True, alpha=alpha)  # type: ignore[arg-type]
-            polygon_obj.patch = poly_patch
-            self.ax.add_patch(poly_patch)
-            self.canvas.draw_idle()
             self._remove_temp()
+            added = True
         self._drawing = False
+        self.set_mask_overlay_visible(True)
+        if added:
+            # redraw through the one drawing path, so the new polygon looks
+            # like every other one and becomes the selected one
+            self.draw_polygons(self.canvas, p_id=self.p_id)
         self.disconnect()  # stop canvas events until next Create Polygon click
-        self.parent.update_table_widget()  # Update the table in the main window
+        if added:
+            self.notify_model_changed()
+
+    def notify_model_changed(self):
+        """Tell the owning tab the polygon set changed, so it can resync.
+
+        Only for *model* changes (added/removed/edited polygons). Redrawing on
+        its own must not go through here -- rebuilding the table on every
+        replot is what used to reset the per-polygon 'Analysis' checkboxes and
+        re-check the toolbar's polygon mask toggle.
+        """
+        if self.parent is not None and hasattr(self.parent, 'refresh_polygons'):
+            self.parent.refresh_polygons()
 
     # --- Saving and Loading ---
     def save_polygons(self, project_dir, sample_id):
-        if sample_id in self.polygons:
-            os.makedirs(os.path.join(project_dir, sample_id), exist_ok=True)
-            for p_id, polygon in self.polygons[sample_id].items():
-                file_name = os.path.join(project_dir, sample_id, f'polygon_{p_id}.poly')
-                with open(file_name, 'wb') as file:
-                    pickle.dump(polygon, file)
-            log("Polygons saved successfully.", prefix="Polygon")
+        if sample_id not in self.polygons:
+            return
+
+        directory = os.path.join(project_dir, sample_id)
+        os.makedirs(directory, exist_ok=True)
+
+        for p_id, polygon in self.polygons[sample_id].items():
+            file_name = os.path.join(directory, f'polygon_{p_id}.poly')
+            with open(file_name, 'wb') as file:
+                pickle.dump(detached_copy(polygon), file)
+
+        # Drop files for polygons that no longer exist -- otherwise a deleted
+        # polygon reappears the next time the project is loaded.
+        keep = {f'polygon_{p_id}.poly' for p_id in self.polygons[sample_id]}
+        for file_name in os.listdir(directory):
+            if file_name.endswith('.poly') and file_name not in keep:
+                try:
+                    os.remove(os.path.join(directory, file_name))
+                except OSError as e:
+                    log(f"could not remove stale polygon file {file_name}: {e}", prefix="Warning")
+
+        log("Polygons saved successfully.", prefix="Polygon")
+
 
     def load_polygons(self, project_dir, sample_id):
         directory = os.path.join(project_dir, sample_id)
@@ -203,19 +316,19 @@ class PolygonManager:
                 file_path = os.path.join(directory, file_name)
                 with open(file_path, 'rb') as file:
                     polygon = pickle.load(file)
+                    # A polygon saved by an older version may carry a stale
+                    # patch from the figure it was drawn on; drawing is
+                    # `draw_polygons`' job, once a canvas is available.
+                    polygon.patch = None
+                    polygon.vertex_markers = []
                     self.polygons[sample_id][polygon.p_id] = polygon
-                    # Draw on axes, if a canvas is currently attached (e.g. the
-                    # polygon tool is active). If not, the polygon is still
-                    # loaded into self.polygons and will be drawn later by
-                    # plot_existing_polygon once a canvas is available.
-                    if hasattr(self, 'ax') and hasattr(self, 'canvas'):
-                        poly_patch = MplPolygon(polygon.verts, closed=True, edgecolor=polygon.color,  # type: ignore[arg-type]
-                                                fill=True, alpha=polygon.alpha)
-                        self.ax.add_patch(poly_patch)
+
+        # keep new polygons from colliding with the ids just loaded
+        self._seed_pid()
+
         if hasattr(self, 'canvas'):
-            self.canvas.draw_idle()
-        if self.parent is not None and hasattr(self.parent, 'update_table_widget'):
-            self.parent.update_table_widget()  # Update the table in the main window
+            self.draw_polygons(self.canvas)
+        self.notify_model_changed()
         log("Polygons loaded successfully.", prefix="Polygon")
 
     # --- Helpers (Matplotlib) ---
@@ -299,15 +412,13 @@ class PolygonManager:
             if event.key == 'escape':
                 self._remove_temp()
                 self._drawing = False
+                self.set_mask_overlay_visible(True)
         elif self.selected_poly:
             if event.key in ['delete', 'backspace']:
-                if self.selected_poly.patch is not None:
-                    self.selected_poly.patch.remove()
-                sample_id = self.main_window.app_data.sample_id
-                if sample_id in self.polygons:
-                    self.polygons[sample_id].pop(self.selected_poly.p_id, None)
-                self.selected_poly = None
-                self.canvas.draw_idle()
+                self.remove_polygons([self.selected_poly.p_id])
+                # keep the table and mask in step -- otherwise the deleted
+                # polygon's row survives and the next mask update raises
+                self.notify_model_changed()
 
     def _draw_temp(self, event=None):
         self._remove_temp()
@@ -324,108 +435,163 @@ class PolygonManager:
         self.ax.add_line(self.current_line)
         self.canvas.draw_idle()
 
+    def _remove_artists(self, polygon):
+        """Take `polygon`'s patch and vertex markers off the axes, if drawn.
+
+        An instance method, not a staticmethod: ``@auto_log_methods`` rewraps
+        static methods as plain functions, which loses the static binding.
+        """
+        if getattr(polygon, 'patch', None) is not None:
+            try:
+                polygon.patch.remove()
+            except Exception:
+                pass  # already gone, or its axes were discarded
+            polygon.patch = None
+        for marker in getattr(polygon, 'vertex_markers', []):
+            try:
+                marker.remove()
+            except Exception:
+                pass
+        polygon.vertex_markers = []
+
+    def remove_polygons(self, p_ids, sample_id=None):
+        """Delete polygons by id, artists and all.
+
+        The one removal path -- the toolbar's Delete action, the polygon
+        table's context menu and the canvas Delete key all come through here.
+        Callers follow it with `notify_model_changed` so the table and mask
+        resync.
+
+        Parameters
+        ----------
+        p_ids : iterable of int
+            Polygon ids to remove. Ids that aren't present are skipped.
+        sample_id : str, optional
+            Defaults to the current sample.
+
+        Returns
+        -------
+        list of int
+            The ids actually removed.
+        """
+        if sample_id is None:
+            sample_id = self.main_window.app_data.sample_id
+
+        polygons = self.polygons.get(sample_id, {})
+        removed = []
+        for p_id in list(p_ids):
+            polygon = polygons.pop(p_id, None)
+            if polygon is None:
+                continue
+            self._remove_artists(polygon)
+            if self.selected_poly is polygon:
+                self.selected_poly = None
+            removed.append(p_id)
+
+        if removed and hasattr(self, 'canvas'):
+            self.canvas.draw_idle()
+
+        return removed
+
     def deselect_all(self):
         sample_id = self.main_window.app_data.sample_id
         for poly in self.polygons.get(sample_id, {}).values():
             poly.deselect()
         self.selected_poly = None
 
-    def plot_existing_polygon(self,canvas, p_id=None):
-        """Plot the first (or specified) existing polygon for the current sample ID.
+    #: Edge colour for an 'out' polygon -- one that removes its area.
+    OUT_COLOR = 'firebrick'
 
-        - Selects the row in the table widget for the polygon.
-        - Plots the polygon patch and, if present, the vertex scatter points.
+    def draw_polygons(self, canvas, p_id=None):
+        """Draw every polygon of the current sample on `canvas`.
+
+        All of them are drawn, not just one: outlining a new region is
+        guesswork if the regions already selected are invisible. The selected
+        polygon is highlighted and shows its vertices; 'out' polygons (which
+        remove their area from the mask) are drawn in `OUT_COLOR`.
+
+        Parameters
+        ----------
+        canvas : MplCanvas
+            Canvas to draw on. Also becomes the canvas this manager listens to.
+        p_id : int, optional
+            Polygon to select. Defaults to keeping the current selection.
         """
-        sample_id = self.main_window.app_data.sample_id
         self.initiate_axes(canvas)
+        self.clear_plot()
 
-        if sample_id in self.polygons and len(self.polygons[sample_id]) > 0:
-            if not p_id:
-                # Get the first polygon ID and its corresponding polygon object
-                p_id = next(iter(self.polygons[sample_id]))
-            
-            polygon = self.polygons[sample_id][p_id]
+        sample_id = self.main_window.app_data.sample_id
+        polygons = self.polygons.get(sample_id, {})
+        if not polygons:
+            self.canvas.draw_idle()
+            return
 
-            # Clear any previous selection in the table
-            table = self.parent.tableWidgetPolyPoints
-            table.blockSignals(True)
-            table.selectionModel().blockSignals(True)
-            table.clearSelection()
-            for row in range(table.rowCount()):
-                item = table.item(row, 0)
-                if item and int(item.text()) == p_id:
-                    table.selectRow(row)
-                    break
-            table.selectionModel().blockSignals(False)
-            table.blockSignals(False)
+        if p_id is None and self.selected_poly is not None:
+            p_id = self.selected_poly.p_id
+        if p_id not in polygons:
+            p_id = None
 
-            # Remove the patch from axes if it exists (to avoid double-drawing)
-            if getattr(polygon, 'patch', None) is not None:
-                try:
-                    polygon.patch.remove()
-                except Exception:
-                    pass  # If already removed
-                polygon.patch = None
+        self.selected_poly = polygons.get(p_id) if p_id is not None else None
 
-            # Draw the polygon patch on the axes
-            from matplotlib.patches import Polygon as MplPolygon
+        for pid, polygon in polygons.items():
+            selected = pid == p_id
+            polygon.is_selected = selected
+            edgecolor = self.OUT_COLOR if polygon.is_out else polygon.color
+
+            # Outline only: the selected area is the one the mask overlay
+            # leaves undimmed, so filling it would hide the data being
+            # inspected. The edge carries the state instead.
             polygon.patch = MplPolygon(polygon.verts, closed=True,  # type: ignore[arg-type]
-                                    edgecolor=polygon.color,
-                                    fill=True, alpha=polygon.alpha)
+                                       edgecolor='orange' if selected else edgecolor,
+                                       linewidth=2.5 if selected else 1.5,
+                                       linestyle='--' if polygon.is_out else '-',
+                                       fill=False)
             self.ax.add_patch(polygon.patch)
 
-            # Draw the vertex markers, if any (re-create if needed)
-            if hasattr(polygon, 'vertex_markers'):
-                for marker in polygon.vertex_markers:
-                    try:
-                        marker.remove()
-                    except Exception:
-                        pass
-                polygon.vertex_markers = []
-            else:
-                polygon.vertex_markers = []
-            for x, y in polygon.verts:
-                marker = self.ax.scatter([x], [y], c='red', s=50, zorder=5)
-                polygon.vertex_markers.append(marker)
+            polygon.vertex_markers = []
+            if selected:
+                for x, y in polygon.verts:
+                    polygon.vertex_markers.append(self.ax.scatter([x], [y], c='red', s=50, zorder=5))
 
-            self.canvas.draw_idle()
+        self.canvas.draw_idle()
+
+    def plot_existing_polygon(self, canvas, p_id=None):
+        """Select `p_id` (the first polygon by default) and redraw.
+
+        Kept as the name older call sites use; `draw_polygons` is the real
+        entry point and draws every polygon, not only the selected one.
+        """
+        sample_id = self.main_window.app_data.sample_id
+        polygons = self.polygons.get(sample_id, {})
+        if p_id is None and polygons:
+            p_id = next(iter(polygons))
+
+        self.draw_polygons(canvas, p_id=p_id)
 
 
     def clear_plot(self):
         """Remove all polygon patches and vertex markers from the canvas for the current sample."""
         sample_id = self.main_window.app_data.sample_id
-        if sample_id in self.polygons:
-            for polygon in self.polygons[sample_id].values():
-                if getattr(polygon, 'patch', None) is not None:
-                    try:
-                        polygon.patch.remove()
-                    except Exception:
-                        pass
-                    polygon.patch = None
-                for marker in getattr(polygon, 'vertex_markers', []):
-                    try:
-                        marker.remove()
-                    except Exception:
-                        pass
-                polygon.vertex_markers = []
+        for polygon in self.polygons.get(sample_id, {}).values():
+            self._remove_artists(polygon)
         if hasattr(self, 'canvas'):
             self.canvas.draw_idle()
 
     def clear_polygons(self):
-        """Clear all existing polygons from the plot."""
+        """Remove every sample's polygon artists from the canvas.
+
+        Drawing only -- the model is untouched, and the table is deliberately
+        *not* rebuilt here. Rebuilding it on each replot used to reset the
+        per-polygon 'Analysis' checkboxes and re-check the toolbar's polygon
+        mask toggle. Model changes go through `notify_model_changed` instead.
+        """
         for polygons in self.polygons.values():
             for polygon in polygons.values():
-                if getattr(polygon, 'patch', None) is not None:
-                    polygon.patch.remove()
-                    polygon.patch = None
-                if hasattr(polygon, 'vertex_markers'):
-                    for marker in polygon.vertex_markers:
-                        marker.remove()
-                    polygon.vertex_markers = []
+                self._remove_artists(polygon)
         if hasattr(self, 'canvas'):
             self.canvas.draw_idle()
-        self.parent.update_table_widget()  # Update the table in the main window
-    
+
+
     def disconnect(self):
         if not hasattr(self, 'canvas') or self.cid_click is None:
             return

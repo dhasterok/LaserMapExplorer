@@ -170,6 +170,8 @@ class StyleTheme():
         | ScaleLocation    | 'northeast'      | Position of scale bar                            |
         | ScaleLength      | None             | Length of the scale bar                          |
         | OverlayColor     | '#ffffff'        | Overlay color (e.g., for text/annotation)        |
+        | MaskColor        | '#808080'        | Wash over masked-out pixels on a map              |
+        | MaskAlpha        | 0.5              | Opacity of that wash (0-1)                       |
         | Marker           | 'circle'         | Marker shape                                     |
         | MarkerSize       | 6                | Marker size in points                            |
         | MarkerColor      | '#1c75bc'        | Marker color                                     |
@@ -217,6 +219,8 @@ class StyleTheme():
             'ScaleLocation': 'northeast',
             'ScaleLength': None,
             'OverlayColor': '#ffffff',
+            'MaskColor': '#808080',
+            'MaskAlpha': 0.5,
             'Marker': 'circle',
             'MarkerSize': 6.0,
             'MarkerColor': '#1c75bc',
@@ -512,6 +516,8 @@ class StyleData(QObject, StyleTheme):
     scaleLocationChanged = pyqtSignal(str)
     scaleLengthChanged = pyqtSignal(float)
     overlayColorChanged = pyqtSignal(str)
+    maskColorChanged = pyqtSignal(str)
+    maskAlphaChanged = pyqtSignal(float)
     showMassChanged = pyqtSignal(bool)
     showMineralPrefixChanged = pyqtSignal(bool)
     markerChanged = pyqtSignal(str)
@@ -851,6 +857,36 @@ class StyleData(QObject, StyleTheme):
             self.overlayColorChanged.emit(hexstr)
         else:
             raise TypeError("color must be a hex string, #rrggbb")
+
+    @property
+    def mask_color(self):
+        """str : Color washed over pixels excluded by the current mask.
+
+        Uses `.get` with a default so style dictionaries saved before this key
+        existed still load.
+        """
+        return self.style_dict[self.plot_type].get('MaskColor', '#808080')
+
+    @mask_color.setter
+    def mask_color(self, hexstr: str):
+        if hexstr is None or self._is_valid_hex_color(hexstr):
+            self.style_dict[self.plot_type]['MaskColor'] = hexstr
+            self.maskColorChanged.emit(hexstr)
+        else:
+            raise TypeError("color must be a hex string, #rrggbb")
+
+    @property
+    def mask_alpha(self):
+        """float : Opacity (0-1) of the wash over masked-out pixels."""
+        return self.style_dict[self.plot_type].get('MaskAlpha', 0.5)
+
+    @mask_alpha.setter
+    def mask_alpha(self, alpha: float):
+        alpha = float(alpha)
+        if not 0.0 <= alpha <= 1.0:
+            raise ValueError("mask alpha must be between 0 and 1.")
+        self.style_dict[self.plot_type]['MaskAlpha'] = alpha
+        self.maskAlphaChanged.emit(alpha)
 
     @property
     def show_mass(self):

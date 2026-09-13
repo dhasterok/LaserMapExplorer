@@ -32,6 +32,8 @@ class PlotStyle:
     scale_location: str = "northeast"
     scale_length: str | None = None
     overlay_color: str = "#ffffff"
+    mask_color: str = "#808080"
+    mask_alpha: float = 0.5
     show_mass: bool = False
     marker: str = "circle"
     marker_size: float = 6.0

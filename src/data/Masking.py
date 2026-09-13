@@ -4,7 +4,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.app.MainWindow import MainWindow
 from PyQt6.QtCore import Qt, QSize, QEvent, pyqtSignal
-from PyQt6.QtGui import QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
+from PyQt6.QtGui import (
+    QStandardItem, QStandardItemModel, QIcon, QFont, QIntValidator, QAction
+)
 from PyQt6.QtWidgets import (
         QMessageBox, QToolButton, QWidget, QTableWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QInputDialog,
         QDoubleSpinBox, QComboBox, QCheckBox, QSizePolicy, QListView, QToolBar, QAbstractItemView, QMenu,
@@ -21,7 +23,6 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.colors as colors
 from matplotlib.collections import PathCollection
-from matplotlib.path import Path
 import numpy as np
 import pandas as pd
 from scipy.stats import percentileofscore
@@ -35,6 +36,7 @@ from src.common.TableFunctions import TableFcn as TableFcn
 from src.app.CustomTableWidget import ReorderableTableWidget, compute_row_reorder
 import lame_core.format as fmt
 from src.data.Polygon import PolygonManager
+from src.data.polygon_mask import polygon_mask
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
 # Mask object
@@ -1322,7 +1324,18 @@ class PolygonTab(QWidget):
             header.setSectionResizeMode(4,QHeaderView.ResizeMode.ResizeToContents)
 
         self.tableWidgetPolyPoints.setHorizontalHeaderLabels(["PolyID", "Name", "Link", "In/out", "Analysis"])
-        
+
+        # Right-click a row to delete it (mirrors the ROI table), and let the
+        # Delete key work while the table itself has focus -- the canvas
+        # shortcut only fires when the map has focus.
+        self.tableWidgetPolyPoints.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tableWidgetPolyPoints.customContextMenuRequested.connect(self.show_polygon_context_menu)
+
+        # An event filter rather than a QShortcut: a shortcut only fires when
+        # the widget's window is active, which makes it both flakier and
+        # untestable headlessly.
+        self.tableWidgetPolyPoints.installEventFilter(self)
+
 
         tab_layout.addWidget(self.tableWidgetPolyPoints)
 
@@ -1448,8 +1461,12 @@ class PolygonTab(QWidget):
         if not getattr(self, '_polygon_signals_connected', False):
             self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.increment_pid())
             self.actionPolyCreate.triggered.connect(lambda: self.polygon_manager.start_polygon(self.ui.mpl_canvas))
-            self.actionPolyDelete.triggered.connect(lambda: self.table_fcn.delete_row(self.tableWidgetPolyPoints))
+            # Deleting has to remove the polygon itself, not just the row --
+            # TableFcn.delete_row matches on accessibleName (never set here)
+            # and its polygon branch still speaks the old pyqtgraph API.
+            self.actionPolyDelete.triggered.connect(self.delete_selected_polygons)
             self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
+            self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.update_delete_action_state)
             self._polygon_signals_connected = True
 
         #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
@@ -1489,7 +1506,6 @@ class PolygonTab(QWidget):
             self.actionPolyLink.setEnabled(True)
             self.actionPolyDelink.setEnabled(False)
             self.actionPolySave.setEnabled(False)
-            self.actionPolyDelete.setEnabled(False)
         else:
             self.actionEdgeDetect.setEnabled(False)
             self.comboBoxEdgeDetectMethod.setEnabled(False)
@@ -1499,57 +1515,187 @@ class PolygonTab(QWidget):
                 self.actionPolyDelink.setEnabled(True)
             if self.tableWidgetPolyPoints.rowCount() > 0:
                 self.actionPolySave.setEnabled(False)
-                self.actionPolyDelete.setEnabled(False)
+
+        # Delete follows the selection, not the polygon-mode toggle: an
+        # existing polygon can be removed whether or not drawing is on.
+        self.update_delete_action_state()
+
+    def _selected_polygon_ids(self):
+        """Ids of the polygons the user is acting on.
+
+        The table's selected rows, or -- when nothing is selected there -- the
+        polygon currently selected on the map, so clicking a region and hitting
+        Delete works without touching the table.
+        """
+        polygons = self.polygon_manager.polygons.get(self.ui.app_data.sample_id, {})
+
+        selection = self.tableWidgetPolyPoints.selectionModel()
+        ids = []
+        if selection is not None:
+            for idx in selection.selectedRows():
+                item = self.tableWidgetPolyPoints.item(idx.row(), 0)
+                if item is not None:
+                    ids.append(int(item.text()))
+
+        if not ids:
+            selected = self.polygon_manager.selected_poly
+            if selected is not None:
+                ids = [selected.p_id]
+
+        return [p_id for p_id in ids if p_id in polygons]
+
+    def delete_selected_polygons(self):
+        """Delete every selected polygon (toolbar action and context menu).
+
+        The canvas Delete key goes through ``PolygonManager.onkey`` to the same
+        ``remove_polygons``.
+        """
+        p_ids = self._selected_polygon_ids()
+        if not p_ids:
+            return
+
+        self.polygon_manager.remove_polygons(p_ids)
+        self.refresh_polygons()
+        if self.ui.mpl_canvas is not None:
+            self.polygon_manager.draw_polygons(self.ui.mpl_canvas)
+
+    def eventFilter(self, obj, event):
+        """Delete/Backspace on the polygon table deletes the selected rows.
+
+        The canvas has its own Delete handler (`PolygonManager.onkey`); this
+        covers the case where the table, not the map, has focus.
+        """
+        if obj is self.tableWidgetPolyPoints and event.type() == QEvent.Type.KeyPress:
+            if event.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
+                self.delete_selected_polygons()
+                return True
+
+        return super().eventFilter(obj, event)
+
+    def show_polygon_context_menu(self, pos):
+        """Right-click menu on the polygon table: delete the selection.
+
+        Right-clicking a row outside the current selection replaces the
+        selection with that row first (standard table convention).
+        """
+        table = self.tableWidgetPolyPoints
+        row = table.rowAt(pos.y())
+        if row >= 0:
+            selection = table.selectionModel()
+            selected_rows = {idx.row() for idx in selection.selectedRows()} if selection else set()
+            if row not in selected_rows:
+                table.clearSelection()
+                table.selectRow(row)
+
+        p_ids = self._selected_polygon_ids()
+        if not p_ids:
+            return
+
+        menu = QMenu(table)
+        label = "Delete Polygon" if len(p_ids) == 1 else f"Delete {len(p_ids)} Polygons"
+        action_delete = menu.addAction(label)
+        viewport = table.viewport()
+        chosen = menu.exec(viewport.mapToGlobal(pos) if viewport else table.mapToGlobal(pos))
+
+        if chosen is action_delete:
+            self.delete_selected_polygons()
+
+    def update_delete_action_state(self, *args, **kwargs):
+        """Enable Delete only when there is something to delete."""
+        self.actionPolyDelete.setEnabled(bool(self._selected_polygon_ids()))
+
+    def refresh_polygons(self):
+        """Resync the table and the mask after the polygon set changed.
+
+        The single entry point for *model* changes (drawn, deleted, loaded).
+        Redrawing on its own must not come through here -- see
+        ``PolygonManager.clear_polygons``.
+        """
+        self.update_table_widget()
+        self.apply_polygon_mask(update_plot=True)
+        self.update_delete_action_state()
 
     def update_table_widget(self, *args, **kwargs):
-        """Update the polygon table (PyQt6 version)."""
+        """Rebuild the polygon table from the polygon model."""
         sample_id = self.ui.app_data.sample_id
         table = self.tableWidgetPolyPoints
 
-        if sample_id in self.polygon_manager.polygons:
-            table.clearContents()
-            table.setRowCount(0)
+        # Always clear, even for a sample with no polygons: leaving the
+        # previous sample's rows behind made the mask look up polygon ids that
+        # don't exist for this sample (a KeyError part-way through
+        # MainWindow.change_sample).
+        # The selection model is its own QObject, so it needs blocking too --
+        # otherwise clearing rows fires selectionChanged and redraws the canvas
+        # part-way through the rebuild.
+        table.blockSignals(True)
+        selection = table.selectionModel()
+        if selection is not None:
+            selection.blockSignals(True)
+        table.clearContents()
+        table.setRowCount(0)
 
-            for p_id, _ in self.polygon_manager.polygons[sample_id].items():
-                row_position = table.rowCount()
-                table.insertRow(row_position)
+        polygons = self.polygon_manager.polygons.setdefault(sample_id, {})
 
-                table.setItem(row_position, 0, QTableWidgetItem(str(p_id)))
-                table.setItem(row_position, 1, QTableWidgetItem(f'Polygon {p_id}'))
-                table.setItem(row_position, 2, QTableWidgetItem(''))
-                table.setItem(row_position, 3, QTableWidgetItem('In'))
+        for row, (p_id, polygon) in enumerate(polygons.items()):
+            table.insertRow(row)
 
-                checkBox = QCheckBox()
-                checkBox.setChecked(True)
-                # Correct slot signature for PyQt6 (int state)
-                def make_cb_callback(p_id_inner):
-                    return lambda state: self.apply_polygon_mask(update_plot=True)
-                checkBox.stateChanged.connect(make_cb_callback(p_id))
-                table.setCellWidget(row_position, 4, checkBox)
+            table.setItem(row, 0, QTableWidgetItem(str(p_id)))
+            table.setItem(row, 1, QTableWidgetItem(polygon.display_name))
+            table.setItem(row, 2, QTableWidgetItem(''))
 
-        self.apply_polygon_mask(update_plot=True)
+            in_out = QComboBox()
+            in_out.addItems(['In', 'Out'])
+            in_out.setCurrentText('Out' if polygon.is_out else 'In')
+            in_out.currentTextChanged.connect(self._make_in_out_callback(p_id))
+            table.setCellWidget(row, 3, in_out)
+
+            checkBox = QCheckBox()
+            checkBox.setChecked(bool(polygon.enabled))
+            checkBox.stateChanged.connect(self._make_enabled_callback(p_id))
+            table.setCellWidget(row, 4, checkBox)
+
+        if selection is not None:
+            selection.blockSignals(False)
+        table.blockSignals(False)
+
+    def _make_in_out_callback(self, p_id):
+        """Write the In/Out choice back to the polygon, then remask."""
+        def callback(text):
+            polygon = self.polygon_manager.polygons.get(self.ui.app_data.sample_id, {}).get(p_id)
+            if polygon is None:
+                return
+            polygon.in_out = text.lower()
+            self.apply_polygon_mask(update_plot=True)
+        return callback
+
+    def _make_enabled_callback(self, p_id):
+        """Write the 'Analysis' checkbox back to the polygon, then remask."""
+        def callback(state):
+            polygon = self.polygon_manager.polygons.get(self.ui.app_data.sample_id, {}).get(p_id)
+            if polygon is None:
+                return
+            polygon.enabled = state == Qt.CheckState.Checked.value
+            self.apply_polygon_mask(update_plot=True)
+        return callback
 
     def view_selected_polygon(self, *args):
-        """View the selected polygon when a selection is made in the table widget ."""
+        """Highlight the polygon selected in the table widget."""
         sample_id = self.ui.app_data.sample_id
+        polygons = self.polygon_manager.polygons.get(sample_id, {})
+        if not polygons:
+            return
 
-        if sample_id in self.polygon_manager.polygons:
-            # Get selected rows (PyQt6 returns QModelIndex objects)
-            selected_rows = self.tableWidgetPolyPoints.selectionModel().selectedRows()
+        selected_rows = self.tableWidgetPolyPoints.selectionModel().selectedRows()
+        if not selected_rows:
+            return
 
-            if selected_rows:
-                # Assume only one row is selected for simplicity
-                selected_row = selected_rows[0]
-                polygon_id_item = self.tableWidgetPolyPoints.item(selected_row.row(), 0)
+        polygon_id_item = self.tableWidgetPolyPoints.item(selected_rows[0].row(), 0)
+        if not polygon_id_item:
+            return
 
-                if polygon_id_item:
-                    polygon_id = int(polygon_id_item.text())
-
-                    if polygon_id in self.polygon_manager.polygons[sample_id]:
-                        # Clear all current polygons from the plot
-                        self.polygon_manager.clear_plot()
-                        # Plot the selected polygon on self.ax
-                        self.polygon_manager.plot_existing_polygon(self.ui.mpl_canvas, polygon_id)
+        polygon_id = int(polygon_id_item.text())
+        if polygon_id in polygons and self.ui.mpl_canvas is not None:
+            self.polygon_manager.draw_polygons(self.ui.mpl_canvas, p_id=polygon_id)
 
     # Polygon mask functions
     # -------------------------------
@@ -1564,52 +1710,28 @@ class PolygonTab(QWidget):
             If true, triggers a plot update via ``MainWindow.schedule_update``, by default True
         """
         sample_id = self.ui.app_data.sample_id
+        if not sample_id or sample_id not in self.ui.data:
+            return
 
-        # create array of all true
-        self.ui.data[sample_id].polygon_mask = np.ones_like(self.ui.data[sample_id].mask, dtype=bool)
+        d = self.ui.data[sample_id]
 
-        # update toolbar actions
-        self.ui.lame_action.ClearFilters.setEnabled(True)
-        self.ui.lame_action.PolygonMask.setEnabled(True)
-        self.ui.lame_action.PolygonMask.setChecked(True)
-        self.ui.data[sample_id].polygon_mask_enabled = True
+        # Read the polygons themselves rather than the table's rows -- the
+        # table is a view of this, and the two used to drift apart (e.g. a
+        # polygon deleted on the canvas left its row behind).
+        polygons = self.polygon_manager.polygons.get(sample_id, {})
+        enabled = [(p.verts, p.in_out) for p in polygons.values() if p.enabled]
 
-        # apply polygon mask — iterate each row in the polygon table
-        for row in range(self.tableWidgetPolyPoints.rowCount()):
-            checkBox = self.tableWidgetPolyPoints.cellWidget(row, 4)
+        d.polygon_mask = polygon_mask(enabled, d.array_size, d.order, len(d.processed))
 
-            if checkBox.isChecked():
-                pid = int(self.tableWidgetPolyPoints.item(row, 0).text())
-
-                polygon_points = self.polygon_manager.polygons[sample_id][pid].verts
-                polygon_points = [(x, y) for x, y in polygon_points]
-
-                path = Path(polygon_points)
-
-                # Polygon vertices are in imshow pixel-index space (col, row).
-                # The image is produced by np.reshape(values, array_size, order=data.order).
-                # For order='F': data[k] → matrix[k % nrows, k // nrows]
-                #   → image position (col = k // nrows, row = k % nrows)
-                # For order='C': data[k] → matrix[k // ncols, k % ncols]
-                #   → image position (col = k % ncols, row = k // ncols)
-                # Using this mapping makes containment match what the user drew.
-                sample = self.ui.data[sample_id]
-                nrows, ncols = sample.array_size
-                order = sample.order
-                n = len(sample.processed)
-                k = np.arange(n, dtype=float)
-                if order == 'F':
-                    image_col = k // nrows
-                    image_row = k % nrows
-                else:
-                    image_col = k % ncols
-                    image_row = k // ncols
-                points = np.column_stack([image_col, image_row])
-                inside_polygon = path.contains_points(points)
-                self.ui.data[sample_id].polygon_mask &= inside_polygon
+        # Update toolbar actions. Whether the mask is *applied* belongs to the
+        # PolygonMask toggle (MainWindow.toggle_polygon_mask), so it is left
+        # alone here -- forcing it on meant the user could never switch it off.
+        has_polygons = bool(polygons)
+        self.ui.lame_action.PolygonMask.setEnabled(has_polygons)
+        if has_polygons:
+            self.ui.lame_action.ClearFilters.setEnabled(True)
 
         # recompute combined mask
-        d = self.ui.data[sample_id]
         d.recompute_mask()
 
         if update_plot:

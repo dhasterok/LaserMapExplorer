@@ -248,16 +248,23 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
 
         cax.set_clim(clim[0], clim[1])
 
-    # use mask to create an alpha layer — grey RGBA overlay on masked pixels
+    # Use the mask to create an alpha layer — a translucent wash over masked
+    # pixels, so the selected area stands out while the rest stays readable.
+    # Colour and opacity come from the style (Styling > Annotations); the
+    # defaults reproduce the previous hard-coded 50% grey.
     mask = data.mask.astype(float)
     reshaped_mask = np.reshape(mask, array_size, order=data.order)
     masked_count = int((reshaped_mask == 0).sum())
     log(f"plot_map_mpl: masking {masked_count}/{mask.size} pixels ({100*masked_count/mask.size:.2f}%)", prefix='Mask')
 
+    mask_rgb = colors.to_rgb(style_data.mask_color)
     overlay = np.zeros((*reshaped_mask.shape, 4), dtype=float)
-    overlay[..., :3] = 0.5  # grey
-    overlay[..., 3] = np.where(reshaped_mask == 0, 0.5, 0)  # 50% alpha where masked, transparent elsewhere
-    canvas.axes.imshow(overlay, aspect=aspect_ratio, interpolation='none')
+    overlay[..., :3] = mask_rgb
+    overlay[..., 3] = np.where(reshaped_mask == 0, style_data.mask_alpha, 0)
+    # Kept as an attribute so the polygon tool can hide it while a polygon is
+    # being drawn (see PolygonManager.set_mask_overlay_visible) -- replotting
+    # to achieve that would swap the canvas out mid-draw.
+    canvas.mask_overlay = canvas.axes.imshow(overlay, aspect=aspect_ratio, interpolation='none')
 
     canvas.axes.tick_params(direction=None,
         labelbottom=False, labeltop=False, labelright=False, labelleft=False,
@@ -532,6 +539,13 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
         mask = mask & current_plot_df['array'].notna()
 
     array = current_plot_df['array'][mask].values
+
+    if array.size == 0:
+        # Every point is masked out (e.g. polygons that exclude everything).
+        # There is no histogram to draw, and nanmax/nanmin would raise -- which
+        # used to abort the whole plot update and freeze the map.
+        log("no unmasked data to histogram", prefix="Warning")
+        return
 
     logflag = False
     # check the analyte map cscale, the histogram needs to be the same

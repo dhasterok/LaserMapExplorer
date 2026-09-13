@@ -236,10 +236,28 @@ class AnnotationsPage(CustomPage):
         self.lineEditScaleLength = CustomLineEdit(parent=self)
         self.lineEditScaleLength.setObjectName("lineEditScaleLength")
 
+        # Wash drawn over pixels excluded by the current mask (filters,
+        # polygons, clusters) on a map -- how strongly the unselected area is
+        # played down relative to the selection.
+        self.colorButtonMaskColor = ColorButton(
+            ui=self.parent,
+            parent=self
+        )
+        self.colorButtonMaskColor.setObjectName("colorButtonMaskColor")
+
+        self.doubleSpinBoxMaskOpacity = QDoubleSpinBox(parent=self)
+        self.doubleSpinBoxMaskOpacity.setObjectName("doubleSpinBoxMaskOpacity")
+        self.doubleSpinBoxMaskOpacity.setDecimals(2)
+        self.doubleSpinBoxMaskOpacity.setRange(0.0, 1.0)
+        self.doubleSpinBoxMaskOpacity.setSingleStep(0.05)
+        self.doubleSpinBoxMaskOpacity.setValue(0.5)
+
         form_layout.addRow("Scale direction", self.comboBoxScaleDirection)
         form_layout.addRow("Scale location", self.comboBoxScaleLocation)
         form_layout.addRow("Scale length", self.lineEditScaleLength)
         form_layout.addRow("Overlay color", self.colorButtonOverlayColor)
+        form_layout.addRow("Mask color", self.colorButtonMaskColor)
+        form_layout.addRow("Mask opacity", self.doubleSpinBoxMaskOpacity)
 
         line = QFrame(parent=self)
         line.setFrameShape(QFrame.Shape.HLine)
@@ -721,6 +739,8 @@ class StylingDock(CustomDockWidget):
         self.annotations.checkBoxShowMineralPrefix.stateChanged.connect(lambda _: self.update_show_mineral_prefix())
         self.annotations.colorButtonOverlayColor.colorChanged.connect(self.update_overlay_color)
         self.annotations.colorButtonOverlayColor.setStyleSheet("background-color: white;")
+        self.annotations.colorButtonMaskColor.colorChanged.connect(self.update_mask_color)
+        self.annotations.doubleSpinBoxMaskOpacity.valueChanged.connect(self.update_mask_alpha)
 
         # add list of colormaps to comboBoxFieldColormap and set callbacks
         self.caxes.comboBoxFieldColormap.clear()
@@ -910,6 +930,8 @@ class StylingDock(CustomDockWidget):
         self.annotations.comboBoxScaleLocation.blockSignals(self._signal_state)
         self.annotations.lineEditScaleLength.blockSignals(self._signal_state)
         self.annotations.colorButtonOverlayColor.blockSignals(self._signal_state)
+        self.annotations.colorButtonMaskColor.blockSignals(self._signal_state)
+        self.annotations.doubleSpinBoxMaskOpacity.blockSignals(self._signal_state)
 
         # markers and lines
         self.elements.comboBoxMarker.blockSignals(self._signal_state)
@@ -1175,6 +1197,22 @@ class StylingDock(CustomDockWidget):
         """Update overlay color from hex string (called by ColorButton.colorChanged signal)"""
         self.ui.style_data.blockSignals(True)
         self.ui.style_data.overlay_color = new_color
+        self.ui.style_data.blockSignals(False)
+        self.ui.schedule_update()
+
+    def update_mask_color(self, new_color=None):
+        """Update the masked-area wash color (ColorButton.colorChanged slot)"""
+        self.ui.style_data.blockSignals(True)
+        self.ui.style_data.mask_color = new_color
+        self.ui.style_data.blockSignals(False)
+        self.ui.schedule_update()
+
+    def update_mask_alpha(self, new_value=None):
+        """Update the opacity of the masked-area wash"""
+        if new_value is None:
+            new_value = self.annotations.doubleSpinBoxMaskOpacity.value()
+        self.ui.style_data.blockSignals(True)
+        self.ui.style_data.mask_alpha = new_value
         self.ui.style_data.blockSignals(False)
         self.ui.schedule_update()
 
@@ -1940,6 +1978,8 @@ class StylingDock(CustomDockWidget):
         self.annotations.comboBoxScaleDirection.setCurrentText(style.scale_dir)
         self.annotations.comboBoxScaleLocation.setCurrentText(style.scale_location)
         self.annotations.colorButtonOverlayColor.color = style.overlay_color
+        self.annotations.colorButtonMaskColor.color = style.mask_color
+        self.annotations.doubleSpinBoxMaskOpacity.setValue(style.mask_alpha)
 
         # Marker
         self.elements.comboBoxMarker.setCurrentText(style.marker)

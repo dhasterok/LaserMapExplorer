@@ -94,6 +94,75 @@ def test_degenerate_polygons_are_ignored():
     assert polygon_mask([([], 'in'), (None, 'in')], ARRAY_SIZE, 'F', N).all()
 
 
+def test_grouping_alone_changes_nothing():
+    """Linking two 'in' polygons must not alter which pixels are kept.
+
+    Groups exist to give regions identity; the mask is the same union either
+    way. This is the guarantee that linking is safe to use mid-analysis.
+    """
+    a, b = square(1, 1, 4, 4), square(10, 1, 13, 4)
+
+    ungrouped = polygon_mask([(a, 'in'), (b, 'in')], ARRAY_SIZE, 'F', N)
+    grouped = polygon_mask([(a, 'in', 7), (b, 'in', 7)], ARRAY_SIZE, 'F', N)
+
+    np.testing.assert_array_equal(ungrouped, grouped)
+
+
+def test_out_linked_into_a_group_holes_only_that_group():
+    """The point of per-group 'out': exclude an inclusion inside one grain
+    without punching the same hole through every other region.
+    """
+    # Two overlapping 'in' regions in separate groups, and an 'out' that sits
+    # inside both but is linked only to the first.
+    left = (square(1, 1, 10, 8), 'in', 1)
+    right = (square(5, 1, 15, 8), 'in', 2)
+    hole = (square(6, 3, 8, 6), 'out', 1)
+
+    kept = polygon_mask([left, right, hole], ARRAY_SIZE, 'F', N)
+
+    hole_pixels = polygon_mask([(square(6, 3, 8, 6), 'in')], ARRAY_SIZE, 'F', N)
+    right_only = polygon_mask([(square(5, 1, 15, 8), 'in')], ARRAY_SIZE, 'F', N)
+
+    # group 2 still covers its own area, including where the hole overlaps it
+    assert (kept & hole_pixels).any(), "group 2 should keep the pixels group 1 excluded"
+    assert (right_only <= kept).all(), "the unlinked group must be untouched"
+
+
+def test_ungrouped_out_still_subtracts_globally():
+    """An 'out' polygon that belongs to no group keeps its old behaviour."""
+    region = (square(1, 1, 15, 8), 'in', 1)
+    hole = (square(6, 3, 8, 6), 'out')  # ungrouped
+
+    kept = polygon_mask([region, hole], ARRAY_SIZE, 'F', N)
+    hole_pixels = polygon_mask([(square(6, 3, 8, 6), 'in')], ARRAY_SIZE, 'F', N)
+
+    assert not (kept & hole_pixels).any()
+
+
+def test_group_of_only_out_polygons_subtracts_globally():
+    """A group with nothing to include can only take away."""
+    region = (square(1, 1, 15, 8), 'in')
+    hole = (square(6, 3, 8, 6), 'out', 4)
+
+    kept = polygon_mask([region, hole], ARRAY_SIZE, 'F', N)
+    hole_pixels = polygon_mask([(square(6, 3, 8, 6), 'in')], ARRAY_SIZE, 'F', N)
+
+    assert not (kept & hole_pixels).any()
+
+
+def test_group_region_can_be_computed_on_its_own():
+    """One group's polygons, passed alone, give that group's region -- which
+    is how a linked group becomes a single ROI.
+    """
+    members = [(square(1, 1, 10, 8), 'in', 3), (square(6, 3, 8, 6), 'out', 3)]
+
+    as_group = polygon_mask(members, ARRAY_SIZE, 'F', N)
+    standalone = polygon_mask([(square(1, 1, 10, 8), 'in'), (square(6, 3, 8, 6), 'out')],
+                              ARRAY_SIZE, 'F', N)
+
+    np.testing.assert_array_equal(as_group, standalone)
+
+
 def test_in_out_is_case_insensitive():
     """The table stores 'In'/'Out' with an initial capital."""
     lower = polygon_mask([(square(2, 2, 6, 5), 'in')], ARRAY_SIZE, 'F', N)

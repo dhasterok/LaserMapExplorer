@@ -14,6 +14,7 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import lame_core.format as fmt
 from src.data.SortAnalytes import sort_analytes
+from src.data.polygon_mask import polygon_mask
 from src.data.outliers import chauvenet_criterion, quantile_and_difference
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
@@ -1661,11 +1662,17 @@ class SampleObj(QObject):
             return None
 
         new_id = max((r['id'] for r in self.roi_stack), default=0) + 1
+        filter_df = entry.get('filter_df')
         self.roi_stack.append({
             'id': new_id,
             'name': f"{entry['name']} copy",
             'color': entry['color'],
-            'filter_df': entry['filter_df'].copy(),
+            'filter_df': filter_df.copy() if filter_df is not None else None,
+            # A copy is independent of the polygons it came from, so it keeps
+            # the geometry but not the source key -- otherwise re-running
+            # "create region" would overwrite the copy as well as the original.
+            'polygons': copy.deepcopy(entry.get('polygons')),
+            'source': None,
         })
         self.selected_rois.append(new_id)
         self.recompute_roi_assignments()
@@ -1689,28 +1696,111 @@ class SampleObj(QObject):
         """Replace a region's stored filter definition (e.g. after recalling
         it into the filter table, editing it, and re-saving) and recompute
         assignments.
+
+        Polygon-defined regions (see `add_polygon_roi`) are skipped: they have
+        no filter definition, and writing the live filter table into one would
+        silently replace its geometry.
         """
         for r in self.roi_stack:
             if r['id'] == roi_id:
+                if r.get('polygons'):
+                    return
                 r['filter_df'] = filter_df.copy()
                 break
         self.recompute_roi_assignments()
+
+    def add_polygon_roi(self, polygons, name=None, color=None, source=None):
+        """Add a region of interest defined by polygon geometry.
+
+        The counterpart of `add_roi`, which stores a filter definition. Linked
+        polygons form one region (see `src/data/polygon_mask.py`), and this is
+        how such a region enters the ROI machinery -- from here on it behaves
+        like any other ROI: `processed['ROI']`, `roi_percentages`,
+        `plot_roi_map` and `regionstats.region_stats` all treat it the same.
+
+        The geometry is *copied in*, so recomputing never reaches back into the
+        polygon tool. A region is a snapshot: editing the polygons afterwards
+        doesn't move the region until it is recreated.
+
+        Parameters
+        ----------
+        polygons : list of dict
+            ``{'verts': [(x, y), ...], 'in_out': 'in'|'out'}`` per member, in
+            pixel-index space (what `PolygonManager` stores).
+        name : str, optional
+            Display name; defaults to ``f"ROI {n}"`` like `add_roi`.
+        color : str, optional
+            Hex color; the caller (UI) normally supplies one.
+        source : str, optional
+            Opaque key identifying what the region was built from (e.g.
+            ``"group:3"``), so recreating it can update in place rather than
+            piling up duplicates. See `polygon_roi_for_source`.
+
+        Returns
+        -------
+        int
+            The new ROI's id (1-based; 0 means "unassigned").
+        """
+        new_id = max((r['id'] for r in self.roi_stack), default=0) + 1
+        if name is None:
+            name = f"ROI {new_id}"
+        if color is None:
+            color = '#808080'
+
+        self.roi_stack.append({
+            'id': new_id,
+            'name': name,
+            'color': color,
+            'filter_df': None,
+            'polygons': copy.deepcopy(polygons),
+            'source': source,
+        })
+        self.selected_rois.append(new_id)
+        self.recompute_roi_assignments()
+        return new_id
+
+    def update_polygon_roi(self, roi_id, polygons):
+        """Replace a polygon-defined region's geometry and recompute."""
+        for r in self.roi_stack:
+            if r['id'] == roi_id:
+                r['polygons'] = copy.deepcopy(polygons)
+                break
+        self.recompute_roi_assignments()
+
+    def polygon_roi_for_source(self, source):
+        """The id of the region built from `source`, or None.
+
+        Lets the polygon tool refresh the region it created earlier instead of
+        adding a second one for the same group.
+        """
+        if source is None:
+            return None
+        entry = next((r for r in self.roi_stack if r.get('source') == source), None)
+        return entry['id'] if entry else None
 
     def recompute_roi_assignments(self):
         """Rebuild the `processed['ROI']` column from the current stack.
 
         Walks `self.roi_stack` in order, evaluating each region's own stored
-        filter definition (`_compute_filter_mask`) and stamping its id onto
-        matching pixels -- later (higher-index) regions overwrite earlier
-        ones on overlapping pixels, so stack order is priority order.
-        Unclaimed pixels stay 0. Also refreshes `roi_selection_mask` (which
-        ROI ids are currently selected for display) and the combined
-        `self.mask`.
+        definition -- a filter (`_compute_filter_mask`) or, for regions built
+        from linked polygons (`add_polygon_roi`), the geometry itself -- and
+        stamping its id onto matching pixels. Later (higher-index) regions
+        overwrite earlier ones on overlapping pixels, so stack order is
+        priority order. Unclaimed pixels stay 0. Also refreshes
+        `roi_selection_mask` (which ROI ids are currently selected for
+        display) and the combined `self.mask`.
         """
         n = self.processed.shape[0]
         roi_values = np.zeros(n, dtype=float)
         for entry in self.roi_stack:
-            member_mask = self._compute_filter_mask(entry['filter_df'])
+            geometry = entry.get('polygons')
+            if geometry:
+                member_mask = polygon_mask(
+                    [(p['verts'], p.get('in_out', 'in')) for p in geometry],
+                    self.array_size, self.order, n,
+                )
+            else:
+                member_mask = self._compute_filter_mask(entry['filter_df'])
             roi_values[member_mask] = entry['id']
 
         self.add_columns('ROI', 'ROI', roi_values)

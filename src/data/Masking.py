@@ -1006,12 +1006,25 @@ class FilterTab(QWidget):
             return
 
         active_id = self._active_roi_id()
-        if active_id is None:
+        entry = None
+        if active_id is not None:
+            entry = next((r for r in current_data.roi_stack if r['id'] == active_id), None)
+
+        # A polygon-defined region (see SampleObj.add_polygon_roi) has no
+        # filter definition to show -- its shape came from the Polygons tab.
+        if entry is None or entry.get('filter_df') is None:
             current_data.filter_df = current_data.filter_df.iloc[0:0]
         else:
-            entry = next((r for r in current_data.roi_stack if r['id'] == active_id), None)
-            current_data.filter_df = entry['filter_df'].copy() if entry is not None else current_data.filter_df.iloc[0:0]
+            current_data.filter_df = entry['filter_df'].copy()
         self.update_filter_table(reload=True, apply=False)
+
+    def _is_polygon_roi(self, roi_id):
+        """True when `roi_id` names a region defined by polygon geometry."""
+        current_data = self.ui.app_data.current_data
+        if not current_data or roi_id is None:
+            return False
+        entry = next((r for r in current_data.roi_stack if r['id'] == roi_id), None)
+        return bool(entry and entry.get('polygons'))
 
     def _sync_active_roi_and_refresh(self):
         """Writes the live ``filter_df`` back into whichever ROI is
@@ -1026,7 +1039,7 @@ class FilterTab(QWidget):
         if not current_data:
             return
         active_id = self._active_roi_id()
-        if active_id is None:
+        if active_id is None or self._is_polygon_roi(active_id):
             return
         current_data.update_roi_filter(active_id, current_data.filter_df)
         self.update_roi_table_widget()
@@ -1040,6 +1053,9 @@ class FilterTab(QWidget):
           (the new filter becomes its first entry).
         - Regions exist but none (or more than one) is selected -> ask the
           user to select a single region first; nothing is added.
+        - The selected region is defined by polygons -> it has no filter
+          definition to add to; say so rather than silently replacing its
+          shape.
         - Exactly one region selected -> append the filter as before, then
           sync it into that region's stored definition.
         """
@@ -1056,6 +1072,13 @@ class FilterTab(QWidget):
             QMessageBox.information(
                 self, "Select a Region of Interest",
                 "Select a single region of interest in the table below before adding a filter.",
+            )
+            return
+        elif self._is_polygon_roi(self._active_roi_id()):
+            QMessageBox.information(
+                self, "Region Defined by Polygons",
+                "This region is defined by polygons, not filters. Edit its shape in the "
+                "Polygons tab, or select a different region to add a filter to.",
             )
             return
 
@@ -1414,7 +1437,9 @@ class PolygonTab(QWidget):
             dark_icon_unchecked="icon-link-dark-64.svg",
             parent=self
         )
-        self.actionPolyLink.setToolTip("Create a link between polygons")
+        self.actionPolyLink.setToolTip(
+            "Link the selected polygons so they form a single region"
+        )
 
         self.actionPolyDelink = CustomAction(
             text="Remove Link",
@@ -1422,7 +1447,22 @@ class PolygonTab(QWidget):
             dark_icon_unchecked="icon-unlink-dark-64.svg",
             parent=self
         )
-        self.actionPolyDelink.setToolTip("Remove link between polygons")
+        self.actionPolyDelink.setToolTip(
+            "Unlink the selected polygons so each is its own region"
+        )
+
+        # Same icon as the ROI tab's "Add ROI" -- this creates one of the same
+        # regions, just defined by geometry instead of filters. No dark variant
+        # ships for it, matching action_add_roi.
+        self.actionPolyRegion = CustomAction(
+            text="Create Region",
+            light_icon_unchecked="icon-roi-add-64.svg",
+            parent=self
+        )
+        self.actionPolyRegion.setToolTip(
+            "Create a region of interest from the selected polygons "
+            "(one per linked group) for per-region statistics"
+        )
 
         self.actionPolySave = CustomAction(
             text="Save Polygons",
@@ -1454,6 +1494,7 @@ class PolygonTab(QWidget):
         toolbar.addSeparator()
         toolbar.addAction(self.actionPolyLink)
         toolbar.addAction(self.actionPolyDelink)
+        toolbar.addAction(self.actionPolyRegion)
         toolbar.addSeparator()
         toolbar.addAction(self.actionPolySave)
         toolbar.addAction(self.actionPolyDelete)
@@ -1465,8 +1506,11 @@ class PolygonTab(QWidget):
             # TableFcn.delete_row matches on accessibleName (never set here)
             # and its polygon branch still speaks the old pyqtgraph API.
             self.actionPolyDelete.triggered.connect(self.delete_selected_polygons)
+            self.actionPolyLink.triggered.connect(self.link_selected_polygons)
+            self.actionPolyDelink.triggered.connect(self.unlink_selected_polygons)
+            self.actionPolyRegion.triggered.connect(self.create_regions_from_polygons)
             self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
-            self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.update_delete_action_state)
+            self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.update_action_states)
             self._polygon_signals_connected = True
 
         #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
@@ -1503,22 +1547,18 @@ class PolygonTab(QWidget):
             self.actionPolyAddPoint.setChecked(False)
             self.actionPolyRemovePoint.setEnabled(True)
             self.actionPolyRemovePoint.setChecked(True)
-            self.actionPolyLink.setEnabled(True)
-            self.actionPolyDelink.setEnabled(False)
             self.actionPolySave.setEnabled(False)
         else:
             self.actionEdgeDetect.setEnabled(False)
             self.comboBoxEdgeDetectMethod.setEnabled(False)
             self.actionPolyCreate.setEnabled(False)
-            if self.tableWidgetPolyPoints.rowCount() > 1:
-                self.actionPolyLink.setEnabled(True)
-                self.actionPolyDelink.setEnabled(True)
             if self.tableWidgetPolyPoints.rowCount() > 0:
                 self.actionPolySave.setEnabled(False)
 
-        # Delete follows the selection, not the polygon-mode toggle: an
-        # existing polygon can be removed whether or not drawing is on.
-        self.update_delete_action_state()
+        # Delete/Link/Unlink/Create Region follow the *selection*, not the
+        # polygon-mode toggle: existing polygons can be grouped, turned into
+        # regions or removed whether or not drawing is on.
+        self.update_action_states()
 
     def _selected_polygon_ids(self):
         """Ids of the polygons the user is acting on.
@@ -1600,9 +1640,92 @@ class PolygonTab(QWidget):
         if chosen is action_delete:
             self.delete_selected_polygons()
 
-    def update_delete_action_state(self, *args, **kwargs):
-        """Enable Delete only when there is something to delete."""
-        self.actionPolyDelete.setEnabled(bool(self._selected_polygon_ids()))
+    def update_action_states(self, *args, **kwargs):
+        """Enable the selection-driven actions only when they'd do something."""
+        p_ids = self._selected_polygon_ids()
+        self.actionPolyDelete.setEnabled(bool(p_ids))
+        self.actionPolyRegion.setEnabled(bool(p_ids))
+
+        polygons = self.polygon_manager.polygons.get(self.ui.app_data.sample_id, {})
+        selected = [polygons[p_id] for p_id in p_ids if p_id in polygons]
+        groups = {p.group for p in selected}
+
+        # Linking needs two or more polygons that aren't already one group;
+        # unlinking needs a selected polygon that is in a group.
+        already_one_group = len(groups) == 1 and None not in groups
+        self.actionPolyLink.setEnabled(len(selected) > 1 and not already_one_group)
+        self.actionPolyDelink.setEnabled(any(p.group is not None for p in selected))
+
+    def link_selected_polygons(self):
+        """Link the selected polygons into one region."""
+        group = self.polygon_manager.link_polygons(self._selected_polygon_ids())
+        if group is None:
+            return
+        self.refresh_polygons()
+        self._redraw_polygons()
+
+    def unlink_selected_polygons(self):
+        """Split the selected polygons back into separate regions."""
+        if not self.polygon_manager.unlink_polygons(self._selected_polygon_ids()):
+            return
+        self.refresh_polygons()
+        self._redraw_polygons()
+
+    def _redraw_polygons(self):
+        """Redraw on the current canvas, if there is one."""
+        if self.ui.mpl_canvas is not None:
+            self.polygon_manager.draw_polygons(self.ui.mpl_canvas)
+
+    def create_regions_from_polygons(self):
+        """Turn the selected polygons into regions of interest.
+
+        One region per linked group; an unlinked polygon is a region of its
+        own ("analyzed as separate regions or linked for combined analysis").
+        Re-running updates the regions already created from the same polygons
+        rather than piling up duplicates.
+
+        The region is a snapshot of the geometry -- editing the polygons
+        afterwards doesn't move it until this is run again. From here on it is
+        an ordinary ROI: it shows up in the ROI table, the ROI map, and the
+        per-region statistics in the Stoichiometry dock.
+        """
+        data = self.ui.app_data.current_data
+        if data is None:
+            return
+
+        p_ids = self._selected_polygon_ids()
+        if not p_ids:
+            return
+
+        created = updated = 0
+        for key, members in self.polygon_manager.groups(p_ids=p_ids):
+            geometry = [
+                {'verts': [(float(x), float(y)) for x, y in p.verts], 'in_out': p.in_out}
+                for p in members if p.enabled
+            ]
+            if not geometry:
+                continue  # every member excluded from analysis
+
+            kind, ident = key
+            source = f'{kind}:{ident}'
+            existing = data.polygon_roi_for_source(source)
+            if existing is not None:
+                data.update_polygon_roi(existing, geometry)
+                updated += 1
+                continue
+
+            name = f'Polygon group {ident}' if kind == 'group' else f'Polygon {ident}'
+            color = self.ui.style_data.set_default_cluster_colors(len(data.roi_stack) + 1)[-1]
+            data.add_polygon_roi(geometry, name=name, color=color, source=source)
+            created += 1
+
+        if not (created or updated):
+            return
+
+        # the ROI table lives on the filter tab
+        self.dock.filter_tab.update_roi_table_widget()
+        self.ui.schedule_update()
+        log(f"polygon regions created={created} updated={updated}", prefix="Mask")
 
     def refresh_polygons(self):
         """Resync the table and the mask after the polygon set changed.
@@ -1613,7 +1736,7 @@ class PolygonTab(QWidget):
         """
         self.update_table_widget()
         self.apply_polygon_mask(update_plot=True)
-        self.update_delete_action_state()
+        self.update_action_states()
 
     def update_table_widget(self, *args, **kwargs):
         """Rebuild the polygon table from the polygon model."""
@@ -1641,7 +1764,10 @@ class PolygonTab(QWidget):
 
             table.setItem(row, 0, QTableWidgetItem(str(p_id)))
             table.setItem(row, 1, QTableWidgetItem(polygon.display_name))
-            table.setItem(row, 2, QTableWidgetItem(''))
+            # Link column: which group this polygon is linked into, if any
+            table.setItem(row, 2, QTableWidgetItem(
+                f'Group {polygon.group}' if polygon.group is not None else ''
+            ))
 
             in_out = QComboBox()
             in_out.addItems(['In', 'Out'])
@@ -1719,7 +1845,9 @@ class PolygonTab(QWidget):
         # table is a view of this, and the two used to drift apart (e.g. a
         # polygon deleted on the canvas left its row behind).
         polygons = self.polygon_manager.polygons.get(sample_id, {})
-        enabled = [(p.verts, p.in_out) for p in polygons.values() if p.enabled]
+        # Groups are passed through so an 'out' polygon linked into a group
+        # holes that group only -- see polygon_mask's notes.
+        enabled = [(p.verts, p.in_out, p.group) for p in polygons.values() if p.enabled]
 
         d.polygon_mask = polygon_mask(enabled, d.array_size, d.order, len(d.processed))
 

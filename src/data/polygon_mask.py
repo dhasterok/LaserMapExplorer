@@ -57,16 +57,25 @@ def pixel_coordinates(array_size, order, n):
     return np.column_stack([image_col, image_row])
 
 
+def _contains(verts, points):
+    """Which `points` fall inside the polygon `verts`, or None if degenerate."""
+    if verts is None or len(verts) < 3:
+        return None
+
+    return Path([(x, y) for x, y in verts]).contains_points(points)
+
+
 def polygon_mask(polygons, array_size, order, n):
     """Combine polygons into a boolean mask over the map's data points.
 
     Parameters
     ----------
     polygons : list of tuple
-        ``(verts, in_out)`` pairs for the *enabled* polygons only, where
-        ``verts`` is a sequence of ``(x, y)`` vertices in pixel-index space and
-        ``in_out`` is ``'in'`` or ``'out'`` (case-insensitive). Polygons with
-        fewer than three vertices are ignored.
+        One entry per *enabled* polygon: ``(verts, in_out)`` or
+        ``(verts, in_out, group)``. ``verts`` is a sequence of ``(x, y)``
+        vertices in pixel-index space, ``in_out`` is ``'in'`` or ``'out'``
+        (case-insensitive), and ``group`` is a group id or None for an
+        ungrouped polygon. Polygons with fewer than three vertices are ignored.
     array_size : tuple of int
         ``(nrows, ncols)`` of the map.
     order : str
@@ -81,27 +90,62 @@ def polygon_mask(polygons, array_size, order, n):
 
     Notes
     -----
-    With no ``'in'`` polygon the mask starts all-True, so a lone ``'out'``
-    polygon excludes just its own area rather than everything.
+    Linked polygons (those sharing a ``group``) are resolved *within* their
+    group first, so an ``'out'`` polygon linked into a group cuts a hole in
+    that group's region only::
+
+        include  = U { union(in_g) & ~union(out_g)  for each group g with an 'in' }
+                 U { each ungrouped 'in' polygon }
+        subtract = U { ungrouped 'out' } U { 'out' of groups with no 'in' }
+        mask     = (include, or all-True when nothing is 'in') & ~subtract
+
+    With no groups this reduces to a plain union of the ``'in'`` polygons
+    minus the ``'out'`` ones. With no ``'in'`` polygon at all the mask starts
+    all-True, so a lone ``'out'`` excludes just its own area rather than
+    everything.
     """
     points = pixel_coordinates(array_size, order, n)
 
-    inside_in = np.zeros(n, dtype=bool)
-    inside_out = np.zeros(n, dtype=bool)
-    any_in = False
+    # group id -> {'in': mask, 'out': mask, 'any_in': bool}; ungrouped
+    # polygons are collected under the sentinel None.
+    groups = {}
+    for entry in polygons:
+        verts, in_out = entry[0], entry[1]
+        group = entry[2] if len(entry) > 2 else None
 
-    for verts, in_out in polygons:
-        if verts is None or len(verts) < 3:
+        contained = _contains(verts, points)
+        if contained is None:
             continue
 
-        contained = Path([(x, y) for x, y in verts]).contains_points(points)
-
+        bucket = groups.setdefault(
+            group, {'in': np.zeros(n, dtype=bool), 'out': np.zeros(n, dtype=bool), 'any_in': False}
+        )
         if str(in_out).lower() == 'out':
-            inside_out |= contained
+            bucket['out'] |= contained
         else:
-            inside_in |= contained
-            any_in = True
+            bucket['in'] |= contained
+            bucket['any_in'] = True
 
-    mask = inside_in if any_in else np.ones(n, dtype=bool)
+    include = np.zeros(n, dtype=bool)
+    subtract = np.zeros(n, dtype=bool)
+    any_in = False
 
-    return mask & ~inside_out
+    for group, bucket in groups.items():
+        if not bucket['any_in']:
+            # Nothing to include here, so these only take away -- whether that
+            # is an ungrouped 'out' or a group that holds nothing but 'out's.
+            subtract |= bucket['out']
+            continue
+
+        any_in = True
+        if group is None:
+            # Ungrouped polygons don't shield each other: their 'out's apply
+            # to the whole map, as they did before linking existed.
+            include |= bucket['in']
+            subtract |= bucket['out']
+        else:
+            include |= bucket['in'] & ~bucket['out']
+
+    mask = include if any_in else np.ones(n, dtype=bool)
+
+    return mask & ~subtract

@@ -67,6 +67,34 @@ You can toggle the use of individual polygons in analyses by clicking the associ
 in the *Analysis* column of the *Polygon Table*, and use the |icon-polygon-new| toolbar
 button to turn the whole polygon mask on or off without discarding the polygons.
 
+Linking polygons into regions
+-----------------------------
+
+By default each polygon is its own region.  Several polygons that outline the same thing --
+for example every grain of one mineral -- can be **linked** so they are analyzed together as
+a single region.  Select the rows in the *Polygon Table* and click |icon-link| to link them,
+or |icon-unlink| to split them apart again.  Linked polygons share a color on the map and
+show their group in the *Link* column.  Linking never changes which pixels are selected; it
+changes what counts as one region.
+
+An *Out* polygon that is linked into a group cuts its hole in **that group only**, so an
+inclusion can be excluded from one grain without affecting any other region.  An *Out*
+polygon that is not linked keeps subtracting from the whole map.
+
+To analyze the regions, select the polygons and click |icon-roi-add| (*Create Region*).  Each
+linked group becomes one region of interest, and each unlinked polygon becomes a region of
+its own.  From that point they behave like any other region of interest: they appear in the
+*ROI* table, in the ROI map, in the region percentages, and in the per-region statistics of
+the *Stoichiometry* dock (choose ``ROI`` as the region column).  Running *Create Region*
+again refreshes the regions made from the same polygons rather than adding duplicates, so
+reshaping a polygon just means clicking it once more.
+
+.. note::
+
+   A region is a snapshot of the polygons it was made from, and regions of interest are not
+   saved in the project file.  The polygons and their groups *are* saved, so the regions can
+   be recreated in one click after reopening a project.
+
 Edge-detection
 --------------
 
@@ -103,6 +131,9 @@ For detailed information about clustering methods and implementation, see `Clust
     :height: 2.5ex
 
 .. |icon-unlink| image:: _static/icons/icon-unlink-64.svg
+    :height: 2.5ex
+
+.. |icon-roi-add| image:: _static/icons/icon-roi-add-64.svg
     :height: 2.5ex
 
 .. |icon-open-file| image:: _static/icons/icon-open-file-64.svg

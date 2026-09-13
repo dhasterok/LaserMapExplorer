@@ -100,8 +100,12 @@ class SerializablePolygon:
     enabled = True
     #: Display name; None falls back to "Polygon <p_id>".
     name = None
+    #: Id of the group this polygon is linked into, or None when it stands
+    #: alone. Linked polygons form one region (see `polygon_mask`).
+    group = None
 
-    def __init__(self, p_id, verts, color='b', alpha=0.3, in_out='in', enabled=True, name=None):
+    def __init__(self, p_id, verts, color='b', alpha=0.3, in_out='in', enabled=True,
+                 name=None, group=None):
         self.p_id = p_id
         self.verts = verts  # list of (x, y) tuples
         self.color = color
@@ -109,6 +113,7 @@ class SerializablePolygon:
         self.in_out = in_out
         self.enabled = enabled
         self.name = name
+        self.group = group
         self.patch: Optional[MplPolygon] = None  # Matplotlib Polygon patch (set when drawn)
         self.vertex_markers = []  # Optionally store scatter objects
         self.is_selected = False
@@ -454,6 +459,130 @@ class PolygonManager:
                 pass
         polygon.vertex_markers = []
 
+    def link_polygons(self, p_ids, sample_id=None):
+        """Link polygons into one group, so they form a single region.
+
+        Polygons already in a group bring their whole group with them, so
+        linking a member of group A to a member of group B merges A and B
+        rather than splitting either. Linking never changes the mask -- a
+        group's members are unioned either way (see `polygon_mask`); it
+        changes what counts as *one region* for per-region analysis.
+
+        Parameters
+        ----------
+        p_ids : iterable of int
+            Polygons to link. Fewer than two resolvable polygons is a no-op.
+        sample_id : str, optional
+            Defaults to the current sample.
+
+        Returns
+        -------
+        int or None
+            The surviving group id, or None if nothing was linked.
+        """
+        if sample_id is None:
+            sample_id = self.main_window.app_data.sample_id
+        polygons = self.polygons.get(sample_id, {})
+
+        targets = [polygons[p_id] for p_id in p_ids if p_id in polygons]
+        if len(targets) < 2:
+            return None
+
+        existing = sorted({p.group for p in targets if p.group is not None})
+        group = existing[0] if existing else self._next_group_id(sample_id)
+
+        # absorb every member of the groups being merged, not just the
+        # polygons that happened to be selected
+        merging = set(existing)
+        for polygon in polygons.values():
+            if polygon in targets or (polygon.group is not None and polygon.group in merging):
+                polygon.group = group
+
+        return group
+
+    def unlink_polygons(self, p_ids, sample_id=None):
+        """Remove polygons from their group.
+
+        A group left with a single member is dissolved -- a group of one is
+        just an ungrouped polygon, and leaving it grouped would show a
+        misleading "Group N" in the table.
+
+        Returns
+        -------
+        bool
+            True when something was actually unlinked.
+        """
+        if sample_id is None:
+            sample_id = self.main_window.app_data.sample_id
+        polygons = self.polygons.get(sample_id, {})
+
+        touched = set()
+        for p_id in p_ids:
+            polygon = polygons.get(p_id)
+            if polygon is None or polygon.group is None:
+                continue
+            touched.add(polygon.group)
+            polygon.group = None
+
+        if not touched:
+            return False
+
+        for group in touched:
+            members = [p for p in polygons.values() if p.group == group]
+            if len(members) == 1:
+                members[0].group = None
+
+        return True
+
+    def _next_group_id(self, sample_id):
+        """An id no group of this sample is using."""
+        used = {p.group for p in self.polygons.get(sample_id, {}).values() if p.group is not None}
+        return max(used, default=0) + 1
+
+    def groups(self, sample_id=None, p_ids=None):
+        """Polygons of this sample bucketed into regions, in table order.
+
+        Each ungrouped polygon is a region of its own -- "analyzed as separate
+        regions or linked for combined analysis".
+
+        Parameters
+        ----------
+        sample_id : str, optional
+            Defaults to the current sample.
+        p_ids : iterable of int, optional
+            Restrict to these polygons; a group is included whole as soon as
+            one of its members is named, so a region is never half-built.
+
+        Returns
+        -------
+        list of tuple
+            ``(key, polygons)`` pairs, where `key` is ``('group', gid)`` or
+            ``('polygon', p_id)`` -- stable across calls, so a region can be
+            matched back to the polygons it came from.
+        """
+        if sample_id is None:
+            sample_id = self.main_window.app_data.sample_id
+        polygons = self.polygons.get(sample_id, {})
+
+        wanted = None
+        if p_ids is not None:
+            wanted = set(p_ids)
+            wanted |= {
+                p.p_id for p in polygons.values()
+                if p.group is not None and p.group in {
+                    polygons[i].group for i in wanted if i in polygons
+                }
+            }
+
+        buckets = {}
+        for p_id, polygon in polygons.items():
+            if wanted is not None and p_id not in wanted:
+                continue
+            key = ('group', polygon.group) if polygon.group is not None else ('polygon', p_id)
+            buckets.setdefault(key, []).append(polygon)
+
+        return list(buckets.items())
+
     def remove_polygons(self, p_ids, sample_id=None):
         """Delete polygons by id, artists and all.
 
@@ -479,6 +608,7 @@ class PolygonManager:
 
         polygons = self.polygons.get(sample_id, {})
         removed = []
+        orphaned_groups = set()
         for p_id in list(p_ids):
             polygon = polygons.pop(p_id, None)
             if polygon is None:
@@ -486,7 +616,15 @@ class PolygonManager:
             self._remove_artists(polygon)
             if self.selected_poly is polygon:
                 self.selected_poly = None
+            if polygon.group is not None:
+                orphaned_groups.add(polygon.group)
             removed.append(p_id)
+
+        # a group down to its last member is no longer a group
+        for group in orphaned_groups:
+            members = [p for p in polygons.values() if p.group == group]
+            if len(members) == 1:
+                members[0].group = None
 
         if removed and hasattr(self, 'canvas'):
             self.canvas.draw_idle()
@@ -502,13 +640,27 @@ class PolygonManager:
     #: Edge colour for an 'out' polygon -- one that removes its area.
     OUT_COLOR = 'firebrick'
 
+    #: Cycled through for linked groups, so each group is visually distinct
+    #: from its neighbours (and from an ungrouped polygon's own colour).
+    GROUP_COLORS = ['tab:green', 'tab:purple', 'tab:cyan', 'tab:olive', 'tab:brown']
+
+    def _group_color(self, polygon):
+        """Edge colour carrying this polygon's role: out, linked, or plain."""
+        if polygon.is_out:
+            return self.OUT_COLOR
+        if polygon.group is None:
+            return polygon.color
+        return self.GROUP_COLORS[(polygon.group - 1) % len(self.GROUP_COLORS)]
+
     def draw_polygons(self, canvas, p_id=None):
         """Draw every polygon of the current sample on `canvas`.
 
         All of them are drawn, not just one: outlining a new region is
         guesswork if the regions already selected are invisible. The selected
         polygon is highlighted and shows its vertices; 'out' polygons (which
-        remove their area from the mask) are drawn in `OUT_COLOR`.
+        remove their area from the mask) are drawn in `OUT_COLOR`; linked
+        polygons share a colour from `GROUP_COLORS`, so a group reads as the
+        single region it is.
 
         Parameters
         ----------
@@ -536,7 +688,7 @@ class PolygonManager:
         for pid, polygon in polygons.items():
             selected = pid == p_id
             polygon.is_selected = selected
-            edgecolor = self.OUT_COLOR if polygon.is_out else polygon.color
+            edgecolor = self._group_color(polygon)
 
             # Outline only: the selected area is the one the mask overlay
             # leaves undimmed, so filling it would hide the data being

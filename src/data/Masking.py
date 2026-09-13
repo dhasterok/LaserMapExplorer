@@ -136,6 +136,8 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setWidget(container)
         self.setWidget(scroll_area)
+        self._scroll_area = scroll_area
+        self._container = container
 
         # Connect tab change signal to update toolbar visibility
         self.tab_widgets.currentChanged.connect(self.update_toolbar_for_tab)
@@ -143,6 +145,38 @@ class MaskDock(CustomDockWidget, FieldLogicUI):
         
         # Initialize toolbar for the first tab
         self.update_toolbar_for_tab(0)
+
+    def fit_to_contents(self, max_fraction: float = 0.6):
+        """Grow the dock so its contents fit without scrolling, if there is room.
+
+        The dock keeps a small minimum height (the contents scroll) so that the
+        central canvas can always shrink, but that also means the dock opens at
+        a height smaller than the tabs need. This resizes it once to the
+        contents' preferred height, leaving the rest of the window to the
+        canvas.
+
+        Parameters
+        ----------
+        max_fraction : float, optional
+            Largest share of the canvas+dock vertical space the dock may
+            take, by default 0.6.
+        """
+        if self.ui is None or not self.isVisible() or self.isFloating():
+            return
+
+        # scroll area chrome (frame + horizontal scrollbar, if any)
+        chrome = self._scroll_area.height() - self._scroll_area.viewport().height()
+        wanted = self._container.sizeHint().height() + chrome
+        wanted += self.height() - self._scroll_area.height()  # dock title bar
+
+        # only the canvas and this dock share the vertical space
+        canvas = getattr(self.ui, 'canvas_widget', None)
+        available = (canvas.height() + self.height()) if canvas is not None else self.ui.height()
+        limit = int(available * max_fraction)
+        target = max(self.minimumSizeHint().height(), min(wanted, limit))
+        if target > self.height():
+            self.ui.resizeDocks([self], [target], Qt.Orientation.Vertical)
+
 
     @property
     def app_data(self):

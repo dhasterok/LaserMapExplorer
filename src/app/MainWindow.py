@@ -1700,12 +1700,12 @@ class MainWindow(QMainWindow):
 
         self.mask_dock.show()
 
-        if first_open and not self.mask_dock.isFloating():
-            # Size the dock by taking height from the canvas rather than letting
-            # QMainWindow grow the window; later opens keep the user's height.
-            available = self.canvas_widget.height() + self.mask_dock.height()
-            height = min(self.mask_dock.widget().sizeHint().height(), int(0.45 * available))
-            self.resizeDocks([self.mask_dock], [height], Qt.Orientation.Vertical)
+        if first_open:
+            # Size the dock to its contents by taking height from the canvas
+            # rather than letting QMainWindow grow the window; later opens keep
+            # whatever height the user dragged it to. Deferred so the tab pages
+            # have been laid out and their size hints are real.
+            QTimer.singleShot(0, self.mask_dock.fit_to_contents)
 
         # Apply current theme to the newly created MaskDock
         self._force_widget_style_refresh(self.mask_dock)

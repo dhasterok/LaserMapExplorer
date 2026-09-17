@@ -37,6 +37,10 @@ from src.app.CustomTableWidget import ReorderableTableWidget, compute_row_reorde
 import lame_core.format as fmt
 from src.data.Polygon import PolygonManager
 from src.data.polygon_mask import polygon_mask
+from src.data.cluster_groups import (
+    cluster_groups, expand_to_groups, group_index, group_of,
+    link_clusters, unlink_clusters,
+)
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
 # Mask object
@@ -1044,21 +1048,40 @@ class FilterTab(QWidget):
         if active_id is not None:
             entry = next((r for r in current_data.roi_stack if r['id'] == active_id), None)
 
-        # A polygon-defined region (see SampleObj.add_polygon_roi) has no
-        # filter definition to show -- its shape came from the Polygons tab.
+        # A region defined by polygons (SampleObj.add_polygon_roi) or clusters
+        # (add_cluster_roi) has no filter definition to show -- it was built in
+        # the Polygons or Clusters tab.
         if entry is None or entry.get('filter_df') is None:
             current_data.filter_df = current_data.filter_df.iloc[0:0]
         else:
             current_data.filter_df = entry['filter_df'].copy()
         self.update_filter_table(reload=True, apply=False)
 
-    def _is_polygon_roi(self, roi_id):
-        """True when `roi_id` names a region defined by polygon geometry."""
+    def _derived_roi_kind(self, roi_id):
+        """``'polygons'``, ``'clusters'`` or None for the region `roi_id`.
+
+        A *derived* region carries its own definition from another tab instead
+        of a filter, so the filter table must neither show nor overwrite it.
+        """
         current_data = self.ui.app_data.current_data
         if not current_data or roi_id is None:
-            return False
+            return None
         entry = next((r for r in current_data.roi_stack if r['id'] == roi_id), None)
-        return bool(entry and entry.get('polygons'))
+        if not entry:
+            return None
+        if entry.get('polygons'):
+            return 'polygons'
+        if entry.get('clusters'):
+            return 'clusters'
+        return None
+
+    def _is_derived_roi(self, roi_id):
+        """True when `roi_id` names a region defined outside the Filters tab."""
+        return self._derived_roi_kind(roi_id) is not None
+
+    def _is_polygon_roi(self, roi_id):
+        """True when `roi_id` names a region defined by polygon geometry."""
+        return self._derived_roi_kind(roi_id) == 'polygons'
 
     def _sync_active_roi_and_refresh(self):
         """Writes the live ``filter_df`` back into whichever ROI is
@@ -1073,7 +1096,7 @@ class FilterTab(QWidget):
         if not current_data:
             return
         active_id = self._active_roi_id()
-        if active_id is None or self._is_polygon_roi(active_id):
+        if active_id is None or self._is_derived_roi(active_id):
             return
         current_data.update_roi_filter(active_id, current_data.filter_df)
         self.update_roi_table_widget()
@@ -1087,9 +1110,9 @@ class FilterTab(QWidget):
           (the new filter becomes its first entry).
         - Regions exist but none (or more than one) is selected -> ask the
           user to select a single region first; nothing is added.
-        - The selected region is defined by polygons -> it has no filter
-          definition to add to; say so rather than silently replacing its
-          shape.
+        - The selected region is defined by polygons or clusters -> it has no
+          filter definition to add to; say so rather than silently replacing
+          the definition it does have.
         - Exactly one region selected -> append the filter as before, then
           sync it into that region's stored definition.
         """
@@ -1108,11 +1131,13 @@ class FilterTab(QWidget):
                 "Select a single region of interest in the table below before adding a filter.",
             )
             return
-        elif self._is_polygon_roi(self._active_roi_id()):
+        elif self._is_derived_roi(self._active_roi_id()):
+            kind = self._derived_roi_kind(self._active_roi_id())
+            source_tab = 'Polygons' if kind == 'polygons' else 'Clusters'
             QMessageBox.information(
-                self, "Region Defined by Polygons",
-                "This region is defined by polygons, not filters. Edit its shape in the "
-                "Polygons tab, or select a different region to add a filter to.",
+                self, f"Region Defined by {source_tab}",
+                f"This region is defined by {kind}, not filters. Edit it in the "
+                f"{source_tab} tab, or select a different region to add a filter to.",
             )
             return
 
@@ -1193,7 +1218,10 @@ class FilterTab(QWidget):
         the menu then acts on whatever selection that produced, same as a
         real right-click would.
         """
-        if obj is self.roi_table.viewport() and event.type() == QEvent.Type.MouseButtonRelease:
+        # Same teardown guard as PolygonTab.eventFilter: the filter outlives
+        # the tab, so this must not assume its widgets are still there.
+        table = getattr(self, 'roi_table', None)
+        if table is not None and obj is table.viewport() and event.type() == QEvent.Type.MouseButtonRelease:
             if event.button() == Qt.MouseButton.LeftButton and event.modifiers() == Qt.KeyboardModifier.ControlModifier:
                 pos = event.position().toPoint() if hasattr(event, "position") else event.pos()
                 self.show_roi_context_menu(pos)
@@ -1639,7 +1667,12 @@ class PolygonTab(QWidget):
         The canvas has its own Delete handler (`PolygonManager.onkey`); this
         covers the case where the table, not the map, has focus.
         """
-        if obj is self.tableWidgetPolyPoints and event.type() == QEvent.Type.KeyPress:
+        # An event filter stays installed on the watched widget after this tab
+        # has been torn down, and Qt keeps delivering to it -- reading the
+        # attribute directly then raises AttributeError out of the event loop,
+        # which surfaces as an unrelated failure in whatever runs next.
+        table = getattr(self, 'tableWidgetPolyPoints', None)
+        if table is not None and obj is table and event.type() == QEvent.Type.KeyPress:
             if event.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
                 self.delete_selected_polygons()
                 return True
@@ -1925,6 +1958,12 @@ class ClusterTab(QWidget):
         #init table_fcn
         self.table_fcn = TableFcn(self)
 
+        # Read by _cluster_row_color_changed/update_table_widget/update_clusters
+        # as a reentrancy guard. It was never initialised here -- only AppData
+        # has its own copy -- so recoloring a row before the first table build
+        # raised AttributeError.
+        self.updating_cluster_table_flag = False
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -1966,7 +2005,7 @@ class ClusterTab(QWidget):
         self.actionClusterColorReset.setToolTip("Reset cluster colors")
 
         self.actionClusterLink = CustomAction(
-            text="Link Polygons",
+            text="Link Clusters",
             light_icon_unchecked="icon-link-64.svg",
             dark_icon_unchecked="icon-link-dark-64.svg",
             parent=self )
@@ -1978,6 +2017,15 @@ class ClusterTab(QWidget):
             dark_icon_unchecked="icon-unlink-dark-64.svg",
             parent=self )
         self.actionClusterDelink.setToolTip("Remove link between clusters")
+
+        # Reuses the ROI-add icon (and, like FilterTab.action_add_roi, has no
+        # dark variant) -- this is the cluster counterpart of
+        # PolygonTab.actionPolyRegion, and both produce ordinary ROIs.
+        self.actionClusterRegion = CustomAction(
+            text="Create Region",
+            light_icon_unchecked="icon-roi-add-64.svg",
+            parent=self )
+        self.actionClusterRegion.setToolTip("Create a region of interest from the checked clusters")
 
         self.actionGroupMask = CustomAction(
             text="Create Cluster Mask",
@@ -1993,11 +2041,16 @@ class ClusterTab(QWidget):
         toolbar.addAction(self.actionClusterLink)
         toolbar.addAction(self.actionClusterDelink)
         toolbar.addSeparator()
+        toolbar.addAction(self.actionClusterRegion)
+        toolbar.addSeparator()
         toolbar.addAction(self.actionGroupMask)
 
         if not getattr(self, '_cluster_signals_connected', False):
             self.actionClusterColorReset.triggered.connect(lambda: self.reset_cluster_colors())
             self.cluster_table.itemChanged.connect(self.cluster_label_changed)
+            self.actionClusterLink.triggered.connect(lambda: self.link_checked_clusters())
+            self.actionClusterDelink.triggered.connect(lambda: self.unlink_checked_clusters())
+            self.actionClusterRegion.triggered.connect(lambda: self.create_regions_from_clusters())
             self.actionGroupMask.triggered.connect(lambda: self.ui.apply_cluster_mask(inverse=False))
             self._cluster_signals_connected = True
 
@@ -2007,9 +2060,138 @@ class ClusterTab(QWidget):
     def toggle_cluster_actions(self):
         enabled = bool(self.ui.data)
         self.actionClusterColorReset.setEnabled(enabled)
-        self.actionClusterLink.setEnabled(enabled)
-        self.actionClusterDelink.setEnabled(enabled)
         self.actionGroupMask.setEnabled(enabled)
+        # Link/Unlink/Create Region follow what is checked, not merely whether
+        # data is loaded -- same rule as PolygonTab.update_action_states.
+        self.update_action_states()
+
+    def _cluster_entries(self):
+        """The per-cluster entries of the active method, or ``{}``.
+
+        ``cluster_dict[method]`` mixes int cluster ids with str settings keys;
+        `src/data/cluster_groups.py` ignores the latter, so this just hands the
+        method's dict over once the method has actually been run.
+        """
+        app_data = self.ui.app_data
+        return app_data.cluster_dict.get(app_data.cluster_method, {})
+
+    def _checked_cluster_ids(self):
+        """Cluster ids whose row checkbox (column 0) is ticked.
+
+        Row index is the cluster id -- `update_table_widget` builds the table
+        that way. The table is ``NoSelection``, so checking *is* selecting
+        here, which is the meaning `selected_clusters` and the docs already
+        use.
+        """
+        ids = []
+        for row in range(self.cluster_table.rowCount()):
+            cb = self.cluster_table.cellWidget(row, 0)
+            if cb is not None and cb.isChecked():
+                ids.append(row)
+        return ids
+
+    def update_action_states(self):
+        """Enable Link/Unlink/Create Region from what is currently checked."""
+        entries = self._cluster_entries()
+        checked = self._checked_cluster_ids()
+
+        # Linking a set that is already exactly one group would do nothing.
+        members = expand_to_groups(entries, checked)
+        already_one_group = (
+            len(members) > 1
+            and len({group_of(entries, c) for c in members}) == 1
+            and group_of(entries, members[0]) is not None
+        )
+        self.actionClusterLink.setEnabled(len(members) > 1 and not already_one_group)
+        self.actionClusterDelink.setEnabled(any(group_of(entries, c) is not None for c in checked))
+        self.actionClusterRegion.setEnabled(bool(checked) and self.ui.app_data.current_data is not None)
+
+    def link_checked_clusters(self):
+        """Link the checked clusters into one class.
+
+        A clustering run often splits one mineral across several clusters;
+        linking merges them for display and analysis. It never touches the
+        labels in ``processed[method]``, so the clustering is unchanged and
+        unlinking restores the original classes.
+        """
+        entries = self._cluster_entries()
+        leader = link_clusters(entries, self._checked_cluster_ids())
+        if leader is None:
+            return
+        self._after_group_change()
+        log(f"clusters linked into group led by {leader}", prefix="Mask")
+
+    def unlink_checked_clusters(self):
+        """Split the checked clusters out of their groups."""
+        entries = self._cluster_entries()
+        if not unlink_clusters(entries, self._checked_cluster_ids()):
+            return
+        self._after_group_change()
+        log("clusters unlinked", prefix="Mask")
+
+    def _after_group_change(self):
+        """Resync the table, the mask and the plot after linking/unlinking.
+
+        Rebuilding the table re-ticks whole groups (see `update_clusters`), so
+        the cluster mask has to be reapplied from the expanded selection.
+        """
+        self.update_table_widget()
+        self.update_clusters()
+        self.update_action_states()
+        self.ui.schedule_update()
+
+    def create_regions_from_clusters(self):
+        """Turn the checked clusters into regions of interest.
+
+        One region per linked group; an unlinked cluster is a region of its
+        own -- the same rule as `PolygonTab.create_regions_from_polygons`.
+        Re-running updates the regions already created from the same clusters
+        rather than piling up duplicates.
+
+        The region is a snapshot of which cluster ids belong to it, so
+        re-linking afterwards doesn't move it until this is run again. From
+        here on it is an ordinary ROI: it shows up in the ROI table, the ROI
+        map, the region percentages and the per-region statistics in the
+        Stoichiometry dock -- which is how a merged class gets reported as a
+        single unit.
+        """
+        data = self.ui.app_data.current_data
+        if data is None:
+            return
+
+        entries = self._cluster_entries()
+        checked = set(expand_to_groups(entries, self._checked_cluster_ids()))
+        if not checked:
+            return
+
+        method = self.ui.app_data.cluster_method
+        created = updated = 0
+        for leader, members in cluster_groups(entries):
+            if not checked.intersection(members):
+                continue
+
+            source = f'cluster:{method}:{leader}'
+            existing = data.roi_for_source(source)
+            if existing is not None:
+                data.update_cluster_roi(existing, method, members)
+                updated += 1
+                continue
+
+            # Name and color come from the group leader, so the region matches
+            # what the cluster map already shows for that class.
+            entry = entries.get(leader, {})
+            name = entry.get('name') or f'Cluster {leader + 1}'
+            color = entry.get('color') or self.ui.style_data.set_default_cluster_colors(len(data.roi_stack) + 1)[-1]
+            data.add_cluster_roi(method, members, name=name, color=color, source=source)
+            created += 1
+
+        if not (created or updated):
+            return
+
+        # the ROI table lives on the filter tab
+        self.dock.filter_tab.update_roi_table_widget()
+        self.ui.schedule_update()
+        log(f"cluster regions created={created} updated={updated}", prefix="Mask")
 
     def _cluster_row_color_changed(self, row, hexcolor):
         """Updates a cluster's color when its own row's ColorButton (in
@@ -2022,7 +2204,16 @@ class ClusterTab(QWidget):
 
         app_data = self.ui.app_data
         method = app_data.cluster_method
-        app_data.cluster_dict[method][row]['color'] = hexcolor
+        entries = app_data.cluster_dict[method]
+
+        # Linked clusters are one class and must stay one color, so recoloring
+        # any member recolors the group. Rebuild the table so the other rows'
+        # ColorButtons follow.
+        members = expand_to_groups(entries, [row])
+        for cluster_id in (members or [row]):
+            entries[cluster_id]['color'] = hexcolor
+        if len(members) > 1:
+            self.update_table_widget()
 
         # update plot if currently coloring by cluster
         if app_data.c_field_type.lower() == 'cluster':
@@ -2035,12 +2226,32 @@ class ClusterTab(QWidget):
 
         # # block signals
         self.cluster_table.blockSignals(True)
+        # The per-row QCheckBoxes are separate widgets, so the table's own
+        # blockSignals doesn't cover them -- this flag is what keeps
+        # update_clusters out while the rows are being built.
+        self.updating_cluster_table_flag = True
 
-        # Clear the list widget
+        # Clear the list widget.
+        #
+        # clearContents() drops the *items* but leaves the cell widgets (the
+        # checkboxes and colour buttons) alive, so without the row reset a
+        # sample that has not been clustered kept the previous sample's rows:
+        # blank name/Link/% cells, but live checkboxes still reporting a
+        # selection. The populating branch below sets the real count; every
+        # path that finds no clusters now leaves the table genuinely empty,
+        # which matters because update_action_states reads these rows.
         self.cluster_table.clearContents()
+        self.cluster_table.setRowCount(0)
         self.cluster_table.setHorizontalHeaderLabels(['', 'Name', 'Link', 'Color', '% Total', '% Filtered'])
         method = app_data.cluster_method
         percentages = data.cluster_percentages(method)
+        # Rebuilding must not silently drop the selection: linking rebuilds the
+        # table, and the checkboxes are what `selected_clusters` (and so the
+        # cluster mask) is read from.
+        # `selected_clusters` is sometimes a numpy array (AppData seeds it from
+        # the label array), so test it explicitly rather than for truthiness.
+        selected = app_data.cluster_dict.get(method, {}).get('selected_clusters')
+        checked = set() if selected is None else {int(c) for c in selected}
         if method in data.processed.columns:
             if not data.processed[method].empty:
                 clusters = data.processed[method].dropna().unique()
@@ -2056,18 +2267,23 @@ class ClusterTab(QWidget):
                     cluster_name = app_data.cluster_dict[method][c]['name']
                     hexcolor = app_data.cluster_dict[method][c]['color']
 
-                    self.updating_cluster_table_flag = True
                     c = int(c)
 
                     # checkbox in col 0
                     def make_cb(cluster_id):
                         cb = QCheckBox()
-                        cb.setChecked(False)
+                        cb.setChecked(cluster_id in checked)
                         cb.stateChanged.connect(lambda state, cid=cluster_id: self.update_clusters())
                         return cb
                     self.cluster_table.setCellWidget(c, 0, make_cb(c))
                     self.cluster_table.setItem(c, 1, QTableWidgetItem(cluster_name))
-                    self.cluster_table.setItem(c, 2, QTableWidgetItem(''))
+
+                    # Link column: which linked class this cluster belongs to,
+                    # blank when it stands alone (see cluster_groups).
+                    n_group = group_index(app_data.cluster_dict[method], c)
+                    link_item = QTableWidgetItem(f'Group {n_group}' if n_group else '')
+                    link_item.setFlags(link_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                    self.cluster_table.setItem(c, 2, link_item)
 
                     # ColorButton shows the hex code as its own text (see
                     # blueberry.ColorButton) and opens a color picker on click --
@@ -2094,6 +2310,11 @@ class ClusterTab(QWidget):
         self.cluster_table.blockSignals(False)
         self.updating_cluster_table_flag = False
 
+        # The rows the actions are enabled from only exist now -- without this,
+        # Link/Unlink/Create Region keep the state they had when the table was
+        # empty until the user happens to toggle a checkbox.
+        self.update_action_states()
+
     def cluster_label_changed(self, item):
         # Initialize the flag
         if not self.updating_cluster_table_flag: #change name only when cluster renamed
@@ -2108,7 +2329,13 @@ class ClusterTab(QWidget):
             method = app_data.cluster_method
             cluster_id = row
 
-            old_name = app_data.cluster_dict[method][cluster_id]['name']
+            entry = app_data.cluster_dict.get(method, {}).get(cluster_id)
+            if entry is None:
+                # The row doesn't name a cluster of the active method (a table
+                # left over from another sample, say) -- nothing to rename.
+                return
+
+            old_name = entry['name']
             for i in range(self.cluster_table.rowCount()):
                 if i != row and self.cluster_table.item(i, 1) and self.cluster_table.item(i, 1).text() == new_name:
                     # Duplicate name found, revert to the original name and show a warning
@@ -2116,19 +2343,21 @@ class ClusterTab(QWidget):
                     QMessageBox.warning(self, "Clusters", "Duplicate name not allowed.")
                     return
 
-            # Update processed data with the new name
-            if method in self.ui.data[app_data.sample_id].processed.columns:
-                # Find the rows where the value matches cluster_id
-                rows_to_update = self.ui.data[app_data.sample_id].processed.loc[:, method] == cluster_id
+            # The name lives only in cluster_dict. This used to also write
+            # new_name into processed[method], which is the numeric label
+            # column -- pandas rejects a str there ("Invalid value for dtype
+            # float64"), the exception was swallowed, and because that write
+            # came first the rename never reached cluster_dict at all, so
+            # renaming a cluster silently did nothing. The write was pointless
+            # even when it worked: every consumer (get_cluster_colormap, the
+            # stoichiometry dock's region list, this table) reads names from
+            # cluster_dict, while strings in the label column would break
+            # np.isin -- the cluster mask, cluster_percentages and
+            # cluster-defined regions all match on integer ids.
+            entry['name'] = new_name
 
-                # Update these rows with the new name
-                self.ui.data[app_data.sample_id].processed.loc[rows_to_update, method] = new_name
-
-            # update current_group to reflect the new cluster name
-            app_data.cluster_dict[method][cluster_id]['name'] = new_name
-
-            # update plot with new cluster name
-            # trigger update to plot
+            # A linked class is labelled by its leader, so renaming the leader
+            # renames the class -- redraw the plot to pick it up.
             self.ui.schedule_update()
 
     def update_clusters(self, *args):
@@ -2138,15 +2367,15 @@ class ClusterTab(QWidget):
         """        
         if not self.updating_cluster_table_flag:
             app_data = self.ui.app_data
-            selected_clusters = []
             method = app_data.cluster_method
+            entries = app_data.cluster_dict[method]
 
-            # get checked clusters from checkboxes in col 0
-            for row in range(self.cluster_table.rowCount()):
-                cb = self.cluster_table.cellWidget(row, 0)
-                if cb is not None and cb.isChecked():
-                    selected_clusters.append(row)
-            selected_clusters.sort()
+            # Checking one member of a linked class selects the whole class --
+            # that is what makes the cluster mask group-aware, without
+            # apply_cluster_mask needing to know about grouping at all.
+            selected_clusters = expand_to_groups(entries, self._checked_cluster_ids())
+            self._sync_checkboxes(selected_clusters)
+            self.update_action_states()
 
             # update selected cluster list in cluster_dict
             if selected_clusters:
@@ -2158,6 +2387,18 @@ class ClusterTab(QWidget):
 
             # apply cluster mask and update plot
             self.ui.apply_cluster_mask()
+
+    def _sync_checkboxes(self, checked_ids):
+        """Tick exactly ``checked_ids``, without re-entering `update_clusters`."""
+        checked = set(checked_ids)
+        self.updating_cluster_table_flag = True
+        try:
+            for row in range(self.cluster_table.rowCount()):
+                cb = self.cluster_table.cellWidget(row, 0)
+                if cb is not None and cb.isChecked() != (row in checked):
+                    cb.setChecked(row in checked)
+        finally:
+            self.updating_cluster_table_flag = False
 
     def reset_cluster_colors(self):
         """Resets all cluster colors to the default colormap.
@@ -2175,13 +2416,23 @@ class ClusterTab(QWidget):
         app_data = self.ui.app_data
         method = app_data.cluster_method
 
-        self.cluster_table.blockSignals(True)
+        entries = app_data.cluster_dict[method]
         for i, color in enumerate(hexcolor):
-            app_data.cluster_dict[method][i]['color'] = color
+            entries[i]['color'] = color
+
+        # Re-flatten each linked class onto its leader's color -- the default
+        # colormap gives every cluster its own, which would split a merged
+        # class back into several colors on the map.
+        for leader, members in cluster_groups(entries):
+            for cluster_id in members:
+                entries[cluster_id]['color'] = entries[leader]['color']
+
+        self.cluster_table.blockSignals(True)
+        for i in range(n):
             button = self.cluster_table.cellWidget(i, 3)
             if button is not None:
                 button.blockSignals(True)
-                button.color = color
+                button.color = entries[i]['color']
                 button.blockSignals(False)
         self.cluster_table.blockSignals(False)
 

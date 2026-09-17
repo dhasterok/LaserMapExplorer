@@ -25,6 +25,7 @@ from global_geochemistry.plotting.radar import radar_prep, radarplot
 from src.plotting.scalebar import scalebar
 from global_geochemistry.plotting.ternary import ternary
 from src.control.Logger import LoggerConfig, log_call, log
+from src.data.cluster_groups import cluster_groups
 
 def create_plot(parent, data, app_data, style_data):
     """Creates a plot without UI dependencies.
@@ -728,6 +729,8 @@ def plot_histogram(parent, data, app_data, style_data):
             id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
             cluster_group = data.processed.loc[data.mask, 'ROI'].map(id_to_index)
             clusters = list(range(len(data.roi_stack)))
+            # Each region is already one unit; only clusters can be linked.
+            cluster_members = [(i, [i]) for i in clusters]
         else:
             method = app_data.c_field
 
@@ -736,16 +739,32 @@ def plot_histogram(parent, data, app_data, style_data):
             # x['array']/etc. are already reduced to data.mask (see DataHandling.get_vector),
             # so cluster_group must be masked the same way or np.isin(...) below will size-mismatch.
             cluster_group = data.processed.loc[data.mask, method]
+            # AppData seeds selected_clusters from the label array, so this is
+            # sometimes a numpy array -- `if not clusters` raised "truth value
+            # of an array is ambiguous" on it, and update_SV swallowed the
+            # exception, leaving the cluster histogram silently blank.
             clusters = app_data.cluster_dict[method]['selected_clusters']
+            clusters = [] if clusters is None else [int(c) for c in clusters]
 
             # fall back to all clusters when none are explicitly selected
             if not clusters:
                 clusters = sorted(cluster_group.dropna().unique().astype(int).tolist())
 
+            # Linked clusters are one class, so they get one pooled histogram
+            # rather than several identically-colored curves drawn on top of
+            # each other (see src/data/cluster_groups.py). The leader stands
+            # for the group in cluster_color/cluster_label.
+            selected = set(clusters)
+            cluster_members = [
+                (leader, members)
+                for leader, members in cluster_groups(app_data.cluster_dict[method])
+                if selected.intersection(members)
+            ]
+
         hist_dfs = []
-        # Plot histogram for all clusters
-        for i in clusters:
-            cluster_data = x['array'][cluster_group == i]
+        # Plot histogram for all clusters (a linked class counts as one)
+        for i, members in cluster_members:
+            cluster_data = x['array'][cluster_group.isin(members).to_numpy()]
 
             bar_color = cluster_color[int(i)]
             if htype == 'step':
@@ -1022,9 +1041,18 @@ def add_colorbar(style_data, canvas, cax, cbartype='continuous', grouplabels=Non
             return
 
         # create patches for legend items
-        p = [None]*len(grouplabels)
-        for i, label in enumerate(grouplabels):
-            p[i] = Patch(facecolor=groupcolors[i], edgecolor='#111111', linewidth=0.5, label=label)
+        #
+        # Linked clusters share their leader's color and name (see
+        # StyleToolbox.get_cluster_colormap), so several ids can map to the
+        # same entry -- a merged class must appear once, not once per member.
+        p = []
+        seen = set()
+        for label, color in zip(grouplabels, groupcolors):
+            key = (label, tuple(color) if isinstance(color, (list, tuple)) else color)
+            if key in seen:
+                continue
+            seen.add(key)
+            p.append(Patch(facecolor=color, edgecolor='#111111', linewidth=0.5, label=label))
 
         if style_data.cbar_dir == 'vertical':
             canvas.axes.legend(

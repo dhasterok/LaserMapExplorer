@@ -1668,10 +1668,13 @@ class SampleObj(QObject):
             'name': f"{entry['name']} copy",
             'color': entry['color'],
             'filter_df': filter_df.copy() if filter_df is not None else None,
-            # A copy is independent of the polygons it came from, so it keeps
-            # the geometry but not the source key -- otherwise re-running
-            # "create region" would overwrite the copy as well as the original.
+            # A copy is independent of the polygons or clusters it came from,
+            # so it keeps the definition but not the source key -- otherwise
+            # re-running "create region" would overwrite the copy as well as
+            # the original.
             'polygons': copy.deepcopy(entry.get('polygons')),
+            'clusters': copy.deepcopy(entry.get('clusters')),
+            'cluster_method': entry.get('cluster_method'),
             'source': None,
         })
         self.selected_rois.append(new_id)
@@ -1697,13 +1700,14 @@ class SampleObj(QObject):
         it into the filter table, editing it, and re-saving) and recompute
         assignments.
 
-        Polygon-defined regions (see `add_polygon_roi`) are skipped: they have
-        no filter definition, and writing the live filter table into one would
-        silently replace its geometry.
+        Regions defined by polygons (`add_polygon_roi`) or clusters
+        (`add_cluster_roi`) are skipped: they have no filter definition, and
+        writing the live filter table into one would silently replace the
+        definition they do have.
         """
         for r in self.roi_stack:
             if r['id'] == roi_id:
-                if r.get('polygons'):
+                if r.get('polygons') or r.get('clusters'):
                     return
                 r['filter_df'] = filter_df.copy()
                 break
@@ -1767,26 +1771,100 @@ class SampleObj(QObject):
                 break
         self.recompute_roi_assignments()
 
-    def polygon_roi_for_source(self, source):
+    def add_cluster_roi(self, method, cluster_ids, name=None, color=None, source=None):
+        """Add a region of interest defined by a set of clusters.
+
+        The cluster counterpart of `add_polygon_roi`. Linked clusters form one
+        class (see `src/data/cluster_groups.py`), and this is how such a class
+        becomes a region: from here on it behaves like any other ROI, so
+        `roi_percentages` and `regionstats.region_stats` report the group as a
+        single unit.
+
+        The ids are copied in, so re-linking the clusters afterwards doesn't
+        move the region until it is recreated. It stays label-based rather
+        than storing a pixel mask so that reordering the stack, or a scoped
+        recompute, re-evaluates it.
+
+        Note this is *not* a snapshot of pixels the way a polygon region is a
+        snapshot of geometry: cluster ids are only meaningful relative to a
+        particular clustering run. Re-running clustering silently rebinds the
+        region to whatever the new clusters with those ids cover (and if the
+        method column is gone entirely, the region claims nothing).
+
+        Parameters
+        ----------
+        method : str
+            Clustering method, and the `processed` column holding its labels
+            (e.g. ``'k-means'``).
+        cluster_ids : iterable of int
+            Cluster labels belonging to this region.
+        name : str, optional
+            Display name; defaults to ``f"ROI {n}"`` like `add_roi`.
+        color : str, optional
+            Hex color; the caller (UI) normally supplies one.
+        source : str, optional
+            Opaque key identifying what the region was built from (e.g.
+            ``"cluster:k-means:2"``), so recreating it updates in place rather
+            than piling up duplicates. See `roi_for_source`.
+
+        Returns
+        -------
+        int
+            The new ROI's id (1-based; 0 means "unassigned").
+        """
+        new_id = max((r['id'] for r in self.roi_stack), default=0) + 1
+        if name is None:
+            name = f"ROI {new_id}"
+        if color is None:
+            color = '#808080'
+
+        self.roi_stack.append({
+            'id': new_id,
+            'name': name,
+            'color': color,
+            'filter_df': None,
+            'clusters': [int(c) for c in cluster_ids],
+            'cluster_method': method,
+            'source': source,
+        })
+        self.selected_rois.append(new_id)
+        self.recompute_roi_assignments()
+        return new_id
+
+    def update_cluster_roi(self, roi_id, method, cluster_ids):
+        """Replace a cluster-defined region's membership and recompute."""
+        for r in self.roi_stack:
+            if r['id'] == roi_id:
+                r['clusters'] = [int(c) for c in cluster_ids]
+                r['cluster_method'] = method
+                break
+        self.recompute_roi_assignments()
+
+    def roi_for_source(self, source):
         """The id of the region built from `source`, or None.
 
-        Lets the polygon tool refresh the region it created earlier instead of
-        adding a second one for the same group.
+        Lets the polygon and cluster tools refresh the region they created
+        earlier instead of adding a second one for the same group.
         """
         if source is None:
             return None
         entry = next((r for r in self.roi_stack if r.get('source') == source), None)
         return entry['id'] if entry else None
 
+    def polygon_roi_for_source(self, source):
+        """Polygon-tool spelling of `roi_for_source`."""
+        return self.roi_for_source(source)
+
     def recompute_roi_assignments(self):
         """Rebuild the `processed['ROI']` column from the current stack.
 
         Walks `self.roi_stack` in order, evaluating each region's own stored
-        definition -- a filter (`_compute_filter_mask`) or, for regions built
-        from linked polygons (`add_polygon_roi`), the geometry itself -- and
-        stamping its id onto matching pixels. Later (higher-index) regions
-        overwrite earlier ones on overlapping pixels, so stack order is
-        priority order. Unclaimed pixels stay 0. Also refreshes
+        definition -- a filter (`_compute_filter_mask`), the geometry itself
+        for regions built from linked polygons (`add_polygon_roi`), or the
+        cluster labels for regions built from linked clusters
+        (`add_cluster_roi`) -- and stamping its id onto matching pixels.
+        Later (higher-index) regions overwrite earlier ones on overlapping
+        pixels, so stack order is priority order. Unclaimed pixels stay 0. Also refreshes
         `roi_selection_mask` (which ROI ids are currently selected for
         display) and the combined `self.mask`.
         """
@@ -1794,11 +1872,22 @@ class SampleObj(QObject):
         roi_values = np.zeros(n, dtype=float)
         for entry in self.roi_stack:
             geometry = entry.get('polygons')
+            clusters = entry.get('clusters')
             if geometry:
                 member_mask = polygon_mask(
                     [(p['verts'], p.get('in_out', 'in')) for p in geometry],
                     self.array_size, self.order, n,
                 )
+            elif clusters:
+                # The labels can be gone -- the method was re-run under a
+                # different name, or the column was never computed in this
+                # session. The region then claims nothing rather than raising,
+                # so one stale entry can't break every other region.
+                method = entry.get('cluster_method')
+                if method in self.processed.columns:
+                    member_mask = np.isin(self.processed[method].values, clusters)
+                else:
+                    member_mask = np.zeros(n, dtype=bool)
             else:
                 member_mask = self._compute_filter_mask(entry['filter_df'])
             roi_values[member_mask] = entry['id']

@@ -17,6 +17,7 @@ from lame_core.config import STYLE_PATH
 from blueberry import COLORMAP_PATH
 from src.app.PlotAxisSettings import axis_settings_dict
 from src.control.Logger import auto_log_methods, log
+from src.data.cluster_groups import group_colors_and_labels
 
 from typing import TYPE_CHECKING, Union
 if TYPE_CHECKING:
@@ -1615,12 +1616,20 @@ class StyleData(QObject, StyleTheme):
         cluster_color = [None]*n
         cluster_label = [None]*n
         
+        # Linked clusters are one class (see src/data/cluster_groups.py), so
+        # every member reports its group leader's color and name. Doing the
+        # substitution here means a merged class draws as one color under one
+        # name in every plot that indexes these lists by raw cluster id --
+        # cluster map, scatter, histogram legend -- with no plot-side changes.
+        group_display = group_colors_and_labels(cluster_dict)
+
         # convert colors from hex to rgb and add to cluster_color list
         for i in range(n):
-            rgb_color = convert_color(cluster_dict[i]['color'], 'hex', 'rgb', norm_out=False)
+            hexcolor, label = group_display.get(i, (cluster_dict[i]['color'], cluster_dict[i]['name']))
+            rgb_color = convert_color(hexcolor, 'hex', 'rgb', norm_out=False)
             color = rgb_color if rgb_color is not None else [0, 0, 0]
             cluster_color[i] = tuple(float(c)/255 for c in color) + (float(alpha)/100,)
-            cluster_label[i] = cluster_dict[i]['name']
+            cluster_label[i] = label
 
         # mask
         if 99 in cluster_dict:

@@ -26,6 +26,7 @@ from lame_core.CustomWidgets import CustomDockWidget, CustomLineEdit
 from src.control.FieldLogic import FieldLogicUI
 from src.data import RegressionModel as rm
 from src.control.Logger import log, auto_log_methods
+from src.data.cluster_groups import cluster_groups
 
 # 176Lu decay constant and CHUR intercept, Sonderlund et al., EPSL, 2004,
 # https://doi.org/10.1016/S0012-821X(04)00012-3
@@ -506,7 +507,9 @@ class Geochronology():
 
         Reads the selected clusters from the Cluster Filtering tab
         (``app_data.cluster_dict[method]['selected_clusters']``); if none are
-        selected, fits all clusters present. Results are cached on
+        selected, fits all clusters present. Clusters linked together are one
+        class (see `src/data/cluster_groups.py`) and get a single pooled fit,
+        keyed by the group's leader id. Results are cached on
         ``self._last_results`` for ``copy_results_to_notes``.
         """
         dt = self.dating_tab
@@ -551,9 +554,13 @@ class Geochronology():
         decay_const = dt.lineEditDecayConstant.value
         decay_const_unc = dt.lineEditDecayConstantUncertainty.value
 
+        entries = app_data.cluster_dict[cluster_method]
+        chosen = set(selected)
         results = {}
-        for c in selected:
-            ind = cluster_labels == c
+        for c, members in cluster_groups(entries):
+            if not chosen.intersection(members):
+                continue
+            ind = np.isin(cluster_labels, members)
             res_fwd = fit_isochron_mc(lu176_hf177[ind], hf176_hf177[ind], method='normal',
                                        fixed_intercept=LU_HF['Hf176_Hf177_i'], decay_const=decay_const,
                                        decay_const_unc=decay_const_unc)

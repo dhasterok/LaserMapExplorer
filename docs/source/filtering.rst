@@ -48,6 +48,22 @@ Polygons can be used to filter specific regions of your data, to create a polygo
 While placing vertices, press ``z`` to remove the last one or ``Esc`` to abandon the polygon.
 These shortcuts act on the map, so click the map once first to give it keyboard focus.
 
+Editing a polygon
+^^^^^^^^^^^^^^^^^
+
+Clicking inside a polygon on the map selects it (its row in the *Polygon Table* follows), and
+the selected polygon shows its vertices as red handles. Three toolbar buttons reshape it:
+
+- |icon-move-point| *Move Point*: drag a handle to move that vertex. Drag from inside the
+  polygon, away from any handle, to move the whole polygon.
+- |icon-add-point| *Add Point*: click on one of the polygon's edges to insert a vertex there.
+- |icon-remove-point| *Remove Point*: click a handle to remove that vertex. A polygon always
+  keeps at least three vertices.
+
+Only one of the three can be active at a time; click the button again, press ``Esc`` or
+right-click the map to leave the mode. The polygon mask and any regions made from the
+polygon update as soon as an edit is finished.
+
 To delete polygons, select one or more rows in the *Polygon Table* and either click the
 Delete button on the tab's toolbar, press ``Delete``, or right-click the selection and choose
 *Delete Polygon*. A polygon selected on the map (click inside it) can also be removed with
@@ -149,6 +165,15 @@ For detailed information about clustering methods and implementation, see `Clust
     :height: 2.5ex
 
 .. |icon-polygon-new| image:: _static/icons/icon-polygon-new-64.svg
+    :height: 2.5ex
+
+.. |icon-move-point| image:: _static/icons/icon-move-point-64.svg
+    :height: 2.5ex
+
+.. |icon-add-point| image:: _static/icons/icon-add-point-64.svg
+    :height: 2.5ex
+
+.. |icon-remove-point| image:: _static/icons/icon-remove-point-64.svg
     :height: 2.5ex
 
 .. |icon-spotlight| image:: _static/icons/icon-spotlight-64.svg

@@ -8,64 +8,8 @@ import copy
 import os
 import pickle
 from src.control.Logger import auto_log_methods, log
+from src.data.polygon_edit import nearest_vertex, nearest_segment, point_segment_distance
 
-class InteractivePolygon:
-    def __init__(self, ax, verts):
-        self.ax = ax
-        self.verts = verts.copy()
-        self.poly = MplPolygon(self.verts, closed=True, edgecolor='b', fill=True, alpha=0.3, picker=True)
-        self.ax.add_patch(self.poly)
-        self.marker_objs = []
-        self.is_selected = False
-        self._draw_vertices()
-
-    def _draw_vertices(self):
-        self._remove_markers()
-        for x, y in self.verts:
-            marker = self.ax.scatter([x], [y], c='red' if self.is_selected else 'blue', s=50, zorder=4)
-            self.marker_objs.append(marker)
-        self.ax.figure.canvas.draw_idle()
-
-    def _remove_markers(self):
-        for marker in self.marker_objs:
-            marker.remove()
-        self.marker_objs = []
-
-    def select(self):
-        self.poly.set_edgecolor('orange')
-        self.poly.set_linewidth(2)
-        self.is_selected = True
-        self._draw_vertices()
-
-    def deselect(self):
-        self.poly.set_edgecolor('b')
-        self.poly.set_linewidth(1)
-        self.is_selected = False
-        self._draw_vertices()
-
-    def move_vertex(self, idx, new_xy):
-        self.verts[idx] = new_xy
-        self.poly.set_xy(self.verts)
-        self._draw_vertices()
-
-
-    def add_vertex(self, insert_after_idx, xy):
-        self.verts.insert(insert_after_idx + 1, xy)
-        self.poly.set_xy(self.verts)
-        self._draw_vertices()
-
-
-    def remove_vertex(self, idx):
-        if len(self.verts) > 3:
-            self.verts.pop(idx)
-            self.poly.set_xy(self.verts)
-            self._draw_vertices()
-
-
-    def remove(self):
-        self.poly.remove()
-        self._remove_markers()
-        self.ax.figure.canvas.draw_idle()
 
 def detached_copy(polygon):
     """A copy of `polygon` with its matplotlib artists stripped.
@@ -128,43 +72,116 @@ class SerializablePolygon:
         """bool : True when this polygon removes its area from the mask."""
         return str(self.in_out).lower() == 'out'
 
+    #: A polygon never has fewer vertices than this; `remove_vertex` refuses
+    #: to go below it.
+    MIN_VERTICES = 3
+
     def select(self):
         self.is_selected = True
         if self.patch is not None:
             self.patch.set_edgecolor('orange')
             self.patch.set_linewidth(2)
 
-    def deselect(self):
+    def deselect(self, edgecolor=None):
+        """Clear the selection highlight.
+
+        Parameters
+        ----------
+        edgecolor : color, optional
+            Outline colour to restore. Defaults to the polygon's own colour;
+            the manager passes the group/out colour so a linked or 'out'
+            polygon keeps its meaning when deselected.
+        """
         self.is_selected = False
         if self.patch is not None:
-            self.patch.set_edgecolor(self.color)
+            self.patch.set_edgecolor(self.color if edgecolor is None else edgecolor)
             self.patch.set_linewidth(1)
 
-    def move_vertex(self, idx: int, new_xy: list[float]) -> None:
-        self.verts[idx] = (float(new_xy[0]), float(new_xy[1]))
+    # --- Vertex editing -------------------------------------------------
+    # These change the geometry (and the patch, if drawn) only. Vertex
+    # markers and the canvas are the manager's job -- see
+    # `PolygonManager._redraw_polygon`.
+
+    def _sync_patch(self):
         if self.patch is not None:
             self.patch.set_xy(self.verts)
 
+    def move_vertex(self, idx: int, new_xy) -> None:
+        """Move vertex `idx` to `new_xy`."""
+        self.verts[idx] = (float(new_xy[0]), float(new_xy[1]))
+        self._sync_patch()
+
+    def add_vertex(self, insert_after_idx: int, xy) -> int:
+        """Insert a vertex on the edge that starts at `insert_after_idx`.
+
+        Returns
+        -------
+        int
+            Index of the new vertex (``insert_after_idx + 1``).
+        """
+        idx = insert_after_idx + 1
+        self.verts.insert(idx, (float(xy[0]), float(xy[1])))
+        self._sync_patch()
+        return idx
+
+    def remove_vertex(self, idx: int) -> bool:
+        """Drop vertex `idx`, unless that would leave fewer than
+        `MIN_VERTICES` (a polygon needs an area to mask).
+
+        Returns
+        -------
+        bool
+            True when a vertex was removed.
+        """
+        if len(self.verts) <= self.MIN_VERTICES:
+            return False
+        self.verts.pop(idx)
+        self._sync_patch()
+        return True
+
+    def translate(self, dx: float, dy: float) -> None:
+        """Shift every vertex by (`dx`, `dy`)."""
+        self.verts = [(float(x) + dx, float(y) + dy) for x, y in self.verts]
+        self._sync_patch()
+
 @auto_log_methods(logger_key='Polygon')
 class PolygonManager:
+    #: Screen distance, in pixels, within which a click counts as hitting a
+    #: vertex. Screen rather than data units, so it does not depend on the
+    #: map's resolution or zoom (a field map's axes are pixel indices, so a
+    #: data-unit tolerance was either unhittable or covered half the map).
+    VERTEX_PICK_PX = 8
+    #: Same, for hitting an edge in Add Point mode. Farther than this from
+    #: every edge of the selected polygon, a click selects instead.
+    EDGE_PICK_PX = 15
+
     def __init__(self,parent, main_window ):
 
         self.parent = parent
         self.main_window = main_window
-        
+
         self.polygons = {}  # {sample_id: {p_id: SerializablePolygon}}
         self.p_id_gen = 0   # global counter (can be made per-sample if needed)
         self.p_id = 0
+
+        self.canvas = None
+        self.ax = None
 
         self.current_verts = []
         self.current_line = None
         self.vertex_markers = []
         self._drawing = False
         self.selected_poly = None
+
+        #: One of 'move', 'add', 'remove' or None -- which toolbar edit mode
+        #: is active. Lives here rather than on the tab so it survives the
+        #: canvas being rebuilt on every replot.
+        self.edit_mode = None
         self.dragging_vertex = False
         self.dragged_idx = None
         self.dragging_poly = False
         self.last_event_xy = None
+        self._drag_moved = False
 
         self.cid_click = None
         self.cid_release = None
@@ -229,7 +246,7 @@ class PolygonManager:
         canvas and the in-progress event connections intact; triggering a
         replot instead would swap the canvas out mid-draw.
         """
-        canvas = getattr(self, 'canvas', None)
+        canvas = self.canvas
         overlay = getattr(canvas, 'mask_overlay', None)
         if overlay is None:
             return
@@ -269,9 +286,40 @@ class PolygonManager:
             # redraw through the one drawing path, so the new polygon looks
             # like every other one and becomes the selected one
             self.draw_polygons(self.canvas, p_id=self.p_id)
-        self.disconnect()  # stop canvas events until next Create Polygon click
-        if added:
+            # The handlers stay connected: outside drawing they only select
+            # and (in an edit mode) reshape polygons. Disconnecting here used
+            # to leave the canvas inert until the next replot happened to
+            # re-arm them.
             self.notify_model_changed()
+
+    def set_edit_mode(self, mode, canvas=None):
+        """Arm one of the vertex-editing modes, or none.
+
+        Parameters
+        ----------
+        mode : {'move', 'add', 'remove', None}
+            'move' drags a vertex of the selected polygon (or the whole
+            polygon, when the press lands inside it); 'add' inserts a vertex
+            on the nearest edge; 'remove' drops the clicked vertex. None
+            leaves click-to-select only.
+        canvas : MplCanvas, optional
+            The live map canvas. Handlers are moved to it if they are bound
+            to a previous one. A replot rebuilds the canvas, so the tab passes
+            it on every mode change.
+        """
+        self._end_drag(commit=False)
+        self.edit_mode = mode
+        if canvas is not None and (canvas is not self.canvas or self.cid_click is None):
+            self.initiate_axes(canvas)
+
+    def _exit_edit_mode(self):
+        """Leave the edit mode from the canvas (Esc or right-click), keeping
+        the toolbar buttons in step."""
+        parent = self.parent
+        if parent is not None and hasattr(parent, 'exit_edit_mode'):
+            parent.exit_edit_mode()   # unchecks the buttons, then calls back into set_edit_mode
+        else:
+            self.set_edit_mode(None)
 
     def notify_model_changed(self):
         """Tell the owning tab the polygon set changed, so it can resync.
@@ -331,7 +379,7 @@ class PolygonManager:
         # keep new polygons from colliding with the ids just loaded
         self._seed_pid()
 
-        if hasattr(self, 'canvas'):
+        if self.canvas is not None:
             self.draw_polygons(self.canvas)
         self.notify_model_changed()
         log("Polygons loaded successfully.", prefix="Polygon")
@@ -344,7 +392,41 @@ class PolygonManager:
         for m in self.vertex_markers:
             m.remove()
         self.vertex_markers = []
-        self.canvas.draw_idle()
+        if self.canvas is not None:
+            self.canvas.draw_idle()
+
+    # --- Hit testing (display pixels) ---
+    def _verts_in_pixels(self, polygon):
+        """`polygon`'s vertices in display coordinates, to compare with
+        ``event.x``/``event.y``."""
+        return self.ax.transData.transform(np.asarray(polygon.verts, dtype=float).reshape(-1, 2))
+
+    def _pick_vertex(self, polygon, event):
+        """Index of `polygon`'s vertex under the mouse, or None."""
+        if polygon is None or not polygon.verts:
+            return None
+        return nearest_vertex(self._verts_in_pixels(polygon), (event.x, event.y),
+                              max_dist=self.VERTEX_PICK_PX)
+
+    def _pick_segment(self, polygon, event):
+        """Index of `polygon`'s edge under the mouse (see `nearest_segment`),
+        or None when no edge is within `EDGE_PICK_PX`."""
+        if polygon is None or len(polygon.verts) < 2:
+            return None
+        pix = self._verts_in_pixels(polygon)
+        idx = nearest_segment(pix, (event.x, event.y))
+        if idx is None:
+            return None
+        dist = point_segment_distance((event.x, event.y), pix[idx], pix[(idx + 1) % len(pix)])
+        return idx if dist <= self.EDGE_PICK_PX else None
+
+    def _polygon_at(self, event):
+        """The first drawn polygon of the current sample containing the mouse."""
+        sample_id = self.main_window.app_data.sample_id
+        for poly in self.polygons.get(sample_id, {}).values():
+            if poly.patch is not None and poly.patch.contains_point((event.x, event.y)):
+                return poly
+        return None
 
     def onclick(self, event):
         if event.inaxes != self.ax:
@@ -356,57 +438,91 @@ class PolygonManager:
                 self._draw_temp(event)
             elif event.button == 3 and len(self.current_verts) >= 3:  # right click to finish
                 self.finish_polygon()
-        else:
-            # --- Polygon Editing Mode ---
-            sample_id = self.main_window.app_data.sample_id
-            current_polys = list(self.polygons.get(sample_id, {}).values())
-            hit_something = False
-            for poly in current_polys:
-                if poly.is_selected:
-                    for i, (vx, vy) in enumerate(poly.verts):
-                        if np.hypot(event.xdata - vx, event.ydata - vy) < 0.05:
-                            self.dragging_vertex = True
-                            self.dragged_idx = i
-                            self.selected_poly = poly
-                            hit_something = True
-                            return
-                    if poly.patch is not None and poly.patch.contains_point([event.x, event.y]):
-                        self.dragging_poly = True
-                        self.last_event_xy = (event.xdata, event.ydata)
-                        self.selected_poly = poly
-                        hit_something = True
-                        return
-            if not hit_something:
-                for poly in current_polys:
-                    if poly.patch is not None and poly.patch.contains_point([event.x, event.y]):
-                        self.deselect_all()
-                        poly.select()
-                        self.selected_poly = poly
-                        hit_something = True
-                        break
-                if not hit_something:
-                    self.deselect_all()
+            return
+
+        # --- Editing / selection ---
+        if event.button == 3:
+            if self.edit_mode is not None:
+                self._exit_edit_mode()
+            return
+        if event.button != 1 or event.xdata is None or event.ydata is None:
+            return
+
+        poly = self.selected_poly
+        match self.edit_mode:
+            case 'move':
+                idx = self._pick_vertex(poly, event)
+                if idx is not None:
+                    self.dragging_vertex = True
+                    self.dragged_idx = idx
+                    self._drag_moved = False
+                    return
+                if poly is not None and poly.patch is not None \
+                        and poly.patch.contains_point((event.x, event.y)):
+                    self.dragging_poly = True
+                    self.last_event_xy = (event.xdata, event.ydata)
+                    self._drag_moved = False
+                    return
+            case 'add':
+                idx = self._pick_segment(poly, event)
+                if idx is not None:
+                    poly.add_vertex(idx, (event.xdata, event.ydata))
+                    self._redraw_polygon(poly)
+                    self.notify_model_changed()
+                    return
+            case 'remove':
+                idx = self._pick_vertex(poly, event)
+                if idx is not None:
+                    if poly.remove_vertex(idx):
+                        self._redraw_polygon(poly)
+                        self.notify_model_changed()
+                    else:
+                        log(f"polygon {poly.p_id} keeps its last "
+                            f"{SerializablePolygon.MIN_VERTICES} vertices", prefix="Polygon")
+                    return
+
+        # Nothing was edited: the click picks a polygon (or clears the pick).
+        hit = self._polygon_at(event)
+        if hit is None:
+            self.deselect_all()
+            if self.canvas is not None:
+                self.canvas.draw_idle()
+        elif hit is not self.selected_poly:
+            self.select_polygon(hit)
 
     def onrelease(self, event):
+        self._end_drag(commit=True)
+
+    def _end_drag(self, commit):
+        """Finish any vertex/polygon drag. With `commit`, a drag that actually
+        moved something is pushed to the mask and table."""
+        moved = self._drag_moved and (self.dragging_vertex or self.dragging_poly)
         self.dragging_vertex = False
         self.dragged_idx = None
         self.dragging_poly = False
         self.last_event_xy = None
+        self._drag_moved = False
+        if moved and commit:
+            self.notify_model_changed()
 
     def onmove(self, event):
         if self._drawing:
             self._draw_temp(event)
-        elif self.dragging_vertex and self.selected_poly:
-            if event.xdata is not None and event.ydata is not None:
-                self.selected_poly.move_vertex(self.dragged_idx, [event.xdata, event.ydata])
-        elif self.dragging_poly and self.selected_poly and self.last_event_xy:
+            return
+        if event.xdata is None or event.ydata is None:
+            return
+        poly = self.selected_poly
+        if self.dragging_vertex and poly is not None and self.dragged_idx is not None:
+            poly.move_vertex(self.dragged_idx, (event.xdata, event.ydata))
+            self._drag_moved = True
+            self._redraw_polygon(poly)
+        elif self.dragging_poly and poly is not None and self.last_event_xy is not None:
             dx = event.xdata - self.last_event_xy[0]
             dy = event.ydata - self.last_event_xy[1]
-            new_verts = [(x+dx, y+dy) for x, y in self.selected_poly.verts]
-            self.selected_poly.verts = new_verts
-            if self.selected_poly.patch is not None:
-                self.selected_poly.patch.set_xy(new_verts)
+            poly.translate(dx, dy)
             self.last_event_xy = (event.xdata, event.ydata)
+            self._drag_moved = True
+            self._redraw_polygon(poly)
 
 
     def onkey(self, event):
@@ -418,6 +534,8 @@ class PolygonManager:
                 self._remove_temp()
                 self._drawing = False
                 self.set_mask_overlay_visible(True)
+        elif event.key == 'escape' and self.edit_mode is not None:
+            self._exit_edit_mode()
         elif self.selected_poly:
             if event.key in ['delete', 'backspace']:
                 self.remove_polygons([self.selected_poly.p_id])
@@ -626,16 +744,36 @@ class PolygonManager:
             if len(members) == 1:
                 members[0].group = None
 
-        if removed and hasattr(self, 'canvas'):
+        if removed and self.canvas is not None:
             self.canvas.draw_idle()
 
         return removed
 
     def deselect_all(self):
+        """Clear the selection, restoring each polygon's own outline style.
+
+        Redraws through `_draw_polygon_artists` rather than the model's
+        `deselect`, so a linked or 'out' polygon gets its group colour back
+        and the selected polygon's vertex markers are removed.
+        """
         sample_id = self.main_window.app_data.sample_id
         for poly in self.polygons.get(sample_id, {}).values():
-            poly.deselect()
+            if poly.is_selected and self.ax is not None:
+                self._draw_polygon_artists(poly, selected=False)
+            else:
+                poly.is_selected = False
         self.selected_poly = None
+
+    def select_polygon(self, polygon):
+        """Make `polygon` the selected one on the canvas and in the table."""
+        self.deselect_all()
+        self.selected_poly = polygon
+        if self.ax is not None:
+            self._draw_polygon_artists(polygon, selected=True)
+        if self.canvas is not None:
+            self.canvas.draw_idle()
+        if self.parent is not None and hasattr(self.parent, 'select_polygon_row'):
+            self.parent.select_polygon_row(polygon.p_id)
 
     #: Edge colour for an 'out' polygon -- one that removes its area.
     OUT_COLOR = 'firebrick'
@@ -686,26 +824,49 @@ class PolygonManager:
         self.selected_poly = polygons.get(p_id) if p_id is not None else None
 
         for pid, polygon in polygons.items():
-            selected = pid == p_id
-            polygon.is_selected = selected
-            edgecolor = self._group_color(polygon)
-
-            # Outline only: the selected area is the one the mask overlay
-            # leaves undimmed, so filling it would hide the data being
-            # inspected. The edge carries the state instead.
-            polygon.patch = MplPolygon(polygon.verts, closed=True,  # type: ignore[arg-type]
-                                       edgecolor='orange' if selected else edgecolor,
-                                       linewidth=2.5 if selected else 1.5,
-                                       linestyle='--' if polygon.is_out else '-',
-                                       fill=False)
-            self.ax.add_patch(polygon.patch)
-
-            polygon.vertex_markers = []
-            if selected:
-                for x, y in polygon.verts:
-                    polygon.vertex_markers.append(self.ax.scatter([x], [y], c='red', s=50, zorder=5))
+            self._draw_polygon_artists(polygon, selected=(pid == p_id))
 
         self.canvas.draw_idle()
+
+    def _draw_polygon_artists(self, polygon, selected):
+        """(Re)create `polygon`'s patch and vertex markers on the current axes.
+
+        The one place polygon styling lives, used by `draw_polygons`,
+        `select_polygon` and `deselect_all`. Outline only: the selected area
+        is the one the mask overlay leaves undimmed, so filling it would hide
+        the data being inspected. The edge carries the state instead, and the
+        selected polygon also shows its vertices (the handles for editing).
+        """
+        self._remove_artists(polygon)
+        polygon.is_selected = selected
+
+        polygon.patch = MplPolygon(polygon.verts, closed=True,  # type: ignore[arg-type]
+                                   edgecolor='orange' if selected else self._group_color(polygon),
+                                   linewidth=2.5 if selected else 1.5,
+                                   linestyle='--' if polygon.is_out else '-',
+                                   fill=False)
+        self.ax.add_patch(polygon.patch)
+
+        polygon.vertex_markers = []
+        if selected:
+            for x, y in polygon.verts:
+                polygon.vertex_markers.append(self.ax.scatter([x], [y], c='red', s=50, zorder=5))
+
+    def _redraw_polygon(self, polygon):
+        """Cheap repaint after a vertex edit: move the existing artists rather
+        than rebuilding them, so a drag stays smooth."""
+        if self.ax is None:
+            return
+        if polygon.patch is not None:
+            polygon.patch.set_xy(polygon.verts)
+        if len(polygon.vertex_markers) == len(polygon.verts):
+            for marker, (x, y) in zip(polygon.vertex_markers, polygon.verts):
+                marker.set_offsets([[x, y]])
+        else:
+            # vertex count changed (add/remove): rebuild the handles
+            self._draw_polygon_artists(polygon, selected=polygon.is_selected)
+        if self.canvas is not None:
+            self.canvas.draw_idle()
 
     def plot_existing_polygon(self, canvas, p_id=None):
         """Select `p_id` (the first polygon by default) and redraw.
@@ -726,7 +887,7 @@ class PolygonManager:
         sample_id = self.main_window.app_data.sample_id
         for polygon in self.polygons.get(sample_id, {}).values():
             self._remove_artists(polygon)
-        if hasattr(self, 'canvas'):
+        if self.canvas is not None:
             self.canvas.draw_idle()
 
     def clear_polygons(self):
@@ -740,12 +901,12 @@ class PolygonManager:
         for polygons in self.polygons.values():
             for polygon in polygons.values():
                 self._remove_artists(polygon)
-        if hasattr(self, 'canvas'):
+        if self.canvas is not None:
             self.canvas.draw_idle()
 
 
     def disconnect(self):
-        if not hasattr(self, 'canvas') or self.cid_click is None:
+        if self.canvas is None or self.cid_click is None:
             return
         self.canvas.mpl_disconnect(self.cid_click)
         self.canvas.mpl_disconnect(self.cid_release)

@@ -1469,13 +1469,20 @@ class PolygonTab(QWidget):
         )
         self.actionPolyCreate.setToolTip("Create a new polygon")
 
+        # The three vertex-editing modes are mutually exclusive toggles (see
+        # `_set_edit_mode`). CustomAction is only checkable when given a
+        # checked icon, so say so explicitly -- as the profile dock does.
         self.actionPolyMovePoint = CustomAction(
             text="Move Point",
             light_icon_unchecked="icon-move-point-64.svg",
             dark_icon_unchecked="icon-move-point-dark-64.svg",
             parent=self
         )
-        self.actionPolyMovePoint.setToolTip("Move a profile point")
+        self.actionPolyMovePoint.setCheckable(True)
+        self.actionPolyMovePoint.setToolTip(
+            "Move a vertex of the selected polygon by dragging it "
+            "(drag inside the polygon to move the whole polygon)"
+        )
 
         self.actionPolyAddPoint = CustomAction(
             text="Add Point",
@@ -1483,7 +1490,8 @@ class PolygonTab(QWidget):
             dark_icon_unchecked="icon-add-point-dark-64.svg",
             parent=self
         )
-        self.actionPolyAddPoint.setToolTip("Add a profile point")
+        self.actionPolyAddPoint.setCheckable(True)
+        self.actionPolyAddPoint.setToolTip("Add a vertex to the selected polygon: click on one of its edges")
 
         self.actionPolyRemovePoint = CustomAction(
             text="Remove Point",
@@ -1491,7 +1499,8 @@ class PolygonTab(QWidget):
             dark_icon_unchecked="icon-remove-point-dark-64.svg",
             parent=self
         )
-        self.actionPolyRemovePoint.setToolTip("Remove a profile point")
+        self.actionPolyRemovePoint.setCheckable(True)
+        self.actionPolyRemovePoint.setToolTip("Remove a vertex from the selected polygon: click on it")
 
         self.actionPolyLink = CustomAction(
             text="Link Polygons",
@@ -1571,16 +1580,98 @@ class PolygonTab(QWidget):
             self.actionPolyLink.triggered.connect(self.link_selected_polygons)
             self.actionPolyDelink.triggered.connect(self.unlink_selected_polygons)
             self.actionPolyRegion.triggered.connect(self.create_regions_from_polygons)
+            self.actionPolyMovePoint.triggered.connect(
+                lambda: self._set_edit_mode(self.actionPolyMovePoint, 'move'))
+            self.actionPolyAddPoint.triggered.connect(
+                lambda: self._set_edit_mode(self.actionPolyAddPoint, 'add'))
+            self.actionPolyRemovePoint.triggered.connect(
+                lambda: self._set_edit_mode(self.actionPolyRemovePoint, 'remove'))
             self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.view_selected_polygon)
             self.tableWidgetPolyPoints.selectionModel().selectionChanged.connect(self.update_action_states)
             self._polygon_signals_connected = True
 
-        #self.actionPolyCreate.triggered.connect(self.parent.data.polygon.create_new_polygon)
-        #self.actionPolyMovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_add_point_polygon', True))
-        #self.actionPolyAddPoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
-        #self.actionPolyRemovePoint.triggered.connect(lambda: setattr(self.parent.data.polygon,'is_moving_polygon', True))
-
         self.toggle_polygon_actions()
+
+    # Polygon vertex editing
+    # -------------------------------
+    @property
+    def _edit_actions(self):
+        return (self.actionPolyMovePoint, self.actionPolyAddPoint, self.actionPolyRemovePoint)
+
+    def _set_edit_mode(self, action, mode):
+        """Toggle one of the three mutually-exclusive vertex-editing modes.
+
+        Checking Move/Add/Remove Point unchecks the other two and arms the
+        polygon manager's click handling on the live map canvas for that
+        mode; unchecking it disarms editing (click-to-select stays). Mirrors
+        ``ProfileDock._set_mode``.
+        """
+        checked = action.isChecked()
+        for other in self._edit_actions:
+            if other is not action:
+                other.blockSignals(True)
+                other.setChecked(False)
+                other.blockSignals(False)
+
+        if not checked:
+            self.polygon_manager.set_edit_mode(None, self.ui.mpl_canvas)
+            return
+
+        # crop / profile point tools would fight over the same clicks
+        self.ui.reset_checked_items('polygon')
+
+        # An edit needs a target: fall back to the first polygon when none
+        # is selected on the map or in the table.
+        if self.polygon_manager.selected_poly is None:
+            p_ids = self._selected_polygon_ids()
+            polygons = self.polygon_manager.polygons.get(self.ui.app_data.sample_id, {})
+            p_id = p_ids[0] if p_ids else next(iter(polygons), None)
+            if p_id is not None:
+                self.select_polygon_row(p_id)
+                if self.ui.mpl_canvas is not None:
+                    self.polygon_manager.draw_polygons(self.ui.mpl_canvas, p_id=p_id)
+
+        self.polygon_manager.set_edit_mode(mode, self.ui.mpl_canvas)
+
+    def exit_edit_mode(self):
+        """Leave whichever edit mode is active (Esc / right-click on the map,
+        or the polygon toggle going off)."""
+        for action in self._edit_actions:
+            action.blockSignals(True)
+            action.setChecked(False)
+            action.blockSignals(False)
+        self.polygon_manager.set_edit_mode(None)
+
+    def select_polygon_row(self, p_id):
+        """Select `p_id`'s row in the table without triggering a redraw.
+
+        Called by the manager when a polygon is picked on the map, so the
+        table follows the canvas. The selection signals are blocked because
+        `view_selected_polygon` would otherwise rebuild every artist.
+        """
+        table = self.tableWidgetPolyPoints
+        selection = table.selectionModel()
+        if selection is None:
+            return
+        selection.blockSignals(True)
+        try:
+            table.clearSelection()
+            for row in range(table.rowCount()):
+                item = table.item(row, 0)
+                if item is not None and int(item.text()) == p_id:
+                    table.selectRow(row)
+                    break
+        finally:
+            selection.blockSignals(False)
+        self.update_action_states()
+
+    def _update_edit_action_states(self):
+        """Move/Add/Remove Point need polygon mode on and a polygon to edit."""
+        available = self.polygon_toggle.isChecked() and self.tableWidgetPolyPoints.rowCount() > 0
+        for action in self._edit_actions:
+            action.setEnabled(available)
+        if not available and self.polygon_manager.edit_mode is not None:
+            self.exit_edit_mode()
 
 
     def polygon_state_changed(self):
@@ -1590,6 +1681,10 @@ class PolygonTab(QWidget):
             if (hasattr(self.ui, "profile_dock")):
                 self.ui.profile_dock.profile_toggle.setChecked(False)
                 self.ui.profile_dock.profile_state_changed()
+        else:
+            # polygons are no longer drawn, so stop listening to the map
+            self.exit_edit_mode()
+            self.polygon_manager.disconnect()
 
         self.toggle_polygon_actions()
 
@@ -1603,12 +1698,6 @@ class PolygonTab(QWidget):
             self.actionEdgeDetect.setEnabled(True)
             self.comboBoxEdgeDetectMethod.setEnabled(True)
             self.actionPolyCreate.setEnabled(True)
-            self.actionPolyMovePoint.setEnabled(False)
-            self.actionPolyMovePoint.setChecked(False)
-            self.actionPolyAddPoint.setEnabled(True)
-            self.actionPolyAddPoint.setChecked(False)
-            self.actionPolyRemovePoint.setEnabled(True)
-            self.actionPolyRemovePoint.setChecked(True)
             self.actionPolySave.setEnabled(False)
         else:
             self.actionEdgeDetect.setEnabled(False)
@@ -1616,6 +1705,8 @@ class PolygonTab(QWidget):
             self.actionPolyCreate.setEnabled(False)
             if self.tableWidgetPolyPoints.rowCount() > 0:
                 self.actionPolySave.setEnabled(False)
+
+        self._update_edit_action_states()
 
         # Delete/Link/Unlink/Create Region follow the *selection*, not the
         # polygon-mode toggle: existing polygons can be grouped, turned into
@@ -1803,6 +1894,8 @@ class PolygonTab(QWidget):
         """
         self.update_table_widget()
         self.apply_polygon_mask(update_plot=True)
+        # the edit buttons come alive with the first polygon and go with the last
+        self._update_edit_action_states()
         self.update_action_states()
 
     def update_table_widget(self, *args, **kwargs):

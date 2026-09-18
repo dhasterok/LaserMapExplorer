@@ -1196,17 +1196,17 @@ class MainWindow(QMainWindow):
                 if hasattr(self, "mask_dock"):
                     if hasattr(self.mask_dock, "polygon_tab"):
                         self.mask_dock.polygon_tab.actionPolyCreate.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyMovePoint.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyAddPoint.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyRemovePoint.setChecked(False)
+                        # unchecks Move/Add/Remove Point *and* disarms the
+                        # manager's edit mode, so the two can't drift apart
+                        self.mask_dock.polygon_tab.exit_edit_mode()
             case 'profiling':
                 self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "mask_dock"):
                     if hasattr(self.mask_dock, "polygon_tab"):
                         self.mask_dock.polygon_tab.actionPolyCreate.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyMovePoint.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyAddPoint.setChecked(False)
-                        self.mask_dock.polygon_tab.actionPolyRemovePoint.setChecked(False)
+                        # unchecks Move/Add/Remove Point *and* disarms the
+                        # manager's edit mode, so the two can't drift apart
+                        self.mask_dock.polygon_tab.exit_edit_mode()
             case 'polygon':
                 self.lame_action.Crop.setChecked(False)
                 if hasattr(self, "profile_dock"):

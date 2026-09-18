@@ -124,6 +124,21 @@ def create_plot(parent, data, app_data, style_data):
     return canvas, plot_info
 
 @log_call(logger_key='Plot')
+def cluster_map_labels(labels, mask, valid_labels):
+    """Cluster labels as floats, NaN wherever the map should be blank.
+
+    Blank means: excluded by `mask`, or never clustered (label 99, or any id
+    not in `valid_labels`, which would otherwise clip to the last colour).
+
+    A copy is always made (``np.array``, not ``asarray``): a pandas float
+    column arrives as a read-only view under copy-on-write.
+    """
+    groups = np.array(labels, dtype=float)
+    groups[~np.asarray(mask, dtype=bool)] = np.nan
+    groups[~np.isin(groups, list(valid_labels))] = np.nan
+    return groups
+
+
 def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_histogram=False):
     """
     Plots a 2D field map using Matplotlib, with optional histogram, color scaling, and style customization.
@@ -3075,13 +3090,6 @@ def plot_cluster_map(parent, data, app_data, style_data):
     plot_type = style_data.plot_type
     method = app_data.cluster_method
 
-    # data frame for plotting
-    groups = data.processed[method].values.astype(float)
-    # mask-out points that are excluded by the combined mask (cluster, polygon, filter, crop)
-    groups[~data.mask] = np.nan
-
-    reshaped_array = np.reshape(groups, data.array_size, order=data.order)
-
     # The norm has to span *every* cluster the colormap defines, so a raw
     # label k always lands on cmap(k). Counting only the labels still
     # visible (np.unique of the non-NaN pixels) collapses BoundaryNorm's
@@ -3090,7 +3098,16 @@ def plot_cluster_map(parent, data, app_data, style_data):
     # clips to the first colour. Use the full cluster count instead, the
     # same one get_cluster_colormap builds the colormap from (and that the
     # cluster scatter path and plot_roi_map already use).
-    n_clusters = len([k for k in app_data.cluster_dict[method].keys() if isinstance(k, int) and k != 99])
+    cluster_ids = [k for k in app_data.cluster_dict[method].keys() if isinstance(k, int) and k != 99]
+    n_clusters = len(cluster_ids)
+
+    # Polygons don't touch the cluster map (see DataHandling.mask_without):
+    # blank what the crop/cluster/ROI masks exclude, and any pixel that was
+    # never clustered (label 99, or an id the cluster table doesn't know).
+    groups = cluster_map_labels(data.processed[method].values,
+                                data.mask_without('polygon'), cluster_ids)
+
+    reshaped_array = np.reshape(groups, data.array_size, order=data.order)
 
     cluster_color, cluster_label, cmap = style_data.get_cluster_colormap(app_data.cluster_dict[method], alpha=style_data.marker_alpha)
 

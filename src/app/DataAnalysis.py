@@ -39,6 +39,14 @@ class Clustering():
 
         df_filtered, isotopes = data.get_processed_data()
 
+        # Polygons don't restrict clustering: they are a field-map selection
+        # tool, and outlining one grain must not shrink the population the
+        # clusters are fitted on. Everything else (crop, cluster/ROI masks)
+        # still applies, as does get_processed_data's own all-fields-present
+        # check -- rebuilt here rather than read back from data.mask, since
+        # that carries the polygon component.
+        mask = data.mask_without('polygon') & df_filtered.notna().all(axis=1).values
+
         if app_data.dim_red_precondition:
             # Cluster on the first N PCA score columns instead of the raw
             # analyte/ratio matrix. Sort numerically ('PC1', 'PC2', ..., 'PC10')
@@ -49,13 +57,15 @@ class Clustering():
             )
             if pca_cols:
                 n_basis = max(1, min(app_data.num_basis_for_precondition, len(pca_cols)))
-                array = data.processed[pca_cols[:n_basis]].values[data.mask]
+                # PCA scores are NaN wherever PCA's own mask excluded a pixel
+                mask = mask & data.processed[pca_cols[:n_basis]].notna().all(axis=1).values
+                array = data.processed[pca_cols[:n_basis]].values[mask]
             else:
                 # Precondition requested but PCA hasn't been run yet -- fall
                 # back to the raw matrix rather than clustering on nothing.
-                array = df_filtered.values[data.mask]
+                array = df_filtered.values[mask]
         else:
-            array = df_filtered.values[data.mask]
+            array = df_filtered.values[mask]
 
 
         seed = app_data.cluster_seed
@@ -108,7 +118,7 @@ class Clustering():
 
                     #add k-means results to self.data
                     if max_clusters is None:
-                        data.add_columns('Cluster', method, model.predict(array), data.mask)
+                        data.add_columns('Cluster', method, model.predict(array), mask)
                     else:
                         kmeans.fit(array)
                         cluster_results.append(kmeans.inertia_)
@@ -135,10 +145,10 @@ class Clustering():
                         # assign cluster scores to self.data
                         for n in range(nc):
                             #data['computed_data']['cluster score'].loc[:,str(n)] = pd.NA
-                            data.add_columns('Cluster score', 'cluster' + str(n), u[n-1,:], data.mask)
+                            data.add_columns('Cluster score', 'cluster' + str(n), u[n-1,:], mask)
 
                         #add cluster results to self.data
-                        data.add_columns('Cluster', method, labels, data.mask)
+                        data.add_columns('Cluster', method, labels, mask)
                     else:
                         # weighted sum of squared errors (WSSE)
                         wsse = np.sum((u ** exponent) * (dist ** 2))
@@ -160,7 +170,7 @@ class Clustering():
                     # skip the cluster-performance path rather than crash
                     return
 
-                clr_array = self._clr_feature_matrix(data)[data.mask]
+                clr_array = self._clr_feature_matrix(data)[mask]
 
                 # min_cluster_size/min_samples are configured as a percentage
                 # of the clustered population (not a raw pixel count) and a
@@ -169,7 +179,7 @@ class Clustering():
                 # different sizes, and a low absolute default (the previous
                 # behavior) let HDBSCAN fragment a large map into far too
                 # many tiny clusters. "The map" here means the pixels
-                # actually being clustered (len(clr_array), i.e. data.mask's
+                # actually being clustered (len(clr_array), i.e. mask's
                 # count), not the sample's total pixel count, since that's
                 # the population min_cluster_size is compared against.
                 n_pixels = len(clr_array)
@@ -190,7 +200,7 @@ class Clustering():
                 # already 0-indexed and contiguous, matching k-means/fuzzy c-means.
                 labels = model.labels_.copy()
                 labels[labels == -1] = 99
-                data.add_columns('Cluster', method, labels, data.mask)
+                data.add_columns('Cluster', method, labels, mask)
 
     def _clr_feature_matrix(self, data):
         """Builds a linear-scale (undisplayed-norm) Analyte/Ratio feature

@@ -36,6 +36,10 @@ class FakeSample:
         self.cluster_results = {}
         self.silhouette_scores = {}
 
+    def mask_without(self, *components):
+        # no polygon/cluster/ROI components here: the mask is the mask
+        return np.asarray(self.mask, dtype=bool).copy()
+
     def get_map_data(self, field, field_type='Analyte', norm='linear'):
         return {'array': self.processed[field]}
 

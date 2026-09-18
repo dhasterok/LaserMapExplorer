@@ -64,6 +64,12 @@ Only one of the three can be active at a time; click the button again, press ``E
 right-click the map to leave the mode. The polygon mask and any regions made from the
 polygon update as soon as an edit is finished.
 
+Polygons belong to the field map. Switching to another plot type turns polygon mode off
+(the polygons and their mask are kept; switch back to the field map and turn polygon mode
+on again to keep editing). Clustering ignores polygons altogether: clusters are always
+computed over the whole map and the cluster map shows every pixel, whatever polygons have
+been drawn. To analyse just the area inside a polygon, use *Create Region* below.
+
 To delete polygons, select one or more rows in the *Polygon Table* and either click the
 Delete button on the tab's toolbar, press ``Delete``, or right-click the selection and choose
 *Delete Polygon*. A polygon selected on the map (click inside it) can also be removed with

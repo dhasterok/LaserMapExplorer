@@ -1598,6 +1598,33 @@ class PolygonTab(QWidget):
     def _edit_actions(self):
         return (self.actionPolyMovePoint, self.actionPolyAddPoint, self.actionPolyRemovePoint)
 
+    def _polygon_canvas(self):
+        """The canvas polygons may be drawn on, or None.
+
+        Polygons are drawn and edited on the field map only. Every other plot
+        type shows the polygon *mask* (see `LamePlot.add_mask_overlay`), not
+        the outlines -- drawing them on, say, a cluster map through a table
+        click used to leave outlines and drag handles on a plot the tools
+        were never meant for.
+        """
+        if self.ui.style_data.plot_type != 'field map':
+            return None
+        return self.ui.mpl_canvas
+
+    def plot_type_changed(self, plot_type):
+        """Leave polygon mode when the plot is no longer a field map.
+
+        Called from ``FieldLogic.update_plot_type``. The polygons themselves
+        and their mask are untouched; only drawing/editing stops.
+        """
+        if plot_type == 'field map':
+            return
+        self.exit_edit_mode()
+        self.polygon_manager.disconnect()
+        if self.polygon_toggle.isChecked():
+            # emits stateChanged -> polygon_state_changed
+            self.polygon_toggle.setChecked(False)
+
     def _set_edit_mode(self, action, mode):
         """Toggle one of the three mutually-exclusive vertex-editing modes.
 
@@ -1613,8 +1640,9 @@ class PolygonTab(QWidget):
                 other.setChecked(False)
                 other.blockSignals(False)
 
+        canvas = self._polygon_canvas()
         if not checked:
-            self.polygon_manager.set_edit_mode(None, self.ui.mpl_canvas)
+            self.polygon_manager.set_edit_mode(None, canvas)
             return
 
         # crop / profile point tools would fight over the same clicks
@@ -1628,10 +1656,10 @@ class PolygonTab(QWidget):
             p_id = p_ids[0] if p_ids else next(iter(polygons), None)
             if p_id is not None:
                 self.select_polygon_row(p_id)
-                if self.ui.mpl_canvas is not None:
-                    self.polygon_manager.draw_polygons(self.ui.mpl_canvas, p_id=p_id)
+                if canvas is not None:
+                    self.polygon_manager.draw_polygons(canvas, p_id=p_id)
 
-        self.polygon_manager.set_edit_mode(mode, self.ui.mpl_canvas)
+        self.polygon_manager.set_edit_mode(mode, canvas)
 
     def exit_edit_mode(self):
         """Leave whichever edit mode is active (Esc / right-click on the map,
@@ -1749,8 +1777,7 @@ class PolygonTab(QWidget):
 
         self.polygon_manager.remove_polygons(p_ids)
         self.refresh_polygons()
-        if self.ui.mpl_canvas is not None:
-            self.polygon_manager.draw_polygons(self.ui.mpl_canvas)
+        self._redraw_polygons()
 
     def eventFilter(self, obj, event):
         """Delete/Backspace on the polygon table deletes the selected rows.
@@ -1830,9 +1857,10 @@ class PolygonTab(QWidget):
         self._redraw_polygons()
 
     def _redraw_polygons(self):
-        """Redraw on the current canvas, if there is one."""
-        if self.ui.mpl_canvas is not None:
-            self.polygon_manager.draw_polygons(self.ui.mpl_canvas)
+        """Redraw on the current canvas, if it is showing a field map."""
+        canvas = self._polygon_canvas()
+        if canvas is not None:
+            self.polygon_manager.draw_polygons(canvas)
 
     def create_regions_from_polygons(self):
         """Turn the selected polygons into regions of interest.
@@ -1980,8 +2008,9 @@ class PolygonTab(QWidget):
             return
 
         polygon_id = int(polygon_id_item.text())
-        if polygon_id in polygons and self.ui.mpl_canvas is not None:
-            self.polygon_manager.draw_polygons(self.ui.mpl_canvas, p_id=polygon_id)
+        canvas = self._polygon_canvas()
+        if polygon_id in polygons and canvas is not None:
+            self.polygon_manager.draw_polygons(canvas, p_id=polygon_id)
 
     # Polygon mask functions
     # -------------------------------

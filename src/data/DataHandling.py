@@ -1527,11 +1527,41 @@ class SampleObj(QObject):
         read elsewhere (e.g. ``MainWindow.update_mask_and_profile_widgets``'s
         enable/disable check, ``filtersApplied``/``ActionRecorder``).
         """
-        n = len(self.crop_mask)
-        polygon_component = self.polygon_mask if self.polygon_mask_enabled else np.ones(n, dtype=bool)
-        cluster_component = self.cluster_mask if self.cluster_mask_enabled else np.ones(n, dtype=bool)
-        roi_component = self.roi_selection_mask if self.roi_mask_enabled else np.ones(n, dtype=bool)
-        self.mask = self.crop_mask & polygon_component & cluster_component & roi_component
+        self.mask = self.mask_without()
+
+    def mask_without(self, *components):
+        """The combined mask with the named components left out.
+
+        Same AND chain as `recompute_mask` -- crop, then each enabled
+        optional component -- but skipping `components`, any of
+        ``'polygon'``, ``'cluster'``, ``'roi'``. Built fresh from the
+        component arrays, so it does not carry the NaN narrowing that
+        `get_processed_data` folds into ``self.mask`` in place.
+
+        Clustering and the cluster map use ``mask_without('polygon')``:
+        polygons are a field-map selection tool, and a polygon drawn to
+        look at one grain must not silently shrink the population the
+        clusters are fitted on (or grey out the rest of the cluster map).
+
+        Parameters
+        ----------
+        *components : str
+            Components to leave out. With none, this is exactly the mask
+            `recompute_mask` stores.
+
+        Returns
+        -------
+        numpy.ndarray
+            Boolean per-pixel mask, True = keep.
+        """
+        mask = np.asarray(self.crop_mask, dtype=bool).copy()
+        if 'polygon' not in components and self.polygon_mask_enabled:
+            mask &= self.polygon_mask
+        if 'cluster' not in components and self.cluster_mask_enabled:
+            mask &= self.cluster_mask
+        if 'roi' not in components and self.roi_mask_enabled:
+            mask &= self.roi_selection_mask
+        return mask
 
     def _compute_filter_mask(self, filter_df):
         """Evaluate a filter table (min/max/operator rows) into a boolean mask.

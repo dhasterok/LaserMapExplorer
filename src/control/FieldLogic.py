@@ -621,6 +621,11 @@ class ControlDock(CustomDockWidget):
 
         plot_type = self.ui.style_data.plot_type
 
+        # polygons are drawn/edited on the field map only
+        mask_dock = getattr(self.ui, 'mask_dock', None)
+        if mask_dock is not None and hasattr(mask_dock, 'polygon_tab'):
+            mask_dock.polygon_tab.plot_type_changed(plot_type)
+
         # update ui
         match self.ui.style_data.plot_type.lower():
             case 'field map' | 'gradient map':

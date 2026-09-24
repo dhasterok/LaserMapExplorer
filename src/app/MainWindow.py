@@ -25,7 +25,8 @@ from src.plotting.LamePlot import (
     plot_ternary_map, plot_ndim, plot_pca, plot_clusters, cluster_performance_plot
 )
 from src.app.LameIO import LameIO
-from src.project.ProjectManager import ProjectManager
+from src.app.FileDrop import classify_dropped_paths, mime_has_droppable_files, urls_to_local_paths
+from src.project.ProjectManager import ProjectManager, PROJECT_FILE_SUFFIX
 from src.control.FieldLogic import ControlDock
 from src.data.AnalyteDialog import AnalyteDialog
 from src.app.FieldDialog import FieldDialog
@@ -229,6 +230,10 @@ class MainWindow(QMainWindow):
         # Central widget (canvas and toolbar)
         self.canvas_widget = CanvasWidget(ui=self, parent=self)
         self.setCentralWidget(self.canvas_widget)
+
+        # Accept files/folders dragged from the file manager anywhere on the
+        # window -- see dragEnterEvent()/dropEvent() below.
+        self.setAcceptDrops(True)
 
         self.control_dock = ControlDock(ui=self)
 
@@ -493,6 +498,93 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+    # ------------------------------------------------------------------
+    # Drag and drop of sample files / folders / project manifests
+    # ------------------------------------------------------------------
+
+    def dragEnterEvent(self, event):
+        """Accept a drag only if it carries something the app can open.
+
+        Qt delivers a drag to the first ancestor under the cursor that has
+        ``acceptDrops()`` set and never falls through, so widgets that accept
+        drops for their own purposes (the Multi View tab, the reorderable
+        tables, floating docks) forward file drags here explicitly.
+        """
+        if mime_has_droppable_files(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if mime_has_droppable_files(event.mimeData()):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        paths = urls_to_local_paths(event.mimeData())
+        if not paths:
+            event.ignore()
+            return
+        event.acceptProposedAction()
+        # Defer past the drag session: open_project() may raise a modal
+        # Save/Discard/Cancel prompt, and opening one inside the drop
+        # callback leaves the source application's drag hung on macOS.
+        QTimer.singleShot(0, lambda: self.handle_dropped_paths(paths))
+
+    def handle_dropped_paths(self, paths):
+        """Open/add whatever was dropped: a project manifest, ``*.lame.csv``
+        files and/or folders of them.
+
+        Parameters
+        ----------
+        paths : list of (str or Path)
+
+        Returns
+        -------
+        bool
+            True if anything was opened or added.
+        """
+        pm = self.project_manager
+        status = pm.status_manager
+        plan = classify_dropped_paths(paths)
+        log(f"Dropped paths: projects={plan.projects} samples={plan.samples} "
+            f"rejected={plan.rejected}", prefix="IO")
+
+        try:
+            if plan.projects:
+                manifest = plan.projects[0]
+                pm.open_project(manifest)
+                opened = (pm.current_project is not None
+                          and pm.current_project.manifest_path is not None
+                          and Path(pm.current_project.manifest_path).resolve() == manifest.resolve())
+                if not opened:
+                    # User cancelled the dirty prompt or the file vanished;
+                    # don't go on to add samples to the wrong project.
+                    return False
+                if len(plan.projects) > 1:
+                    status.show_message(
+                        f"Opened {manifest.name}; only one project can be open at a time.")
+
+            added = []
+            if plan.samples:
+                added = pm.add_samples(plan.samples)
+
+            if plan.rejected:
+                names = ', '.join(p.name for p in plan.rejected[:3])
+                if plan.is_empty:
+                    status.show_message(
+                        f"Cannot open {names}: drop *.lame.csv files, a folder of them, "
+                        f"or a *{PROJECT_FILE_SUFFIX} project file.")
+                else:
+                    log(f"Ignored dropped item(s): {names}", prefix="IO")
+
+            return bool(plan.projects) or bool(added)
+        except Exception as e:
+            log(f"Drop failed: {e}", prefix="Error")
+            status.show_message(f"Could not open dropped item(s): {e}")
+            return False
 
     def _teardown_workflow_webengine(self):
         """Explicitly destroy the Workflow dock's QWebEngineView before the app quits.

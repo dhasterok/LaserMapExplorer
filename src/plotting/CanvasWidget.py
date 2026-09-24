@@ -25,6 +25,7 @@ from src.common.TableFunctions import TableFcn as TableFcn
 import src.app.CustomTableWidget as TW
 from src.data.SortAnalytes import sort_analytes
 from src.tree.PlotTree import PLOT_TREE_MIME_TYPE
+from src.app.FileDrop import forward_file_drag, forward_file_drop
 from lame_core.UITheme import default_font
 from src.control.Logger import auto_log_methods, log, no_log
 
@@ -1002,18 +1003,26 @@ class MultiViewTab(QWidget):
         return row, col
 
     def dragEnterEvent(self, event):
+        # File drags from the OS belong to the main window's handler; this
+        # widget accepts drops, so Qt would otherwise stop here.
+        if forward_file_drag(self, event):
+            return
         if self.canvas_widget is not None and event.mimeData().hasFormat(PLOT_TREE_MIME_TYPE):
             event.acceptProposedAction()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
+        if forward_file_drag(self, event):
+            return
         if self.canvas_widget is not None and event.mimeData().hasFormat(PLOT_TREE_MIME_TYPE):
             event.acceptProposedAction()
         else:
             event.ignore()
 
     def dropEvent(self, event):
+        if forward_file_drop(self, event):
+            return
         mime_data = event.mimeData()
         if self.canvas_widget is None or not mime_data.hasFormat(PLOT_TREE_MIME_TYPE):
             event.ignore()

@@ -15,6 +15,10 @@ Data Management
 
 The data management section offers tools for loading, importing, and saving data.  You can load data by opening a directory (|icon-add-directory|) containing multiple sample data files or by loading a single sample file (|icon-open-file|).  For detailed information about importing data and supported formats, see :doc:`import`.  To preserve your work, use the save session button (|icon-save-session|) to store all analyses and plots.  Previously saved sessions can be retrieved using the load session button (|icon-open-session|).
 
+.. tip::
+
+   You can also drag files from your file manager onto the *LaME* window instead of using the buttons.  Drop one or more ``*.lame.csv`` files, or a folder containing them, anywhere on the main window (or a floating dock) to add those samples to the current project; drop a ``*.lame_project.json`` file to open that project.  A folder with no ``*.lame.csv`` files is reported in the status bar -- convert raw instrument exports with the import tool first (see :doc:`import`).
+
 Sample and Analyte Selector
 ===========================
 

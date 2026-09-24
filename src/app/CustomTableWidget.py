@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import ( QTableWidget, QTableWidgetItem, QCheckBox, QAbstractItemView  )
 from PyQt6.QtGui import ( QDropEvent )
 from lame_core.CustomWidgets import CustomTableWidget
+from src.app.FileDrop import forward_file_drag, forward_file_drop
 
 # TableWidgetDragRows
 # -------------------------------
@@ -20,7 +21,19 @@ class TableWidgetDragRows(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
 
+    def dragEnterEvent(self, event):
+        if forward_file_drag(self, event):
+            return
+        super().dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        if forward_file_drag(self, event):
+            return
+        super().dragMoveEvent(event)
+
     def dropEvent(self, event: QDropEvent):
+        if forward_file_drop(self, event):
+            return
         if not event.isAccepted() and event.source() == self:
             drop_row = self.drop_on(event)
 
@@ -153,7 +166,19 @@ class ReorderableTableWidget(CustomTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
 
+    def dragEnterEvent(self, event):
+        if forward_file_drag(self, event):
+            return
+        super().dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        if forward_file_drag(self, event):
+            return
+        super().dragMoveEvent(event)
+
     def dropEvent(self, event: QDropEvent):
+        if forward_file_drop(self, event):
+            return
         if event.source() is not self:
             event.ignore()
             return

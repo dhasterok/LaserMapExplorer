@@ -36,6 +36,7 @@ from src.project.ProjectModel import (
     new_project as _new_untitled_project,
     save_project as _save_project_file,
     load_project as _load_project_file,
+    CLUSTER_LABELS_FILENAME, save_cluster_labels,
 )
 
 PROJECT_FILE_SUFFIX = '.lame_project.json'
@@ -232,9 +233,9 @@ class ProjectManager(QObject):
     def _save_sidecars(self, project_dir):
         """Write every loaded sample's profile/polygon sidecars under `project_dir`.
 
-        Profile/polygon geometry round-trips through its own per-sample files
-        (``.prfl``/``.poly``), not the JSON manifest, so saving the project
-        has to save these separately.
+        Profile/polygon geometry and cluster labels round-trip through their
+        own per-sample files (``.prfl``/``.poly``/``clusters.npz``), not the
+        JSON manifest, so saving the project has to save these separately.
         """
         if project_dir is None:
             return
@@ -244,6 +245,9 @@ class ProjectManager(QObject):
                 self.ui.profile_dock.profiling.project_dir = project_dir
             if hasattr(self.ui, 'mask_dock'):
                 self.ui.mask_dock.polygon_tab.polygon_manager.save_polygons(project_dir, sample_id)
+            # Cluster labels: the saved cluster groups and cluster-defined
+            # ROIs in the manifest refer to them, and they're too large for it.
+            save_cluster_labels(self.ui.data[sample_id], project_dir / sample_id / CLUSTER_LABELS_FILENAME)
 
     def _flush_notes(self):
         """Write the open Notes editor's content to its current file, if any."""
@@ -761,6 +765,12 @@ class ProjectManager(QObject):
         aren't currently loaded (e.g. never selected this session) keep
         whatever `processing` they already had.
         """
+        # The current sample's cluster groups live in app_data.cluster_dict
+        # while it's shown; the other loaded samples already hold their own.
+        current = self.ui.app_data.current_data
+        if current is not None:
+            self.ui.app_data.stash_cluster_entries(current)
+
         for sample_id, entry in self.current_project.samples.items():
             sample_obj = self.ui.data.get(sample_id)
             if sample_obj is not None:

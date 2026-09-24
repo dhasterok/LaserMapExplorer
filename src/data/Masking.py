@@ -43,6 +43,15 @@ from src.data.cluster_groups import (
 )
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
+
+def _mark_project_dirty(ui, reason):
+    """Flag the open project as changed. ROIs and cluster groups are saved
+    with the project, so editing them must trigger the save prompt and
+    autosave like any other processing change."""
+    manager = getattr(ui, 'project_manager', None)
+    if manager is not None:
+        manager.mark_dirty(reason)
+
 # Mask object
 # -------------------------------
 class MaskObj:
@@ -986,6 +995,7 @@ class FilterTab(QWidget):
         new_id = current_data.add_roi(color=color)
 
         self.update_filter_table(reload=True, apply=False)
+        _mark_project_dirty(self.ui, 'ROI added')
         self.update_roi_table_widget()
         self._select_roi_row(new_id)
         self.ui.schedule_update()
@@ -1099,6 +1109,7 @@ class FilterTab(QWidget):
         if active_id is None or self._is_derived_roi(active_id):
             return
         current_data.update_roi_filter(active_id, current_data.filter_df)
+        _mark_project_dirty(self.ui, 'ROI filter edited')
         self.update_roi_table_widget()
 
     def _on_add_filter_clicked(self):
@@ -1155,6 +1166,7 @@ class FilterTab(QWidget):
             return
         for roi_id in roi_ids:
             current_data.remove_roi(roi_id)
+        _mark_project_dirty(self.ui, 'ROI deleted')
         self.update_roi_table_widget()
         self.ui.schedule_update()
 
@@ -1192,6 +1204,7 @@ class FilterTab(QWidget):
         current_data = self.ui.app_data.current_data
         if not current_data or chosen is None:
             return
+        _mark_project_dirty(self.ui, 'ROI edited')
         if chosen is action_add:
             self.add_roi()
         elif action_duplicate is not None and chosen is action_duplicate:
@@ -1248,6 +1261,7 @@ class FilterTab(QWidget):
         new_stack_ids = list(reversed(new_display_ids))
 
         current_data.reorder_roi_stack(new_stack_ids)
+        _mark_project_dirty(self.ui, 'ROI order changed')
         self.update_roi_table_widget()
         self.ui.schedule_update()
 
@@ -1265,6 +1279,7 @@ class FilterTab(QWidget):
                 entry['color'] = hexcolor
                 break
 
+        _mark_project_dirty(self.ui, 'ROI color changed')
         if self.ui.app_data.c_field_type.lower() == 'roi':
             self.ui.schedule_update()
 
@@ -1282,6 +1297,7 @@ class FilterTab(QWidget):
                 entry['name'] = new_name
                 break
 
+        _mark_project_dirty(self.ui, 'ROI renamed')
         self.update_roi_table_widget()
         if self.ui.app_data.c_field_type.lower() == 'roi':
             self.ui.schedule_update()
@@ -1307,6 +1323,7 @@ class FilterTab(QWidget):
                     selected.append(rid)
 
         current_data.selected_rois = selected
+        _mark_project_dirty(self.ui, 'ROI selection changed')
         current_data.recompute_roi_assignments()
         self.ui.schedule_update()
 
@@ -1911,6 +1928,7 @@ class PolygonTab(QWidget):
         # the ROI table lives on the filter tab
         self.dock.filter_tab.update_roi_table_widget()
         self.ui.schedule_update()
+        _mark_project_dirty(self.ui, 'polygon ROIs created')
         log(f"polygon regions created={created} updated={updated}", prefix="Mask")
 
     def refresh_polygons(self):
@@ -2260,6 +2278,7 @@ class ClusterTab(QWidget):
         self.update_table_widget()
         self.update_clusters()
         self.update_action_states()
+        _mark_project_dirty(self.ui, 'cluster groups changed')
         self.ui.schedule_update()
 
     def create_regions_from_clusters(self):
@@ -2313,6 +2332,7 @@ class ClusterTab(QWidget):
         # the ROI table lives on the filter tab
         self.dock.filter_tab.update_roi_table_widget()
         self.ui.schedule_update()
+        _mark_project_dirty(self.ui, 'cluster ROIs created')
         log(f"cluster regions created={created} updated={updated}", prefix="Mask")
 
     def _cluster_row_color_changed(self, row, hexcolor):
@@ -2334,6 +2354,7 @@ class ClusterTab(QWidget):
         members = expand_to_groups(entries, [row])
         for cluster_id in (members or [row]):
             entries[cluster_id]['color'] = hexcolor
+        _mark_project_dirty(self.ui, 'cluster color changed')
         if len(members) > 1:
             self.update_table_widget()
 
@@ -2477,6 +2498,7 @@ class ClusterTab(QWidget):
             # np.isin -- the cluster mask, cluster_percentages and
             # cluster-defined regions all match on integer ids.
             entry['name'] = new_name
+            _mark_project_dirty(self.ui, 'cluster renamed')
 
             # A linked class is labelled by its leader, so renaming the leader
             # renames the class -- redraw the plot to pick it up.
@@ -2506,6 +2528,8 @@ class ClusterTab(QWidget):
                 app_data.cluster_dict[method]['selected_clusters'] = selected_clusters
             else:
                 app_data.cluster_dict[method]['selected_clusters'] = []
+
+            _mark_project_dirty(self.ui, 'cluster selection changed')
 
             # apply cluster mask and update plot
             self.ui.apply_cluster_mask()
@@ -2548,6 +2572,8 @@ class ClusterTab(QWidget):
         for leader, members in cluster_groups(entries):
             for cluster_id in members:
                 entries[cluster_id]['color'] = entries[leader]['color']
+
+        _mark_project_dirty(self.ui, 'cluster colors reset')
 
         self.cluster_table.blockSignals(True)
         for i in range(n):

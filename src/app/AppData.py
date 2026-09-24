@@ -1611,7 +1611,7 @@ class AppData(QObject):
         self.cluster_seed = r
         return r
 
-    def cluster_group_changed(self, data, style_data):
+    def cluster_group_changed(self, data, style_data, method=None):
         """
         Updates the cluster dictionary and selected cluster groups.
 
@@ -1629,10 +1629,12 @@ class AppData(QObject):
             ``data.processed[method]``
         style_data : object
             Object providing default cluster color assignments
+        method : str, optional
+            Clustering method to rebuild; defaults to ``self.cluster_method``.
         """
         if self.sample_id == '':
             return
-        method =self.cluster_method
+        method = method or self.cluster_method
         if method in data.processed.columns:
             if not data.processed[method].empty:
                 clusters = data.processed[method].dropna().unique()
@@ -1678,3 +1680,57 @@ class AppData(QObject):
                     self.cluster_dict[method]['selected_clusters'] = clusters
         else:
             log(f"(group_changed) Cluster method, ({method}) is not defined", prefix="Error")
+
+    def stash_cluster_entries(self, sample_obj):
+        """Copy the live cluster groups into `sample_obj.cluster_entries`.
+
+        ``cluster_dict`` is app-wide, but its per-cluster entries (names,
+        colors, links) describe the current sample's labels. Stashing them on
+        the sample before another one becomes current -- and before a project
+        save -- keeps each sample's groups with its own clusters.
+
+        Parameters
+        ----------
+        sample_obj : SampleObj
+        """
+        if sample_obj is None:
+            return
+        stashed = {}
+        for method, settings in self.cluster_dict.items():
+            entries = {k: copy.deepcopy(v) for k, v in settings.items() if isinstance(k, int)}
+            if not entries:
+                continue
+            stashed[method] = {
+                'entries': entries,
+                'selected_clusters': [int(c) for c in settings.get('selected_clusters', [])],
+            }
+        sample_obj.cluster_entries = stashed
+
+    def restore_cluster_entries(self, sample_obj, style_data):
+        """Replace the live cluster groups with `sample_obj`'s own.
+
+        The counterpart of `stash_cluster_entries`, run when `sample_obj`
+        becomes the current sample. Methods with labels on the sample but no
+        saved groups get the defaults a fresh clustering run would
+        (`cluster_group_changed`); methods with neither are left empty, so a
+        sample that was never clustered doesn't show another sample's groups.
+
+        Parameters
+        ----------
+        sample_obj : SampleObj
+        style_data : StyleData
+            Supplies default cluster colors for the fallback.
+        """
+        if sample_obj is None:
+            return
+        saved = getattr(sample_obj, 'cluster_entries', {}) or {}
+        for method, settings in self.cluster_dict.items():
+            for k in [k for k in settings if isinstance(k, int)]:
+                del settings[k]
+            settings['selected_clusters'] = []
+
+            if method in saved:
+                settings.update(copy.deepcopy(saved[method]['entries']))
+                settings['selected_clusters'] = list(saved[method].get('selected_clusters', []))
+            elif method in sample_obj.processed.columns:
+                self.cluster_group_changed(sample_obj, style_data, method=method)

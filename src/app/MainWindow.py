@@ -1091,6 +1091,8 @@ class MainWindow(QMainWindow):
             self.plot_tree.add_sample(self.app_data.sample_id)
             self.plot_tree.update_tree()
 
+        self._swap_cluster_entries()
+
         self.update_mask_and_profile_widgets()
 
         # sort data
@@ -1134,6 +1136,26 @@ class MainWindow(QMainWindow):
 
         # trigger update to plot
         self.schedule_update()
+
+    def _swap_cluster_entries(self):
+        """Hand ``app_data.cluster_dict``'s cluster groups to the new sample.
+
+        The groups (names, colors, links) describe one sample's labels, but
+        ``cluster_dict`` is app-wide: stash them on the sample they belong to
+        and load the incoming sample's own, so switching samples neither
+        leaks groups across samples nor loses them (they are also what a
+        project saves -- see ``SampleObj.export_processing_state``).
+        """
+        # Tracked by object, not id: closing a project and reopening it gives
+        # a new SampleObj under the same id, which still needs restoring.
+        incoming = self.app_data.current_data
+        outgoing = getattr(self, '_cluster_entries_sample', None)
+        if outgoing is incoming:
+            return
+        if outgoing is not None and self.data.get(outgoing.sample_id) is outgoing:
+            self.app_data.stash_cluster_entries(outgoing)
+        self.app_data.restore_cluster_entries(incoming, self.style_data)
+        self._cluster_entries_sample = incoming
 
     def update_ui_on_sample_change(self):
         # reset all plot types on change of tab to the first option

@@ -796,6 +796,8 @@ class ClusterPage(CustomPage, Clustering):
             self.dock.ui.app_data.update_cluster_flag = False
             # update cluster colors
             self.dock.ui.app_data.cluster_group_changed(data, self.dock.ui.style_data)
+            if hasattr(self.dock.ui, 'project_manager'):
+                self.dock.ui.project_manager.mark_dirty('clusters computed')
             # enable cluster tab actions and update group table
             if hasattr(self.dock.ui, 'mask_dock'):
                 self.dock.ui.mask_dock.cluster_tab.toggle_cluster_actions()

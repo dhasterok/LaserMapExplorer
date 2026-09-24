@@ -28,6 +28,66 @@ from src.control.Logger import LoggerConfig, auto_log_methods, log
 # MapImporter.parse_filenames, which writes the column under this name.
 SPECIAL_FIELD_NAMES = {'TotalBeam'}
 
+#: Columns of `SampleObj.filter_df` (and of each filter-defined ROI's stored
+#: definition).
+FILTER_COLUMNS = ['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent']
+
+
+def _roi_to_dict(entry):
+    """One `roi_stack` entry as JSON-ready data (see `_roi_from_dict`)."""
+    filter_df = entry.get('filter_df')
+    filters = None
+    if filter_df is not None:
+        filters = [
+            {
+                'use': bool(row['use']) if not isinstance(row['use'], str) else row['use'].strip().lower() == 'true',
+                'field_type': row['field_type'], 'field': row['field'], 'norm': row['norm'],
+                'min': float(row['min']), 'max': float(row['max']),
+                'operator': row['operator'], 'persistent': bool(row['persistent']),
+            }
+            for _, row in filter_df.iterrows()
+        ]
+    polygons = entry.get('polygons')
+    if polygons:
+        polygons = [
+            {'verts': [[float(x), float(y)] for x, y in p['verts']], 'in_out': p.get('in_out', 'in')}
+            for p in polygons
+        ]
+    clusters = entry.get('clusters')
+    return {
+        'id': int(entry['id']),
+        'name': entry['name'],
+        'color': entry['color'],
+        'source': entry.get('source'),
+        'filter': filters,
+        'polygons': polygons or None,
+        'clusters': [int(c) for c in clusters] if clusters else None,
+        'cluster_method': entry.get('cluster_method'),
+    }
+
+
+def _roi_from_dict(d):
+    """Rebuild a `roi_stack` entry from `_roi_to_dict` output."""
+    filters = d.get('filter')
+    entry = {
+        'id': int(d['id']),
+        'name': d['name'],
+        'color': d['color'],
+        'filter_df': (
+            pd.DataFrame(filters, columns=FILTER_COLUMNS) if filters is not None else None
+        ),
+        'source': d.get('source'),
+    }
+    if d.get('polygons'):
+        entry['polygons'] = [
+            {'verts': [tuple(v) for v in p['verts']], 'in_out': p.get('in_out', 'in')}
+            for p in d['polygons']
+        ]
+    if d.get('clusters'):
+        entry['clusters'] = [int(c) for c in d['clusters']]
+        entry['cluster_method'] = d.get('cluster_method')
+    return entry
+
 
 @auto_log_methods(logger_key='Data')
 class SampleObj(QObject):
@@ -859,6 +919,14 @@ class SampleObj(QObject):
         self.roi_stack = []
         self.selected_rois = []
 
+        # This sample's cluster groups (names/colors/links per cluster id),
+        # ``{method: {'entries': {id: {...}}, 'selected_clusters': [...]}}``.
+        # ``AppData.cluster_dict`` is app-wide and shows whichever sample is
+        # current; this is where a sample keeps its own while another sample
+        # is shown, and what a project saves (see
+        # ``AppData.stash_cluster_entries``/``restore_cluster_entries``).
+        self.cluster_entries = {}
+
         self.dim_red_results = {}
         self.cluster_results = {}
         self.silhouette_scores = {}
@@ -1405,6 +1473,9 @@ class SampleObj(QObject):
             applied_filters=applied_filters,
             masks=masks,
             computed_fields=computed_fields,
+            rois=[_roi_to_dict(entry) for entry in self.roi_stack],
+            selected_rois=[int(i) for i in self.selected_rois],
+            cluster_groups=copy.deepcopy(self.cluster_entries),
         )
 
     def apply_processing_state(self, state, ref_chem=None, field_calculator=None):
@@ -1463,6 +1534,10 @@ class SampleObj(QObject):
                 prefix='Data',
             )
 
+        # Cluster groups are restored as data only; AppData picks them up when
+        # this sample becomes current (AppData.restore_cluster_entries).
+        self.cluster_entries = copy.deepcopy(state.cluster_groups)
+
         if state.computed_fields:
             if field_calculator is None:
                 log(
@@ -1474,6 +1549,14 @@ class SampleObj(QObject):
                 for spec in state.computed_fields:
                     field_calculator.calculate_new_field(self, ref_chem, spec.field, spec.formula)
                     self.processed.set_attribute(spec.field, 'formula', spec.formula)
+
+        # Last, so filter-defined regions can reference replayed computed
+        # fields, and cluster-defined ones the labels the caller restored from
+        # the project's clusters sidecar before calling this.
+        if state.rois:
+            self.roi_stack = [_roi_from_dict(d) for d in state.rois]
+            self.selected_rois = [int(i) for i in state.selected_rois]
+            self.recompute_roi_assignments()
 
     def delete_column(self, column_name):
         """Deletes a column and associated attributes from the AttributeDataFrame.
@@ -2269,6 +2352,7 @@ class SampleObj(QObject):
         analyte_columns = []
         ratio_columns = []
         computed_ratios = {}
+        carried_labels = {}
         if field == 'all':
             # Capture ratios that were computed (e.g. via compute_ratio) and live only in
             # self.processed, along with their attributes, before self.processed gets
@@ -2277,6 +2361,20 @@ class SampleObj(QObject):
             for col in self.processed.match_attribute('data_type', 'Ratio'):
                 if col not in self.raw.columns:
                     computed_ratios[col] = dict(self.processed.column_attributes.get(col, {}))
+
+            # Cluster labels/scores are per-pixel results, not derived from
+            # the analyte values this rebuild changes, so they are carried
+            # across as-is. Dropping them left cluster groups and
+            # cluster-defined ROIs pointing at a column that no longer
+            # existed -- and a project reload, which restores labels before
+            # the preprocessing widgets sync the outlier method, lost them
+            # every time. The ROI column is rebuilt from the stack below.
+            carried_labels = {
+                col: (self.processed[col].values.copy(), data_type)
+                for data_type in ('Cluster', 'Cluster score')
+                for col in self.processed.match_attribute('data_type', data_type)
+                if col not in self.raw.columns
+            }
 
             # Select columns where 'data_type' attribute is 'Analyte'
             analyte_columns = self.raw.match_attributes({'data_type': 'Analyte', 'use': True})
@@ -2379,6 +2477,13 @@ class SampleObj(QObject):
                 self.processed.loc[cluster_mask, col] = transformed_data
 
         
+        # Restore carried cluster columns (after clipping, which must not
+        # touch labels) and re-evaluate ROIs against the rebuilt values.
+        for col, (values, data_type) in carried_labels.items():
+            self.add_columns(data_type, col, values)
+        if field == 'all' and getattr(self, 'roi_stack', None):
+            self.recompute_roi_assignments()
+
         # Compute special fields?
         # -----------------------
         for col in self.processed.columns:

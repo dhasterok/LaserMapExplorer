@@ -227,11 +227,29 @@ class ProcessingLogEntry:
 
 @dataclass
 class SampleProcessingState:
+    """Project-scoped processing choices for one sample.
+
+    ``rois``, ``selected_rois`` and ``cluster_groups`` are stored as plain
+    JSON-ready dicts rather than dataclasses -- they mirror
+    `SampleObj.roi_stack` and `SampleObj.cluster_entries` directly, and
+    `SampleObj.export_processing_state`/`apply_processing_state` own the
+    conversion. The cluster *labels* those groups refer to are per-pixel
+    arrays and live in a ``clusters.npz`` sidecar (see `save_cluster_labels`),
+    not in this manifest.
+    """
     workflow_ref: Optional[str] = None
     applied_filters: list = field(default_factory=list)
     masks: list = field(default_factory=list)
     computed_fields: list = field(default_factory=list)
     processing_log: list = field(default_factory=list)
+    #: One dict per ROI, in stack (priority) order -- see
+    #: `SampleObj.export_processing_state` for the shape.
+    rois: list = field(default_factory=list)
+    selected_rois: list = field(default_factory=list)
+    #: ``{method: {'entries': {id: {'name', 'color', 'link'}},
+    #: 'selected_clusters': [int]}}`` -- cluster ids are ints in memory and
+    #: str keys in JSON.
+    cluster_groups: dict = field(default_factory=dict)
 
 
 def _processing_state_to_dict(state):
@@ -241,6 +259,15 @@ def _processing_state_to_dict(state):
         'masks': [asdict(m) for m in state.masks],
         'computed_fields': [asdict(c) for c in state.computed_fields],
         'processing_log': [asdict(p) for p in state.processing_log],
+        'rois': state.rois,
+        'selected_rois': [int(i) for i in state.selected_rois],
+        'cluster_groups': {
+            method: {
+                'entries': {str(cid): entry for cid, entry in groups.get('entries', {}).items()},
+                'selected_clusters': [int(c) for c in groups.get('selected_clusters', [])],
+            }
+            for method, groups in state.cluster_groups.items()
+        },
     }
 
 
@@ -251,7 +278,97 @@ def _processing_state_from_dict(d):
         masks=[MaskSpec(**m) for m in d.get('masks', [])],
         computed_fields=[ComputedFieldSpec(**c) for c in d.get('computed_fields', [])],
         processing_log=[ProcessingLogEntry(**p) for p in d.get('processing_log', [])],
+        rois=d.get('rois', []),
+        selected_rois=[int(i) for i in d.get('selected_rois', [])],
+        cluster_groups={
+            method: {
+                'entries': {int(cid): entry for cid, entry in groups.get('entries', {}).items()},
+                'selected_clusters': [int(c) for c in groups.get('selected_clusters', [])],
+            }
+            for method, groups in d.get('cluster_groups', {}).items()
+        },
     )
+
+
+# ---------------------------------------------------------------------------
+# Cluster labels sidecar
+# ---------------------------------------------------------------------------
+
+#: Per-sample sidecar holding the cluster label columns, under
+#: ``<project_dir>/<sample_id>/``.
+CLUSTER_LABELS_FILENAME = 'clusters.npz'
+
+#: `SampleObj.processed` data types saved to the cluster sidecar.
+CLUSTER_DATA_TYPES = ('Cluster', 'Cluster score')
+
+
+def save_cluster_labels(sample_obj, path):
+    """Write `sample_obj`'s cluster label/score columns to `path` (``.npz``).
+
+    Labels are per-pixel arrays, far too large for the JSON manifest, and
+    without them the saved cluster groups and cluster-defined ROIs would have
+    nothing to refer to on reload. Removes `path` when the sample has no
+    cluster columns, so a stale file can't bring back clusters that were
+    cleared.
+
+    Parameters
+    ----------
+    sample_obj : SampleObj
+    path : str or Path
+
+    Returns
+    -------
+    bool
+        True if a file was written.
+    """
+    import numpy as np
+
+    path = Path(path)
+    arrays = {}
+    for data_type in CLUSTER_DATA_TYPES:
+        for column in sample_obj.processed.match_attribute('data_type', data_type):
+            # np.savez keys can't carry the data type, so encode it in the key.
+            arrays[f'{data_type}|{column}'] = np.asarray(sample_obj.processed[column].values, dtype=float)
+
+    if not arrays:
+        if path.exists():
+            path.unlink()
+        return False
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, 'wb') as f:
+        np.savez_compressed(f, **arrays)
+    return True
+
+
+def load_cluster_labels(sample_obj, path):
+    """Restore cluster columns written by `save_cluster_labels` onto `sample_obj`.
+
+    Columns whose length no longer matches the sample (the raw file changed)
+    are skipped rather than raising.
+
+    Returns
+    -------
+    list of str
+        The columns restored.
+    """
+    import numpy as np
+
+    path = Path(path)
+    if not path.exists():
+        return []
+
+    restored = []
+    n = sample_obj.processed.shape[0]
+    with np.load(path) as archive:
+        for key in archive.files:
+            data_type, _, column = key.partition('|')
+            values = archive[key]
+            if not column or len(values) != n:
+                continue
+            sample_obj.add_columns(data_type, column, values)
+            restored.append(column)
+    return restored
 
 
 # ---------------------------------------------------------------------------

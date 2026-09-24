@@ -16,7 +16,9 @@ from src.data.DataHandling import LaserSampleObj, XRFSampleObj
 from src.plotting.CustomMplCanvas import MplCanvas
 from src.app.Status import StatusMessageManager
 from src.control.Logger import LoggerConfig, auto_log_methods, log
-from src.project.ProjectModel import load_calibration_sidecar, is_calibration_stale
+from src.project.ProjectModel import (
+    load_calibration_sidecar, is_calibration_stale, load_cluster_labels, CLUSTER_LABELS_FILENAME,
+)
 # -------------------------------------
 # File I/O related functions
 # -------------------------------------
@@ -184,6 +186,15 @@ class LameIO():
             # dock hasn't been created yet (e.g. in a lighter-weight test
             # harness).
             if entry is not None:
+                # Cluster labels first: cluster-defined ROIs replayed by
+                # apply_processing_state resolve against them.
+                project_dir = self.ui.project_manager.project_dir
+                if project_dir is not None:
+                    load_cluster_labels(
+                        self.ui.data[self.ui.app_data.sample_id],
+                        project_dir / self.ui.app_data.sample_id / CLUSTER_LABELS_FILENAME,
+                    )
+
                 field_calculator = getattr(getattr(self.ui, 'calculator', None), 'cfc', None)
                 self.ui.data[self.ui.app_data.sample_id].apply_processing_state(
                     entry.processing,
@@ -198,7 +209,6 @@ class LameIO():
                 # (nothing saved yet for this sample). project_dir is None
                 # for an unsaved project, in which case there's nothing on
                 # disk to load yet either.
-                project_dir = self.ui.project_manager.project_dir
                 if project_dir is not None:
                     if hasattr(self.ui, 'profile_dock'):
                         self.ui.profile_dock.profiling.load_profiles(project_dir, self.ui.app_data.sample_id)

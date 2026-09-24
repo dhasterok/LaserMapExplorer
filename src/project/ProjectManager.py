@@ -249,6 +249,42 @@ class ProjectManager(QObject):
             # ROIs in the manifest refer to them, and they're too large for it.
             save_cluster_labels(self.ui.data[sample_id], project_dir / sample_id / CLUSTER_LABELS_FILENAME)
 
+    def load_sidecars(self, sample_ids=None):
+        """Load saved profiles/polygons into whichever docks exist.
+
+        The Profile and Mask docks are created lazily, the first time the
+        user opens them -- often after the project's samples have already
+        been loaded. So this runs both when a sample is first loaded
+        (`LameIO.initialize_sample_object`) and when either dock is created
+        (with every loaded sample). Each manager remembers which samples it
+        has read, so a sample is never re-read over unsaved edits.
+
+        Parameters
+        ----------
+        sample_ids : iterable of str, optional
+            Samples to load; defaults to every sample loaded this session.
+        """
+        project_dir = self.project_dir
+        if self.current_project is None or project_dir is None:
+            return
+        if sample_ids is None:
+            sample_ids = list(self.ui.data)
+        for sample_id in sample_ids:
+            if sample_id not in self.current_project.samples:
+                continue
+            if hasattr(self.ui, 'profile_dock'):
+                profiling = self.ui.profile_dock.profiling
+                profiling.project_dir = project_dir
+                # load_profiles adds the sample's key, so its presence means
+                # "already read" (a sample with nothing saved is re-checked,
+                # which is harmless).
+                if sample_id not in profiling.profiles:
+                    profiling.load_profiles(project_dir, sample_id)
+            if hasattr(self.ui, 'mask_dock'):
+                manager = self.ui.mask_dock.polygon_tab.polygon_manager
+                if sample_id not in manager.loaded_samples:
+                    manager.load_polygons(project_dir, sample_id)
+
     def _flush_notes(self):
         """Write the open Notes editor's content to its current file, if any."""
         if hasattr(self.ui, 'notes_dock'):

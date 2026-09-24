@@ -205,16 +205,9 @@ class LameIO():
                 # Profile/polygon geometry lives in its own per-sample
                 # sidecar files, not the processing-state JSON -- load this
                 # sample's on first touch, same as calibration/processing
-                # state above. Both are tolerant of a missing directory
-                # (nothing saved yet for this sample). project_dir is None
-                # for an unsaved project, in which case there's nothing on
-                # disk to load yet either.
-                if project_dir is not None:
-                    if hasattr(self.ui, 'profile_dock'):
-                        self.ui.profile_dock.profiling.load_profiles(project_dir, self.ui.app_data.sample_id)
-                        self.ui.profile_dock.profiling.project_dir = project_dir
-                    if hasattr(self.ui, 'mask_dock'):
-                        self.ui.mask_dock.polygon_tab.polygon_manager.load_polygons(project_dir, self.ui.app_data.sample_id)
+                # state above. A dock that doesn't exist yet picks them up
+                # when it's created (see ProjectManager.load_sidecars).
+                self.ui.project_manager.load_sidecars([self.ui.app_data.sample_id])
 
             # Connect data observers if required
             if self.connect_actions:

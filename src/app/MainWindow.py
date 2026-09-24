@@ -1798,6 +1798,11 @@ class MainWindow(QMainWindow):
             self.mask_dock.setFloating(False)
 
             self.statusbar.toolButtonBottomDock.clicked.connect(lambda: self.toggle_dock_visibility(dock=self.mask_dock, button=self.statusbar.toolButtonBottomDock))
+
+            # Samples loaded before the dock existed never had their saved
+            # polygons read -- without this they'd be missing, and the next
+            # save would clobber them.
+            self.project_manager.load_sidecars()
             # Keep the toggle button in sync when the dock is closed via its
             # own title-bar close button (DockWidgetClosable) rather than the
             # status bar toggle -- toggle_dock_visibility only updates the
@@ -1839,6 +1844,8 @@ class MainWindow(QMainWindow):
         """
         if not hasattr(self, 'profile_dock'):
             self.profile_dock = ProfileDock(self)
+            # see open_mask_dock
+            self.project_manager.load_sidecars()
 
             if self.profile_dock not in self.help_mapping:
                 self.help_mapping[self.profile_dock] = 'profiles'

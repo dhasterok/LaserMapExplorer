@@ -161,6 +161,10 @@ class PolygonManager:
         self.main_window = main_window
 
         self.polygons = {}  # {sample_id: {p_id: SerializablePolygon}}
+        #: Samples whose saved polygons have been read by `load_polygons`
+        #: (or that were checked and had none). `save_polygons` won't write a
+        #: sample it never read -- see there.
+        self.loaded_samples = set()
         self.p_id_gen = 0   # global counter (can be made per-sample if needed)
         self.p_id = 0
 
@@ -207,6 +211,7 @@ class PolygonManager:
         docstring for why this is needed (`add_samples()` only ever adds).
         """
         self.polygons = {}
+        self.loaded_samples = set()
         self.p_id_gen = 0
         self.p_id = 0
 
@@ -338,6 +343,17 @@ class PolygonManager:
             return
 
         directory = os.path.join(project_dir, sample_id)
+
+        # Writing a sample whose saved polygons were never read would clobber
+        # them: new polygons reuse the ids of the unread files, and the stale
+        # file cleanup below deletes the rest. Refuse rather than lose them.
+        if sample_id not in self.loaded_samples and os.path.isdir(directory) and any(
+            f.endswith('.poly') for f in os.listdir(directory)
+        ):
+            log(f"not saving polygons for {sample_id}: its saved polygons in "
+                f"{directory} were never loaded", prefix="Warning")
+            return
+
         os.makedirs(directory, exist_ok=True)
 
         for p_id, polygon in self.polygons[sample_id].items():
@@ -361,9 +377,11 @@ class PolygonManager:
     def load_polygons(self, project_dir, sample_id):
         directory = os.path.join(project_dir, sample_id)
         self.polygons.setdefault(sample_id, {})
+        self.loaded_samples.add(sample_id)
         if not os.path.isdir(directory):
             # sample had no saved polygons -- nothing to load
             return
+        loaded = []
         for file_name in os.listdir(directory):
             if file_name.endswith(".poly"):
                 file_path = os.path.join(directory, file_name)
@@ -374,12 +392,19 @@ class PolygonManager:
                     # `draw_polygons`' job, once a canvas is available.
                     polygon.patch = None
                     polygon.vertex_markers = []
-                    self.polygons[sample_id][polygon.p_id] = polygon
+                    loaded.append(polygon)
+        # Id order, not directory-listing order, so the table and drawing
+        # order match the order the polygons were created in.
+        for polygon in sorted(loaded, key=lambda p: p.p_id):
+            self.polygons[sample_id][polygon.p_id] = polygon
 
         # keep new polygons from colliding with the ids just loaded
         self._seed_pid()
 
-        if self.canvas is not None:
+        # Only the current sample is on screen; loading another sample's
+        # polygons (e.g. when the Mask dock is first opened) must not draw
+        # them. The canvas may also be left over from a closed project.
+        if self.canvas is not None and sample_id == self.main_window.app_data.sample_id:
             self.draw_polygons(self.canvas)
         self.notify_model_changed()
         log("Polygons loaded successfully.", prefix="Polygon")

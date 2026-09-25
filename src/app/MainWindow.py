@@ -62,7 +62,11 @@ from src.workflow import WorkflowFile
 from src.plotting.CustomMplCanvas import MplCanvas
 
 import faulthandler
-faulthandler.enable()
+import sys
+# A windowed (console=False) Windows build has sys.stderr = None, and enable() raises
+# RuntimeError without a stream -- which crashed the frozen app at import.
+if sys.stderr is not None:
+    faulthandler.enable()
 
 # to prevent segmentation error at startup
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"

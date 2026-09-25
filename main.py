@@ -1,13 +1,111 @@
-import sys, os, argparse, darkdetect
+import sys, os, threading, traceback
 from pathlib import Path
-from PyQt6.QtCore import QEvent, QTimer
-from PyQt6.QtWidgets import QSplashScreen, QApplication
-from PyQt6.QtGui import QPixmap, QIcon
-import src.app.config  # noqa: F401 — runs lame_core.config.setup()
-from lame_core.config import BASEDIR, ICONPATH, load_stylesheet
-from lame_core.wheel_scroll import install_wheel_scrolling
-from src.control.Logger import LoggerConfig, install_qt_message_handler
-from src.app.MainWindow import MainWindow
+
+
+class SelftestReport:
+    """
+    Progress log for ``--selftest`` that cannot itself hang or crash the check.
+
+    A windowed (``console=False``) Windows build has ``sys.stderr`` set to None, and
+    PyInstaller's bootloader answers any unhandled exception with a modal
+    "Unhandled exception in script" message box. Headless on CI nobody dismisses it,
+    so a single uncaught error stalls the job until GitHub's 6 h limit. Hence:
+
+    * every line goes to ``<user data dir>/selftest.log`` (directory created first,
+      flushed per line) as well as to stderr when there is one, so the CI step can
+      show how far the check got even if the process has to be killed;
+    * a watchdog thread ends the process with exit code 3 after ``timeout`` seconds,
+      naming the stage it was stuck in -- this also covers a modal dialog or a hung
+      WebEngine initialisation, which block the main thread.
+
+    Built only from the standard library so it works before any LaME, lame_core or
+    Qt import has been attempted.
+
+    Parameters
+    ----------
+    timeout : float
+        Seconds before the watchdog gives up on the whole check.
+    """
+
+    def __init__(self, timeout=120):
+        self.stage = 'starting'
+        self.file = None
+        try:
+            if sys.platform == 'win32':
+                base = os.environ.get('APPDATA') or (Path.home() / 'AppData' / 'Roaming')
+            elif sys.platform == 'darwin':
+                base = Path.home() / 'Library' / 'Application Support'
+            else:
+                base = os.environ.get('XDG_DATA_HOME') or (Path.home() / '.local' / 'share')
+            # Must match lame_core.config.default_user_data_dir('LaME'); duplicated
+            # because lame_core may be the very import that is broken.
+            log_dir = Path(base) / 'LaME'
+            log_dir.mkdir(parents=True, exist_ok=True)
+            self.file = open(log_dir / 'selftest.log', 'w', encoding='utf-8')
+        except Exception:
+            pass
+
+        watchdog = threading.Timer(timeout, self._expire)
+        watchdog.daemon = True
+        watchdog.start()
+
+    def write(self, message):
+        """Write one line to every available sink, flushing immediately."""
+        line = f"selftest: {message}\n"
+        for stream in (self.file, sys.stderr):
+            if stream is None:
+                continue
+            try:
+                stream.write(line)
+                stream.flush()
+            except Exception:
+                pass
+
+    def begin(self, stage):
+        """Record the stage about to run, so a hang can be attributed to it."""
+        self.stage = stage
+        self.write(f"stage: {stage}")
+
+    def fail(self, context):
+        """Log the active exception's traceback and exit immediately with code 1."""
+        self.write(f"FAILED during {self.stage}: {context}")
+        self.write(traceback.format_exc().rstrip())
+        self.exit(1)
+
+    def exit(self, code):
+        """End the process without interpreter finalisation (see :func:`shutdown`)."""
+        for stream in (self.file, sys.stdout, sys.stderr):
+            try:
+                if stream is not None:
+                    stream.flush()
+            except Exception:
+                pass
+        os._exit(code)
+
+    def _expire(self):
+        self.write(f"FAILED: timed out during stage '{self.stage}' (hung)")
+        self.exit(3)
+
+
+# Decided from the raw argv because the imports below can fail before argparse runs.
+_selftest_report = SelftestReport() if '--selftest' in sys.argv[1:] else None
+if _selftest_report is not None:
+    _selftest_report.begin('importing modules')
+
+try:
+    import argparse, darkdetect
+    from PyQt6.QtCore import QEvent, QTimer
+    from PyQt6.QtWidgets import QSplashScreen, QApplication
+    from PyQt6.QtGui import QPixmap, QIcon
+    import src.app.config  # noqa: F401 — runs lame_core.config.setup()
+    from lame_core.config import BASEDIR, ICONPATH, load_stylesheet
+    from lame_core.wheel_scroll import install_wheel_scrolling
+    from src.control.Logger import LoggerConfig, install_qt_message_handler
+    from src.app.MainWindow import MainWindow
+except BaseException:
+    if _selftest_report is None:
+        raise
+    _selftest_report.fail('import failed (a module missing from the frozen build?)')
 
 # -------------------------------
 # MAIN FUNCTION!!!
@@ -193,7 +291,7 @@ def shutdown(app, window, exit_code):
     os._exit(exit_code)
 
 
-def selftest(app):
+def selftest(app, report):
     """
     Construct the main window and confirm the bundled resources are reachable.
 
@@ -207,27 +305,19 @@ def selftest(app):
     app : QApplication
         A live application instance; the stylesheet has already been applied by
         :func:`create_app`.
+    report : SelftestReport
+        Sink for progress and failures (stderr when present, plus selftest.log).
 
     Returns
     -------
     int :
-        0 if every check passed, 1 otherwise. Failures are reported to stderr.
+        0 if every check passed, 1 otherwise.
     """
     from lame_core.config import APPDATA_PATH, STYLE_PATH, USERDATA_PATH, user_data_dir
 
-    # A windowed (console=False) build has no attached console, and on Windows the
-    # bootloader can leave sys.stderr as None -- writing to it would crash the very
-    # check that is meant to report failures. Fall back to a file the CI step can read.
-    stream = sys.stderr
-    fallback = None
-    if stream is None:
-        fallback = open(USERDATA_PATH / 'selftest.log', 'w', encoding='utf-8')
-        stream = fallback
-
-    def report(message):
-        print(f"selftest: {message}", file=stream)
-
     failures = []
+
+    report.begin('checking bundled resources')
 
     def check(description, path):
         if not Path(path).exists():
@@ -256,6 +346,7 @@ def selftest(app):
     # QtWebEngineProcess helper, icudtl.dat and the .pak resources alongside the app.
     # Instantiating a view forces Chromium to initialise, which fails loudly if any of
     # that is missing.
+    report.begin('initialising QWebEngineView')
     try:
         from PyQt6.QtWebEngineWidgets import QWebEngineView
 
@@ -266,26 +357,24 @@ def selftest(app):
     except Exception as e:
         failures.append(f"QWebEngineView failed to initialise: {e}")
 
+    report.begin('constructing MainWindow')
     window = None
     try:
         window = MainWindow(app)
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        report.write(traceback.format_exc().rstrip())
         failures.append(f"MainWindow construction failed: {e}")
 
     for failure in failures:
-        report(failure)
+        report.write(failure)
 
     if window is not None:
+        report.begin('destroying MainWindow')
         window.deleteLater()
         app.sendPostedEvents(None, QEvent.Type.DeferredDelete)
         app.processEvents()
 
-    report(f"{'FAILED' if failures else 'passed'} ({len(failures)} problem(s))")
-
-    if fallback is not None:
-        fallback.close()
+    report.write(f"{'FAILED' if failures else 'passed'} ({len(failures)} problem(s))")
 
     return 1 if failures else 0
 
@@ -302,17 +391,25 @@ def main():
     It also ensures that the application exits cleanly when the main window is closed.
     """
     args = parse_args()
+
+    if _selftest_report is not None:
+        # Any exception escaping here would reach PyInstaller's modal error box on a
+        # windowed Windows build and hang CI; report it and exit instead.
+        report = _selftest_report
+        try:
+            configure_logging(args)
+            install_qt_message_handler()
+            report.begin('creating QApplication')
+            app = create_app()
+            exit_code = selftest(app, report)
+        except BaseException:
+            report.fail('unhandled exception')
+        report.exit(exit_code)
+
     configure_logging(args)
     install_qt_message_handler()
 
     app = create_app()
-
-    if args.selftest:
-        exit_code = selftest(app)
-        for stream in (sys.stdout, sys.stderr):
-            if stream is not None:
-                stream.flush()
-        os._exit(exit_code)
 
     show_splash()
 

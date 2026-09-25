@@ -29,6 +29,9 @@ jobs:
             name: windows-x64
 
     runs-on: ${{ matrix.os }}
+    # A healthy run takes ~12 min on Windows and ~8 on macOS. Without this a hang
+    # burns GitHub's 6 h default before anything is reported.
+    timeout-minutes: 45
 
     steps:
       - name: Check out LaserMapExplorer
@@ -114,23 +117,40 @@ jobs:
       - name: Smoke-test the frozen build (macOS)
         if: runner.os == 'macOS'
         working-directory: LaserMapExplorer
+        timeout-minutes: 5
         env:
           QT_QPA_PLATFORM: offscreen
         run: ./dist/LaME.app/Contents/MacOS/LaME --selftest
 
-      # A windowed build detaches from the console, so the exit code is the signal.
-      # Start-Process -Wait is what makes PowerShell actually wait for it; the selftest
-      # also writes %APPDATA%\LaME\selftest.log when it has no usable stderr.
+      # A windowed build detaches from the console, so the exit code is the signal and
+      # %APPDATA%\LaME\selftest.log (written line by line) is the output. The selftest
+      # exits on its own after 120 s (code 3, naming the stuck stage); the 180 s wait is
+      # a backstop for a hang before its watchdog starts. On timeout the window title
+      # tells the two classic causes apart: "Unhandled exception in script" is
+      # PyInstaller's error box, anything else is the app itself stuck.
       - name: Smoke-test the frozen build (Windows)
         if: runner.os == 'Windows'
         working-directory: LaserMapExplorer
         shell: pwsh
+        timeout-minutes: 5
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          $p = Start-Process -FilePath .\dist\LaME\LaME.exe -ArgumentList '--selftest' -Wait -PassThru
           $log = Join-Path $env:APPDATA 'LaME\selftest.log'
-          if (Test-Path $log) { Get-Content $log }
+          Remove-Item $log -ErrorAction SilentlyContinue
+          $p = Start-Process -FilePath .\dist\LaME\LaME.exe -ArgumentList '--selftest' -PassThru
+          $finished = $p.WaitForExit(180000)
+          if (-not $finished) {
+            $p.Refresh()
+            Write-Host "selftest still running after 180 s; window title: '$($p.MainWindowTitle)'"
+            Get-Process | Where-Object { $_.MainWindowTitle } |
+              ForEach-Object { Write-Host "  open window: $($_.ProcessName) -> '$($_.MainWindowTitle)'" }
+          }
+          if (Test-Path $log) { Get-Content $log } else { Write-Host "no selftest.log was written" }
+          if (-not $finished) {
+            taskkill /T /F /PID $p.Id | Out-Null
+            throw "selftest hung"
+          }
           if ($p.ExitCode -ne 0) { throw "selftest failed with exit code $($p.ExitCode)" }
 
       # An arm64 bundle needs at least an ad-hoc signature or macOS refuses to launch it.

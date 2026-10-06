@@ -213,11 +213,25 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     reshaped_array = np.reshape(map_df['array'].values, array_size, order=data.order)
 
     if is_discrete:
-        # Codes are 1-indexed (see dock.py's _write_results_to_sample);
-        # shift to 0-indexed to match Cluster/ROI maps' own convention.
-        reshaped_array = reshaped_array - 1.0
         labels = data.processed.get_attribute(field, 'category_labels') or []
         hexcolors = data.processed.get_attribute(field, 'category_colors') or []
+        # How the stored codes map onto those labels. 'category_values' lists
+        # the actual data codes, positionally matched to the labels, and is
+        # remapped to 0..n-1 here. Cluster fields need it: their ids are
+        # 0-based *and* reserve 99 for the mask/unclustered group (see
+        # AppData.cluster_group_changed), so they are neither 1-based nor
+        # contiguous, and the plain shift below would fold cluster 0 and 1
+        # onto one colour and give the mask the last cluster's.
+        category_values = data.processed.get_attribute(field, 'category_values')
+        if category_values:
+            remapped = np.full(reshaped_array.shape, np.nan)
+            for position, value in enumerate(category_values):
+                remapped[reshaped_array == value] = position
+            reshaped_array = remapped
+        else:
+            # Codes are 1-indexed (see dock.py's _write_results_to_sample);
+            # shift to 0-indexed to match Cluster/ROI maps' own convention.
+            reshaped_array = reshaped_array - 1.0
         group_color, group_label, cmap = style_data.get_discrete_colormap(labels, hexcolors, alpha=style_data.marker_alpha)
         n = max(len(labels), 1)
         norm = colors.BoundaryNorm(np.arange(-0.5, n, 1), n, clip=True)
@@ -572,8 +586,22 @@ def plot_small_histogram(parent, data, app_data, style_data, current_plot_df):
             log(f"issues with values <= 0, (-): {sum(array < 0)}, (0): {sum(array == 0)}", prefix="Warning")
             return
 
-    bin_width = (np.nanmax(array) - np.nanmin(array)) / app_data._default_hist_num_bins
-    edges = np.arange(np.nanmin(array), np.nanmax(array) + bin_width, bin_width)
+    lo, hi = float(np.nanmin(array)), float(np.nanmax(array))
+    span = hi - lo
+    if not np.isfinite(span) or span <= 0:
+        # A field with no spread at all. Not a degenerate case to guard
+        # against so much as an expected one: a categorical classification is
+        # routinely uniform over a whole map -- a garnet that is almandine
+        # everywhere gives a constant '<abbrev>_dominant' column (see
+        # src/stoichiometry/dock.py), as does a single-cluster or single-ROI
+        # field. bin_width would be 0 and np.arange(lo, lo, 0) raises
+        # "arange: cannot compute length", which aborted the plot update the
+        # same way the all-masked case above used to.
+        half = max(abs(lo) * 1e-6, 0.5)
+        edges = np.array([lo - half, lo + half])
+    else:
+        bin_width = span / app_data._default_hist_num_bins
+        edges = np.arange(lo, hi + bin_width, bin_width)
 
     if sum(mask) != len(mask):
         canvas.axes.hist( 

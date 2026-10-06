@@ -1481,6 +1481,12 @@ class AppData(QObject):
 
             # update bin width
             data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
+            if not np.isfinite(data_range) or data_range <= 0:
+                # A constant field (a uniform categorical classification, say)
+                # has no range to divide up; a 0 bin width then makes
+                # update_hist_num_bins divide by zero, and any np.arange using
+                # it raise. Leave the previous width alone.
+                return
             self.hist_bin_width = data_range / self._hist_num_bins
         except (KeyError, TypeError) as e:
             # Field may not exist yet
@@ -1502,6 +1508,11 @@ class AppData(QObject):
 
             # update n bins
             data_range = np.nanmax(map_df['array']) - np.nanmin(map_df['array'])
+            if not np.isfinite(data_range) or not self.hist_bin_width:
+                # Nothing to divide, or nothing to divide *by* -- see
+                # update_hist_bin_width. ZeroDivisionError isn't in the except
+                # clause below, so this would propagate.
+                return
             self.hist_num_bins = max(1, round(data_range / self.hist_bin_width))
         except (KeyError, TypeError) as e:
             return
@@ -1678,6 +1689,28 @@ class AppData(QObject):
                     self.cluster_dict[method]['selected_clusters'] = clusters[:-1]
                 else:
                     self.cluster_dict[method]['selected_clusters'] = clusters
+
+                # Mark the column categorical, so a Cluster field drawn through
+                # the generic field-map path gets the swatch legend the
+                # dedicated 'cluster map' plot type gives it, rather than a
+                # continuous colorbar over what are only group codes. 'field
+                # map' offers Cluster as a colour field type (see
+                # PlotAxisSettings), and plot_map_mpl decides discrete vs
+                # continuous purely from these attributes.
+                #
+                # category_values carries the codes explicitly (0-based, with
+                # 99 last for the mask) because they are neither 1-based nor
+                # contiguous -- see plot_map_mpl's discrete branch.
+                codes = [int(c) for c in clusters]
+                data.processed.set_attribute(method, 'discrete', True)
+                data.processed.set_attribute(
+                    method, 'category_values', codes)
+                data.processed.set_attribute(
+                    method, 'category_labels',
+                    [self.cluster_dict[method][c]['name'] for c in codes])
+                data.processed.set_attribute(
+                    method, 'category_colors',
+                    [self.cluster_dict[method][c]['color'] for c in codes])
         else:
             log(f"(group_changed) Cluster method, ({method}) is not defined", prefix="Error")
 

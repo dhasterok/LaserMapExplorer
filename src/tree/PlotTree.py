@@ -855,8 +855,8 @@ class PlotTree(CustomDockWidget):
                 leaf_item.setBackground(QBrush(QColor(bgcolor)))  # white or any default background color
 
     def get_tree_items(self, tree):
-        """Returns items associated with the specified tree
-        
+        """Returns items associated with the specified tree, creating it if new
+
         Parameters
         ----------
         tree : str
@@ -866,7 +866,22 @@ class PlotTree(CustomDockWidget):
         -------
         Qt.AbstractModelItem
             The set of items under *tree*
+
+        Notes
+        -----
+        The branch is added on demand rather than looked up in a fixed list.
+        ``add_tree_item`` passes ``plot_info['tree']``, which is the plot's
+        field type, and the branches built in ``__init__`` never covered every
+        type a field map accepts as its colour field (see
+        ``PlotAxisSettings``' ``cfield_type`` for 'field map'): 'Stoichiometry'
+        has no branch -- nor does 'Cluster', 'ROI', 'Special', or the
+        'Calculated Map' that ``add_tree_item`` remaps 'Calculated' to. Each
+        was a ``KeyError`` that fired *after* the canvas was drawn, so the map
+        appeared but never entered the tree and so could not be recalled.
         """
+        if tree not in self.tree:
+            log(f"adding plot tree branch '{tree}'", prefix="Tree")
+            self.tree[tree] = self.treeView.add_branch(self.treeView.root_node, tree)
         return self.tree[tree]
 
     def find_leaf(self, tree, branch, leaf):

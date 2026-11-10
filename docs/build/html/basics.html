@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
@@ -54,7 +54,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
-    <meta name="docbuild:last-update" content="2026-09-06"/>
+    <meta name="docbuild:last-update" content="2026-11-10"/>
   
     
     <script src="_static/searchtools.js"></script>
@@ -477,6 +477,9 @@
 <h3>Raw data<a class="headerlink" href="#raw-data" title="Link to this heading">#</a></h3>
 <p>Raw data refers to the data read directly from a file.  It may be uncalibrated (e.g., cps) or calibrated (e.g., ppm).  Currently, <em>LaME</em> does not calibrate LA-ICP-MS data, so any calibrated data should be calibrated in Iolite or XMapTools first.</p>
 <p>Cropping ( <a class="reference internal" href="_images/icon-crop-64.svg"><img alt="icon-crop" src="_images/icon-crop-64.svg" style="height: 2ex;" /></a> ) can be applied to the raw data, reducing the area analyzed by the code.  The original extent can be restored by clicking the <a class="reference internal" href="_images/icon-fit-to-width-64.svg"><img alt="icon-fit-to-width" src="_images/icon-fit-to-width-64.svg" style="height: 2ex;" /></a> button.  If the raw data is cropped or restored to the original extent, these operations result in clearing any figures or analyses.  A dialog will appear prompting the user if they wish to proceed before clearing the memory.</p>
+<p>To crop, display a map (any of the map plot types) and click <a class="reference internal" href="_images/icon-crop-64.svg"><img alt="icon-crop" src="_images/icon-crop-64.svg" style="height: 2ex;" /></a>.  A dashed rectangle appears over the map; drag its edges or corners to enclose the area you want to analyse, then <strong>double-click inside the rectangle</strong> to apply it.  Pressing <code class="docutils literal notranslate"><span class="pre">Enter</span></code> does the same, and <code class="docutils literal notranslate"><span class="pre">Esc</span></code> cancels.  Releasing the mouse only moves the rectangle — cropping discards computed fields and filters, so it waits for a deliberate confirmation.  Afterwards <a class="reference internal" href="_images/icon-fit-to-width-64.svg"><img alt="icon-fit-to-width" src="_images/icon-fit-to-width-64.svg" style="height: 2ex;" /></a> restores the whole sample.</p>
+<p>A reminder of these keys is shown above the map while the tool is active.  Double-clicking is the more reliable of the two, because <code class="docutils literal notranslate"><span class="pre">Enter</span></code> is only delivered once the map itself has keyboard focus — click anywhere on the map first if the key appears to do nothing.</p>
+<p>The crop tool is only available while a map is displayed, since the region it selects is an area of the sample; it is disabled on scatter plots, histograms, correlation matrices and the like.  If the rectangle does not respond to the mouse, check that the map’s pan or zoom tool is not still active — those take the mouse while they are armed.</p>
 </section>
 <section id="preprocessed-data">
 <h3>Preprocessed data<a class="headerlink" href="#preprocessed-data" title="Link to this heading">#</a></h3>
@@ -570,8 +573,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -579,7 +582,7 @@
     <div class="footer-items__start">
       
         <div class="footer-item"><p class="last-updated">
-  Last updated on 2026-09-06.
+  Last updated on 2026-11-10.
   <br/>
 </p></div>
       
@@ -592,7 +595,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
 </p></div>
       
     </div>

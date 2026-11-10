@@ -387,51 +387,1104 @@ table.docutils td {
 <body>
 <div class="document" id="laser-map-explorer-lame-workshop">
 <h1 class="title">Laser Map Explorer (LaME) Workshop</h1>
-<h2 class="subtitle" id="wish-list-for-lame-workshop">Wish list for LaME workshop</h2>
-
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr class="duration field"><th class="docinfo-name">Duration:</th><td class="field-body">Half day (09:00–13:00)</td>
+</tr>
+<tr class="build field"><th class="docinfo-name">Build:</th><td class="field-body"><tt class="docutils literal">LaME <span class="pre">v0.9.0-workshop</span></tt></td>
+</tr>
+<tr class="datasets field"><th class="docinfo-name">Datasets:</th><td class="field-body">Three garnet maps, one pyrite map</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Fill in your own date, venue and contact details above before printing.</p>
+</div>
+<div class="contents local topic" id="on-this-page">
+<p class="topic-title"><a class="reference internal" href="#top">On this page</a></p>
 <ul class="simple">
-<li>Import tool (hardest/lowest priority)</li>
-<li>Import processed data</li>
-<li><dl class="first docutils">
-<dt>Analytes</dt>
-<dd><ul class="first last">
-<li>Histograms</li>
-<li>Correlations (plotting)</li>
-<li>Add Ratios (analytes tool)</li>
-<li>Create a custom field (e.g., Eu*)</li>
+<li><a class="reference internal" href="#what-today-covers" id="toc-entry-1">What today covers</a></li>
+<li><a class="reference internal" href="#where-to-find-lame" id="toc-entry-2">Where to find LaME</a></li>
+<li><a class="reference internal" href="#before-you-start" id="toc-entry-3">Before you start</a></li>
+<li><a class="reference internal" href="#how-to-read-this-handout" id="toc-entry-4">How to read this handout</a></li>
+<li><a class="reference internal" href="#the-datasets" id="toc-entry-5">The datasets</a></li>
+<li><a class="reference internal" href="#opening-the-project" id="toc-entry-6">1. Opening the project</a></li>
+<li><a class="reference internal" href="#choosing-fields" id="toc-entry-7">2. Choosing fields</a></li>
+<li><a class="reference internal" href="#one-field-at-a-time" id="toc-entry-8">3. One field at a time</a></li>
+<li><a class="reference internal" href="#two-fields-then-three" id="toc-entry-9">4. Two fields, then three</a></li>
+<li><a class="reference internal" href="#regions-and-filters" id="toc-entry-10">5. Regions and filters</a></li>
+<li><a class="reference internal" href="#clustering" id="toc-entry-11">6. Clustering</a></li>
+<li><a class="reference internal" href="#mineral-formulae-across-three-garnets" id="toc-entry-12">7. Mineral formulae across three garnets</a></li>
+<li><a class="reference internal" href="#pyrite-your-turn" id="toc-entry-13">8. Pyrite — your turn</a></li>
+<li><a class="reference internal" href="#notes-and-the-methods-report" id="toc-entry-14">9. Notes and the methods report</a></li>
+<li><a class="reference internal" href="#take-it-home" id="toc-entry-15">10. Take it home</a></li>
+<li><a class="reference internal" href="#known-limitations-in-this-build" id="toc-entry-16">Known limitations in this build</a></li>
+<li><a class="reference internal" href="#if-you-fall-behind" id="toc-entry-17">If you fall behind</a></li>
+<li><a class="reference internal" href="#appendix-a-profiles" id="toc-entry-18">Appendix A: Profiles</a></li>
+<li><a class="reference internal" href="#appendix-b-getting-your-own-data-in" id="toc-entry-19">Appendix B: Getting your own data in</a></li>
+<li><a class="reference internal" href="#getting-help" id="toc-entry-20">Getting help</a></li>
+<li><a class="reference internal" href="#references" id="toc-entry-21">References</a></li>
 </ul>
-</dd>
-</dl>
+</div>
+<div class="section" id="what-today-covers">
+<h1><a class="toc-backref" href="#toc-entry-1">What today covers</a></h1>
+<p>LaME turns LA-ICP-MS element maps into something you can rapidly explore: filter, plot,
+cluster, calculate, and get mineral formulae out the other end.</p>
+<p>We work through two threads.</p>
+<p><strong>Garnet — the quantitative thread.</strong> One sample to learn on, then the same analysis
+across three garnets, ending with mineral formulae and a map of the end-member
+distribution.</p>
+<p><strong>Pyrite — the qualitative thread.</strong> A completely different mineral system, where you
+drive. Cluster it with and without PCA preconditioning, mask to the sulfide using the
+clusters themselves, and ask what separates the populations inside it.</p>
+<p><strong>Core – XRF.</strong> Use many of the same tools to investigate XRF intensity maps.  Turn
+semi-quantitative data into something that you can interpret rapidly and with
+confidence.</p>
+<p>LaME is beta software and this handout is honest about that. Where something is
+unfinished you will see a <strong>Not in this build</strong> box telling you what you would see and
+what to do instead. Those boxes are not apologies — they are there so you do not waste
+the workshop discovering them yourself. A consolidated list is in
+<a class="reference internal" href="#known-limitations-in-this-build">Known limitations in this build</a>.</p>
+<div class="figure align-center">
+<img alt="Alternate text goes here" src="/Users/dhasterok/Documents/GitHub/LaserMapExplorer/docs/source/_static/screenshots/LaME_Initial_Window.png" style="width: 150mm;" />
+<p class="caption">The LaME main window immediately after opening.  There are four main areas in the window:
+(1) Control Toolbox, left; (2) plot canvas, center; (3) Styling Toolbox and Plot Tree,
+right; (4) bottom tabs; (5) the toolbar.</p>
+</div>
+</div>
+<div class="section" id="where-to-find-lame">
+<h1><a class="toc-backref" href="#toc-entry-2">Where to find LaME</a></h1>
+<p>LaME is built around five separate GitHub repositories.  They can all be found by visiting: <a class="reference external" href="https://github.com/dhasterok">GitHub</a></p>
+<ul class="simple">
+<li><strong>LaserMapExplorer</strong>, the main application machinery and GUI components</li>
+<li><strong>lame-core</strong>, core utilities required by <em>LaME</em> and the other repositories</li>
+<li><strong>siesta-rest-editor</strong>, used to produce reSTructured text notes within <em>LaME</em>.  Siesta can
+also be used as a stand-alone application for viewing, editing, and printing documents.</li>
+<li><strong>blueberry-color-tools</strong> is used within LaME to create and modify colormaps and select colors.
+Like Siesta, Blũberry can be used as a stand-alone application.</li>
+<li><strong>global-geochemistry</strong>, utilities for producing various geochemical plots displayed within
+LaME and much more.  It was originally written to process large geochemical datasets and has
+some mapping capabilities, geophysical property estimation, and interfaces with tectonic
+shapefiles and a metamorphic conditions dataset.</li>
+</ul>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><div class="first last figure align-center">
+<img alt="Alternate text goes here" src="/Users/dhasterok/Documents/GitHub/LaserMapExplorer/resources/icons/LaME-64.png" style="width: 93%;" />
+<p class="caption">Laser Map Explorer</p>
+</div>
+</td>
+<td><div class="first last figure align-center">
+<img alt="Alternate text goes here" src="/Users/dhasterok/Documents/GitHub/siesta-rest-editor/src/siesta/icons/siesta2.png" style="width: 85%;" />
+<p class="caption">Siesta</p>
+</div>
+</td>
+<td><div class="first last figure align-center">
+<img alt="Alternate text goes here" src="/Users/dhasterok/Documents/GitHub/blueberry-colortools/resources/icons/blueberry_64.png" style="width: 85%;" />
+<p class="caption">Blüberry</p>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="before-you-start">
+<h1><a class="toc-backref" href="#toc-entry-3">Before you start</a></h1>
+<p>You need two things, both of which should already be on your machine:</p>
+<ol class="arabic">
+<li><p class="first"><strong>LaME installed</strong> — the <tt class="docutils literal">.dmg</tt> (macOS) or <tt class="docutils literal">.zip</tt> (Windows) from the release
+link you were emailed.</p>
 </li>
-<li><dl class="first docutils">
-<dt>Geochemical plots</dt>
-<dd><ul class="first last">
-<li>Scatter</li>
-<li>Heatmap</li>
-<li>Ternary → ternary map</li>
-</ul>
-</dd>
-</dl>
+<li><p class="first"><strong>The workshop folder</strong>, unzipped <strong>to your Desktop with its structure intact</strong>:</p>
+<pre class="code text literal-block">
+LaME-workshop/
+├── data/
+│   ├── RM02.lame.csv          garnet, 78,228 px
+│   ├── WOS-02.lame.csv        garnet, 123,255 px
+│   ├── TR1-07.lame.csv        garnet, 59,916 px
+│   └── 71A-Py 12.lame.csv     pyrite, 29,666 px
+├── 00-open.lame_project.json      + 00-open/
+├── 02-plots.lame_project.json     + 02-plots/
+├── 04-clusters.lame_project.json  + 04-clusters/
+├── 06-pyrite.lame_project.json    + 06-pyrite/
+└── handout.pdf
+</pre>
 </li>
-<li>Filtering (most issues)</li>
-<li>Show interaction with notes</li>
-<li><dl class="first docutils">
-<dt>Clustering and re-plotting</dt>
-<dd><ul class="first last">
-<li>Change analytes used for clustering</li>
-<li>Use PCA for plotting</li>
+</ol>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Do not move files out of that folder or rename the directories beside each
+<tt class="docutils literal">.lame_project.json</tt>. Project files find their data by <strong>relative</strong> path, so the
+structure is what makes them work on your machine rather than only on the
+presenter's.</p>
+</div>
+</div>
+<div class="section" id="how-to-read-this-handout">
+<h1><a class="toc-backref" href="#toc-entry-4">How to read this handout</a></h1>
+<p><strong>Numbered steps</strong> are things you do. Do them in order — a few of them only work in
+one order, and those are called out.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint</p>
+<p class="last"><strong>Grey boxes like this are things you should see.</strong> If your screen does not match,
+do not debug it: open the project file named in the box and carry on. You will lose
+nothing that later sections need.</p>
+</div>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p class="last"><strong>Boxes like this are known limitations.</strong> They tell you what you would see if you
+tried, and what to do instead.</p>
+</div>
+<p><em>Try this</em> paragraphs at the end of a section are optional. They exist so that if you
+finish early you have somewhere to go that does not put you ahead of the group.</p>
+</div>
+<div class="section" id="the-datasets">
+<h1><a class="toc-backref" href="#toc-entry-5">The datasets</a></h1>
+<p>Three garnets and a pyrite, all real data.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="12%" />
+<col width="10%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Sample</th>
+<th class="head">Pixels</th>
+<th class="head">Mineral</th>
+<th class="head">Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">RM02</tt></td>
+<td>78,228</td>
+<td>Garnet</td>
+<td>Garnet–chlorite schist, Walter–Outalpa Shear Zone, South Australia.
+28 analytes: full REE suite plus Ca, Fe, Mg, Mn, Al, Ti, Cr, P, Li, Zr, Th, U, Pb.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">WOS-02</span></tt></td>
+<td>123,255</td>
+<td>Garnet</td>
+<td>33 analytes. Adds <strong>Si</strong>, Na, Sr, Ba and a second Pb isotope.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">TR1-07</span></tt></td>
+<td>59,916</td>
+<td>Garnet</td>
+<td>33 analytes, same suite as WOS-02. The smallest and quickest of the three.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">71A-Py</span> 12</tt></td>
+<td>29,666</td>
+<td>Pyrite</td>
+<td>91 scan lines × 326 pixels, 20 × 6.1 µm. 30 analytes: S, Fe and the chalcophile
+suite — <strong>Co</strong>, <strong>Ni</strong>, <strong>Cu</strong>, Zn, As, Se, Ag, Cd, Sn, Sb, Te, Au, Hg, Tl, Pb, Bi.
+Gold is below detection in most pixels here, so the chalcophile story is in Cu
+and As.</td>
+</tr>
+</tbody>
+</table>
+<p>What these datasets <strong>cannot</strong> do — worth knowing up front, because all three are properties of the data rather than of the software:</p>
+<ul class="simple">
+<li><strong>RM02 has no silicon.</strong> Garnet is X<sub>3</sub>Y<sub>2</sub>Z<sub>3</sub>O<sub>12</sub>,
+and Si normally fills the tetrahedral Z site. Without it, LaME fills Z with aluminium instead. We use this deliberately in <a class="reference internal" href="#mineral-formulae-across-three-garnets">7. Mineral formulae across three garnets</a> — it is the clearest demonstration you will get of what the stoichiometry calculation needs from your data.</li>
+<li><strong>None of them can do Lu–Hf dating.</strong> That needs
+<sup>176</sup>Lu/<sup>177</sup>Hf and <sup>176</sup>Hf/<sup>177</sup>Hf. These maps have <sup>175</sup>Lu and at most one Hf isotope. The capability is real — you will see a result from a different sample — but no amount of clicking will produce an isochron from today's data.</li>
+<li><strong>The pyrite map is uncalibrated.</strong> Values are counts per second, not ppm. Everything
+we do with it — maps, filters, clusters, biplots — is valid on CPS. Mineral formulae
+and chondrite normalisation are <strong>not</strong>, so do not run the Stoichiometry dock on it.</li>
 </ul>
-</dd>
-</dl>
+<p>One practical wrinkle: the three garnets were run on different setups, so <strong>isotope
+names differ between samples</strong>. RM02 has <tt class="docutils literal">Fe57</tt>, <tt class="docutils literal">Ti49</tt>, <tt class="docutils literal">Cr53</tt>; WOS-02 and
+TR1-07 have <tt class="docutils literal">Fe56</tt>, <tt class="docutils literal">Ti47</tt>, <tt class="docutils literal">Cr52</tt>. When a step names a field, check the sample
+you are actually on.</p>
+</div>
+<div class="section" id="opening-the-project">
+<h1><a class="toc-backref" href="#toc-entry-6">1. Opening the project</a></h1>
+<p><em>Goal: get a map on screen in under two minutes, with everyone seeing the same thing.</em></p>
+<ol class="arabic simple">
+<li>Launch LaME. First launch takes a little while — it is unpacking, not hung.</li>
+<li><strong>Home</strong> toolbar page → <strong>Open Project</strong>.</li>
+<li>Navigate to <tt class="docutils literal"><span class="pre">Desktop/LaME-workshop/</span></tt> and choose <tt class="docutils literal"><span class="pre">00-open.lame_project.json</span></tt>.</li>
+</ol>
+<p>That is all. You did not open the CSV directly, and you will not need to today — a
+project file carries the sample, the selected fields and the window state together,
+which is why it makes a reliable starting point and a reliable <em>recovery</em> point.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 0</p>
+<p>The title bar reads <strong>LaME - 00-open</strong>. The Control Toolbox on the left is on its
+<strong>Preprocess</strong> page. There is a field map of RM02 in the centre and a small
+histogram of the same field beside it.</p>
+<p class="last"><em>Not matching?</em> You are at the first step; just try the open again.</p>
+</div>
+<!-- Figure placeholder FIG-1.1  [CHECKPOINT — must match attendee screens exactly]
+WHAT: Full window at Checkpoint 0. Title bar visible showing "LaME - 00-open".
+Control Toolbox on the Preprocess page. RM02 field map in the canvas with its
+companion histogram. Take this at the same window size you will tell attendees to
+use (1280x800 is a safe laptop size).
+WHY: This is the reference photograph for the first checkpoint. It must be
+pixel-faithful, not illustrative — attendees compare their screen against it.
+SIZE: full page width. -->
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>Look at the <strong>Plot</strong> box at the top of the Control Toolbox. It reads <tt class="docutils literal">field map</tt>.
+The entry directly below it, <tt class="docutils literal">gradient map</tt>, produces nothing in this build —
+either a warning about noise reduction, or silence and the previous plot left on
+screen.</p>
+<p class="last">We now leave this page and do not come back. Everything else today happens on pages
+whose plot lists contain no unfinished entries.</p>
+</div>
+<ol class="arabic simple">
+<li>In the Control Toolbox, switch from <strong>Preprocess</strong> to <strong>Field Viewer</strong>.</li>
+</ol>
+<p><strong>What you just learned.</strong> Projects, not CSVs, are how you save and resume work in
+LaME. The Control Toolbox page you are on determines which plot types are offered.</p>
+</div>
+<div class="section" id="choosing-fields">
+<h1><a class="toc-backref" href="#toc-entry-7">2. Choosing fields</a></h1>
+<p><em>Goal: control which analytes are in play, build a ratio, and calculate a new field.</em></p>
+<p>Nothing in LaME plots an analyte you have not selected. That selection also drives what
+the correlation matrix shows and what clustering uses, so it is the first real control
+you have.</p>
+<div class="section" id="selecting-analytes-and-a-ratio">
+<h2>Selecting analytes and a ratio</h2>
+<ol class="arabic simple">
+<li>Click <strong>Analytes</strong> in the pinned toolbar row. The <em>Select Analytes and Ratios</em>
+dialog opens on a square grid of your analytes.</li>
+<li>The <strong>diagonal</strong> cells are the analytes themselves. Click along it to select
+<tt class="docutils literal">Mn55</tt>, <tt class="docutils literal">Y89</tt>, <tt class="docutils literal">Sm147</tt>, <tt class="docutils literal">Eu153</tt>, <tt class="docutils literal">Gd157</tt>, <tt class="docutils literal">Ca43</tt>, <tt class="docutils literal">Fe57</tt>, <tt class="docutils literal">Mg24</tt>.
+Selected cells highlight.</li>
+<li>The <strong>off-diagonal</strong> cells are ratios. Above the diagonal gives row ÷ column; below
+gives column ÷ row. Find the cell where <tt class="docutils literal">Y89</tt> meets <tt class="docutils literal">Mn55</tt> and click it once.</li>
+<li>Your choices appear in the <strong>Selected</strong> list on the right, with columns <em>Field</em>,
+<em>Scaling</em> and <em>Normalized</em>. The ratio appears as <tt class="docutils literal">Y89 / Mn55</tt>.</li>
+<li>Click <strong>Done</strong>.</li>
+</ol>
+<!-- Figure placeholder FIG-2.1
+WHAT: The Select Analytes and Ratios dialog, mid-selection. Several diagonal cells
+highlighted, and one off-diagonal cell (Y89 x Mn55) highlighted. The Selected list
+on the right visible with both analytes and the "Y89 / Mn55" ratio row showing.
+Annotate with two short arrows: "diagonal = analyte", "off-diagonal = ratio".
+WHY: The diagonal/off-diagonal distinction is the single least obvious thing in this
+dialog and the thing people get wrong.
+SIZE: two-thirds page width. -->
+<p>The background colours in that grid are the correlation matrix — so the dialog is
+already telling you which analytes co-vary before you plot anything.</p>
+</div>
+<div class="section" id="setting-the-reference">
+<h2>Setting the reference</h2>
+<ol class="arabic simple">
+<li>Back in the Control Toolbox, find the <strong>Ref.</strong> row and set it to a chondrite —
+<tt class="docutils literal">CI chondrite [AG89]</tt>.</li>
+</ol>
+<p>Do this <strong>before</strong> the next part. Normalised fields divide by this reference, and the
+default is bulk silicate Earth, which is not what you want for a REE anomaly.</p>
+</div>
+<div class="section" id="calculating-eu">
+<h2>Calculating Eu*</h2>
+<p>Europium anomalies need a field that is not in your data: the interpolated Eu you would
+expect from its neighbours. That is what the Calculator is for.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Analysis</strong> toolbar page → <strong>Calculator</strong>.</p>
 </li>
-<li>Stoichiometry tool</li>
-<li>Workflow</li>
-<li>Lu-Hf dating</li>
-<li>Create a profile</li>
+<li><p class="first">In the saved-formula box, choose <tt class="docutils literal">Eu*</tt>. The formula appears:</p>
+<pre class="code text literal-block">
+{Analyte.Eu153_N}/({Analyte.Sm147_N}*{Analyte.Gd157_N})^(1/2)
+</pre>
+<p>Fields are written <tt class="docutils literal">{FieldType.Field}</tt>. The <tt class="docutils literal">_N</tt> suffix means
+reference-normalised — which is why the reference had to be set first.</p>
+</li>
+<li><p class="first">Click <strong>Calculate</strong>.</p>
+</li>
+<li><p class="first">Plot it: Control Toolbox <strong>Field Viewer</strong>, plot type <tt class="docutils literal">field map</tt>, then set the
+colour field type to <tt class="docutils literal">Calculated</tt> and the field to <tt class="docutils literal">Eu*</tt>.</p>
+</li>
+</ol>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>The Calculator's keypad offers <tt class="docutils literal">case()</tt> and <tt class="docutils literal">otw()</tt> buttons for conditional
+expressions. Conditionals do not work in this build — you will get <em>&quot;could not
+evaluate conditional statement&quot;</em>.</p>
+<p class="last">The shipped Calculator documentation also describes a <tt class="docutils literal"><span class="pre">case(...)</span></tt> <strong>function</strong>.
+That syntax has never existed in any version. <strong>Ignore the ``case()`` section of the
+Calculator docs.</strong> Arithmetic, logs, powers and roots all work fine.</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 1</p>
+<p>The Plot Tree on the right has a <strong>Calculated</strong> branch containing <tt class="docutils literal">Eu*</tt>. Your
+canvas shows a smooth, low-contrast Eu* map — much flatter than a raw element map,
+because you have divided out the overall REE level.</p>
+<p class="last"><em>Not matching?</em> Open <tt class="docutils literal"><span class="pre">02-plots.lame_project.json</span></tt> — it has the fields, the ratio
+and Eu* already built.</p>
+</div>
+<!-- Figure placeholder FIG-2.2  [CHECKPOINT]
+WHAT: Canvas showing the Eu* field map on RM02, with the Plot Tree visible on the
+right expanded to show the Calculated branch containing Eu*.
+WHY: Checkpoint reference. Also shows where calculated fields live in the tree,
+which is how attendees find them again later.
+SIZE: full page width. -->
+<ol class="arabic simple">
+<li><strong>Save Project</strong> in the pinned toolbar. Save it next to the workshop folder under
+your own name.</li>
+</ol>
+<p>From here on, start each section by saving. You are building your own recovery points
+alongside the ones we supply.</p>
+<p><strong>What you just learned.</strong> Field selection gates everything downstream. Ratios come
+from the analyte grid; anything more complex comes from the Calculator. Normalised
+fields depend on the reference material being set first.</p>
+</div>
+</div>
+<div class="section" id="one-field-at-a-time">
+<h1><a class="toc-backref" href="#toc-entry-8">3. One field at a time</a></h1>
+<p><em>Goal: read a single element's distribution properly before comparing elements.</em></p>
+<div class="section" id="histograms">
+<h2>Histograms</h2>
+<ol class="arabic simple">
+<li>Control Toolbox <strong>Field Viewer</strong>, plot type <tt class="docutils literal">histogram</tt>.</li>
+<li>Set the <strong>X</strong> field to <tt class="docutils literal">Mn55</tt>.</li>
+<li>In the <strong>Histogram</strong> group, set <em>Histogram type</em> to <tt class="docutils literal">PDF</tt> and tick <strong>Show KDE</strong>.</li>
+<li>Try <tt class="docutils literal"><span class="pre">log-scaling</span></tt>. Trace-element distributions are usually closer to log-normal
+than normal, and the shape change tells you whether yours is.</li>
+<li>Set the colour field type to <tt class="docutils literal">Cluster</tt> or <tt class="docutils literal">ROI</tt> later in the day and this same
+histogram splits by group — a quick way to see whether two zones really differ.</li>
+</ol>
+<!-- Figure placeholder FIG-3.1
+WHAT: Mn55 histogram on RM02 with the KDE overlay switched on, log-scaling enabled.
+The Histogram control group visible in the Control Toolbox so the Bin width,
+No. Bins, Histogram type and Show KDE controls can be seen.
+WHY: Pairs the output with the controls that produced it.
+SIZE: two-thirds page width. -->
+</div>
+<div class="section" id="correlations">
+<h2>Correlations</h2>
+<ol class="arabic simple">
+<li>Plot type <tt class="docutils literal">correlation</tt>.</li>
+<li>Set <strong>Method</strong> to <tt class="docutils literal">Pearson</tt>, then compare against <tt class="docutils literal">Spearman</tt>. Pearson assumes a
+linear relationship; Spearman only assumes monotonic, so a large gap between them is
+itself informative.</li>
+<li>Tick <strong>C²</strong> to show correlation squared — the shared-variance view.</li>
+</ol>
+<p>The matrix covers exactly the analytes you selected in section 2. Change the selection
+and the matrix changes with it.</p>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>The correlation matrix <strong>ignores filters</strong>. Later today you will filter the map; the
+correlation plot will not respond. The same applies to the ternary map.</p>
+<p class="last">To see a filter's effect, use <tt class="docutils literal">field map</tt>, <tt class="docutils literal">histogram</tt> or <tt class="docutils literal">roi map</tt>.</p>
+</div>
+<p><strong>What you just learned.</strong> Histogram shape tells you which scaling to use. Correlation
+method choice is a real decision, not a default. Both read from your field selection.</p>
+</div>
+</div>
+<div class="section" id="two-fields-then-three">
+<h1><a class="toc-backref" href="#toc-entry-9">4. Two fields, then three</a></h1>
+<p><em>Goal: move from distributions to relationships, and back onto the map.</em></p>
+<ol class="arabic simple">
+<li>Control Toolbox → <strong>Scatter and Heatmaps</strong>. The axis rows now have labels: <strong>X</strong>,
+<strong>Y</strong>, <strong>Z</strong> and <strong>Color</strong>.</li>
+</ol>
+<div class="section" id="biplot">
+<h2>Biplot</h2>
+<ol class="arabic simple">
+<li>Plot type <tt class="docutils literal">scatter</tt>. Set <strong>X</strong> to <tt class="docutils literal">Mn55</tt> and <strong>Y</strong> to <tt class="docutils literal">Y89</tt>. Leave <strong>Z</strong> empty.</li>
+<li>Set <strong>Color</strong> to <tt class="docutils literal">Ca43</tt>. A third variable as colour is usually more informative
+than a third axis.</li>
+</ol>
+</div>
+<div class="section" id="heatmap">
+<h2>Heatmap</h2>
+<ol class="arabic simple">
+<li>Plot type <tt class="docutils literal">heatmap</tt>, same X and Y. With 78,000 points, overplotting hides the
+structure; binning reveals it.</li>
+<li>In the <strong>Biplot and Ternary</strong> group, try the <em>Heatmaps</em> statistic — <tt class="docutils literal">counts</tt>,
+then <tt class="docutils literal">median</tt>. <tt class="docutils literal">counts</tt> shows where the data is; <tt class="docutils literal">median</tt> shows what a third
+variable does there.</li>
+</ol>
+</div>
+<div class="section" id="ternary">
+<h2>Ternary</h2>
+<p>There is no separate &quot;ternary&quot; plot type. A ternary appears when you fill in Z.</p>
+<ol class="arabic simple">
+<li>Plot type <tt class="docutils literal">scatter</tt>, then set <strong>Z</strong> to <tt class="docutils literal">Fe57</tt>. X, Y and Z must be three
+different fields.</li>
+<li>With X = <tt class="docutils literal">Mn55</tt>, Y = <tt class="docutils literal">Ca43</tt>, Z = <tt class="docutils literal">Fe57</tt> you have a compositional ternary of
+the three major garnet cations.</li>
+</ol>
+</div>
+<div class="section" id="ternary-map">
+<h2>Ternary map</h2>
+<ol class="arabic simple">
+<li>Plot type <tt class="docutils literal">ternary map</tt>, same three fields.</li>
+<li>In the <strong>Ternary Map</strong> group, either pick a <strong>Colormap</strong> or set the four colour
+swatches — one per vertex plus one for the centre.</li>
+<li>Click <strong>Ternary map</strong>.</li>
+</ol>
+<p>Each pixel is now coloured by where it sits in the ternary. This is the single most
+useful plot in LaME for seeing compositional zoning, because it puts three elements on
+one map without you choosing which matters most.</p>
+<!-- Figure placeholder FIG-4.1
+WHAT: Side by side if the layout allows: the Mn55-Ca43-Fe57 ternary scatter on the
+left, and the corresponding ternary map on the right, using the same colour scheme
+so vertices are visually matched between the two.
+WHY: The link between position-in-ternary and colour-on-map is the whole idea, and
+it is much easier to see as a pair than as two separate figures.
+SIZE: full page width. -->
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 2</p>
+<p>Your Plot Tree contains five plots: a field map, a histogram, a correlation, a
+scatter and a ternary map. The canvas shows the ternary map with clear zoning —
+the garnet core should be a visibly different colour from its rim.</p>
+<p class="last"><em>Not matching?</em> Open <tt class="docutils literal"><span class="pre">02-plots.lame_project.json</span></tt>.</p>
+</div>
+<p><em>Try this:</em> double-click any leaf in the Plot Tree. It restores that plot — type, fields
+and styling together. The tree is a record of your session, not just a list.</p>
+<p><strong>What you just learned.</strong> Scatter and heatmap answer the same question at different
+densities. Adding Z turns either into a ternary. The ternary map is how you get a
+three-element relationship back onto the spatial map.</p>
+</div>
+</div>
+<div class="section" id="regions-and-filters">
+<h1><a class="toc-backref" href="#toc-entry-10">5. Regions and filters</a></h1>
+<p><em>Goal: restrict the analysis to the material you actually care about.</em></p>
+<p>This is the part of LaME with the most moving parts, so read step 1 before clicking.</p>
+<p><strong>Filters live inside regions of interest.</strong> An ROI is a named, saved definition; a
+filter is one rule inside it. You select the ROI first, then add filters to it. If you
+add a filter with no ROI defined, LaME quietly creates one for you — which is
+convenient once and confusing the second time, when it starts asking which region you
+meant.</p>
+<div class="section" id="your-first-roi-and-filter">
+<h2>Your first ROI and filter</h2>
+<ol class="arabic simple">
+<li><strong>Processing</strong> toolbar page → <strong>Filters</strong>. The Masking Toolbox opens at the bottom
+on its <strong>Filters</strong> tab.</li>
+<li>In the <strong>ROI</strong> table at the bottom of that tab, click <strong>Add ROI</strong>. A new row appears.
+Double-click its <em>Name</em> and call it <tt class="docutils literal">garnet</tt>. <strong>Leave this row selected.</strong></li>
+<li>Now in <strong>Filter Settings</strong> on the left: set <em>Field type</em> to <tt class="docutils literal">Analyte</tt> and <em>Field</em>
+to <tt class="docutils literal">Mn55</tt>. The Min and Max boxes fill with that field's range.</li>
+<li>Narrow it. Either type values, or use the percentile spin boxes beside them — the
+percentile route is usually faster for a first pass.</li>
+<li>Set <em>Operator</em> to <tt class="docutils literal">and</tt>.</li>
+<li>Click <strong>Add filter</strong>.</li>
+</ol>
+<p>The filter appears as a row in the table on the right, with a <strong>Use</strong> checkbox, and the
+map updates.</p>
+<ol class="arabic simple">
+<li>Add a second filter the same way on a different element — <tt class="docutils literal">Ca43</tt>, say. Because the
+<tt class="docutils literal">garnet</tt> row is still selected, it joins the same region.</li>
+</ol>
+<!-- Figure placeholder FIG-5.1
+WHAT: The Masking Toolbox Filters tab, fully populated: Filter Settings on the left
+with Field/Min/Max/Operator filled in, the filter table on the right showing two
+rows with Use ticked, and the ROI table at the bottom with the "garnet" row
+selected and showing non-zero % Total and % Filtered.
+WHY: This is the most structurally confusing panel in the app. One annotated figure
+showing all three tables populated at once is worth several paragraphs.
+SIZE: full page width. Annotate the ROI table with "select this row FIRST". -->
+</div>
+<div class="section" id="seeing-what-you-removed">
+<h2>Seeing what you removed</h2>
+<ol class="arabic simple">
+<li>Control Toolbox <strong>Field Viewer</strong> → plot type <tt class="docutils literal">roi map</tt>.</li>
+</ol>
+<p>Excluded pixels are drawn grey. This is the plot to use whenever you want to check what
+a filter actually did — it shows you the mask itself rather than its effect on a value.</p>
+</div>
+<div class="section" id="polygons">
+<h2>Polygons</h2>
+<p>Filters cut by composition. Polygons cut by location.</p>
+<ol class="arabic simple">
+<li>Masking Toolbox → <strong>Polygons</strong> tab.</li>
+<li>Flip the toggle switch at the left of its toolbar to enter polygon mode. The plot
+type collapses to <tt class="docutils literal">field map</tt> only while you are drawing.</li>
+<li>Click <strong>Create a new polygon</strong>, then click round a feature on the map to place
+vertices.</li>
+<li>The <em>In/out</em> column on each row controls whether the polygon keeps or removes what
+is inside it.</li>
+<li>Use <strong>Move a control point</strong>, <strong>Add a vertex</strong> and <strong>Remove a vertex</strong> to adjust.</li>
+</ol>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>Polygons are deliberately <strong>excluded from clustering</strong>. Drawing a polygon around a
+grain and re-clustering will not restrict the clustering to that grain.</p>
+<p class="last">To scope an analysis spatially, use an ROI. That is what the clustering and
+stoichiometry sections do.</p>
+</div>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>Two toolbar buttons to avoid: <strong>Crop</strong> and <strong>Full Map</strong>. Cropping is incomplete in
+this build, and the <em>Full Map</em> button that would undo it raises an error instead.
+Nothing today needs either; if you crop by accident, reopen your saved project.</p>
+<p class="last"><strong>Save filter</strong> is also unavailable in the packaged build — it tries to write inside
+the application bundle. Your filters are saved in your <em>project</em>, which is what
+matters.</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 3</p>
+<p>The ROI table has one row named <tt class="docutils literal">garnet</tt> with a non-zero <strong>% Filtered</strong>. The
+<tt class="docutils literal">roi map</tt> shows your garnet in colour with a grey excluded rim.</p>
+<p class="last"><em>Not matching?</em> Open <tt class="docutils literal"><span class="pre">04-clusters.lame_project.json</span></tt>, which has the ROI already
+built — it also has clusters, which you are about to need anyway.</p>
+</div>
+<p><strong>What you just learned.</strong> ROI first, then filters into it. <tt class="docutils literal">roi map</tt> is how you
+verify a mask. Polygons are spatial, filters are compositional, and only filters and
+ROIs scope downstream analysis.</p>
+</div>
+</div>
+<div class="section" id="clustering">
+<h1><a class="toc-backref" href="#toc-entry-11">6. Clustering</a></h1>
+<p><em>Goal: let the data propose its own zones, then test whether they are real.</em></p>
+<ol class="arabic simple">
+<li>Control Toolbox → <strong>Clustering</strong>. Opening the page runs clustering immediately with
+the current settings and plots the result, so you will see groups before you have
+chosen anything.</li>
+</ol>
+<div class="section" id="k-means">
+<h2>k-means</h2>
+<ol class="arabic simple">
+<li>Set <strong>Method</strong> to <tt class="docutils literal"><span class="pre">k-means</span></tt> and <strong>No. clusters</strong> to <tt class="docutils literal">4</tt>.</li>
+<li>Plot type <tt class="docutils literal">cluster map</tt>.</li>
+<li>Click <strong>Randomize</strong> beside the <strong>Seed</strong> box and watch the map. k-means starts from
+random centres; if your zones survive several seeds they are robust, and if they
+reshuffle they were not there.</li>
+</ol>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p>The <strong>Distance</strong> combobox on this page has no effect — the distance-metric code is
+not active in this build. Changing it recomputes and gives an identical result.</p>
+<p class="last">Also: <tt class="docutils literal">HDBSCAN</tt> works as a method, but combining it with the <tt class="docutils literal">cluster
+performance</tt> plot type silently does nothing. HDBSCAN discovers its own cluster
+count, so there is no <em>k</em> to sweep. Use <tt class="docutils literal">cluster performance</tt> with k-means or
+fuzzy c-means only.</p>
+</div>
+</div>
+<div class="section" id="changing-what-clustering-sees">
+<h2>Changing what clustering sees</h2>
+<p>Clustering uses exactly the fields you selected in section 2 — so changing that
+selection changes the clusters.</p>
+<ol class="arabic simple">
+<li>Click <strong>Analytes</strong> and add two or three REE you had left out — <tt class="docutils literal">La139</tt>, <tt class="docutils literal">Ce140</tt>,
+<tt class="docutils literal">Nd146</tt>.</li>
+<li>Click <strong>Done</strong>. Because you are on the Clustering page, it recomputes and replots
+automatically.</li>
+<li>Compare against what you had. Adding light REE will usually sharpen a growth-zoning
+boundary, because those elements partition strongly during garnet growth.</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">That automatic recompute only happens while you are on the <strong>Clustering</strong> or
+<strong>Dimensional Reduction</strong> page. From anywhere else, change the selection and then
+press <strong>Update Plot</strong>.</p>
+</div>
+</div>
+<div class="section" id="clustering-on-principal-components">
+<h2>Clustering on principal components</h2>
+<p>With 11 correlated analytes, much of what k-means sees is the same signal repeated.
+Reducing first often gives cleaner groups.</p>
+<ol class="arabic simple">
+<li>Control Toolbox → <strong>Dimensional Reduction</strong>. Opening the page runs PCA.</li>
+<li>Set <strong>Method</strong> to <tt class="docutils literal">PCA: Principal component analysis</tt>. Look at the <tt class="docutils literal">variance</tt>
+plot to see how many components you actually need — usually three or four carry
+nearly everything.</li>
+<li>Go back to <strong>Clustering</strong>. Tick the <strong>PCA</strong> checkbox and set <strong>No. basis</strong> to the
+number you just decided on.</li>
+<li>Re-cluster.</li>
+</ol>
+<p>Run PCA <em>before</em> ticking that box. If no PCA scores exist, LaME falls back to the raw
+analytes without telling you, and the comparison you were trying to make silently
+does not happen.</p>
+<!-- Figure placeholder FIG-6.1
+WHAT: Two cluster maps of RM02 side by side, both k-means with 4 clusters and the
+same seed: left = raw analytes, right = PCA-preconditioned. Use the same cluster
+colours in both if possible.
+WHY: The whole point of the PCA step is that the boundaries get cleaner. Shown as a
+pair this is obvious; described in prose it is not.
+SIZE: full page width. -->
+</div>
+<div class="section" id="naming-and-reusing-clusters">
+<h2>Naming and reusing clusters</h2>
+<ol class="arabic simple">
+<li>Masking Toolbox → <strong>Clusters</strong> tab. The table lists your clusters with <em>Name</em>,
+<em>Link</em>, <em>Color</em>, <em>% Total</em> and <em>% Filtered</em>.</li>
+<li>Rename a cluster in place — <tt class="docutils literal">core</tt>, <tt class="docutils literal">rim</tt>, <tt class="docutils literal">inclusion</tt>. These names follow
+through into the legend, the Notes report and the stoichiometry scope list.</li>
+<li>Recolour one by clicking its <em>Color</em> cell.</li>
+<li>Tick two clusters that you think are the same zone and click <strong>Link Clusters</strong> —
+they then behave as one class.</li>
+<li>Tick the cluster you want to work on and click <strong>Create Region</strong>. It becomes an ROI,
+which is how you will scope the next section.</li>
+</ol>
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 4</p>
+<p>A <tt class="docutils literal">cluster map</tt> with four k-means groups, the <strong>PCA</strong> box ticked, and a Clusters
+table with four named rows. At least one cluster has been turned into an ROI, so the
+ROI table in the Filters tab now has a second row.</p>
+<p class="last"><em>Not matching?</em> Open <tt class="docutils literal"><span class="pre">04-clusters.lame_project.json</span></tt>. Its clusters restore from
+disk without recomputing, so it loads quickly.</p>
+</div>
+<p><strong>What you just learned.</strong> Clustering reads your field selection, so curating that
+selection is the main lever you have. PCA first usually improves it. Clusters become
+ROIs, and ROIs are how you scope everything downstream.</p>
+</div>
+</div>
+<div class="section" id="mineral-formulae-across-three-garnets">
+<h1><a class="toc-backref" href="#toc-entry-12">7. Mineral formulae across three garnets</a></h1>
+<p><em>Goal: get apfu, site occupancies and end-member proportions, and map them.</em></p>
+<p>LaME can convert composition into a mineral formula — site by site, with iron split
+between Fe²⁺ and Fe³⁺ by charge balance. The chemistry behind this is the most heavily
+validated part of LaME, cross-checked against published mineral-recalculation workbooks
+for garnet, feldspar, olivine and pyroxene.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last"><strong>Scope it to one region before you touch anything else.</strong> The calculation runs
+pixel by pixel, on the interface thread, and it re-runs every time you change any
+setting. Across a whole 78,000-pixel map that is minutes of frozen window, several
+times over. Scoped to one cluster it is seconds.</p>
+</div>
+<div class="section" id="rm02-and-what-happens-without-silicon">
+<h2>RM02 — and what happens without silicon</h2>
+<ol class="arabic simple">
+<li><strong>Analysis</strong> toolbar page → <strong>Stoichiometry</strong>. The <em>Stoichiometric Calculator</em> opens.</li>
+<li><strong>First</strong>, in the <strong>Compute scope</strong> group: set <em>Filter</em> to the ROI you made from a
+cluster, and tick <strong>only that region</strong> in the list below. New regions start
+unticked deliberately — leave the others alone.</li>
+<li>Now the <strong>Settings</strong> group: <em>Mineral</em> = <tt class="docutils literal">Garnet</tt>, <em>Input basis</em> = <tt class="docutils literal">ppm</tt>,
+<em>Redox method</em> = <tt class="docutils literal">droop_1987</tt>, <em>BDL treatment</em> = <tt class="docutils literal">zero</tt>.</li>
+<li>Leave <strong>Compare all redox methods</strong> switched <strong>off</strong>. It triples the work.</li>
+<li>Click <strong>Run</strong>.</li>
+</ol>
+<p>New fields appear under field type <tt class="docutils literal">Stoichiometry</tt>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Field</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">Grt_Z</tt>, <tt class="docutils literal">Grt_Y</tt>, <tt class="docutils literal">Grt_X</tt></td>
+<td>Cations per formula unit on each site — tetrahedral, octahedral, dodecahedral</td>
+</tr>
+<tr><td><tt class="docutils literal">Grt_pyrope</tt> … <tt class="docutils literal">Grt_uvarovite</tt></td>
+<td>End-member proportions: pyrope, almandine, spessartine, grossular, andradite,
+uvarovite</td>
+</tr>
+<tr><td><tt class="docutils literal">Grt_dominant</tt></td>
+<td>Which end member dominates at each pixel — a categorical field</td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic simple">
+<li>Plot it: <tt class="docutils literal">field map</tt>, colour field type <tt class="docutils literal">Stoichiometry</tt>, field <tt class="docutils literal">Grt_dominant</tt>.
+It draws with a labelled swatch legend rather than a colour bar, because the values
+are categories rather than amounts.</li>
+</ol>
+<p>Now look at <tt class="docutils literal">Grt_Z</tt>. It should be close to 3.0, filled by silicon. <strong>On RM02 it is
+not</strong> — RM02 has no Si, so LaME has filled the tetrahedral site with aluminium instead,
+following the fallback order in the garnet configuration. The end-member percentages
+that come out are correspondingly wrong.</p>
+<p>This is worth seeing rather than being told. The stoichiometry calculation is only as
+good as the elements you measured, and a missing major element does not produce an
+error — it produces a plausible-looking answer that is incorrect.</p>
+</div>
+<div class="section" id="the-same-garnet-with-silicon">
+<h2>The same garnet, with silicon</h2>
+<ol class="arabic simple">
+<li>Switch sample using the selector in the pinned toolbar: choose <tt class="docutils literal"><span class="pre">TR1-07</span></tt>.</li>
+<li>Make a quick ROI on it — one filter on <tt class="docutils literal">Mn55</tt> is enough; you do not need to
+re-cluster.</li>
+<li>Scope the Stoichiometry dock to that ROI and <strong>Run</strong> again.</li>
+<li>Compare <tt class="docutils literal">Grt_Z</tt> with what RM02 gave you. With <tt class="docutils literal">Si29</tt> present it should sit near
+3.0, and the end-member proportions are now meaningful.</li>
+<li>Repeat on <tt class="docutils literal"><span class="pre">WOS-02</span></tt> if time allows. It is the largest of the three, so keep the
+region small.</li>
+</ol>
+<!-- Figure placeholder FIG-7.1
+WHAT: Three Grt_dominant maps side by side — RM02, TR1-07, WOS-02 — each with its
+swatch legend visible. Underneath each, the Grt_Z value from the region summary
+table, so the ~3.0 (TR1-07, WOS-02) versus wrong (RM02) contrast is explicit.
+WHY: This is the payoff figure of the whole garnet thread and the Si lesson in one
+image.
+SIZE: full page width. -->
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 5</p>
+<p class="last">At least two garnets have <tt class="docutils literal">Grt_*</tt> fields, and you have a <tt class="docutils literal">Grt_dominant</tt> map with
+a swatch legend on screen. <tt class="docutils literal">Grt_Z</tt> is near 3.0 for TR1-07 and clearly not for RM02.</p>
+</div>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p class="last">If the <strong>Mineral</strong> dropdown is empty and outlined in red, the application cannot
+find its mineral configuration files. Tell the presenter — there is a workaround.</p>
+</div>
+<p><em>Try this:</em> the <strong>Region summary</strong> table at the bottom of the dock gives per-region
+statistics. Switch <em>Region source</em> between <tt class="docutils literal">ROI</tt> and a cluster column to compare
+formulae between zones you identified in section 6.</p>
+<p><strong>What you just learned.</strong> Scope first, always. Site totals are your sanity check on
+whether the calculation had the elements it needed. <tt class="docutils literal">Grt_dominant</tt> maps mineral
+classification back onto the map.</p>
+</div>
+</div>
+<div class="section" id="pyrite-your-turn">
+<h1><a class="toc-backref" href="#toc-entry-13">8. Pyrite — your turn</a></h1>
+<p><em>Goal: apply what you have done to a different mineral system, with less guidance, and
+see what preconditioning does to a clustering.</em></p>
+<p>This section has fewer numbered steps on purpose. You have the tools now; the questions
+are new.</p>
+<p><strong>The questions.</strong> <tt class="docutils literal"><span class="pre">71A-Py</span> 12</tt> is a pyrite-bearing sample. Two things to find out.
+Does clustering change when you precondition the data with PCA first? And once you have
+the pyrite on its own, is it chemically uniform, or are there distinct populations
+within it?</p>
+<p>Remember this map is <strong>uncalibrated</strong>: counts per second, not ppm. Relative patterns
+are fine; absolute values and mineral formulae are not.</p>
+<ol class="arabic">
+<li><p class="first">Open <tt class="docutils literal"><span class="pre">06-pyrite.lame_project.json</span></tt>, or add <tt class="docutils literal"><span class="pre">data/71A-Py</span> 12.lame.csv</tt> yourself.</p>
+</li>
+<li><p class="first"><strong>Find the pyrite.</strong> Field maps of <tt class="docutils literal">Fe57</tt> and <tt class="docutils literal">S34</tt>. Pyrite is FeS₂, so it
+should stand out sharply against the silicate matrix in both. Something like 40% of
+this map is sulfide, so it is not a small target.</p>
+</li>
+<li><p class="first"><strong>Cluster the whole map, on the analytes.</strong> Clustering page, <tt class="docutils literal"><span class="pre">k-means</span></tt>, 4 clusters.
+Choose a sensible set of analytes first (<tt class="docutils literal">Fe57</tt>, <tt class="docutils literal">S34</tt>, <tt class="docutils literal">Cu65</tt>, <tt class="docutils literal">Co59</tt>,
+<tt class="docutils literal">Ni60</tt>, <tt class="docutils literal">As75</tt> is a good start). Look at the <tt class="docutils literal">cluster map</tt>: two of the four
+groups should land on the sulfide and two on everything else.</p>
+<p>Note which clusters are the pyrite, and roughly what fraction of the map they cover.</p>
+</li>
+<li><p class="first"><strong>Now precondition with PCA and cluster again.</strong> Visit the Dimensional Reduction
+page first so the scores exist, then return to Clustering, tick <strong>PCA</strong> and set
+<strong>No. basis</strong> to 3. Re-cluster.</p>
+<p>Compare the two cluster maps. The sulfide/matrix split survives — that boundary is
+not in doubt — but the way the pyrite is divided <em>within</em> itself changes, and so do
+the cluster proportions. Neither answer is the &quot;right&quot; one: PCA has reweighted what
+counts as similar, by dropping the directions in which the data varies least.</p>
+</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Why this matters</p>
+<p class="last">PCA before clustering is often presented as a tidying step. It is not neutral. It
+decides which variation the clustering is allowed to see. Comparing the two maps on
+the same sample, as you just did, is the honest way to find out whether a result
+depends on that choice — and it takes two minutes.</p>
+</div>
+<ol class="arabic">
+<li><p class="first"><strong>Filter to the pyrite with the Cluster tool.</strong> Masking Toolbox → <strong>Clusters</strong> tab.
+Tick the clusters that are the pyrite, then press <strong>Create Cluster Mask</strong>.</p>
+<p>Everything outside those clusters is now masked, so every plot that follows uses
+pyrite pixels only. This is the cluster-based route to the same place section 5
+reached with an ROI and field filters — no bounds to choose, because the clustering
+has already found the boundary for you.</p>
+</li>
+<li><p class="first"><strong>Fe against Cu.</strong> Scatter and Heatmaps page, plot type <tt class="docutils literal">scatter</tt>: <strong>X</strong> =
+<tt class="docutils literal">Fe57</tt>, <strong>Y</strong> = <tt class="docutils literal">Cu65</tt>, <strong>Color</strong> = your cluster field.</p>
+<p>Fe is the pyrite's own framework and barely varies; Cu does not substitute into
+pyrite in any quantity, so where it appears it is telling you about something else —
+an inclusion, a later overprint, or a different generation of growth. Watch for the
+points that climb away from the main Fe population.</p>
+</li>
+<li><p class="first"><strong>A histogram per cluster.</strong> Field Viewer page, plot type <tt class="docutils literal">histogram</tt>, <strong>X</strong> =
+<tt class="docutils literal">Co59</tt>, with <strong>Show KDE</strong> on and <tt class="docutils literal"><span class="pre">log-scaling</span></tt> set. Then step through your
+clusters and compare.</p>
+<p>Expect a dramatic separation between the sulfide clusters and the matrix — Co runs
+a few hundred thousand counts inside the pyrite against a few thousand outside. What
+you will probably <em>not</em> see is much difference between the two pyrite clusters
+themselves: Co (and Ni, which behaves the same way) is substituting for Fe fairly
+uniformly through the sulfide.</p>
+<p>That is a real result, not a failed exercise. It says the populations your clustering
+found are not Co–Ni populations. Go back to the biplot: <tt class="docutils literal">Cu65</tt>, and <tt class="docutils literal">As75</tt>, are
+where those two groups actually differ.</p>
+</li>
+</ol>
+<!-- Figure placeholder FIG-8.1
+WHAT: Two cluster maps of 71A-Py 12 side by side at the same scale — left, k-means
+on the raw analytes; right, k-means after PCA with 3 components. Same number of
+clusters, same colours where they correspond. Annotate the sulfide/matrix boundary
+as unchanged and circle one area where the division *within* the pyrite differs.
+WHY: The whole point of the first half of this section. Attendees need to see that
+preconditioning moved an internal boundary while leaving the obvious one alone.
+SIZE: full page width. -->
+<!-- Figure placeholder FIG-8.2
+WHAT: The Fe57 vs Cu65 biplot on the masked pyrite, points coloured by cluster,
+legend visible. Frame it so the Cu-enriched population is clearly separated from
+the main Fe cloud.
+WHY: The scientific punchline of the pyrite thread, and the figure attendees are
+most likely to want to reproduce on their own data.
+SIZE: two-thirds page width. -->
+<!-- Figure placeholder FIG-8.3
+WHAT: Co59 histograms for each cluster, log-scaled, ideally overlaid or in a small
+column so they can be compared directly. The two sulfide clusters should sit on top
+of one another, far to the right of the matrix clusters.
+WHY: Supports the point that a strong element contrast between pyrite and matrix
+says nothing about structure *within* the pyrite.
+SIZE: half page width. -->
+<div class="admonition tip">
+<p class="first admonition-title">Checkpoint 6</p>
+<p class="last">Two cluster maps of the same sample (with and without PCA), a cluster mask
+restricting the map to the sulfide, an Fe–Cu biplot coloured by cluster, and a
+Co histogram you have compared across clusters.</p>
+</div>
+<p><em>Try this:</em> turn the cluster mask off with the <strong>Cluster Mask</strong> toolbar toggle and redraw
+the Fe–Cu biplot on the whole map. The silicate matrix swamps the pyrite entirely — a
+concrete demonstration of why the masking step was not optional.</p>
+<p><strong>What you just learned.</strong> Clustering is a choice, not a measurement: preconditioning
+changes the answer, and the way to know how much is to run it both ways. Clusters are a
+masking tool in their own right, not just a picture. And a huge contrast in one element
+between two materials tells you nothing about structure inside either of them.</p>
+</div>
+<div class="section" id="notes-and-the-methods-report">
+<h1><a class="toc-backref" href="#toc-entry-14">9. Notes and the methods report</a></h1>
+<p><em>Goal: leave with a record of what you did, not just the plots.</em></p>
+<ol class="arabic">
+<li><p class="first"><strong>Log</strong> toolbar page → <strong>Notes</strong>. An editor window opens — titled <em>reST Editor</em> —
+holding a notes file tied to this sample inside your project folder.</p>
+</li>
+<li><p class="first">Click <strong>Record</strong> in the same toolbar page. The status-bar <em>Notes</em> light turns red.</p>
+</li>
+<li><p class="first">Now make a plot — anything. It is captured into the notes automatically as a figure.</p>
+</li>
+<li><p class="first">In the Notes toolbar, open the <strong>Insert</strong> page and use <strong>Formatted Info</strong>. It offers:</p>
+<ul class="simple">
+<li>Sample info</li>
+<li>List analytes used</li>
+<li>Current plot details</li>
+<li>Filter table</li>
+<li>PCA results</li>
+<li>Cluster results</li>
+<li>Diffusion results</li>
+<li>Stoichiometry results</li>
 </ul>
+<p>Insert <strong>List analytes used</strong>, <strong>Filter table</strong> and <strong>Cluster results</strong>. Each writes
+a formatted block pulled from your live session — the actual analytes, the actual
+filters, the actual clusters.</p>
+</li>
+</ol>
+<p>That is the methods paragraph of a paper, assembled from what you really did rather
+than from what you remember doing a month later.</p>
+<!-- Figure placeholder FIG-9.1
+WHAT: The reST Editor window with a recorded figure and at least two inserted
+Formatted Info blocks visible (analytes used, and the filter table as a formatted
+table). The Formatted Info menu can be shown open if it fits.
+WHY: Shows both halves of the feature — automatic figure capture and the
+live-data info blocks.
+SIZE: two-thirds page width. -->
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p class="last">There is also a <strong>Capture</strong> toggle, and a Workflow designer with a drag-and-drop
+block canvas. Capture currently records only sample changes as reusable blocks —
+so treat it as a <strong>methods report generator</strong>, which it does well, rather than as a
+way to record your clicks into a re-runnable workflow. Hand-built workflows in the
+designer do run; recording them does not yet.</p>
+</div>
+<p><strong>What you just learned.</strong> Notes are per-sample and live inside the project. Record
+captures figures as you go. Formatted Info blocks pull real state, so the record stays
+honest.</p>
+</div>
+<div class="section" id="take-it-home">
+<h1><a class="toc-backref" href="#toc-entry-15">10. Take it home</a></h1>
+<ol class="arabic simple">
+<li><strong>Save Project</strong>.</li>
+<li>Close the project — <strong>File → Close Project</strong>.</li>
+<li>Reopen it. Your fields, ratios, calculated fields, ROIs, filters, polygons, clusters
+and notes all come back.</li>
+</ol>
+<p>That round trip is the thing to trust: the project file is the unit of work, and it
+survives being moved between machines because it stores paths relative to itself.</p>
+</div>
+<div class="section" id="known-limitations-in-this-build">
+<h1><a class="toc-backref" href="#toc-entry-16">Known limitations in this build</a></h1>
+<p>Everything from the boxes above, in one place.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="38%" />
+<col width="38%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Feature</th>
+<th class="head">What you will see</th>
+<th class="head">What to do instead</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal">gradient map</tt> plot type</td>
+<td>A warning about noise reduction, or nothing at all</td>
+<td>Not available; use <tt class="docutils literal">field map</tt></td>
+</tr>
+<tr><td>Calculator conditionals</td>
+<td><em>&quot;could not evaluate conditional statement&quot;</em></td>
+<td>Arithmetic only. <strong>Ignore the ``case()`` section of the Calculator docs</strong> — that
+syntax never existed</td>
+</tr>
+<tr><td><strong>Crop</strong> / <strong>Full Map</strong></td>
+<td>Crop is incomplete; <em>Full Map</em> raises an error instead of undoing it</td>
+<td>Avoid both. Reopen your project if you crop by accident</td>
+</tr>
+<tr><td><tt class="docutils literal">profile</tt> and <tt class="docutils literal">polygon</tt> plot types</td>
+<td>Blank canvas, no error</td>
+<td>Drive profiles from the <strong>Profiles</strong> dock (Appendix A)</td>
+</tr>
+<tr><td>Correlation and ternary map</td>
+<td>Both ignore filters and masks entirely</td>
+<td>Check filter effects on <tt class="docutils literal">field map</tt>, <tt class="docutils literal">histogram</tt> or <tt class="docutils literal">roi map</tt></td>
+</tr>
+<tr><td>Adding a filter with no ROI selected</td>
+<td>First one silently creates an ROI; the second asks which region you meant</td>
+<td>Create and select the ROI row first</td>
+</tr>
+<tr><td>Polygons + clustering</td>
+<td>Clustering ignores polygons by design</td>
+<td>Scope with an ROI instead</td>
+</tr>
+<tr><td>Cluster <strong>Distance</strong> combobox</td>
+<td>No effect on the result</td>
+<td>Leave it alone</td>
+</tr>
+<tr><td>HDBSCAN + <tt class="docutils literal">cluster performance</tt></td>
+<td>Silently does nothing</td>
+<td>Use k-means or fuzzy c-means for that plot</td>
+</tr>
+<tr><td><strong>Save filter</strong> preset</td>
+<td><em>&quot;could not save filter table&quot;</em> in the packaged build</td>
+<td>Your filters are saved in the project, which is what matters</td>
+</tr>
+<tr><td>Stoichiometry on a whole map</td>
+<td>Minutes of frozen window</td>
+<td>Scope to one ROI or cluster first</td>
+</tr>
+<tr><td>Lu–Hf dating</td>
+<td>Needs ¹⁷⁶Lu/¹⁷⁷Hf and ¹⁷⁶Hf/¹⁷⁷Hf, absent from today's data</td>
+<td>Implemented, but not demonstrable on these samples</td>
+</tr>
+<tr><td>Workflow <strong>Capture</strong></td>
+<td>Records only sample changes as blocks</td>
+<td>Use it as a methods-report generator</td>
+</tr>
+<tr><td>Thermometry / Barometry tabs</td>
+<td>Empty method dropdowns</td>
+<td>Not implemented</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="if-you-fall-behind">
+<h1><a class="toc-backref" href="#toc-entry-17">If you fall behind</a></h1>
+<p>Open the nearest project file and carry on. You lose nothing that later sections need.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">File</th>
+<th class="head">Picks up at</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">00-open.lame_project.json</span></tt></td>
+<td>Section 1 — RM02 loaded, nothing else done</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">02-plots.lame_project.json</span></tt></td>
+<td>Section 4 — fields, ratio and Eu* built</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">04-clusters.lame_project.json</span></tt></td>
+<td>Section 7 — ROI and clusters ready</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">06-pyrite.lame_project.json</span></tt></td>
+<td>Section 8 — pyrite sample loaded</td>
+</tr>
+</tbody>
+</table>
+<p><strong>File → Open Project</strong>, pick the file, carry on. Do not spend the workshop debugging.</p>
+</div>
+<div class="section" id="appendix-a-profiles">
+<h1><a class="toc-backref" href="#toc-entry-18">Appendix A: Profiles</a></h1>
+<p>Profiles extract a transect across a map — the standard way to show garnet zoning as a
+function of radius. It works, but the route to it is not the obvious one.</p>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p class="last">Do <strong>not</strong> select <tt class="docutils literal">profile</tt> from the plot-type list. It produces a blank canvas.
+Profiles are driven entirely from the Profiles dock.</p>
+</div>
+<ol class="arabic simple">
+<li>Get a <tt class="docutils literal">field map</tt> on screen.</li>
+<li><strong>Analysis</strong> toolbar page → <strong>Profiles</strong>.</li>
+<li>Flip the toggle switch at the left of the dock's toolbar. Plot type collapses to
+<tt class="docutils literal">field map</tt> while profiling is active.</li>
+<li>Click <strong>Create new profile and set control points</strong>, then click along the map — for
+a garnet, rim through core to the far rim.</li>
+<li>Set <strong>Point radius</strong> (how much to average around each point), <strong>Interp. distance</strong>
+(spacing along the transect) and <strong>Point type</strong> (<tt class="docutils literal">median + IQR</tt> is the robust
+choice).</li>
+<li>In <strong>Axis Options</strong>, set <strong>No. subplots</strong>, then for each subplot pick a field and
+click the add button. Several elements stacked against distance is how zoning is
+normally presented.</li>
+<li>Use <strong>Edit mode</strong> to click out any point sitting on a crack or inclusion.</li>
+<li>Save with the export button. Profiles are stored per sample in your project.</li>
+</ol>
+<!-- Figure placeholder FIG-A.1
+WHAT: The Profiles dock beside a field map with a rim-core-rim transect drawn on it,
+plus the resulting multi-subplot profile showing two or three elements against
+distance.
+WHY: Shows the control points on the map and the output together, which is what
+makes the workflow make sense.
+SIZE: full page width. -->
+</div>
+<div class="section" id="appendix-b-getting-your-own-data-in">
+<h1><a class="toc-backref" href="#toc-entry-19">Appendix B: Getting your own data in</a></h1>
+<p>Today's samples were already converted to LaME's <tt class="docutils literal">.lame.csv</tt> format. For your own
+data, the Import tool handles raw exports.</p>
+<ol class="arabic simple">
+<li><strong>Home</strong> toolbar page → <strong>Import Files</strong>.</li>
+<li>Choose a <strong>Data type</strong> and <strong>Method</strong> — <tt class="docutils literal"><span class="pre">LA-ICP-MS</span></tt> with <tt class="docutils literal">quadrupole</tt>, <tt class="docutils literal">TOF</tt> or
+<tt class="docutils literal">SF</tt>, or <tt class="docutils literal">XRF</tt> with <tt class="docutils literal">image</tt>.</li>
+<li>Point it at your directory. The metadata table fills with one row per sample.</li>
+<li>Set spot size, sweep time and stage speed; LaME derives pixel spacing from them.</li>
+<li>Use the per-sample <strong>Select files</strong> button to check which files map to which
+analytes, then <strong>Import</strong>.</li>
+</ol>
+<div class="admonition error">
+<p class="first admonition-title">Not in this build</p>
+<p class="last">Only <tt class="docutils literal"><span class="pre">LA-ICP-MS</span></tt> and <tt class="docutils literal">XRF</tt> → <tt class="docutils literal">image</tt> import in this build. The other data
+types populate the metadata table and then stop with a <em>&quot;Not implemented&quot;</em> message,
+so the table filling in is not a sign that it will work.</p>
+</div>
+<!-- Figure placeholder FIG-B.1
+WHAT: The Map Import dialog with the metadata table populated for two or three
+samples, Data type on LA-ICP-MS and Method on quadrupole, with the spot
+size/sweep/speed columns filled and the derived dX/dY columns visible.
+WHY: Attendees will do this unsupervised later; the figure is their reference for
+which columns they must fill in themselves.
+SIZE: full page width. -->
+<p>If a conversion gives you trouble, send the presenter a raw export and you will get a
+<tt class="docutils literal">.lame.csv</tt> back.</p>
+</div>
 <div class="section" id="getting-help">
-<h1>Getting Help</h1>
-<p>Documentation</p>
+<h1><a class="toc-backref" href="#toc-entry-20">Getting help</a></h1>
+<p><strong>In the application.</strong> <strong>Help</strong> menu → <em>User Guide</em> or <em>Tutorials</em>. There is also a
+context-sensitive mode: toggle <strong>Help</strong> in the toolbar, then click any part of the
+interface to jump to its documentation.</p>
+<p><strong>Video walkthroughs.</strong></p>
+<ul class="simple">
+<li><a class="reference external" href="https://www.youtube.com/watch?v=wPuP3z1NJXA">Introduction to LaME</a> — interface,
+navigation, view modes</li>
+<li><a class="reference external" href="https://www.youtube.com/watch?v=DWJTAN3SPS8">Loading Data and Selecting Samples</a> —
+import formats and analyte selection</li>
+<li><a class="reference external" href="https://www.youtube.com/watch?v=j6oNE7QN5Ak">Visualization Fundamentals</a> —
+correlation, spatial patterns</li>
+<li><a class="reference external" href="https://www.youtube.com/watch?v=5Xe5hjQQcMc">Working with Notes</a></li>
+</ul>
+<p><strong>Reporting a problem.</strong> <strong>Help</strong> menu → <em>Report Bug</em>. Please include what you were
+doing, what you expected, and what happened. Everything in
+<a class="reference internal" href="#known-limitations-in-this-build">Known limitations in this build</a> is already known — anything else is worth telling us
+about, and today is exactly the sort of session that surfaces new ones.</p>
+</div>
+<div class="section" id="references">
+<h1><a class="toc-backref" href="#toc-entry-21">References</a></h1>
 </div>
 </div>
 </body>

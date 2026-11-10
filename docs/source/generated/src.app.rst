@@ -14,6 +14,7 @@
    CustomTableWidget
    DataAnalysis
    FieldDialog
+   FileDrop
    InfoViewer
    LameIO
    LameStatusBar

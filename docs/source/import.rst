@@ -69,7 +69,14 @@ Example filenames include:
 - 90-75B-PY-3.csv
 - 121.csv
 
-In all but the last two cases above, the line number came last.  However, the order doesn't matter as *LaME* will strip away the common patterns to reveal the line number, which it needs along with spot size to determine distance between lines.  This distance is defined as the *X*-direction.
+In all but the last two cases above, the line number came last.  The order doesn't matter: *LaME* reads the directory listing as a whole and takes the line number to be the part of the filename that is a number in *every* file and different in *every* file.  A sample name's digits are numbers too, but they repeat, so they cannot be mistaken for it.  The line number, along with spot size, gives the distance between lines, which is defined as the *X*-direction.
+
+The *Select files* dialog states which part it read as the line number, and offers the alternatives when more than one part fits.  Changing it renumbers every file in that directory at once, and the choice is reused for the remaining samples — one instrument session normally names its files the same way throughout.
+
+.. note::
+   *LaME* decides whether a directory holds scan lines or analyte matrices by **reading** the files, not by interpreting their names: a scan-line file opens with an instrument preamble and a ``Time [Sec]`` header row, while a matrix file is a bare grid of numbers.  This matters because an element symbol followed by a number is indistinguishable from a sample name followed by a line number — lines 10 and 11 of a sample called ``75B-Large CPY`` read as the boron isotopes B10 and B11 if you only have the filename to go on.  Once the layout is known from the data, no analyte is looked for in a scan-line filename at all.
+
+   Whatever *LaME* cannot interpret is named at the top of the *Select files* dialog and counted, rather than being quietly left unticked.  If files are missing from a map, that is the first place to look.
 
 Each file should include several metadata lines followed by a header and the table of values with results from each analyte in a separate column.  The first column is the time along the line.  The difference in times are the sweep time and should be constant from measurement to measurement.  The sweep time along with the rate of travel of the laser is used to determine the distance along the line.  This distance is the *Y*-direction.  A snippet is shown in the table below, with the first three lines removed.  These three lines do not provide metadata useful to *LaME*.
 
@@ -78,8 +85,16 @@ Each file should include several metadata lines followed by a header and the tab
     :widths: 11 11 11 11 11 11 11 11 11
     :header-rows: 1
 
-.. note:: 
+.. note::
    Scan line data may include files with standards.  These standards will sit between scan lines of the sample resulting in non-sequential line numbers for the sample, which is accounted for by *LaME* when converting to distance.
+
+   Standards are recognised from their filenames and are unticked for you in the *Select files* dialog, where they remain listed so you can see what was identified and tick one back on if a sample line was misread.  Because the line's position in the map comes from its *order* among the files being imported rather than from the number in its filename, the gap a standard leaves does not become a gap in the map.
+
+.. note::
+   Many instruments close each scan-line file with a blank line and a trailing ``Printed:<date time>`` stamp.  *LaME* stops reading at the end of the numeric block, so this footer does not become an extra pixel.  The time column itself is used to establish the sweep interval and is then dropped, since it records the instrument's clock rather than a measurement and would otherwise be offered alongside the analytes.
+
+.. warning::
+   The two orientation fields are easy to read the wrong way round.  *X reverse* applies to the axis **across** the scan lines — the direction in which successive files advance over the sample.  *Y reverse* applies to the axis **along** each scan line — the direction the laser travelled.  If a map comes out mirrored, that is the pair to check.  Use *Swap XY* when the scan lines run horizontally rather than vertically, so that the along-line axis becomes *X*.
 
 2. Matrix Format
 ^^^^^^^^^^^^^^^^
@@ -92,7 +107,9 @@ Example filenames:
 - RM03 Dy163_ppm matrix.csv
 - 4337064_grt03 Ba137_CPS matrix.csv
 - B10B_SMALL_ppm K39_ppm matrix.csv
+
 |
+
 Each file should include a matrix of data without headers, line numbers, distances, or times.  The default reads columns as the *X* coordinate and rows as the *Y*.  A snippet is shown in the table below.
 
  .. csv-table:: Analyte-matrix file from LA-ICP-MS quadrupole

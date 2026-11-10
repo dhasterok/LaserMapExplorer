@@ -8,6 +8,9 @@ src.calibration.rawfile
 
    .. autosummary::
    
+      clean_signal_columns
+      clean_signal_dict
+      find_analyte_column
       list_line_files
       parse_filename_label
       parse_line_file

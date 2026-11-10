@@ -1,4 +1,4 @@
-src.plotting.LamePlot
+﻿src.plotting.LamePlot
 =====================
 
 .. automodule:: src.plotting.LamePlot
@@ -11,12 +11,14 @@ src.plotting.LamePlot
       add_colorbar
       add_scalebar
       biplot
+      cluster_map_labels
       cluster_performance_plot
       create_plot
       get_scatter_data
       hist2dbiplot
       hist2dternplot
       logax
+      pca_field_labels
       plot_cluster_map
       plot_clusters
       plot_correlation

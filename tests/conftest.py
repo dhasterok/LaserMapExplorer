@@ -68,6 +68,15 @@ def import_sample(qtbot, main_window, mocker):
     mocker.patch.object(QFileDialog, 'exec', return_value=QFileDialog.DialogCode.Accepted)
     mocker.patch.object(QFileDialog, 'selectedFiles', return_value=['maps/Alex_garnet_maps/processed data/RM02.lame.csv'])
 
+    # AddSampleFiles goes through ProjectManager.add_sample_files_dialog, which
+    # calls the *static* getOpenFileNames rather than constructing a dialog, so
+    # the exec/selectedFiles patches above never see it. Unmocked it blocks on a
+    # real modal and the run hangs instead of failing.
+    mocker.patch.object(
+        QFileDialog, 'getOpenFileNames',
+        return_value=(['maps/Alex_garnet_maps/processed data/RM02.lame.csv'], ''),
+    )
+
     # Find the action and trigger it
     action_open_sample = main_window.findChild(QAction, 'actionAddSampleFiles')
 

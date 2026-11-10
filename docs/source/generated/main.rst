@@ -16,3 +16,9 @@
       show_splash
       shutdown
    
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SelftestReport
+   

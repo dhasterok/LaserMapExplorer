@@ -43,6 +43,12 @@ Raw data refers to the data read directly from a file.  It may be uncalibrated (
 
 Cropping ( |icon-crop| ) can be applied to the raw data, reducing the area analyzed by the code.  The original extent can be restored by clicking the |icon-fit-to-width| button.  If the raw data is cropped or restored to the original extent, these operations result in clearing any figures or analyses.  A dialog will appear prompting the user if they wish to proceed before clearing the memory.
 
+To crop, display a map (any of the map plot types) and click |icon-crop|.  A dashed rectangle appears over the map; drag its edges or corners to enclose the area you want to analyse, then **double-click inside the rectangle** to apply it.  Pressing ``Enter`` does the same, and ``Esc`` cancels.  Releasing the mouse only moves the rectangle — cropping discards computed fields and filters, so it waits for a deliberate confirmation.  Afterwards |icon-fit-to-width| restores the whole sample.
+
+A reminder of these keys is shown above the map while the tool is active.  Double-clicking is the more reliable of the two, because ``Enter`` is only delivered once the map itself has keyboard focus — click anywhere on the map first if the key appears to do nothing.
+
+The crop tool is only available while a map is displayed, since the region it selects is an area of the sample; it is disabled on scatter plots, histograms, correlation matrices and the like.  If the rectangle does not respond to the mouse, check that the map's pan or zoom tool is not still active — those take the mouse while they are armed.
+
 Preprocessed data
 -----------------
 

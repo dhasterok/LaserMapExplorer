@@ -1,4 +1,4 @@
-src.plotting.CropImage
+﻿src.plotting.CropImage
 ======================
 
 .. automodule:: src.plotting.CropImage
@@ -9,5 +9,4 @@ src.plotting.CropImage
    .. autosummary::
    
       CropTool
-      ResizableRectItem
    

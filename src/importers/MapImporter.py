@@ -7,9 +7,10 @@ import matplotlib as mpl
 from matplotlib.colors import LogNorm
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QFileDialog, QTableWidget, QTableWidgetItem, QInputDialog, QComboBox, QToolBar,
-    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout
+    QWidget, QCheckBox, QHeaderView, QProgressBar, QLineEdit, QMessageBox, QVBoxLayout, QPushButton, QHBoxLayout,
+    QLabel
 )
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QBrush
 from PyQt6.QtCore import Qt, QUrl
 from lame_core.CustomWidgets import CustomAction
 import src.common.csvdict as csvdict
@@ -41,6 +42,117 @@ VALID_IMPORT_EXTENSIONS = {
 def valid_extensions_for(data_type):
     """Returns the tuple of recognized file extensions for a given data type."""
     return VALID_IMPORT_EXTENSIONS.get(data_type, TABULAR_EXTENSIONS)
+
+
+# The time axis of a per-line ("Intensity Vs Time") export. It is the instrument's
+# sweep clock, not a measurement, so read_raw_folder uses it to find the end of the
+# data block and then drops it.
+TIME_COLUMN = 'Time [Sec]'
+
+#: How many leading lines sniff_file_layout reads before deciding.
+SNIFF_LINES = 6
+
+
+def sniff_file_layout(file_path):
+    """Returns ``'line'``, ``'matrix'`` or ``None`` by reading the file's start.
+
+    The layout is a property of the data, and the data says so plainly: a per-line
+    export opens with an instrument preamble and a ``Time [Sec],<analytes...>``
+    header row, while a matrix export is a bare numeric grid with no header at all.
+
+    Filenames cannot be trusted with this question. The element/mass matcher in
+    `parse_filenames` will claim any letter+digit pair that spells a real isotope,
+    and a sample name supplies plenty -- lines 10 and 11 of '75B-Large CPY' read as
+    the boron isotopes B10 and B11. Asking the file removes the guesswork, and it
+    means the analyte matcher need not run over line-scan filenames at all.
+
+    Parameters
+    ----------
+    file_path : str
+        File to inspect. Only the first few lines are read.
+
+    Returns
+    -------
+    str or None
+        ``'line'``, ``'matrix'``, or ``None`` when the file can't be read or
+        resembles neither (callers then fall back to the filename heuristics).
+    """
+    # Spreadsheets are a valid import format but not text; reading one here would
+    # only ever produce a confident-looking nothing.
+    if str(file_path).lower().endswith(('.xlsx', '.xls')):
+        return None
+
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as fh:
+            head = [fh.readline() for _ in range(SNIFF_LINES)]
+    except OSError:
+        return None
+
+    lines = [ln.rstrip('\r\n') for ln in head if ln]
+    if not lines:
+        return None
+
+    for line in lines:
+        first_field = line.split(',')[0].strip().strip('"').lower()
+        if first_field == TIME_COLUMN.lower():
+            return 'line'
+    if any('intensity vs time' in ln.lower() for ln in lines):
+        return 'line'
+
+    # A matrix export is numbers from the very first cell. One header-free row of
+    # all-numeric fields is enough -- line files never manage that, because their
+    # first rows are the preamble text.
+    def all_numeric(line):
+        fields = [f.strip() for f in line.split(',') if f.strip() != '']
+        if len(fields) < 2:
+            return False
+        try:
+            [float(f) for f in fields]
+        except ValueError:
+            return False
+        return True
+
+    if all_numeric(lines[0]):
+        return 'matrix'
+    return None
+
+
+def sniff_directory_layout(path, files, sample_limit=5):
+    """Returns the layout shared by a sample directory's files, or ``None``.
+
+    Sniffs a handful of files rather than all of them -- a directory holds one
+    layout, and reading 150 files to learn that would make the file dialog crawl.
+    Returns ``None`` if the sampled files disagree, so a mixed directory keeps the
+    per-filename behaviour rather than having one guess imposed on all of it.
+    """
+    ordered = sorted(files)
+    if not ordered:
+        return None
+    # Spread the sample across the listing instead of taking the first few: the
+    # leading filenames are often all standards, and a stray non-data file tends
+    # to sort to one end.
+    step = max(1, len(ordered) // sample_limit)
+    seen = set()
+    for name in ordered[::step][:sample_limit]:
+        layout = sniff_file_layout(os.path.join(path, name))
+        if layout is not None:
+            seen.add(layout)
+    if len(seen) == 1:
+        return seen.pop()
+    return None
+
+
+def _time_column(df):
+    """Returns the name of ``df``'s time column, or None.
+
+    Matched loosely -- the header is written with varying case and padding across
+    instrument software versions, and a mismatch here would silently leave the
+    footer row (and the time axis) in the imported map.
+    """
+    for col in df.columns:
+        if isinstance(col, str) and col.strip().lower() == TIME_COLUMN.lower():
+            return col
+    return None
 
 
 def _as_check_state(value) -> bool:
@@ -86,6 +198,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+
+        # Layout ('line'/'matrix') and line-number position per sample, plus the
+        # batch-wide default each falls back to. One instrument session names its
+        # files one way, so what the first directory establishes -- by sniffing, or
+        # by the user correcting it -- carries to the rest instead of being
+        # rediscovered (or re-corrected) for every sample. Set before the early
+        # return below so they exist on any instance, however it was built.
+        self.sample_layout = {}
+        self.batch_layout = None
+        self.sample_line_position = {}
+        self.batch_line_position = None
 
         if parent is None:
             return
@@ -335,13 +458,78 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         return array
 
+    def read_line_file(self, file_path):
+        """Reads one per-line ("Intensity Vs Time") export into analyte columns.
+
+        Strips the three-line instrument preamble, the trailing footer, and the time
+        axis, leaving only analyte columns -- so the first column of the result is a
+        measurement, which is what both the preview and the import want.
+
+        These exports close with a blank line and a '          Printed:<datetime>'
+        footer. ``read_csv`` takes that as a data row: the timestamp lands in the time
+        column and turns the whole column into strings, which survives into the
+        .lame.csv and later aborts the sample load, where ``cluster_data()`` calls
+        ``np.isfinite()`` on what is by then an object array. Rows are therefore kept
+        only where the time parses as a number -- the same test the original MATLAB
+        reader used (``isnan(Time_Sec_)``).
+
+        Returns
+        -------
+        pd.DataFrame
+            Analyte columns only, with a fresh 0..n-1 index.
+        """
+        df = pd.read_csv(file_path, skiprows=3)
+
+        time_col = _time_column(df)
+        if time_col is not None:
+            df = df[pd.to_numeric(df[time_col], errors='coerce').notna()]
+            # The sweep clock is not a measurement. Left as a column it is typed
+            # 'Analyte' on load and so reaches the field lists, clustering and PCA.
+            df = df.drop(columns=[time_col])
+        else:
+            # No recognizable time column: fall back to dropping rows that carry no
+            # data at all, so the footer still cannot become a pixel.
+            df = df.dropna(how='all')
+
+        return df.reset_index(drop=True)
+
+    def select_import_files(self, df):
+        """Returns ``(selected, is_numeric)`` for one sample's file table.
+
+        ``selected`` is the subset the user ticked, less any standards, sorted by line
+        number when the sample turns out to be a line-scan set. Stacking order sets the
+        image's column order, so an unsorted list reshapes into a column-shuffled map
+        with no error raised anywhere.
+
+        ``is_numeric`` is the matrix-vs-line-scan discriminator, and is computed over
+        the *selected* rows only: one unticked stray file whose name happens to parse
+        as an analyte would otherwise flip a whole line-scan directory into matrix mode.
+
+        Preview and import both go through here so they cannot disagree about which
+        files are read, in what order, or as which layout.
+        """
+        selected = df[df['Import'].astype(bool)]
+
+        standard_list = getattr(self, 'standard_list', [])
+        if standard_list:
+            selected = selected[~selected['Filename'].apply(
+                lambda f: any(std in f for std in standard_list))]
+        if selected.empty:
+            return selected, False
+
+        line_no = pd.to_numeric(selected['Analyte 1'], errors='coerce')
+        is_numeric = bool(line_no.notna().all())
+        if is_numeric:
+            selected = selected.assign(_line_no=line_no).sort_values('_line_no')
+        return selected, is_numeric
+
     def get_preview_array(self, sample_id):
         """Builds a rough 2D preview array from a sample's currently selected import files.
 
         For matrix-style exports (e.g. XMapTools) the first selected file already *is* the
         map grid, so it's read and shown directly. For per-line exports (e.g. Iolite/LADr,
         where the filename encodes a line number) the selected files are sorted by line
-        number and stacked into a grid, using the first data column of each file.
+        number and stacked into a grid, using the first analyte column of each file.
 
         Parameters
         ----------
@@ -358,27 +546,15 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         if df is None or df.empty or 'Import' not in df.columns:
             return None, None
 
-        selected = df[df['Import'].astype(bool)]
-        if selected.empty:
-            return None, None
-
-        standard_list = getattr(self, 'standard_list', [])
-        if standard_list:
-            selected = selected[~selected['Filename'].apply(lambda f: any(std in f for std in standard_list))]
+        selected, is_numeric = self.select_import_files(df)
         if selected.empty:
             return None, None
 
         row_idx = self.sample_ids.index(sample_id)
         path = self.paths[row_idx]
 
-        numeric_check = pd.to_numeric(df['Analyte 1'], errors='coerce')
-        is_numeric = numeric_check.notna().all()
-
         try:
             if is_numeric:
-                selected = selected.copy()
-                selected['_line_no'] = pd.to_numeric(selected['Analyte 1'], errors='coerce')
-                selected = selected.sort_values('_line_no')
 
                 # Cap the number of lines read so the preview stays responsive on large maps.
                 max_preview_lines = 200
@@ -390,7 +566,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 label = None
                 for _, file_row in selected.iterrows():
                     file_path = os.path.join(path, file_row['Filename'])
-                    line_df = pd.read_csv(file_path, skiprows=3)
+                    line_df = self.read_line_file(file_path)
                     if line_df.empty:
                         continue
                     if label is None:
@@ -1072,7 +1248,7 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                     #case 'Filename\nformat':
                     #    self.add_combobox(row, col, ['SampleID-LineNum','LineNum-SampleID'], 0)
 
-    def parse_filenames(self, sample_id, files):
+    def parse_filenames(self, sample_id, files, layout=None):
         """Parses a list of filenames to predict file type and extract analyte, unit, and line number information.
 
         Parameters
@@ -1081,6 +1257,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             The sample ID to remove from filenames.
         files : list of str
             List of file paths to be parsed.
+        layout : {'line', 'matrix'} or None, optional
+            The directory's layout when it is already known -- normally from
+            `sniff_directory_layout`, which reads the files rather than their
+            names. Given ``'line'``, the analyte matcher is skipped entirely and
+            every file is read as a scan line, which is both faster and immune to
+            a filename that happens to spell an isotope. ``None`` (the default)
+            keeps the filename-only heuristics.
 
         Returns
         -------
@@ -1089,6 +1272,150 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             - boolean indicating if the file is valid
             - file type (either 'matrix', 'line', or None)
             - the extracted analyte, ratio, or line number
+        """
+        if layout == 'line':
+            return self.parse_line_filenames(files)
+        return self._parse_filenames_heuristic(sample_id, files)
+
+    #: Characters that separate the parts of a filename.
+    LINE_TOKEN_DELIMITERS = r'[ \-_,]+'
+
+    #: Unit suffixes a filename may carry, longest first so 'ppb' isn't clipped.
+    UNIT_TOKENS = ('cps', 'ppm', 'ppb')
+
+    def line_number_candidates(self, files):
+        """Token positions in a listing that could hold the line number.
+
+        Reads the listing as a whole, which is what makes this reliable where
+        per-filename parsing is not: the line number is the token that is numeric
+        in *every* file and different in *every* file. The digits in a sample name
+        are numeric too, but they repeat, so they can't be mistaken for it. That
+        one observation replaces having to recognise sample names, delimiters or
+        element symbols at all.
+
+        Parameters
+        ----------
+        files : list of str
+            Every filename in the sample directory.
+
+        Returns
+        -------
+        list of dict
+            One entry per usable position, best first. Each has ``key`` (an
+            identifier to pass back as ``position``), ``label`` (for the UI),
+            ``numbers`` (filename -> line number as a string) and ``density``
+            (how close the numbers are to an unbroken run -- a real line sequence
+            scores near 1.0). Empty when no position works for every file.
+        """
+        valid_extensions = valid_extensions_for(self.comboBoxDataType.currentText())
+        usable = [f for f in files if f.split('.')[-1].lower() in valid_extensions]
+        if not usable:
+            return []
+
+        tokens = {}
+        for f in usable:
+            stem = os.path.splitext(os.path.basename(f))[0].lower()
+            for unit in self.UNIT_TOKENS:
+                stem = stem.replace(unit, '')
+            tokens[f] = [t for t in re.split(self.LINE_TOKEN_DELIMITERS, stem) if t]
+
+        candidates = []
+        for side in ('left', 'right'):
+            for idx in range(max(len(t) for t in tokens.values())):
+                numbers = {}
+                for f, toks in tokens.items():
+                    pos = idx if side == 'left' else len(toks) - 1 - idx
+                    if not (0 <= pos < len(toks)) or not toks[pos].isdigit():
+                        numbers = None
+                        break
+                    numbers[f] = toks[pos]
+                if not numbers:
+                    continue
+                values = [int(v) for v in numbers.values()]
+                if len(set(values)) != len(values):
+                    continue        # repeats -- part of the sample name, not a line
+                spread = max(values) - min(values) + 1
+                ordinal = 'first' if idx == 0 else f'{idx + 1}'
+                candidates.append({
+                    'key': f'{side}:{idx}',
+                    'label': (f"{ordinal} number from the {'start' if side == 'left' else 'end'}"
+                              f" (e.g. {min(values)}…{max(values)})"),
+                    'numbers': numbers,
+                    'density': len(values) / spread,
+                })
+
+        # Two positions can resolve to the same assignment (a one-token name is
+        # both first and last); keep one of each, best density first.
+        best, seen = [], set()
+        for cand in sorted(candidates, key=lambda c: (-c['density'], c['key'])):
+            signature = tuple(sorted(cand['numbers'].items()))
+            if signature in seen:
+                continue
+            seen.add(signature)
+            best.append(cand)
+        return best
+
+    def parse_line_filenames(self, files, position=None):
+        """Parses a line-scan directory's filenames for line numbers only.
+
+        Used once the layout is known to be line-scan, which `sniff_directory_layout`
+        establishes from the file contents. No analyte matching happens here at all,
+        and that is the point: it is the element/mass matcher that turns lines 10 and
+        11 of '75B-Large CPY' into the boron isotopes B10 and B11, and a line file
+        has no analyte in its name to find in the first place.
+
+        Parameters
+        ----------
+        files : list of str
+            Every filename in the sample directory.
+        position : str or None, optional
+            A ``key`` from `line_number_candidates` to force which token is read as
+            the line number. ``None`` uses the best-scoring position.
+
+        Returns
+        -------
+        list of tuples
+            Same 7-tuple shape as `parse_filenames`.
+        """
+        valid_extensions = valid_extensions_for(self.comboBoxDataType.currentText())
+        candidates = self.line_number_candidates(files)
+        chosen = None
+        if position is not None:
+            chosen = next((c for c in candidates if c['key'] == position), None)
+        if chosen is None and candidates:
+            chosen = candidates[0]
+
+        results = []
+        for file in files:
+            extension = file.split('.')[-1].lower()
+            if extension not in valid_extensions:
+                results.append((False, extension, None, None, None, None, None))
+                continue
+
+            stem = os.path.splitext(os.path.basename(file))[0].lower()
+            unit = next((u for u in self.UNIT_TOKENS if u in stem), None)
+
+            lineno = chosen['numbers'].get(file) if chosen else None
+            if lineno is None:
+                # No position fits every file (a stray among the data, say). Fall
+                # back to this name's own first number rather than dropping it.
+                found = re.findall(r'\d+', stem)
+                lineno = found[0] if found else None
+
+            if lineno is None:
+                results.append((False, extension, None, None, None, None, unit))
+            else:
+                results.append((True, extension, 'line', None, lineno, None, unit))
+
+        return results
+
+    def _parse_filenames_heuristic(self, sample_id, files):
+        """Filename-only parsing, for when the layout isn't known from the data.
+
+        This is the original matcher: strip the sample id and units, then try to
+        recognise an element/mass (or a ratio) in what's left, falling back to a
+        line number. Kept for matrix directories and for anything
+        `sniff_directory_layout` can't classify.
         """
         # Load the Excel file with element symbols and isotope masses
         df = pd.read_csv(os.path.join(BASEDIR, 'resources/app_data/isotope_info.csv'))
@@ -1126,8 +1453,13 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 results.append((valid, extension, filetype, fieldtype, analyte1, analyte2, unit))
                 continue
 
-            # Remove extension and sample_id
-            filename = file.replace('.' + extension, '').replace(sample_id, '')
+            # Remove extension and sample_id. `file` was lowercased above, so the
+            # sample_id has to be too or it never matches and the sample name stays
+            # in the string -- where it feeds the element/mass matcher below. That
+            # is how lines 12 and 13 of a sample called '92C-LHS' came out as the
+            # carbon isotopes C12 and C13: an analyte name instead of a line number,
+            # which unticks the file and silently drops two scan lines from the map.
+            filename = file.replace('.' + extension, '').replace(sample_id.lower(), '')
 
             # Remove units
             for u in units:
@@ -1308,7 +1640,68 @@ class MapImporter(QDialog, Ui_MapImportDialog):
             else:
                 results.append((valid, extension, filetype, fieldtype, analyte1, analyte2, unit))
 
-        return results
+        return self.recover_stray_line_files(files, results)
+
+    def recover_stray_line_files(self, files, results):
+        """Reclassifies files that a majority line-scan directory says must be lines.
+
+        A backstop for the filename-only path. When `sniff_directory_layout` can
+        read the files it settles the layout outright and this never has anything
+        to do; it matters when sniffing is inconclusive -- unreadable files, an
+        unusually long preamble, a directory holding more than one layout.
+
+        Parsing a filename on its own is ambiguous: the element/mass matcher will
+        claim any leftover letter+digit pair that spells a real isotope, and the
+        sample name is a rich source of them. Lines 10 and 11 of '75B-Large CPY'
+        parse as the boron isotopes B10 and B11, and line 12 of '92C-LHS' as C12.
+        Stripping the sample name first only helps when the directory name matches
+        the text inside the filenames, which it frequently doesn't -- a directory
+        called '75B-Large Cpy 2' holds files named '75B-Large CPY'. Left alone these
+        files come back invalid, arrive unticked in the file dialog, and their scan
+        lines go missing from the map with nothing reported.
+
+        One filename cannot settle it; the directory can. Where nearly every file is
+        a line scan, a lone "isotope" among them is a line too. Its number is the
+        first number in the filename not already claimed by another line, which is
+        what separates the line index from the digits in the sample name.
+
+        Parameters
+        ----------
+        files : list of str
+            The filenames, in the same order as ``results``.
+        results : list of tuple
+            Per-file tuples from `parse_filenames`.
+
+        Returns
+        -------
+        list of tuple
+            ``results``, with recoverable strays retyped as line files.
+        """
+        valid_extensions = valid_extensions_for(self.comboBoxDataType.currentText())
+        line_rows = [i for i, r in enumerate(results) if r[2] == 'line']
+        strays = [i for i, r in enumerate(results)
+                  if r[2] is None and r[1] in valid_extensions]
+
+        # Only when line scans clearly dominate. A matrix directory has no line rows
+        # at all, and a genuinely mixed one is left exactly as parsed rather than
+        # having this guess applied to it.
+        if not strays or len(line_rows) < max(3, 4 * len(strays)):
+            return results
+
+        claimed = {str(results[i][4]) for i in line_rows}
+        recovered = list(results)
+        for i in strays:
+            name = os.path.basename(files[i]).lower().rsplit('.', 1)[0]
+            lineno = next((n for n in re.findall(r'\d+', name) if n not in claimed), None)
+            if lineno is None:
+                continue
+            claimed.add(lineno)
+            _valid, extension, _filetype, _fieldtype, _a1, _a2, unit = results[i]
+            recovered[i] = (True, extension, 'line', None, lineno, None, unit)
+            log(f"'{files[i]}' looked like an analyte but sits in a line-scan "
+                f"directory; treating it as line {lineno}", prefix="Warning")
+
+        return recovered
 
     def prefer_std_corrected(self, files, results):
         """Prefers standard-corrected files over uncorrected duplicates.
@@ -1566,16 +1959,14 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
             data_frames = []
 
-            # Convert to numeric, coercing errors (non-numeric values become NaN)
-            numeric_check = pd.to_numeric(self.metadata[sample_id]['Analyte 1'], errors='coerce')
+            # The files to read, standards dropped and -- for line scans -- sorted by
+            # line number, plus the matrix-vs-line-scan discriminator. Shared with the
+            # preview so the two cannot disagree; see select_import_files.
+            selected, is_numeric = self.select_import_files(self.metadata[sample_id])
 
-            # Check if a value is numeric (True for numeric values, False for non-numeric)
-            is_numeric = all(numeric_check.notna())
-
-            # non-standard, Import=True files for this sample -- used both to refine
-            # TOF's per-line dy spacing below and as the 'Number of files' metadata field
-            selected_files = self.metadata[sample_id].loc[self.metadata[sample_id]['Import'], 'Filename']
-            n_files = sum(1 for f in selected_files if not any(std in f for std in self.standard_list))
+            # used both to refine TOF's per-line dy spacing below and as the
+            # 'Number of files' metadata field
+            n_files = len(selected)
 
             if method == 'TOF' and is_numeric and raster_width is not None and n_files:
                 # Per-line spacing (dy): total map width divided by the number of lines
@@ -1597,22 +1988,21 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
 
             first = True
-            for i, file in enumerate(self.metadata[sample_id]['Filename']):
-                if not self.metadata[sample_id]['Import'][i]:
-                    continue
-
+            # selected is already filtered (Import, standards) and, for line scans,
+            # sorted by line number. Don't reuse `i` here -- it indexes the sample.
+            for line_index, (_, file_row) in enumerate(selected.iterrows()):
+                file = file_row['Filename']
                 file_path = os.path.join(path, file)
-                if any(std in file for std in self.standard_list):
-                    continue  # skip standard files
 
-                analyte1 = self.metadata[sample_id]['Analyte 1'][i]
-                analyte2 = self.metadata[sample_id]['Analyte 2'][i]
+                analyte1 = file_row['Analyte 1']
+                analyte2 = file_row['Analyte 2']
                 if is_numeric:
-                    # line data
+                    # line data -- keyed off the line's position in the sorted set,
+                    # not the scan number in its filename; see read_raw_folder
                     if method == 'TOF' and raster_length is not None:
-                        df = self.read_raw_folder(analyte1, file_path, swap_xy, dx, dy, length=raster_length)
+                        df = self.read_raw_folder(line_index, file_path, swap_xy, dx, dy, length=raster_length)
                     else:
-                        df = self.read_raw_folder(analyte1, file_path, swap_xy, dx, dy)
+                        df = self.read_raw_folder(line_index, file_path, swap_xy, dx, dy)
                     data_frames.append(df)
                 else:
                     # matrix data
@@ -1656,18 +2046,6 @@ class MapImporter(QDialog, Ui_MapImportDialog):
                 final_data['Yc'] = final_data['Yc'] - final_data['Yc'].min()
             else:
                 final_data = pd.concat(data_frames, axis = 1)
-            
-            if not data_frames:
-                continue
-
-            self.statusBar.showMessage(f'Formatting {sample_id}...')
-            QApplication.processEvents()
-            if is_numeric:
-                final_data = pd.concat(data_frames, ignore_index=True)
-                final_data['Xc'] -= final_data['Xc'].min() if reverse_x else 0
-                final_data['Yc'] -= final_data['Yc'].min() if reverse_y else 0
-            else:
-                final_data = pd.concat(data_frames, axis=1)
 
             file_name = os.path.join(save_path, sample_id+'.lame.csv')
             self.statusBar.showMessage(f'Saving {sample_id}.lame.csv...')
@@ -1687,13 +2065,17 @@ class MapImporter(QDialog, Ui_MapImportDialog):
 
         self.ok = True
             
-    def read_raw_folder(self,line_no,file_path, swap_xy, dx, dy, length=None):
+    def read_raw_folder(self,line_index,file_path, swap_xy, dx, dy, length=None):
         """Reads laser data formatted into files with separate lines, each with all analytes.
 
         Parameters
         ----------
-        line_no : int
-            Line number.
+        line_index : int
+            Zero-based position of this line among the lines being imported for the
+            sample. Deliberately *not* the scan number parsed from the filename:
+            standards and skipped lines leave gaps in the scan numbering (e.g.
+            203..297 for 91 lines), and keying the coordinate off the raw number
+            reproduces those gaps as uneven pixel spacing.
         file_path : str
             Full file path and name to be parsed.
         swap_xy : bool
@@ -1711,14 +2093,15 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         pd.DataFrame
             Data in the current file, ``file_path``.
         """
-        df = pd.read_csv(file_path, skiprows=3)
+        df = self.read_line_file(file_path)
+
         if length is not None and len(df):
             dx = length / len(df)
         if swap_xy:
-            df.insert(1,'Yc',(int(line_no)-1)*dy)
+            df.insert(1,'Yc',int(line_index)*dy)
             df.insert(0,'Xc',np.arange(len(df))*dx)
         else:
-            df.insert(0,'Xc',(int(line_no)-1)*dx)
+            df.insert(0,'Xc',int(line_index)*dx)
             df.insert(1,'Yc',np.arange(len(df))*dy)
         return df
    
@@ -1894,15 +2277,41 @@ class MapImporter(QDialog, Ui_MapImportDialog):
         # Get a list of files in the directory
         file_list = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
 
+        # Ask the files themselves which layout this is, rather than inferring it
+        # from their names. One sniff settles what no amount of filename parsing
+        # can, and it is remembered for the rest of the batch: an instrument
+        # session uses one convention throughout, so the first directory to answer
+        # sets the default for the others (overridable per sample in the dialog).
+        layout = self.sample_layout.get(sample_id)
+        if layout is None:
+            layout = sniff_directory_layout(directory, file_list) or self.batch_layout
+            if layout is not None:
+                self.sample_layout[sample_id] = layout
+                if self.batch_layout is None:
+                    self.batch_layout = layout
+
         # Guess the analytes from filenames and allow user to change them and select files
-        parsed_results = self.parse_filenames(sample_id, file_list)
+        parsed_results = self.parse_filenames(
+            sample_id, file_list, layout=layout)
         parsed_results = self.prefer_std_corrected(file_list, parsed_results)
 
         # Show the dialog to confirm or edit the file import details
-        dialog = FileSelectData(sample_id, file_list, parsed_results, parent=self)
+        dialog = FileSelectData(
+            sample_id, file_list, parsed_results, parent=self,
+            layout=layout,
+            line_positions=(self.line_number_candidates(file_list)
+                            if layout == 'line' else None),
+            line_position=self.sample_line_position.get(sample_id, self.batch_line_position),
+        )
         if dialog.exec() == QDialog.DialogCode.Accepted:
             # Retrieve the updated data from the dialog
             self.metadata[sample_id] = dialog.get_data()
+            # Remember an override so the rest of the batch inherits it -- the
+            # whole session shares a naming convention, so correcting it once
+            # should be enough.
+            if dialog.line_position is not None:
+                self.sample_line_position[sample_id] = dialog.line_position
+                self.batch_line_position = dialog.line_position
         else:
             return
 
@@ -1954,8 +2363,18 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         UI interface design.  Note this interface was created in QtCreator, though it requires replacing
         of ``QtWidgets.TableWidget`` with ``CustomWidgets.CustomTableWidget``.  The custom widget adds a
         ``.to_dataframe()`` simplify data extraction tables (especially complex tables).
-    """    
-    def __init__(self, sample_id, file_list, parsed_results, parent=None):
+    """
+
+    # tableWidgetFileMetadata column order, from Ui_FileSelectorDialog
+    IMPORT_COL = 0
+    FILENAME_COL = 1
+    FIELD_TYPE_COL = 2
+    LINE_COL = 3          # 'Analyte 1' for matrix sets, the line number for line scans
+    ANALYTE2_COL = 4
+    UNITS_COL = 5
+
+    def __init__(self, sample_id, file_list, parsed_results, parent=None,
+                 layout=None, line_positions=None, line_position=None):
         """Initializes a file selection dialog.
 
         Use the file selection dialog to pick the files for import and correcting parsing errors of individual files.
@@ -1970,11 +2389,26 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
             A multidimensional list of metadata and parsed information from the filenames in file_list.
         parent : _type_, optional
             Parent object, by default None
-        """        
+        layout : {'line', 'matrix'} or None, optional
+            The directory's layout, where it is already known from the file
+            contents. Only used to decide how the table presents itself.
+        line_positions : list of dict or None, optional
+            Candidate line-number positions from
+            `MapImporter.line_number_candidates`. When more than one fits, the
+            dialog offers them so the user can correct the inference.
+        line_position : str or None, optional
+            The candidate ``key`` to start on, normally whatever the user picked
+            for an earlier sample in the same batch.
+        """
         super().__init__(parent)
         self.setupUi(self)
 
         self.parent = parent
+        self.layout_hint = layout
+        self.line_positions = line_positions or []
+        #: The position the user settled on, or None if they didn't choose.
+        self.line_position = line_position if any(
+            c['key'] == line_position for c in self.line_positions) else None
 
         if not self.layout():
             layout = QVBoxLayout(self)
@@ -2027,17 +2461,52 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         # Initialize the table widget
         self.tableWidgetFileMetadata.setRowCount(len(filtered_files))
 
+        standard_list = getattr(self.parent, 'standard_list', []) or []
+
+        def is_standard_file(name):
+            return any(std in name for std in standard_list)
+
+        # In a line-scan set every file is one laser traverse holding *all* analytes,
+        # so parse_filenames puts a line number -- not an analyte -- in the 'Analyte 1'
+        # slot, and Field Type / Analyte 2 / Units mean nothing. Presenting the
+        # matrix-format columns over that data is just misleading, so relabel and hide.
+        #
+        # When the layout came from reading the files it is a fact, so take it.
+        # Otherwise fall back to what the filenames suggested, judged on the files
+        # that will actually be imported -- the same basis select_import_files uses,
+        # so the dialog shows what the import will do. That deliberately ignores the
+        # rest: one filename the parser mistook for an analyte should not make a
+        # 100-line directory present itself as a matrix set.
+        if self.layout_hint is not None:
+            self.is_line_scan = self.layout_hint == 'line'
+        else:
+            to_import = [r for f, r in zip(filtered_files, filtered_results)
+                         if r[0] and not is_standard_file(f)]
+            self.is_line_scan = bool(to_import) and all(r[2] == 'line' for r in to_import)
+
+        self._filtered_files = filtered_files
+
         # Populate the table with data
         for row, (filename, result) in enumerate(zip(filtered_files, filtered_results)):
+            # Standards sit interleaved between the sample lines and are skipped by
+            # the import regardless. Unticking them here makes that visible and still
+            # overridable, rather than silently dropping files the user ticked.
+            is_standard = is_standard_file(filename)
+
             # Checkbox for import
             import_checkbox = QCheckBox()
             import_checkbox.setStyleSheet("text-align: center; margin-left:25%; margin-right:25%;")
-            import_checkbox.setChecked(result[0])
+            import_checkbox.setChecked(bool(result[0]) and not is_standard)
             self.tableWidgetFileMetadata.setCellWidget(row, 0, import_checkbox)
 
             # Filename (non-editable)
             filename_item = QTableWidgetItem(filename)
             filename_item.setFlags(filename_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            if is_standard:
+                filename_item.setToolTip(
+                    "Recognized as a standard — excluded from the map. "
+                    "Tick to include it anyway.")
+                filename_item.setForeground(QBrush(Qt.GlobalColor.gray))
             self.tableWidgetFileMetadata.setItem(row, 1, filename_item)
 
             # Analyte Type ComboBox (editable)
@@ -2061,6 +2530,21 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
             units_item.setText(result[6])
             self.tableWidgetFileMetadata.setItem(row, 5, units_item)
 
+        if self.is_line_scan:
+            self.labelDialog.setText(
+                "Verify line import parameters — one file per laser line, all analytes")
+            # Header text is what CustomTableWidget.to_dataframe() uses for column
+            # names, so get_data() renames this back to 'Analyte 1' to leave the
+            # downstream metadata schema untouched.
+            self.tableWidgetFileMetadata.horizontalHeaderItem(
+                self.LINE_COL).setText('Line')
+            for col in (self.FIELD_TYPE_COL, self.ANALYTE2_COL, self.UNITS_COL):
+                self.tableWidgetFileMetadata.setColumnHidden(col, True)
+
+        self._add_summary_label(filtered_files, filtered_results, is_standard_file)
+        if self.is_line_scan:
+            self._add_line_position_control()
+
         header = self.tableWidgetFileMetadata.horizontalHeader()
         for col in range(self.tableWidgetFileMetadata.columnCount()):
             if self.tableWidgetFileMetadata.horizontalHeaderItem(col).text() == 'Filename':
@@ -2075,6 +2559,99 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
         # Connect buttons to actions
         self.buttonBox.ok_button.clicked.connect(self.accept)
         self.buttonBox.cancel_button.clicked.connect(self.reject)
+
+    #: How many unparsed filenames to name before summarizing the rest.
+    MAX_NAMED_SKIPS = 4
+
+    def _add_line_position_control(self):
+        """Shows which token was read as the line number, and lets it be changed.
+
+        The inference is almost always right, so this states its reading rather
+        than asking a question -- but when a convention puts the line number
+        somewhere unexpected, it is the one control that fixes every file at once
+        instead of retyping a hundred cells. The choice carries to the rest of the
+        batch, since a session names its files one way throughout.
+        """
+        if not self.line_positions:
+            return
+
+        current = self.line_position or self.line_positions[0]['key']
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Line number is the", self))
+        self.comboBoxLinePosition = QComboBox(self)
+        for cand in self.line_positions:
+            self.comboBoxLinePosition.addItem(cand['label'], cand['key'])
+        self.comboBoxLinePosition.setCurrentIndex(
+            max(0, self.comboBoxLinePosition.findData(current)))
+        if len(self.line_positions) == 1:
+            self.comboBoxLinePosition.setEnabled(False)
+            self.comboBoxLinePosition.setToolTip(
+                "Only one token is numeric in every file and distinct across them, "
+                "so there is nothing to choose between.")
+        else:
+            self.comboBoxLinePosition.setToolTip(
+                "Which part of the filename is the line number. Changing it "
+                "renumbers every file here and is reused for the other samples.")
+        self.comboBoxLinePosition.currentIndexChanged.connect(
+            self._line_position_changed)
+        row.addWidget(self.comboBoxLinePosition)
+        row.addStretch(1)
+        self.verticalLayout.insertLayout(2, row)
+
+    def _line_position_changed(self, _index):
+        """Renumbers the Line column from the newly chosen token position."""
+        key = self.comboBoxLinePosition.currentData()
+        cand = next((c for c in self.line_positions if c['key'] == key), None)
+        if cand is None:
+            return
+        self.line_position = key
+        table = self.tableWidgetFileMetadata
+        for row in range(table.rowCount()):
+            name_item = table.item(row, self.FILENAME_COL)
+            if name_item is None:
+                continue
+            lineno = cand['numbers'].get(name_item.text())
+            if lineno is not None:
+                table.setItem(row, self.LINE_COL, QTableWidgetItem(str(lineno)))
+
+    def _add_summary_label(self, files, results, is_standard_file):
+        """States what the dialog is about to do, and names what it will skip.
+
+        A file the parser couldn't make sense of arrives simply unticked, which
+        among a hundred rows is invisible -- that is how three directories of line
+        scans quietly lost two scan lines each. The counts go at the top of the
+        dialog and the unparsed filenames are named outright, so a wrong reading
+        is something the user is told rather than something they have to notice.
+        """
+        skipped = [f for f, r in zip(files, results)
+                   if not r[0] and not is_standard_file(f)]
+        standards = [f for f in files if is_standard_file(f)]
+        importing = len(files) - len(skipped) - len(standards)
+
+        kind = "scan line" if self.is_line_scan else "field"
+        parts = [f"{importing} of {len(files)} files will be imported, "
+                 f"one {kind} each" if self.is_line_scan else
+                 f"{importing} of {len(files)} files will be imported"]
+        if standards:
+            parts.append(f"{len(standards)} standard(s) excluded")
+
+        text = " · ".join(parts)
+        if skipped:
+            named = ", ".join(skipped[:self.MAX_NAMED_SKIPS])
+            if len(skipped) > self.MAX_NAMED_SKIPS:
+                named += f", and {len(skipped) - self.MAX_NAMED_SKIPS} more"
+            text += (f"\n⚠ {len(skipped)} file(s) could not be interpreted and will "
+                     f"be skipped: {named}")
+
+        self.labelSummary = QLabel(text, self)
+        self.labelSummary.setWordWrap(True)
+        if skipped:
+            self.labelSummary.setStyleSheet("color: #b00020; font-weight: bold;")
+            self.labelSummary.setToolTip(
+                "Tick a skipped file to import it anyway, and correct its value in "
+                "the table. If the whole set is misread, check the line-number "
+                "pattern above.")
+        self.verticalLayout.insertWidget(1, self.labelSummary)
 
     def select_all(self):
         for row in range(self.tableWidgetFileMetadata.rowCount()):
@@ -2097,5 +2674,11 @@ class FileSelectData(QDialog, Ui_FileSelectorDialog):
     def get_data(self):
         """Returns the updated information from ``tableWidgetFileMetadata``."""
         data = self.tableWidgetFileMetadata.to_dataframe()
+
+        # to_dataframe() names columns after the visible headers, so undo the
+        # line-scan relabelling: everything downstream (select_import_files, the
+        # .lmdf.json 'analytes' records) expects 'Analyte 1'.
+        if getattr(self, 'is_line_scan', False) and 'Line' in data.columns:
+            data = data.rename(columns={'Line': 'Analyte 1'})
 
         return data

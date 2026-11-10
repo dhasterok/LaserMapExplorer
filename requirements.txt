@@ -7,9 +7,22 @@
 -e ../siesta-rest-editor
 -e ../global_geochemistry
 
-# Qt
-PyQt6
-PyQt6-WebEngine
+# Qt -- bindings and runtime are pinned together on purpose; see below.
+PyQt6==6.11.0
+PyQt6-WebEngine==6.11.0
+# The Qt *runtime* floor is pinned deliberately. Qt 6.11.0/6.11.1 on macOS 26+
+# segfault at random in QImage::toCGImage(): colour-space creation moved into
+# qt_mac_cgImageFormatForImage(), whose QCFType<CGColorSpaceRef> owner goes out
+# of scope before CGImageCreate() receives the raw pointer, so CoreGraphics gets
+# a stale CGColorSpaceRef (QTBUG-147602, fixed in 6.11.2). Every QImage -> CGImage
+# conversion is exposed -- field maps and Qt's own bitmap cursors alike -- and it
+# only misfires when the stale pointer happens to be dead, which is why it reads
+# as an occasional crash on sample switching rather than a reproducible one.
+# An open-ended floor is wrong here: pip would resolve the runtime ahead of the
+# bindings (6.12.0 / 6.140.0), which PyQt6 6.11.x rejects. Upper bounds keep the
+# pair in lockstep while still excluding the two broken runtimes.
+PyQt6-Qt6>=6.11.2,<6.12.0
+PyQt6-WebEngine-Qt6>=6.11.2,<6.12.0
 
 # Numerical / data
 numpy

@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
@@ -54,7 +54,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
-    <meta name="docbuild:last-update" content="2026-08-22"/>
+    <meta name="docbuild:last-update" content="2026-09-18"/>
   
     
     <script src="_static/searchtools.js"></script>
@@ -444,7 +444,39 @@
                   
   <section id="cluster-dock">
 <h1>Cluster Dock<a class="headerlink" href="#cluster-dock" title="Link to this heading">#</a></h1>
-<p>Clustered data can be assigned a name and color.  Clusters can be linked (<a href="#id2"><span class="problematic" id="id3">|icon-link|</span></a>) or unlinked (<a href="#id4"><span class="problematic" id="id5">|icon-unlink|</span></a>).  A selected cluster or clusters can be used to mask (<a href="#id6"><span class="problematic" id="id7">|icon-mask-dark|</span></a>) or reverse mask (<a href="#id8"><span class="problematic" id="id9">|icon-mask-light|</span></a>) data in a plot or on a map.  See <a class="reference external" href="multidimensional.html#clustering">Clustering</a> for more details on cluster analysis.</p>
+<p>Clustered data can be assigned a name and color.  A checked cluster or clusters can be used to mask (<a class="reference internal" href="_images/icon-mask-dark-64.svg"><img alt="icon-mask-dark" src="_images/icon-mask-dark-64.svg" style="height: 2ex;" /></a>) or reverse mask (<a class="reference internal" href="_images/icon-mask-light-64.svg"><img alt="icon-mask-light" src="_images/icon-mask-light-64.svg" style="height: 2ex;" /></a>) data in a plot or on a map.  See <a class="reference external" href="multidimensional.html#clustering">Clustering</a> for more details on cluster analysis.</p>
+<section id="linking-clusters-into-one-class">
+<h2>Linking clusters into one class<a class="headerlink" href="#linking-clusters-into-one-class" title="Link to this heading">#</a></h2>
+<p>A clustering run often splits a single mineral across several clusters that differ only
+in something uninteresting, such as ablation depth.  Those clusters can be <strong>linked</strong> so
+that everything downstream treats them as one class.  Check the clusters in the <em>Cluster
+Table</em> and click <a class="reference internal" href="_images/icon-link-64.svg"><img alt="icon-link" src="_images/icon-link-64.svg" style="height: 2ex;" /></a> to link them, or <a class="reference internal" href="_images/icon-unlink-64.svg"><img alt="icon-unlink" src="_images/icon-unlink-64.svg" style="height: 2ex;" /></a> to split them apart again.</p>
+<p>Linking never re-clusters anything: the underlying cluster labels are untouched, so
+unlinking restores the original classes exactly.  What changes is how a class is shown
+and analyzed:</p>
+<ul class="simple">
+<li><p>the linked clusters take the color and name of the lowest-numbered member, so they draw
+as one class on the cluster map and appear once in the legend;</p></li>
+<li><p>they show their group in the <em>Link</em> column;</p></li>
+<li><p>checking any member checks the whole class, so the cluster mask covers all of it;</p></li>
+<li><p>plots that are drawn per cluster – histograms by cluster, multi-pixel isochrons –
+produce one pooled result for the class instead of one per member.</p></li>
+</ul>
+<p>To analyze the classes, check them and click <a class="reference internal" href="_images/icon-roi-add-64.svg"><img alt="icon-roi-add" src="_images/icon-roi-add-64.svg" style="height: 2ex;" /></a> (<em>Create Region</em>).  Each
+linked class becomes one region of interest, and each unlinked cluster becomes a region of
+its own.  From that point they behave like any other region of interest: they appear in
+the <em>ROI</em> table, in the ROI map, in the region percentages, and in the per-region
+statistics of the <em>Stoichiometry</em> dock (choose <code class="docutils literal notranslate"><span class="pre">ROI</span></code> as the region column).  Running
+<em>Create Region</em> again refreshes the regions made from the same clusters rather than adding
+duplicates.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A region records <em>which clusters</em> it was made from, not which pixels, so re-running
+clustering rebinds it to the new clusters carrying those numbers – check your regions
+after re-clustering.  Re-running clustering also clears the links, since the clusters
+they referred to no longer exist.  Neither the links nor the regions of interest are
+saved in the project file.</p>
+</div>
 <figure class="align-center" id="id1">
 <a class="reference internal image-reference" href="_images/LaME_Styling_Clusters.png"><img alt="LaME interface: right toolbox, styling-clustering tab" src="_images/LaME_Styling_Clusters.png" width="232" />
 </a>
@@ -452,6 +484,7 @@
 <p><span class="caption-text">The Styling &gt; Clustering contains options for working with clustered data</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
+</section>
 </section>
 
 
@@ -494,6 +527,18 @@
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linking-clusters-into-one-class">Linking clusters into one class</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
     <a href="_sources/cluster_dock.rst.txt">
@@ -515,8 +560,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -524,7 +569,7 @@
     <div class="footer-items__start">
       
         <div class="footer-item"><p class="last-updated">
-  Last updated on 2026-08-22.
+  Last updated on 2026-09-18.
   <br/>
 </p></div>
       
@@ -537,7 +582,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
 </p></div>
       
     </div>

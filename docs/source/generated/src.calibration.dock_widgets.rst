@@ -1,4 +1,4 @@
-﻿src.calibration.dock\_widgets
+src.calibration.dock\_widgets
 =============================
 
 .. automodule:: src.calibration.dock_widgets

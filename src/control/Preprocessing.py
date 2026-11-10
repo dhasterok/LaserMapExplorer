@@ -755,7 +755,15 @@ class PreprocessingUI(CustomPage):
     def reset_crop(self):
         """Resets the cropping of the current sample and triggers a plot update."""
         self.dock.ui.data[self.dock.ui.app_data.sample_id].reset_crop()
+        # Open the axes back out to the full sample; they are set from
+        # style_data.xlim/ylim, which still hold the cropped extent.
+        if hasattr(self.dock.ui, 'reset_map_limits'):
+            self.dock.ui.reset_map_limits()
         self.dock.ui.schedule_update()
+        # The redraw is scheduled, not immediate, so refresh the crop/Full Map
+        # buttons now rather than leaving Full Map lit with nothing to reset.
+        if hasattr(self.dock.ui, 'update_crop_availability'):
+            self.dock.ui.update_crop_availability()
 
     def update_swap_resolution(self):
         """Swaps dx and dy of the current sample and triggers a plot update.

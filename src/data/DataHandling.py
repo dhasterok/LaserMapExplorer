@@ -28,6 +28,27 @@ from src.control.Logger import LoggerConfig, auto_log_methods, log
 # MapImporter.parse_filenames, which writes the column under this name.
 SPECIAL_FIELD_NAMES = {'TotalBeam'}
 
+
+def pixel_spacing(coord_range, n_unique, fallback=None):
+    """Pixel pitch from a coordinate range and the number of distinct values.
+
+    ``n`` evenly spaced pixels span ``n - 1`` gaps, not ``n``. Dividing by ``n``
+    -- as this did until now -- understates the pitch by a factor of ``(n-1)/n``:
+    a 91-line map 1800 um across reported 19.78 um instead of 20. That value feeds
+    the scalebar, the map's aspect ratio, and the physical-to-index conversion in
+    ``LamePlot.plot_map_mpl``, so every map was slightly off.
+
+    A single distinct value spans no gaps at all and so says nothing about pitch;
+    ``fallback`` is returned rather than dividing by zero.
+
+    A module-level function, not a static method: ``SampleObj`` is wrapped by
+    ``auto_log_methods``, which rebinds class attributes and would pass ``self``
+    to it.
+    """
+    if coord_range is None or n_unique is None or n_unique < 2:
+        return fallback
+    return coord_range / (n_unique - 1)
+
 #: Columns of `SampleObj.filter_df` (and of each filter-defined ROI's stored
 #: definition).
 FILTER_COLUMNS = ['use', 'field_type', 'field', 'norm', 'min', 'max', 'operator', 'persistent']
@@ -391,8 +412,8 @@ class SampleObj(QObject):
         if not self._updating:
             self._updating = True
             self._x = new_x
-            self._dx = self.x_range / new_x.nunique()
             self._nx = new_x.nunique()
+            self._dx = pixel_spacing(self.x_range, self._nx, self._dx)
             self._updating = False
 
     # Define the y property
@@ -406,8 +427,8 @@ class SampleObj(QObject):
         if not self._updating:
             self._updating = True
             self._y = new_y
-            self._dy = self.y_range / new_y.nunique() 
             self._ny = new_y.nunique()
+            self._dy = pixel_spacing(self.y_range, self._ny, self._dy)
             self._updating = False
 
     @property
@@ -633,34 +654,98 @@ class SampleObj(QObject):
         return self._crop_mask
     
     @crop_mask.setter
-    def crop_mask(self, new_xlim, new_ylim):
-        self.crop=True
+    def crop_mask(self, new_mask):
+        self._crop_mask = np.asarray(new_mask, dtype=bool)
 
-        self._crop_mask = (
-            (self.raw['Xc'] >= new_xlim[0]) & 
-            (self.raw['Xc'] <= new_xlim[1]) &
-            (self.raw['Yc'] <= self.raw['Yc'].max() - new_ylim[0]) &
-            (self.raw['Yc'] >= self.raw['Yc'].max() - new_ylim[1])
-        )
+    @property
+    def n_pixels(self):
+        """int : Number of displayed pixels — the length every per-pixel mask has.
 
-        #crop clipped_analyte_data based on self.crop_mask
-        self.raw[self.crop_mask].reset_index(drop=True)
-        # Ensure we maintain AttributeDataFrame type after cropping
-        cropped_processed = self.processed[self.crop_mask].reset_index(drop=True)
-        if not isinstance(cropped_processed, AttributeDataFrame):
-            # If pandas operation returned regular DataFrame, convert back to AttributeDataFrame
-            new_processed = AttributeDataFrame(cropped_processed)
-            new_processed.column_attributes = self.processed.column_attributes.copy()
-            self.processed = new_processed
-        else:
-            self.processed = cropped_processed
+        ``raw``'s length unless the sample is cropped, in which case
+        ``processed``'s. Keyed on ``crop`` rather than just preferring
+        ``processed`` because of ordering during ``reset_data``: it clears
+        ``crop`` and rebuilds the masks at ``raw`` length while ``processed``
+        still holds the previous, cropped frame, and reading ``processed`` there
+        would size the combined mask to the map being thrown away.
+        """
+        if not getattr(self, 'crop', False):
+            return len(self.raw)
+        processed = getattr(self, 'processed', None)
+        if processed is not None and len(processed):
+            return len(processed)
+        return len(self.raw)
 
+    def _apply_crop_mask(self, df):
+        """Returns ``df`` reduced to ``crop_mask``, still an AttributeDataFrame.
+
+        Plain pandas indexing drops the subclass (and with it every column
+        attribute: data_type, units, bounds), so the attributes are carried over
+        explicitly when that happens.
+        """
+        cropped = df[self._crop_mask].reset_index(drop=True)
+        if not isinstance(cropped, AttributeDataFrame):
+            attributes = df.column_attributes
+            cropped = AttributeDataFrame(cropped)
+            cropped.column_attributes = copy.deepcopy(attributes)
+        return cropped
+
+    def apply_crop(self, xlim, ylim):
+        """Restricts the sample to a rectangle of the map, in data coordinates.
+
+        Cropping sets the extent of the map used for every subsequent analysis.
+        ``raw`` is deliberately left whole -- it is what `reset_crop` restores from
+        -- so the crop lives in ``crop_mask``, a raw-length boolean that `prep_data`
+        applies each time it rebuilds ``processed``. Without that the next
+        ``prep_data`` (any change of negative handling or autoscaling triggers one)
+        would quietly restore the full map.
+
+        Parameters
+        ----------
+        xlim, ylim : tuple of float
+            ``(min, max)`` bounds in the same coordinates as ``Xc``/``Yc`` -- i.e.
+            what a map plot's axes report, not pixel indices. Order doesn't matter.
+
+        Returns
+        -------
+        bool
+            ``True`` if the crop was applied, ``False`` if it would have kept no
+            pixels at all (in which case nothing is changed).
+        """
+        x0, x1 = sorted((float(xlim[0]), float(xlim[1])))
+        y0, y1 = sorted((float(ylim[0]), float(ylim[1])))
+
+        mask = (
+            (self.raw['Xc'] >= x0) & (self.raw['Xc'] <= x1) &
+            (self.raw['Yc'] >= y0) & (self.raw['Yc'] <= y1)
+        ).to_numpy(dtype=bool)
+
+        if not mask.any():
+            return False
+
+        self._crop_mask = mask
+        self.crop = True
+
+        # The per-pixel masks are sized to self.processed, which is about to
+        # shrink, so resize them before anything can read them at the old length
+        # -- prep_data re-evaluates ROIs partway through. Resetting rather than
+        # subsetting matches what the reset dialog promises ("...and reset
+        # filters"): prep_data is rebuilding processed from raw anyway, so the
+        # computed fields those filters referred to are going too.
+        kept = int(mask.sum())
+        self.filter_mask = np.ones(kept, dtype=bool)
+        self.polygon_mask = np.ones(kept, dtype=bool)
+        self.cluster_mask = np.ones(kept, dtype=bool)
+        self.roi_selection_mask = np.ones(kept, dtype=bool)
+
+        # Rebuilds processed from raw, applying crop_mask as it goes.
+        self.prep_data()
+
+        # xlim/ylim/x_range/nx and friends are all derived from these.
         self.x = self.processed['Xc']
         self.y = self.processed['Yc']
 
-        self._crop_mask = np.ones_like(self.raw['Xc'], dtype=bool)
-
-        self.prep_data()
+        self.recompute_mask()
+        return True
 
     def scale_options(self, plot_type: str|None=None, ax: str|None=None, field_type: str|None=None, field: str|None=None) -> list:
         """Options for scaling the data.
@@ -832,8 +917,13 @@ class SampleObj(QObject):
         sample_df[numeric_cols] = sample_df[numeric_cols].astype('float64')
         non_numeric = [c for c in sample_df.columns if c not in set(numeric_cols)]
         if non_numeric:
+            # Warning, not Data: the Data prefix is suppressed unless the logger dock
+            # happens to be open, and this is the one thing the user needs told. A
+            # single stray text cell -- an 'n/a', or an instrument footer row that a
+            # converter swept into a column -- is enough to make the column
+            # non-numeric, and it is otherwise invisible in the file.
             log(f"'{os.path.basename(self.file_path)}' has non-numeric column(s), "
-                f"left as-is: {non_numeric}", prefix="Data")
+                f"left as-is and excluded from analysis: {non_numeric}", prefix="Warning")
 
         # determine column data types
         # initialize all as 'Analyte'
@@ -864,6 +954,15 @@ class SampleObj(QObject):
         for col in sample_df.columns:
             if col in SPECIAL_FIELD_NAMES:
                 data_type[sample_df.columns.get_loc(col)] = 'Special'
+
+        # Columns we couldn't make numeric above. Typed 'Special' (so use=False) for
+        # the same reason, but defensively rather than by name: as 'Analyte' they
+        # reach cluster_data(), where np.isfinite() over an object array raises and
+        # takes the whole sample load down before anything is drawn -- with no dialog
+        # on the menu path. Keeping the column but out of the analyte maths preserves
+        # the deliberate choice above not to coerce it.
+        for col in non_numeric:
+            data_type[sample_df.columns.get_loc(col)] = 'Special'
 
         # use an ExtendedDF.AttributeDataFrame to add attributes to the columns
         # may includes analytes, ratios, and special data
@@ -1162,15 +1261,15 @@ class SampleObj(QObject):
         bool
             ``True`` indicates user clicked ``Yes``, ``False`` for ``No``
         """        
-        # Create a message box
-        msgBox = QMessageBox.warning(self.ui,
-            "Confirm Reset", 
+        # QMessageBox.warning is a static convenience method: it builds, shows and
+        # waits on the dialog itself, and hands back the button that was clicked.
+        # Calling .exec() on that return value raises AttributeError, which is what
+        # made "Full Map" -- the only way back from a crop -- do nothing at all.
+        response = QMessageBox.warning(self.ui,
+            "Confirm Reset",
             "Resetting to the full map will delete all analyses, computed fields, and reset filters.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
-
-        # Show the message box and get the user's response
-        response = msgBox.exec()
 
         # Check the user's response
         if response == QMessageBox.StandardButton.No:
@@ -1637,7 +1736,16 @@ class SampleObj(QObject):
         numpy.ndarray
             Boolean per-pixel mask, True = keep.
         """
-        mask = np.asarray(self.crop_mask, dtype=bool).copy()
+        # One entry per *displayed* pixel -- that is what the field map reshapes
+        # into array_size, and what get_processed_data ANDs its NaN mask into.
+        #
+        # This deliberately does not start from crop_mask. crop_mask lives in raw
+        # space: it says which rows of self.raw become self.processed, and
+        # SampleObj.apply_crop has already applied it. Re-applying it here would
+        # be both redundant and the wrong length -- the two only ever matched
+        # because, until cropping worked, processed was always the same size as
+        # raw.
+        mask = np.ones(self.n_pixels, dtype=bool)
         if 'polygon' not in components and self.polygon_mask_enabled:
             mask &= self.polygon_mask
         if 'cluster' not in components and self.cluster_mask_enabled:
@@ -2388,6 +2496,13 @@ class SampleObj(QObject):
             # may need to create a copy of processed data overwriting with raw data
             negative_method = self._negative_method
             self.processed = copy.deepcopy(self.raw)
+            # processed is the *cropped* view of raw. raw stays whole so reset_crop
+            # has something to restore from, which means the crop has to be
+            # reapplied every time processed is rebuilt here -- otherwise any later
+            # prep_data (a change of negative handling or autoscaling is enough)
+            # silently restores the full map under the user.
+            if getattr(self, 'crop', False) and self._crop_mask is not None:
+                self.processed = self._apply_crop_mask(self.processed)
             self.processed.set_attribute(analyte_columns, 'negative_method', negative_method)
         else:
             columns = field
@@ -2431,6 +2546,12 @@ class SampleObj(QObject):
         # ------------------
         # loop over all fields
         for col in (col for col in self.processed.columns if self.processed.get_attribute(col, 'data_type') != 'coordinate'):
+
+            # Nothing below is meaningful for a column reset_data couldn't make
+            # numeric, and np.nanpercentile/np.min on strings raises a bare
+            # TypeError that aborts the sample load before anything is drawn.
+            if not pd.api.types.is_numeric_dtype(self.processed[col]):
+                continue
 
             lq = self.processed.get_attribute(col, 'lower_bound')
             uq = self.processed.get_attribute(col, 'upper_bound')
@@ -2488,11 +2609,16 @@ class SampleObj(QObject):
         # -----------------------
         for col in self.processed.columns:
             self.processed.set_attribute(col,'label',self.create_label(col))
-            
+
+            # A non-numeric column has no plot range; np.min returns a string and
+            # fmt.oround then raises on abs(), aborting the sample load.
+            if not pd.api.types.is_numeric_dtype(self.processed[col]):
+                continue
+
             # Set min and max unmasked values
             amin = np.min(self.processed[col])
             amax = np.max(self.processed[col])
-            
+
             if col not in ['Xc','Yc']: # do not round 'X' and 'Y' so full extent of map is viewable
                 amin = fmt.oround(amin, order=2, toward=0)
                 amax = fmt.oround(amax, order=2, toward=1)

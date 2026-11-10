@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -36,10 +36,10 @@
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
 
     <script src="_static/documentation_options.js?v=2709fde1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
@@ -54,7 +54,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
-    <meta name="docbuild:last-update" content="2026-09-06"/>
+    <meta name="docbuild:last-update" content="2026-09-25"/>
   
     
     <script src="_static/searchtools.js"></script>
@@ -484,10 +484,72 @@
 <li><p>Left-click to place vertices on the map</p></li>
 <li><p>Right-click to complete the polygon</p></li>
 </ol>
-<p><em>LaME</em> allows you to create multiple polygons, which can be analyzed as separate regions or linked for combined analysis. To link or delink polygons, select multiple entries in the <em>Polygon Table</em> and click the <a class="reference internal" href="_images/icon-link-64.svg"><img alt="icon-link" src="_images/icon-link-64.svg" style="height: 2.5ex;" /></a> or <a class="reference internal" href="_images/icon-unlink-64.svg"><img alt="icon-unlink" src="_images/icon-unlink-64.svg" style="height: 2.5ex;" /></a> button. You can toggle the use of individual polygons in analyses by clicking the associated checkbox in the <em>Polygon Table</em>.</p>
+<p>While placing vertices, press <code class="docutils literal notranslate"><span class="pre">z</span></code> to remove the last one or <code class="docutils literal notranslate"><span class="pre">Esc</span></code> to abandon the polygon.
+These shortcuts act on the map, so click the map once first to give it keyboard focus.</p>
+<section id="editing-a-polygon">
+<h3>Editing a polygon<a class="headerlink" href="#editing-a-polygon" title="Link to this heading">#</a></h3>
+<p>Clicking inside a polygon on the map selects it (its row in the <em>Polygon Table</em> follows), and
+the selected polygon shows its vertices as red handles. Three toolbar buttons reshape it:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="_images/icon-move-point-64.svg"><img alt="icon-move-point" src="_images/icon-move-point-64.svg" style="height: 2.5ex;" /></a> <em>Move Point</em>: drag a handle to move that vertex. Drag from inside the
+polygon, away from any handle, to move the whole polygon.</p></li>
+<li><p><a class="reference internal" href="_images/icon-add-point-64.svg"><img alt="icon-add-point" src="_images/icon-add-point-64.svg" style="height: 2.5ex;" /></a> <em>Add Point</em>: click on one of the polygon’s edges to insert a vertex there.</p></li>
+<li><p><a class="reference internal" href="_images/icon-remove-point-64.svg"><img alt="icon-remove-point" src="_images/icon-remove-point-64.svg" style="height: 2.5ex;" /></a> <em>Remove Point</em>: click a handle to remove that vertex. A polygon always
+keeps at least three vertices.</p></li>
+</ul>
+<p>Only one of the three can be active at a time; click the button again, press <code class="docutils literal notranslate"><span class="pre">Esc</span></code> or
+right-click the map to leave the mode. The polygon mask and any regions made from the
+polygon update as soon as an edit is finished.</p>
+<p>Polygons belong to the field map. Switching to another plot type turns polygon mode off
+(the polygons and their mask are kept; switch back to the field map and turn polygon mode
+on again to keep editing). Clustering ignores polygons altogether: clusters are always
+computed over the whole map and the cluster map shows every pixel, whatever polygons have
+been drawn. To analyse just the area inside a polygon, use <em>Create Region</em> below.</p>
+<p>To delete polygons, select one or more rows in the <em>Polygon Table</em> and either click the
+Delete button on the tab’s toolbar, press <code class="docutils literal notranslate"><span class="pre">Delete</span></code>, or right-click the selection and choose
+<em>Delete Polygon</em>. A polygon selected on the map (click inside it) can also be removed with
+<code class="docutils literal notranslate"><span class="pre">Delete</span></code> without going through the table.</p>
+<p>While a polygon is being drawn, the map is shown in full so the area being outlined stays
+visible; once it is complete, everything outside the selection is dimmed to keep the focus
+on the selected region. The color and strength of that dimming can be set with <em>Mask color</em>
+and <em>Mask opacity</em> on the <em>Text and Scales</em> page of the <em>Styling Toolbox</em>.</p>
+<p><em>LaME</em> allows you to create multiple polygons. Regions are <strong>combined</strong>, so several polygons
+select all of their areas together, and every polygon is drawn on the map. Each row of the
+<em>Polygon Table</em> has an <em>In/out</em> setting: <em>In</em> keeps the enclosed area, while <em>Out</em> removes it
+from the selection, which is how a hole is cut in a larger region (an <em>Out</em> polygon is drawn
+with a dashed outline). With no <em>In</em> polygon, an <em>Out</em> polygon simply excludes its own area.
+You can toggle the use of individual polygons in analyses by clicking the associated checkbox
+in the <em>Analysis</em> column of the <em>Polygon Table</em>, and use the <a class="reference internal" href="_images/icon-polygon-new-64.svg"><img alt="icon-polygon-new" src="_images/icon-polygon-new-64.svg" style="height: 2.5ex;" /></a> toolbar
+button to turn the whole polygon mask on or off without discarding the polygons.</p>
+<section id="linking-polygons-into-regions">
+<h4>Linking polygons into regions<a class="headerlink" href="#linking-polygons-into-regions" title="Link to this heading">#</a></h4>
+<p>By default each polygon is its own region.  Several polygons that outline the same thing –
+for example every grain of one mineral – can be <strong>linked</strong> so they are analyzed together as
+a single region.  Select the rows in the <em>Polygon Table</em> and click <a class="reference internal" href="_images/icon-link-64.svg"><img alt="icon-link" src="_images/icon-link-64.svg" style="height: 2.5ex;" /></a> to link them,
+or <a class="reference internal" href="_images/icon-unlink-64.svg"><img alt="icon-unlink" src="_images/icon-unlink-64.svg" style="height: 2.5ex;" /></a> to split them apart again.  Linked polygons share a color on the map and
+show their group in the <em>Link</em> column.  Linking never changes which pixels are selected; it
+changes what counts as one region.</p>
+<p>An <em>Out</em> polygon that is linked into a group cuts its hole in <strong>that group only</strong>, so an
+inclusion can be excluded from one grain without affecting any other region.  An <em>Out</em>
+polygon that is not linked keeps subtracting from the whole map.</p>
+<p>To analyze the regions, select the polygons and click <a class="reference internal" href="_images/icon-roi-add-64.svg"><img alt="icon-roi-add" src="_images/icon-roi-add-64.svg" style="height: 2.5ex;" /></a> (<em>Create Region</em>).  Each
+linked group becomes one region of interest, and each unlinked polygon becomes a region of
+its own.  From that point they behave like any other region of interest: they appear in the
+<em>ROI</em> table, in the ROI map, in the region percentages, and in the per-region statistics of
+the <em>Stoichiometry</em> dock (choose <code class="docutils literal notranslate"><span class="pre">ROI</span></code> as the region column).  Running <em>Create Region</em>
+again refreshes the regions made from the same polygons rather than adding duplicates, so
+reshaping a polygon just means clicking it once more.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A region is a snapshot of the polygons it was made from, and regions of interest are not
+saved in the project file.  The polygons and their groups <em>are</em> saved, so the regions can
+be recreated in one click after reopening a project.</p>
+</div>
+</section>
 <section id="edge-detection">
-<h3>Edge-detection<a class="headerlink" href="#edge-detection" title="Link to this heading">#</a></h3>
+<h4>Edge-detection<a class="headerlink" href="#edge-detection" title="Link to this heading">#</a></h4>
 <p>To aid with the identification of mineral boundaries, you can turn on edge detection by clicking the <a class="reference internal" href="_images/icon-spotlight-64.svg"><img alt="icon-spotlight" src="_images/icon-spotlight-64.svg" style="height: 2.5ex;" /></a> button. There are multiple edge detection methods available (Sobel, Canny, zero-cross) which you can select using the dropdown menu.  Edge-detection is useful for locating the boundaries of polygons.  The use of edge detection does not affect analyses.</p>
+</section>
 </section>
 </section>
 <section id="cluster-masking">
@@ -563,7 +625,11 @@
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-by-value">Filter by value</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#polygon-masking">Polygon Masking</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#edge-detection">Edge-detection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#editing-a-polygon">Editing a polygon</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#linking-polygons-into-regions">Linking polygons into regions</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#edge-detection">Edge-detection</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster-masking">Cluster Masking</a></li>
@@ -592,8 +658,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -601,7 +667,7 @@
     <div class="footer-items__start">
       
         <div class="footer-item"><p class="last-updated">
-  Last updated on 2026-09-06.
+  Last updated on 2026-09-25.
   <br/>
 </p></div>
       
@@ -614,7 +680,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
 </p></div>
       
     </div>

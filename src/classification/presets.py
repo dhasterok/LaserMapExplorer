@@ -9,7 +9,13 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
-DEFAULT_PRESETS_PATH = "resources/minerals/classification_presets.csv"
+from lame_core.config import RESOURCE_PATH
+
+# Anchored to the installed resources directory, not the working directory: a
+# frozen app launched from Finder runs with cwd "/". src/app/config.py calls
+# lame_core.config.setup() before any app module is imported, so RESOURCE_PATH is
+# already correct by the time this binds.
+DEFAULT_PRESETS_PATH = str(Path(RESOURCE_PATH) / "minerals" / "classification_presets.csv")
 
 
 def load_presets(path: str | Path = DEFAULT_PRESETS_PATH) -> dict[str, list[str]]:

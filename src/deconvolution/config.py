@@ -12,9 +12,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from lame_core.config import RESOURCE_PATH
+
 import yaml
 
-DEFAULT_DEFAULTS_PATH = "resources/calibration/defaults.yaml"
+# Anchored to the installed resources directory -- see the note in
+# src/classification/presets.py; cwd is "/" for a frozen app.
+DEFAULT_DEFAULTS_PATH = str(Path(RESOURCE_PATH) / "calibration" / "defaults.yaml")
 
 
 class DeconvolutionConfigError(ValueError):

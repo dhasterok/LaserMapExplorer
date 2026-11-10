@@ -290,6 +290,11 @@ class MainWindow(QMainWindow):
         """
         self.lame_action.FullMap.triggered.connect(self.control_dock.preprocess.reset_crop)
 
+        # Crop is a checkable action: checking it arms the rubber band, unchecking
+        # it abandons the crop. Applying happens on Enter inside the canvas (see
+        # CropTool), so that throwing away computed fields takes a deliberate key.
+        self.lame_action.Crop.toggled.connect(self.toggle_crop)
+
     
     def on_ui_pref_changed(self, *args):
         scale = prefs.scale
@@ -1456,6 +1461,72 @@ class MainWindow(QMainWindow):
 
         return True
 
+    def toggle_crop(self, checked):
+        """Arms or abandons the crop tool from the toolbar's Crop action."""
+        if checked:
+            self.reset_checked_items('crop')
+            self.crop_tool.start(getattr(self, 'mpl_canvas', None))
+        else:
+            self.crop_tool.stop()
+
+    def reset_map_limits(self):
+        """Fits the map's axis limits to the sample's current extent.
+
+        ``plot_map_mpl`` sets the axes from ``style_data.xlim``/``ylim``, not from
+        the data, so after a crop the map keeps the old extent and the cropped-away
+        area simply shows as empty space instead of the view closing in on what is
+        left.
+
+        Called only where the extent genuinely changes -- cropping and Full Map --
+        because these limits are also what the Styling panel's bound fields write
+        to, and refreshing them on every redraw would overwrite values typed in by
+        hand. Applied to every map plot type, since the crop changes the sample for
+        all of them, not just the one on screen.
+        """
+        data = self.app_data.current_data
+        if data is None:
+            return
+        xlim, ylim = tuple(data.xlim), tuple(data.ylim)
+        if None in xlim or None in ylim:
+            return
+        xlim = [float(xlim[0]), float(xlim[1])]
+        ylim = [float(ylim[0]), float(ylim[1])]
+
+        style = self.style_data
+        for plot_type in style.map_plot_types:
+            entry = style.style_dict.get(plot_type)
+            if entry is None:
+                continue
+            entry['XLim'] = list(xlim)
+            entry['YLim'] = list(ylim)
+            entry['ScaleLength'] = None
+
+        if style.plot_type in style.map_plot_types:
+            # Through the properties for the current plot type so the axisLimChanged
+            # signals fire and the scalebar length is recomputed (its setter derives
+            # a default from xlim/ylim when handed None).
+            style.xlim = xlim
+            style.ylim = ylim
+            style.scale_length = None
+
+    def update_crop_availability(self):
+        """Enables Crop only where there is a map to crop.
+
+        A crop is a rectangle of the sample, so it means nothing on a scatter,
+        histogram or correlation plot -- the same distinction that governs the
+        scalebar (``StyleToolbox.map_plot_types``). If the plot type changes out
+        from under a live crop, the rubber band goes with it rather than being
+        left over a plot it no longer refers to.
+        """
+        available = self.crop_tool.is_available()
+        self.lame_action.Crop.setEnabled(available)
+        if not available and self.lame_action.Crop.isChecked():
+            self.crop_tool.cancel()
+
+        # Full Map is only meaningful once something has been cropped.
+        data = self.app_data.current_data
+        self.lame_action.FullMap.setEnabled(bool(data is not None and getattr(data, 'crop', False)))
+
     def schedule_update(self):
         """Schedules an update to a plot only when ``self.ui.plot_flag == True``."""
         if self.plot_flag:
@@ -1599,6 +1670,13 @@ class MainWindow(QMainWindow):
         finally:
             # Always restore plot_flag to prevent infinite loops
             self.plot_flag = old_plot_flag
+            # Crop follows whatever is now on the canvas: a single point that
+            # catches a plot-type change, a sample change and a project load
+            # alike, since all of them end up redrawing here.
+            try:
+                self.update_crop_availability()
+            except Exception as e:
+                log(f"could not update crop availability: {e}", prefix="Warning")
 
 
     def apply_cluster_mask(self, inverse=False):

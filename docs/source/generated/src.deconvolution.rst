@@ -13,6 +13,7 @@
    config
    diagnostics
    esf
+   inclusions
    kernels
    operator
    pipeline

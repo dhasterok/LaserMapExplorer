@@ -2,6 +2,59 @@ import sys, os, threading, traceback
 from pathlib import Path
 
 
+def _guard_matplotlib_font_scan():
+    """Stop matplotlib's macOS font scan from killing startup.
+
+    ``matplotlib.font_manager`` builds its font list at *import* time
+    (``fontManager = _load_fontmanager()``), and ``_load_fontmanager`` only guards
+    the cache *read* -- constructing a ``FontManager`` is unprotected. That
+    construction calls ``_get_macos_fonts``, which ends in::
+
+        return [Path(entry["path"]) for entry in d["_items"]]
+
+    On macOS 26 and later ``system_profiler -xml SPFontsDataType`` answers with no
+    ``_items`` key at all, so that raises ``KeyError``. matplotlib catches only
+    OSError, CalledProcessError and InvalidFileException, so the KeyError escapes
+    the import and nothing that touches pyplot can load. Present in 3.11.0 through
+    3.11.2 alike, so there is no version to upgrade to.
+
+    It only bites when no font cache exists yet, which is why running from a
+    developer checkout looks fine (``~/.matplotlib/fontlist-v*.json`` is already
+    there from some earlier session) while a freshly installed app bundle dies on
+    first launch.
+
+    The fix is to make that one subprocess call fail in a way matplotlib already
+    handles. Narrowed to ``system_profiler`` and reverted immediately, so nothing
+    else sees a patched ``check_output``. Little is lost: ``findSystemFonts`` scans
+    ``OSXFontDirectories`` separately, and matplotlib's own bundled fonts are
+    always present -- ``_get_macos_fonts`` is one source among several.
+    """
+    import subprocess
+
+    real_check_output = subprocess.check_output
+
+    def check_output(cmd, *args, **kwargs):
+        first = cmd[0] if isinstance(cmd, (list, tuple)) and cmd else cmd
+        if isinstance(first, (str, bytes, os.PathLike)) and \
+                os.path.basename(os.fsdecode(first)) == 'system_profiler':
+            raise OSError('system_profiler font list suppressed; see '
+                          '_guard_matplotlib_font_scan')
+        return real_check_output(cmd, *args, **kwargs)
+
+    subprocess.check_output = check_output
+    try:
+        import matplotlib.font_manager  # noqa: F401  -- import for the side effect
+    except Exception as exc:
+        print(f"warning: could not pre-load matplotlib fonts: {exc}", file=sys.stderr)
+    finally:
+        subprocess.check_output = real_check_output
+
+
+# Before anything that might pull in matplotlib, since the failure above happens
+# during its import and there is no later point at which to intervene.
+_guard_matplotlib_font_scan()
+
+
 class SelftestReport:
     """
     Progress log for ``--selftest`` that cannot itself hang or crash the check.
@@ -16,7 +69,7 @@ class SelftestReport:
       show how far the check got even if the process has to be killed;
     * a watchdog thread ends the process with exit code 3 after ``timeout`` seconds,
       naming the stage it was stuck in -- this also covers a modal dialog or a hung
-      WebEngine initialisation, which block the main thread.
+      WebEngine initialization, which block the main thread.
 
     Built only from the standard library so it works before any LaME, lame_core or
     Qt import has been attempted.
@@ -73,7 +126,7 @@ class SelftestReport:
         self.exit(1)
 
     def exit(self, code):
-        """End the process without interpreter finalisation (see :func:`shutdown`)."""
+        """End the process without interpreter finalization (see :func:`shutdown`)."""
         for stream in (self.file, sys.stdout, sys.stderr):
             try:
                 if stream is not None:
@@ -330,6 +383,11 @@ def selftest(app, report):
     check('reference data', APPDATA_PATH / 'earthref.xlsx')
     check('isotope table', APPDATA_PATH / 'isotope_info.csv')
     check('calibration defaults', BASEDIR / 'resources' / 'calibration' / 'defaults.yaml')
+    # The Stoichiometry dock's mineral list. Checked explicitly because these were
+    # once looked up relative to the working directory, which is "/" for an app
+    # launched from Finder -- the files were bundled all along, so nothing failed at
+    # build time and the dropdown simply came up empty for every user.
+    check('mineral configs', BASEDIR / 'resources' / 'minerals' / 'garnet.yaml')
     check('blockly workspace', BASEDIR / 'blockly' / 'index.html')
     check('blockly bundle', BASEDIR / 'blockly' / 'dist' / 'bundle.js')
     check('user guide', BASEDIR / 'docs' / 'build' / 'html' / 'index.html')

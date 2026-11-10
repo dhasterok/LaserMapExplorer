@@ -24,9 +24,11 @@
    isotope_apportion
    lod
    massbias
+   nonparametric_drift
    pipeline
    poisson_drift
    pooling
+   progress
    rawfile
    reflib
    standards

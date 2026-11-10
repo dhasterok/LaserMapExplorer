@@ -8,6 +8,7 @@ src.calibration.reflib
 
    .. autosummary::
    
+      clean_analyte_name
       load_reference_library
       load_reference_material
       parse_analyte_name

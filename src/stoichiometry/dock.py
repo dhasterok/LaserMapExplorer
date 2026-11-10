@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
+import lame_core.config as lame_core_config
 from lame_core.CustomWidgets import CustomDockWidget, CustomAction
 from src.control.FieldLogic import FieldLogicUI
 from src.stoichiometry import pipeline, regionstats
@@ -32,7 +33,23 @@ from src.stoichiometry.config import MineralConfig, MineralConfigError, load_min
 
 _ELEMENT_COL_RE = re.compile(r"^([A-Z][a-z]?)(\d+)$")
 
-DEFAULT_GARNET_CONFIG_PATH = "resources/minerals/garnet.yaml"
+def minerals_dir() -> Path:
+    """Directory holding the bundled mineral configs.
+
+    Resolved against ``lame_core.config.RESOURCE_PATH`` at call time, never
+    against the working directory. A frozen app launched from Finder runs with
+    cwd ``/``, so the old ``Path("resources/minerals")`` found nothing there and
+    the mineral dropdown came up empty and red -- the configs are bundled, just
+    not where a relative path looks. Read through the module rather than
+    from-imported so a later change to the import order cannot leave this bound
+    to lame-core's own resources directory.
+    """
+    return Path(lame_core_config.RESOURCE_PATH) / "minerals"
+
+
+def default_mineral_config_path() -> Path:
+    """Garnet, the mineral the dock opens on."""
+    return minerals_dir() / "garnet.yaml"
 
 
 def _base_element(species: str) -> str:
@@ -113,9 +130,10 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
     _ALL_PIXELS_LABEL = "(All pixels)"
 
-    def __init__(self, ui=None, config_path: str = DEFAULT_GARNET_CONFIG_PATH):
+    def __init__(self, ui=None, config_path: str | None = None):
         self.ui = ui
         self.logger_key = "Stoichiometry"
+        config_path = config_path if config_path is not None else default_mineral_config_path()
 
         if not isinstance(ui, QMainWindow):
             raise TypeError("Parent must be an instance of QMainWindow.")
@@ -314,7 +332,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
     # -------------------------------------
     def _available_minerals(self) -> dict[str, str]:
         """{display name: yaml path} for every mineral config in resources/minerals/."""
-        paths = sorted(Path("resources/minerals").glob("*.yaml"))
+        paths = sorted(minerals_dir().glob("*.yaml"))
         return {p.stem.capitalize(): str(p) for p in paths}
 
     def _update_mineral_combobox_style(self):

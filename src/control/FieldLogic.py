@@ -1293,7 +1293,15 @@ class FieldLogicUI():
         plot_type : str
             The plot type helps to define the set of field types available, by default ``''`` (no change)
         """
-        data_type_dict = self.data.processed.get_attribute_dict('data_type')
+        if self.data is None:
+            return
+
+        # `self.data` is a SampleObj on most docks but the processed
+        # AttributeDataFrame itself on CalculatorDock, so resolve the frame
+        # rather than assuming one shape -- getting this wrong is why the
+        # calculator's field-type box was never populated.
+        frame = getattr(self.data, 'processed', self.data)
+        data_type_dict = frame.get_attribute_dict('data_type')
 
         match plot_type.lower():
             case 'correlation' | 'histogram' | 'tec':
@@ -1346,6 +1354,14 @@ class FieldLogicUI():
 
                 if 'Diffusion model' in data_type_dict:
                     field_list.append('Diffusion model')
+
+                # Mineral-formula outputs (e.g. 'Grt_almandine',
+                # 'Grt_dominant') are ordinary numeric columns that
+                # get_map_data already serves and _compute_filter_mask already
+                # evaluates correctly -- they were simply never offered here,
+                # so the Filter tab could not see them.
+                if 'Stoichiometry' in data_type_dict:
+                    field_list.append('Stoichiometry')
 
         # add None to list?
         if addNone:

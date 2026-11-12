@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from PyQt6.QtCore import QRect, QSize, Qt, QTimer
+from PyQt6.QtCore import QRect, QSize, Qt
 from PyQt6.QtWidgets import (
     QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
     QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPlainTextEdit,
@@ -133,6 +133,12 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
     def __init__(self, ui=None, config_path: str | None = None):
         self.ui = ui
         self.logger_key = "Stoichiometry"
+        # CustomDockWidget.__init__ calls self.show(). When the parent window
+        # is already visible -- i.e. every time the dock is opened from the
+        # toolbar rather than built at startup -- Qt delivers the QShowEvent
+        # synchronously, before setupUI() has created a single widget. showEvent
+        # must therefore not touch the UI until this flag says it exists.
+        self._ui_ready = False
         config_path = config_path if config_path is not None else default_mineral_config_path()
 
         if not isinstance(ui, QMainWindow):
@@ -142,6 +148,9 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self._last_results: dict = {}
         self._last_mask = None
+        #: Settings have changed since the displayed results were computed.
+        #: Nothing recomputes on its own -- see `_mark_stale`.
+        self._results_stale = False
         self.config: MineralConfig | None = None
         self._config_path = config_path
 
@@ -158,7 +167,11 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
         self.setupUI()
         self.connect_widgets()
+        self._ui_ready = True
         self._refresh_region_columns()
+        # Opens with the prompt rather than an empty box, since nothing is
+        # computed until the user asks for it.
+        self._mark_stale()
         self.setGeometry(QRect(0, 0, 700, 600))
 
     @property
@@ -196,7 +209,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             light_icon_unchecked="icon-run-64.svg",
             parent=self,
         )
-        self.run_action.setToolTip("Calculate")
+        self.run_action.setToolTip("Calculate stoichiometry with the current settings")
 
         self.copy_to_notes_action = CustomAction(
             text="Copy to Notes",
@@ -306,25 +319,28 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         self.copy_to_notes_action.triggered.connect(
             lambda: self.ui.insert_info_note("stoichiometry results"))
         self.minerals_combobox.currentIndexChanged.connect(self._on_mineral_changed)
-        self.analyte_units_combobox.currentIndexChanged.connect(self.calculate)
-        self.redox_method_combobox.currentIndexChanged.connect(self.calculate)
-        self.comboBoxLodTreatment.currentIndexChanged.connect(self.calculate)
-        self.checkBoxCompareRedox.toggled.connect(self.calculate)
+        # Changing a setting only marks the displayed results out of date --
+        # the run itself waits for the Run action. calculate() writes columns
+        # back to the sample with merge=True, so a run cannot be undone by
+        # changing the setting back; recomputing on every combobox change
+        # meant a half-made selection was written permanently on the way to
+        # the one the user actually wanted. (That is what the debounce timer
+        # removed from here was trying, and failing, to contain.)
+        self.analyte_units_combobox.currentIndexChanged.connect(self._mark_stale)
+        self.redox_method_combobox.currentIndexChanged.connect(self._mark_stale)
+        self.comboBoxLodTreatment.currentIndexChanged.connect(self._mark_stale)
+        self.checkBoxCompareRedox.toggled.connect(self._mark_stale)
         self.filter_combobox.currentIndexChanged.connect(self._on_scope_column_changed)
-        # Debounced rather than a direct connection: checking/unchecking a batch of
-        # regions fires one itemChanged per click, and calculate() writes with
-        # merge=True (never clears stale values) -- an un-debounced recompute on
-        # every intermediate click would permanently "leak" whichever regions were
-        # transiently checked partway through the user's edit, even after they're
-        # unchecked in the final state.
-        self._scope_debounce = QTimer(self)
-        self._scope_debounce.setSingleShot(True)
-        self._scope_debounce.timeout.connect(self.calculate)
-        self.listScopeRegions.itemChanged.connect(lambda *_: self._scope_debounce.start(300))
+        self.listScopeRegions.itemChanged.connect(self._mark_stale)
         self.comboBoxRegionColumn.currentIndexChanged.connect(self._on_region_column_changed)
 
     def showEvent(self, event):
         super().showEvent(event)
+        if not self._ui_ready:
+            # Fired from CustomDockWidget.__init__'s self.show(), before
+            # setupUI(); __init__ calls _refresh_region_columns() itself once
+            # the widgets exist.
+            return
         self._refresh_region_columns()
 
     # -------------------------------------
@@ -363,7 +379,10 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
                 self.redox_method_combobox.setCurrentText(self.config.redox.default_method)
         self.redox_method_combobox.blockSignals(False)
 
-        self.calculate()
+        # A different mineral means different columns, different end members
+        # and a different output prefix, so whatever is on screen belongs to
+        # the previous one -- but it is still the user's call when to run.
+        self._mark_stale()
 
     # -------------------------------------
     # Region scope (restrict computation to specific ROIs/clusters)
@@ -474,12 +493,18 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
 
     def _on_scope_column_changed(self, *_args):
         self._refresh_scope_regions()
-        # Debounced, not called directly: a freshly-populated region list
-        # defaults every item to checked, so an immediate calculate() here
-        # would eagerly compute (and permanently, since writes use
-        # merge=True) over every region before the user narrows the
-        # selection down to the ones they actually want.
-        self._scope_debounce.start(300)
+        self._mark_stale()
+
+    def _mark_stale(self, *_args):
+        """Note that the displayed results no longer match the settings.
+
+        Every settings widget lands here instead of ``calculate``: a run
+        writes mineral-formula columns back into the sample, which is not
+        something to do on each keystroke of a user making up their mind.
+        The Run action is the only thing that computes.
+        """
+        self._results_stale = True
+        self._update_results_text()
 
     def _on_region_column_changed(self, *_args):
         if self.data is not None and self._last_mask is not None:
@@ -547,11 +572,12 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
     def calculate(self, *_args):
         """Recompute over the current scope and write results back.
 
-        Called on any settings change (input mode, redox method, LOD
-        treatment, compare-methods toggle, or region-scope selection) -- no
-        need to close and reopen the dock, or click a separate button, to see
-        an updated result. Scoped runs (e.g. one mineral on one cluster,
-        another mineral on a different cluster) coexist: see
+        Run only when the Run action is clicked. Changing a setting marks
+        the displayed results stale (see ``_mark_stale``) but computes
+        nothing: a run writes mineral-formula columns into the sample, so it
+        is the user's decision when to make one, and partially-made
+        selections should not reach the data. Scoped runs (e.g. one mineral
+        on one cluster, another mineral on a different cluster) coexist: see
         ``_write_results_to_sample``.
         """
         if self.config is None:
@@ -622,6 +648,7 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
             "summary_df": getattr(self, "_last_summary_df", None),
             "endmember_members": list(self.config.end_members.members),
         }
+        self._results_stale = False
         self._update_results_text()
         self.ui.schedule_update()
 
@@ -807,11 +834,21 @@ class StoichiometryDock(CustomDockWidget, FieldLogicUI):
         update_dataframe(display_df.reset_index(drop=True), self.tableSummary)
         self.tableSummary.setVerticalHeaderLabels(field_labels)
 
+    #: Shown in place of results when nothing has been computed yet.
+    _RUN_PROMPT = "Set the options above, then click Run to calculate."
+    #: Prefixed to the last run's results once a setting has moved on.
+    _STALE_NOTICE = ("Settings have changed since this was calculated "
+                     "-- click Run to update.")
+
     def _update_results_text(self):
         r = self._last_results
         if not r:
+            if self._results_stale:
+                self.textEditResults.setPlainText(self._RUN_PROMPT)
             return
         lines = []
+        if self._results_stale:
+            lines.append(self._STALE_NOTICE)
         if getattr(self, "_column_mapping_line", ""):
             lines.append(self._column_mapping_line)
         lines += [

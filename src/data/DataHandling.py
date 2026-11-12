@@ -336,11 +336,20 @@ class SampleObj(QObject):
         # cleared whenever prep_data() runs since that's the only place analyte values change
         self._correlation_cache = {}
 
-        self._default_lower_bound = 0.005
-        self._default_upper_bound = 0.995
+        # Percentiles, in the 0-100 units np.nanpercentile takes -- these are
+        # passed straight to it by prep_data's outlier clipping. They were
+        # 0.005/0.995, i.e. the same numbers expressed as fractions, which is
+        # a factor of 100 out: clipping at "the 0.995th percentile" pinned the
+        # top 99% of a column to a single value. Analytes escaped it because
+        # reset_data assigns them these same percentile values explicitly;
+        # everything created through add_columns -- ratios, calculated fields,
+        # PCA and cluster scores, stoichiometry outputs -- took the defaults
+        # and was silently flattened the next time prep_data ran.
+        self._default_lower_bound = 0.05
+        self._default_upper_bound = 99.5
 
-        self._default_difference_lower_bound= 0.005
-        self._default_difference_upper_bound= 0.995
+        self._default_difference_lower_bound = 0.05
+        self._default_difference_upper_bound = 99
 
         self._data_min_quantile = 0.005
         self._data_max_quantile = 0.005
@@ -2477,9 +2486,27 @@ class SampleObj(QObject):
             # existed -- and a project reload, which restores labels before
             # the preprocessing widgets sync the outlier method, lost them
             # every time. The ROI column is rebuilt from the stack below.
+            # Columns that exist only in `processed`. The reset below rebuilds
+            # `processed` from `raw`, which destroys them outright -- and
+            # nothing here can reconstruct their values, because each belongs
+            # to a tool this method cannot reach: a Calculated field's
+            # formula, a PCA or clustering fit, a stoichiometry run. Only
+            # ratios are regenerable (see `computed_ratios` above), so
+            # everything else is carried across verbatim.
+            #
+            # Carried, not recomputed: a Calculated field keeps the values it
+            # had, which may no longer match inputs that this very call has
+            # just re-preprocessed. That is still far better than the column
+            # vanishing -- losing it also removes its whole field *type* from
+            # every dropdown, so the fields become unplottable and unselectable
+            # with no message. Recomputing would mean reaching the calculator
+            # from here, as `apply_processing_state` does with its injected
+            # `field_calculator`.
             carried_labels = {
-                col: (self.processed[col].values.copy(), data_type)
-                for data_type in ('Cluster', 'Cluster score')
+                col: (self.processed[col].values.copy(), data_type,
+                      dict(self.processed.column_attributes.get(col, {})))
+                for data_type in ('Cluster', 'Cluster score', 'Calculated',
+                                  'PCA score', 'Stoichiometry', 'Special')
                 for col in self.processed.match_attribute('data_type', data_type)
                 if col not in self.raw.columns
             }
@@ -2600,8 +2627,14 @@ class SampleObj(QObject):
         
         # Restore carried cluster columns (after clipping, which must not
         # touch labels) and re-evaluate ROIs against the rebuilt values.
-        for col, (values, data_type) in carried_labels.items():
+        for col, (values, data_type, attrs) in carried_labels.items():
             self.add_columns(data_type, col, values)
+            # add_columns only fills in defaults, so restore what the column
+            # actually carried: a Calculated field's 'formula', a dominant
+            # end-member's 'discrete'/'category_labels'/'category_colors', the
+            # 'units' on an apfu site total, plus use/norm/bounds.
+            for attr_name, attr_value in attrs.items():
+                self.processed.set_attribute(col, attr_name, attr_value)
         if field == 'all' and getattr(self, 'roi_stack', None):
             self.recompute_roi_assignments()
 

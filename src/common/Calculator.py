@@ -16,6 +16,86 @@ from lame_core.CustomWidgets import CustomComboBox, CustomDockWidget, CustomActi
 from src.control.FieldLogic import FieldLogicUI
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 
+def apply_outside_braces(txt: str, transform) -> str:
+    """Run ``transform`` over the parts of ``txt`` that sit outside ``{...}``.
+
+    Everything between the braces is a *field name*, not expression syntax,
+    and some field names contain characters the normalization would destroy:
+    every ratio is named ``'Sr88 / Ca43'``, spaces and all (see
+    ``SampleObj.reset_data``'s ``' / '`` check). Stripping whitespace across
+    the whole string turned that into ``Sr88/Ca43``, which matches no column,
+    so every ratio reference failed -- silently, until the missing-field
+    error was added.
+
+    Unbalanced braces are left to the existing brace-count check to report.
+    """
+    out, buf, depth = [], [], 0
+    for ch in txt:
+        if depth > 0:
+            out.append(ch)
+            if ch == '}':
+                depth -= 1
+            continue
+        if ch == '{':
+            out.append(transform(''.join(buf)))
+            buf = []
+            out.append(ch)
+            depth += 1
+            continue
+        buf.append(ch)
+    out.append(transform(''.join(buf)))
+    return ''.join(out)
+
+
+def parenthesize_boolean_operands(expr: str) -> str:
+    """Wrap each operand of a top-level ``&``/``|`` in parentheses.
+
+    Python -- and so numexpr, which parses with Python's own grammar -- binds
+    ``&`` and ``|`` *tighter* than the comparison operators. ``a>b & c>d``
+    therefore parses as ``a > (b&c) > d``, a chained comparison, and chaining
+    is implemented with ``and``; numexpr reports that as
+
+        You can't use Python's standard boolean operators in NumExpr
+        expressions. You should use their bitwise counterparts instead...
+
+    which blames the user for an ``and`` they never typed. Rewriting the
+    expression as ``(a>b)&(c>d)`` is what was meant in every realistic case,
+    and is a no-op for an expression that is already parenthesized or that
+    applies ``&`` to plain numbers.
+
+    Only depth-zero operators are split on, so parentheses and ``{field}``
+    references are left intact. Malformed input is returned unchanged for the
+    existing error handling to report.
+    """
+    parts, buf, depth = [], [], 0
+    for ch in expr:
+        if ch in '([{':
+            depth += 1
+        elif ch in ')]}':
+            depth -= 1
+        if depth == 0 and ch in '&|':
+            parts.append((''.join(buf), ch))
+            buf = []
+        else:
+            buf.append(ch)
+
+    if not parts:
+        return expr
+    parts.append((''.join(buf), ''))
+
+    out = []
+    for operand, op in parts:
+        operand = operand.strip()
+        if not operand:
+            return expr
+        if operand.startswith('~'):
+            # 'not a > b' -> '~a>b' would negate `a`, not the comparison.
+            out.append(f'~({operand[1:]}){op}')
+        else:
+            out.append(f'({operand}){op}')
+    return ''.join(out)
+
+
 def calc_error(parent, func, err, addinfo):
     """Raise a calculator-related error
 
@@ -198,13 +278,22 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         calculator_layout.addLayout(equation_select_layout)
 
         # Field Control
+        #
+        # Both boxes repopulate on popup rather than at construction: the dock
+        # is built once at startup, before any sample exists, so anything
+        # filled in now would be empty forever. The field box refreshes the
+        # type box first -- otherwise opening it with an unpopulated type box
+        # silently falls back to listing analytes (see
+        # FieldLogicUI.update_field_combobox), which is what made the two
+        # boxes disagree.
         self.comboBoxFieldType = CustomComboBox()
         self.comboBoxFieldType.setToolTip("Select field type")
+        self.comboBoxFieldType.popup_callback = self._refresh_field_type_combobox
         self.comboBoxFieldType.activated.connect(lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
         calculator_layout.addWidget(self.comboBoxFieldType)
 
         field_layout = QHBoxLayout()
-        self.comboBoxField = CustomComboBox(popup_callback=lambda: self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField))
+        self.comboBoxField = CustomComboBox(popup_callback=lambda: self._refresh_field_comboboxes())
         self.comboBoxField.setToolTip("Select field")
 
         self.add_formula_button = CustomToolButton(
@@ -369,6 +458,23 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
                 if func_name == 'otherwise':
                     cursor.insertText(f"; ")
     
+    def _refresh_field_type_combobox(self):
+        """Repopulate the field-type box, preserving the current selection.
+
+        ``update_field_type_combobox`` clears and refills, which would reset
+        the user's choice every time either popup opens, so the selection is
+        restored afterwards when it still exists.
+        """
+        previous = self.comboBoxFieldType.currentText()
+        self.update_field_type_combobox(self.comboBoxFieldType, addNone=False)
+        if previous and previous in self.comboBoxFieldType.allItems():
+            self.comboBoxFieldType.setCurrentText(previous)
+
+    def _refresh_field_comboboxes(self):
+        """Refresh the field list, making sure the type box is populated first."""
+        self._refresh_field_type_combobox()
+        self.update_field_combobox(self.comboBoxFieldType, self.comboBoxField)
+
     def calc_add_field(self):
         """Adds the selected field to the calculator
 
@@ -388,8 +494,14 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
             case 'Calculated':
                 fieldname = f'Calculated.{field}'
             case _:
-                if field != '':
-                    fieldname = f'{field_type}.{field}'
+                fieldname = f'{field_type}.{field}'
+
+        # Nothing useful to insert: a half-selected pair would produce
+        # '{.Fe57}' or '{Analyte.}', which calc_parse cannot resolve, and an
+        # unset `fieldname` used to raise UnboundLocalError here.
+        if field == '' or field_type == '':
+            self.message_label.setText("Select a field type and a field first...")
+            return
 
         # add to calculation screen
         cursor = self.calc_text_edit.textCursor()
@@ -497,7 +609,7 @@ class CalculatorDock(CustomDockWidget, FieldLogicUI):
         func = 'CalculatorDock.calculate_new_field'
         # open dialog to get new field
         if self.add_formula:
-            new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custon field name:')
+            new_field, ok = QInputDialog.getText(self, 'Save expression', 'Enter custom field name:')
             if ok:
                 # check for valid field name
                 if partial_match(['_N',':'],new_field)[0]:
@@ -582,12 +694,29 @@ class CustomFieldCalculator():
         if txt is None:
             return None, None
 
-        txt = ''.join(txt.split())
+        def normalize(segment):
+            # Accept the English operators as well as the bitwise ones numexpr
+            # requires -- 'and' reads naturally to anyone who does not write
+            # code. The substitution has to precede the whitespace strip:
+            # afterwards 'a > 2 and b > 3' is 'a>2andb>3' and the word
+            # boundaries are gone.
+            segment = re.sub(r'\bnot\b', ' ~ ', segment)
+            segment = re.sub(r'\band\b', ' & ', segment)
+            segment = re.sub(r'\bor\b', ' | ', segment)
 
-        txt = txt.replace('^','**')
-        txt = txt.replace('log(','log10(')
-        txt = txt.replace('ln(','log(')
-        txt = txt.replace('grad(','gradient(')
+            segment = ''.join(segment.split())
+
+            segment = segment.replace('^','**')
+            segment = segment.replace('log(','log10(')
+            segment = segment.replace('ln(','log(')
+            segment = segment.replace('grad(','gradient(')
+            return segment
+
+        # Field names inside {...} are left exactly as typed: they are data,
+        # not syntax, and a ratio's name ('Sr88 / Ca43') does not survive
+        # being stripped. It also means a name containing 'and'
+        # ('Grt_almandine') is protected structurally rather than by \b.
+        txt = apply_outside_braces(txt, normalize)
 
         cond = None
         if ('case' in txt) or ('otherwise' in txt):
@@ -638,10 +767,18 @@ class CustomFieldCalculator():
             err = 'mismatched braces in expr'
             calc_error(self.parent, func, err, '')
             return None, None
+
+        if cond is None:
+            # Only on the plain path: a 'case ...;' string is split on ';' and
+            # ',' above and each piece comes back through this function, so
+            # parenthesizing the whole thing here would span those separators.
+            txt = parenthesize_boolean_operands(txt)
         
         field_list = re.findall(r'\{.*?\}', txt)
         log(f"{field_list}", prefix="Calculator")
         var = {}
+        # field name -> the identifier standing in for it in the expression
+        placeholders = {}
         for field_str in field_list:
             field_str = field_str.replace('{','')
             field_str = field_str.replace('}','')
@@ -656,13 +793,36 @@ class CustomFieldCalculator():
                 if field_type in ['Analyte', 'Ratio']:
                     field_type = f"{field_type} (normalized)"
 
-            if field in list(var.keys()):
+            if (field_type, field) in placeholders:
                 continue
 
-            df = data.get_map_data(field, field_type)
-            var.update({field: df['array']})
+            try:
+                df = data.get_map_data(field, field_type)
+            except Exception as e:
+                # get_map_data raises a bare KeyError for a column this sample
+                # does not have. Uncaught, it escaped calculate_new_field and
+                # the dock entirely: no dialog, no log line, no field -- the
+                # one calculator failure that looked like nothing happening.
+                # Stoichiometry/PCA/cluster columns are per-sample, so this is
+                # most often a reference to a field computed on another one.
+                sample_id = getattr(data, 'sample_id', None) or 'the current sample'
+                err = f"no field '{field}' of type '{field_type}' in {sample_id}"
+                calc_error(self.parent, func, err, e)
+                return None, None
+            # numexpr resolves names with Python's own grammar, so the text
+            # substituted into the expression has to be a valid identifier.
+            # A ratio is not: 'Sr88 / Ca43' would be parsed as a division and
+            # looked up as two unknown names. Ordinary names are kept as they
+            # are, so expressions and logs stay readable.
+            name = field if field.isidentifier() else f'_field{len(placeholders)}'
+            while name in var:
+                # Distinct fields must not share a name -- e.g. 'Fe57' and
+                # 'Fe57_N', which both reduce to 'Fe57' above.
+                name += '_'
+            placeholders[(field_type, field)] = name
+            var[name] = df['array']
 
-            txt = txt.replace(f"{{{field_str}}}", f"{field}")
+            txt = txt.replace(f"{{{field_str}}}", name)
         
         if len(var) == 0:
             var = None

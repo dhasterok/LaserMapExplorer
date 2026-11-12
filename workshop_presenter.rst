@@ -16,159 +16,267 @@ LaME Workshop — Presenter Script
    :local:
 
 
+Read this first: the handout is a superset, by design
+=====================================================
+
+**The handout is about five hours of material and you have 180 minutes, one of which
+contains an installation.** That is deliberate. The overflow is there so that nobody
+runs out of things to do, and so that attendees leave with a document that keeps working
+after the room empties.
+
+The budget, with nothing hidden:
+
+.. list-table::
+   :header-rows: 0
+   :widths: 60 40
+
+   * - 14:00–17:00
+     - **180 min**
+   * - less the catered coffee break at 15:00
+     - −15
+   * - less arrival, USB transfer and installation
+     - −15
+   * - less welcome and close
+     - −3 *(the welcome is talked over the install)*
+   * - **left for the seventeen handout sections**
+     - **147 min**
+
+Those seventeen sections cost about **282 minutes** at the pace a room actually moves.
+So you can do a little over **half the handout**, and the timetable below picks which
+half: **§1–6, §8–11 and §14 — eleven sections.** What it leaves out is §7, §12, §13 and
+§15–17, all of which are self-contained.
+
+.. important::
+
+   **Say this during the install, and say it plainly:** *"Your handout has seventeen
+   sections. We will get through about eleven of them. The rest is written so you can
+   work through it on your own — the data is on your stick and nothing later depends on
+   having been here for something earlier."*
+
+   Thirty seconds, and it converts the thing that would otherwise read as running out of
+   time into the thing it actually is. Without it, stopping at section 14 looks like
+   failure; with it, it looks like a plan.
+
+**The spine — reach these.** The timetable is built so that these four land:
+
+#. **§1, the import.** The thing nobody can get from the documentation alone, and the
+   reason several people are in the room.
+#. **§9–10, clustering and using the clusters.** The most transferable skill of the day.
+#. **§11, stoichiometry.** The mineral-formula chain is what LaME does that nothing else
+   on their machine does.
+#. **§14, notes.** Leaving with a record of their own work is worth more than one more
+   plot type.
+
+Everything between them is negotiable and every block carries a **Cut if behind** line.
+
+**Eleven attendees changes two things.** Hands-on blocks move faster than the timings
+below assume — those are sized for a room of twenty, so expect to gain a few minutes
+every block, and bank them. And the arithmetic on helping someone individually changes:
+two minutes spent on one person costs twenty person-minutes here, not fifty. A quick fix
+is affordable where it would not be in a bigger room. Anything over about a minute still
+goes on the triage sheet.
+
+**Running ahead?** That is the good problem, and the ladder is in `Overflow blocks — if
+you are ahead`_ at the end of this script. The TEC plot is first and it is only eight
+minutes.
+
 Timetable
 =========
 
 .. list-table::
    :header-rows: 1
-   :widths: 6 10 6 44 34
+   :widths: 5 8 5 10 36 36
 
    * - No.
      - Clock
      - Min
+     - Handout
      - Block
      - Cut if behind
    * - 0
-     - 08:40
-     - *20*
-     - Doors open — install triage
-     - Not contact time. Do not start late to accommodate it
-   * - 1
-     - 09:00
-     - 8
-     - Welcome and scope
-     - Trim to 5. Keep the honesty framing
-   * - 2
-     - 09:08
-     - **10**
-     - **First win** — open project, map + histogram
-     - Never cut. This is the whole morning's foundation
-   * - 3
-     - 09:18
-     - 22
-     - Fields: analytes, ratio, reference, Eu\*
-     - Drop the ratio step (−4)
-   * - 4
-     - 09:40
-     - 18
-     - Histogram, correlation
-     - Drop Spearman/Kendall comparison (−4)
-   * - 5
-     - 09:58
-     - 22
-     - Scatter → heatmap → ternary → ternary map
-     - Drop the heatmap statistic tour (−6)
-   * - C1
-     - 10:20
-     - 8
-     - **Resync buffer**
-     - This is slack. Spend it here, not on content
-   * - —
-     - 10:28
-     - 20
-     - **Break**
-     - Do not shorten. People need to fix things
-   * - 6
-     - 10:48
-     - 30
-     - Regions and filters; polygons
-     - Drop polygons (−10). Keep ROI + filters + ``roi map``
-   * - 7
-     - 11:18
-     - 26
-     - Clustering; change analytes; PCA
-     - Drop cluster naming/linking (−6)
-   * - 8
-     - 11:44
-     - 26
-     - Stoichiometry across three garnets
-     - Do RM02 + TR1-07 only, skip WOS-02 (−8)
-   * - C2
-     - 12:10
-     - 6
-     - **Resync buffer**
+     - 14:00
+     - **15**
      - —
-   * - 9
-     - 12:16
-     - 24
-     - **Pyrite — attendee-driven**
-     - Drop the per-cluster histogram (−8). Keep the PCA comparison
-   * - 10
-     - 12:40
-     - 10
-     - Notes → methods report
-     - Drop Formatted Info, keep Record (−5)
-   * - 11
-     - 12:50
+     - **Arrival, USB transfer, install** — welcome talked over it
+     - Cannot cut. This is also the afternoon's only slack
+   * - 1
+     - 14:15
+     - **22**
+     - §1
+     - **Import RM01 from the iolite matrix files**; save the project
+     - Never cut. Demote to a demo if the room cannot get it working
+   * - 2
+     - 14:37
+     - 8
+     - §2
+     - Field maps; colour scaling
+     - Three elements instead of six (−3)
+   * - 3
+     - 14:45
      - 6
-     - Look-ahead: Lu–Hf, import, Blockly, profiles
-     - First thing to cut entirely (−6)
+     - §3
+     - Correlation matrix
+     - Drop the Spearman comparison (−4)
+   * - 4
+     - 14:51
+     - 9
+     - §4
+     - Analyte grid, ratios, ratio map
+     - Drop the second ratio (−4). Can finish after coffee
+   * - —
+     - 15:00
+     - *15*
+     - —
+     - **Coffee** — fixed, catered, cannot slide
+     - Not yours to move, and you should not want to
+   * - 5
+     - 15:15
+     - 9
+     - §5
+     - Reference, then Eu\* in the Calculator
+     - Demo rather than hands-on (−6)
+   * - 6
+     - 15:24
+     - 14
+     - §6
+     - Scatter → heatmap → ternary → ternary map
+     - Drop the heatmap tour (−6), then the scatter (−4)
+   * - 7
+     - 15:38
+     - 12
+     - §8
+     - PCA: variance, basis vectors, score maps
+     - Drop ``dimension scatter`` (−4)
+   * - 8
+     - 15:50
+     - **22**
+     - §9
+     - k-means, fuzzy c-means, PCA preconditioning
+     - Drop fuzzy c-means (−8). Never drop the PCA comparison
+   * - 9
+     - 16:12
+     - 12
+     - §10
+     - Name clusters, cluster mask, replot the ternary
+     - Nothing. Block 10 needs the region this creates
+   * - 10
+     - 16:24
+     - **20**
+     - §11
+     - Stoichiometry; missing-Si lesson; ``Grt_Z`` on the whiteboard
+     - Demo rather than hands-on (−8). Keep the two numbers
+   * - 11
+     - 16:44
+     - **13**
+     - §14
+     - **Notes** — record, capture figures, Formatted Info
+     - Two info blocks instead of four (−3). Protect the rest
    * - 12
-     - 12:56
-     - 4
-     - Q&A, feedback, bug reporting
-     - Keep 2 min minimum
-   * - **Total**
-     -
-     - **220**
-     - + 20 min break
-     -
+     - 16:57
+     - 3
+     - —
+     - Where the docs are; what you did not reach; close
+     - Never cut
 
-**Hard decision points.**
+Contact time: 165 minutes — **60 before coffee (15 of them the install), 105 after**.
+Break: 15. Total 14:00–17:00.
 
-* **10:20** — if more than a quarter of the room is not at Checkpoint 2, spend the whole
-  buffer resyncing and plan to cut polygons from block 6.
-* **11:44** — if you are more than 10 minutes late here, do two garnets, not three. The
-  Si lesson needs exactly two samples to land; the third is reinforcement.
-* **12:16** — the pyrite block is the one attendees will remember, because it is the one
-  they drive. Protect it. Cut blocks 10 and 11 before you cut it.
+.. caution::
 
+   **Three things about this slot specifically.**
+
+   **The install is inside the session.** You have 5 sticks for 11 people, which is two
+   or three per stick and genuinely quick — but the Windows unzip is 436 MB expanding to
+   924 MB with Defender watching, and that is slow and silent. Block 0 tells you what
+   each person actually needs to copy, which is about a third of the stick.
+
+   **The break at 15:00 is only an hour in, and that is lucky.** It leaves a single
+   unbroken 105-minute run for the entire spine. Do not try to move it later even if you
+   could — a break at 15:45 would fall between clustering and stoichiometry, which is
+   the one seam in the afternoon you cannot afford to open.
+
+   **There is no buffer after 14:15.** Block 0 is the only slack, so every minute the
+   install does not use is a minute you keep. If all eleven machines are running by
+   14:10, start block 1 early.
+
+.. important::
+
+   **The single highest-value thing you can do before tomorrow is remove the install
+   from the session.** Email the release link tonight with the Gatekeeper and SmartScreen
+   steps spelled out, and ask people to install before they arrive. If even half of them
+   do, block 0 shrinks to a few minutes of data copying and you get the TEC plot and a
+   live TR1-07 back. Nothing else available to you tonight buys ten minutes.
 
 Why the order is what it is
 ===========================
 
-Worth knowing, because someone will ask why filtering comes after plotting.
+Worth knowing, because someone will ask.
 
-**Dependency.** Fields must exist before a plot can use them. A plot must exist before a
-filter has anywhere to show its effect. Filters and clusters must exist before
-stoichiometry can be scoped to one. Clusters must exist before the *Cluster results*
-note block has anything to insert. Data → fields → plots → masks → clusters → report is
-the only order that never asks anyone to accept something on faith.
+**Dependency.** The sample must exist before fields can. Fields must exist before a plot
+can use them. PCA scores must exist before clustering can precondition on them. Clusters
+must exist before there is anything to mask with, or to scope stoichiometry to, or for
+the *Cluster results* note block to insert. Import → fields → plots → reduce → cluster →
+scope → formulae → report is the only order that never asks anyone to accept something
+on faith.
 
-**Risk.** Every block before the break is on the reliable list. First contact with
-filtering — the roughest area — is at 10:48, after 80 minutes of unbroken success and
-after everyone has saved their own project. If filtering goes badly the workshop has
-already delivered its value. Doing filtering early "while everyone is fresh" risks
-poisoning the first hour instead.
+**The import goes first.** Block 1 is an import, which means the riskiest twenty-two
+minutes of the afternoon are also the first twenty-two after the install. That is a
+deliberate trade: the import is what attendees cannot learn from the documentation,
+their own data is sitting on their own laptops, and a room that has successfully
+imported something believes the rest. The mitigation is the ``.lame.csv`` fallback — see
+`Fallbacks`_ — not a reordering.
 
-**Attention.** "Filters live inside ROIs" is the most confusing concept in the
-application. It gets the post-break slot, not 12:30.
+**Risk is spread, not stacked.** The two blocks most likely to behave unexpectedly are
+the import at 14:15 and stoichiometry at 16:24 — the first and the second-to-last. The
+import has an explicit fallback; stoichiometry runs after everyone has saved their
+project three times. Neither can take the afternoon down with it.
 
-**Quarantine.** Every unfinished feature is in block 11, labelled. Sprinkling "and this
-bit isn't ready" through the morning erodes confidence cumulatively; one clearly-framed
-roadmap block at the end reads as candour.
+**The break lands where it does least harm.** Coffee is fixed at 15:00, an hour in, and
+that is awkward on paper — it splits the afternoon 60/105 rather than down the middle,
+and it interrupts §4 rather than falling cleanly between sections. Take it anyway.
+
+What it buys is a **single unbroken 105-minute run** that holds the entire spine: PCA,
+clustering, masking, mineral formulae, notes. That matters for one specific reason —
+the **PCA** tick box on the clustering page falls back to raw analytes silently if no
+scores exist, so a coffee break between computing the scores and using them is exactly
+how someone ends up comparing a PCA clustering against itself. A later break would fall
+between clustering and stoichiometry, which is worse still: the ROI created in block 9
+is what block 10 scopes itself to, and fifteen minutes is long enough for someone to
+come back and start clicking elsewhere.
+
+**Quarantine.** The unfinished features are named where they arise and collected in the
+handout's limitations table, but no block in the timetable depends on one. Everything
+purely demonstrative — the workflow designer most of all — has been moved out of the
+timetable entirely and into `Overflow blocks — if you are ahead`_.
 
 
 Room setup
 ==========
 
-**T-45, presentation machine**
+**Tomorrow, T-45 — presentation machine**
 
 * Mirror displays, do not extend — you will lose track of which screen has the dialog.
 * Set the LaME window to the size your checkpoint screenshots were taken at.
 * Styling Toolbox → **Text and Scales** → raise **Font size**. Check legibility from the
   back row, not from your chair.
 * Disable notifications, sleep and auto-update. Plug in power.
-* **Open the project once and draw all five plots once.** This warms the lazy imports and
-  matplotlib's first-figure cost so nothing stalls on stage.
-* Pre-load the block 11 demo states in a second window, or have screenshots ready.
+* **Import RM01 once and draw every plot type once.** This warms the lazy imports and
+  matplotlib's first-figure cost so nothing stalls on stage. Then close the project and
+  do the import again for real in block 1 — the second one is fast.
+* **Only if you expect to reach the workflow overflow block:** have one already built
+  in a second window. Building it live costs all four of its minutes.
 
-**T-20, room**
+**Tomorrow, T-20 — room**
 
-* USB sticks at the end of each row of tables.
-* Write ``CHECKPOINT: 0`` on the whiteboard. Update it at every checkpoint — latecomers
-  and stuck attendees then self-rescue without interrupting.
+* **The five sticks at the door, not at the front.** Hand them out as people arrive so
+  copying starts before 14:00. Two or three people per stick.
+* **Write the three import numbers on the whiteboard before anyone sits down** — spot
+  16, sweep 0.279, speed 23.66. They need to be up for block 1 and they stay up all
+  afternoon.
+* Write ``SECTION: 1`` below them. Update it at every block boundary.
 * Triage sheet out. Record every problem; do not fix them silently.
+* **Know which attendees are on Windows.** Their unzip is the slowest step of block 0
+  and it gives no progress indication worth watching. Ask as they come in.
 
 
 Pre-flight checklist
@@ -193,556 +301,699 @@ packaging problems.
    ``qVersion()`` is the number that matters — ``QT_VERSION_STR`` reports what the
    bindings were compiled against (still 6.11.0) and will mislead you.
 
-**T-90**
+.. important::
 
-#. **Confirm the Qt runtime is ≥ 6.11.2** (see above). Nothing below is worth checking
+   **Gate one: ``RM01.lame.csv`` must be on the stick, beside the ``RM01/`` directory.**
+   It is the only safety net block 1 has, and block 1 is an import — the riskiest
+   twenty-two minutes of the afternoon, running before anyone has saved anything.
+
+   It is on the stick as of the last check (95,676 px, 476 × 201, 28 analytes, identical
+   to what the import produces). Open it once on the clean machine anyway — and confirm
+   it is on **all five** sticks. Without it, anyone whose import does not work is locked
+   out of everything from block 2 onward.
+
+.. danger::
+
+   **The workshop is tomorrow afternoon, so this checklist is tonight's work, not the
+   morning's.** Items 1, 2 and 6 are the ones that can still change what you hand out;
+   do those first, while there is time to re-cut a build or re-copy a stick.
+
+   **And do item 3 first of all** — emailing the installer link tonight is the single
+   highest-return action available to you, because it is the only thing that can give
+   block 0's fifteen minutes back.
+
+**Tonight**
+
+#. **Confirm the Qt runtime is ≥ 6.11.2** (gate zero). Nothing below is worth checking
    until this passes.
-#. Download the release assets **fresh over the venue wifi** and time it. Over five
-   minutes means the USB route is mandatory, not a backup.
+#. **Open ``RM01.lame.csv`` from the stick** (gate one) and confirm 95,676 pixels.
+#. **Email the release link to all eleven attendees tonight**, with the Gatekeeper and
+   SmartScreen steps spelled out and a line saying *"please install before you arrive;
+   it will save us fifteen minutes."* Even half of them doing it buys back the TEC plot
+   and a live TR1-07.
 #. Install following the attendee instructions **verbatim**, Gatekeeper and SmartScreen
    steps included. Use none of the shortcuts you know.
 #. Launch. Note the cold-start time — say that number in your opening remarks so nobody
    thinks it has hung.
-#. Unzip ``LaME-workshop.zip`` to the Desktop. Open ``00-open.lame_project.json``.
-   Confirm the relative sample path resolved and the field map draws.
-#. **Open every checkpoint project in turn and verify its condition** — above all that
-   the clustering one restores its groups *without recomputing*. **This is the most
-   important item on this list.** If a checkpoint does not restore, your entire
-   desynchronisation strategy is gone, and you need to know now rather than at 10:20.
+#. **Rehearse block 1 end to end on the clean machine.** Import
+   ``data/LA-ICP-MS/RM01/`` with spot 16, sweep 0.279, speed 23.66. Confirm dX reads
+   16 and dY reads 6.6 before you click Import, and confirm the loaded sample is
+   **476 × 201 = 95,676 px with axes to ~3140 × 3220 µm**. Time it. This is the number
+   you will quote when someone asks how long to wait.
+#. **Save the project straight after that import and check what appears on disk** — the
+   manifest, the notes file, and ``figures/``/``data/`` once you export a plot. Then
+   leave it running past the autosave interval (ten minutes by default) and confirm the
+   manifest's timestamp moves. The save step at the end of block 1 is the foundation of
+   every later recovery, so verify it rather than assuming it.
+#. **Rehearse the XRF import too**, in case you reach the overflow block: ``XRF`` / ``image`` on
+   ``data/XRF/core 7/``, spot size 1, import ``row1``. It is a demo, so it has to work
+   on *your* machine specifically.
 #. Confirm the Stoichiometry **Mineral** dropdown is populated and not red. If it is
-   empty, the mineral-config path fix did not make the build — block 8 cannot be
+   empty, the mineral-config path fix did not make the build — block 10 cannot be
    hands-on and must become a demo on your machine.
-#. Time one **scoped** stoichiometry run on each garnet. Write the numbers down; you
-   will be asked how long to wait.
-#. Set the reference to ``CI chondrite [AG89]`` and confirm **Eu\*** recomputes.
-#. Switch between all four samples. Block 8 depends on this being clean.
+#. Time one **scoped** stoichiometry run on RM01 and on TR1-07. Write the numbers down.
+#. **Write down both ``Grt_Z`` values** — RM01's and TR1-07's. Block 10 closes on those
+   two numbers from the whiteboard, and in this timetable you will not have time to
+   compute TR1-07's live.
+#. Set the reference to ``CI chondrite [AG89]`` and confirm **Eu\*** recomputes, and
+   that the ``TEC`` plot draws with the ``REE`` preset.
+#. Switch between all samples, including after a cluster mask is active. Blocks 10 and
+   11 depend on this being clean, and so does the TR1-07 overflow block.
 #. **Click every hazard once and write down the literal message** — see
    `Do not do these on the projector`_. You will be asked about at least one, and
    knowing the exact wording is the difference between authority and hand-waving.
-#. Confirm **Help** opens a built page.
+#. Confirm **Help** opens a built page, and that the context-sensitive **Help** toggle
+   jumps to the right page. Block 12 is three minutes long and entirely about this.
+#. **Scan the survey QR with your own phone** and confirm it opens the form. It goes up
+   on the projector at the close, and a QR nobody can scan is worse than no QR at all.
 #. ``python main.py --selftest`` on each machine you will use.
 
 
-Block 1 — Welcome (09:00, 8 min)
-================================
+Block 0 — Arrival, install and welcome (14:00, 15 min)
+======================================================
 
-.. Figure placeholder PFIG-1  [presenter slide]
-   WHAT: One title slide. "Laser Map Explorer" + version + your name/affiliation +
-   the date. Bottom third: four small thumbnails in a row -- an RM02 ternary map, a
-   four-cluster cluster map, a Grt_dominant swatch map, an As-Au biplot. These are
-   the four things the room will have made by 13:00.
-   WHY: Projected during block 1 while you talk. The thumbnails are the promise;
-   referring back to them ("that one, by lunch") is worth more than a bullet list.
-   SIZE: full slide.
+*Not in the handout. Fifteen minutes you do not have but cannot avoid — so talk through
+it rather than waiting it out.*
 
-**Say.** What LaME is for: you have a map with tens of thousands of pixels and thirty
-analytes, and the question is never "what is the mean" — it is "which parts of this
-grain are chemically distinct, and what are they". Today is about answering that.
+**The logistics, with 11 attendees and 5 sticks.** Two or three people per stick, in
+parallel. Hand the sticks out at the door, not from the front.
 
-**Set the expectation about beta software early and once.** Something like: *"This is
-beta. There are things in the interface that do not work yet, and rather than hope you
-do not find them, the handout lists them with what to do instead. If you hit something
-not on that list, tell me — that is genuinely useful."*
+What each person actually needs to start is **one installer plus about 90 MB of data**:
 
-Doing this at 09:00 converts every later limitation from an embarrassment into a
-confirmation that you were straight with them.
+.. list-table::
+   :header-rows: 1
+   :widths: 34 16 50
 
-**Do not** demo anything in this block. Talking over a live app at minute three invites
-a question you have not laid groundwork for.
+   * - From the stick
+     - Size
+     - Needed
+   * - ``program/LaME-macos-arm64.dmg`` **or** ``program/LaME-windows-x64.zip``
+     - ~450 MB
+     - One of the two. **Nobody needs both.** Say this out loud — it halves the copy.
+   * - ``data/LA-ICP-MS/RM01/``
+     - ~48 MB
+     - Block 1 imports it
+   * - ``data/LA-ICP-MS/RM01.lame.csv``
+     - ~43 MB
+     - The fallback if the import fails
+   * - Everything else
+     - ~550 MB
+     - **Not today.** Copy it over coffee or at the end
+
+**Tell them to copy the whole folder anyway if the stick is free** — they want the rest
+for the take-home sections. But the critical path is the three rows above, and anyone
+still copying the XRF data at 14:12 should stop and resume at coffee.
+
+**Talk while they copy.** This block is the welcome, and none of it needs a screen:
 
 
-Block 2 — First win (09:08, 10 min)
+
+* What LaME is for, in one sentence: element maps in, interpretation out.
+* The four parts: one garnet end to end, two more garnets, a pyrite, a core scan.
+* **It is beta.** Say this now, plainly, once. "You will see things that do not work.
+  They are marked in your handout, and I will tell you what you would see. That is
+  deliberate — I would rather you spend the afternoon on what works."
+* The cold-start time you measured. "First launch takes about N seconds. It is
+  unpacking, not hung."
+* **Questions whenever.** Mean it. The timetable has slack for this and the handout
+  says so.
+* **The handout is bigger than the afternoon, on purpose.** Seventeen sections; we will
+  not do all of them together; the rest is written to work through alone. Say it here,
+  in one sentence — see the box at the top of this script for why it matters.
+
+**Do not** demonstrate anything yet. The first thing anyone sees working should be on
+their own screen, not yours.
+
+**Watch for the Windows unzip.** 436 MB expands to about 924 MB and Defender scans it on
+the way out. It is the slowest single step of the arrival and it is silent — check on
+the Windows users specifically at the ten-minute mark.
+
+**This block is also the afternoon's only buffer.** If everyone is running by 14:10,
+start block 1 early and bank the five minutes; the first thing to spend them on is the
+TEC plot, which is the top item in `Overflow blocks — if you are ahead`_.
+
+
+Block 1 — Import RM01 (14:15, 22 min)
+=====================================
+
+*Handout §1. The highest-risk and highest-value block of the day.*
+
+**The teaching point, and say it before they start:** the files contain no statement of
+how big a pixel is. Everything else they will do today is downstream of three numbers
+they type here.
+
+**Drive it on the projector first, then let them do it.** This is the one block worth
+doing twice. Twenty-two minutes is enough for a five-minute demonstration, a fourteen-minute
+attempt and three minutes of recovery.
+
+Numbers to put on the whiteboard, large, and leave there all afternoon:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 50
+
+   * - Field
+     - Value
+     - Becomes
+   * - Spot size (µm)
+     - ``16``
+     - dX = 16
+   * - Sweep (s)
+     - ``0.279``
+     - —
+   * - Speed (µm/s)
+     - ``23.66``
+     - dY = speed × sweep = 6.6
+
+**Say while the dialog is open:**
+
+* ``LA-ICP-MS`` / ``quadrupole``, then **Open directory** on ``data/LA-ICP-MS/`` — the
+  parent, not the ``RM01`` folder. People will choose ``RM01/`` and get nothing.
+* The dX/dY columns are **computed and not editable**. "Watch them while I type. If
+  those two numbers are not 16 and 6.6, do not click Import."
+* 28 files, one analyte each, no header and no coordinates. Show **Select files** for
+  ten seconds so they see the filename-to-analyte parse, then close it.
+
+**What will go wrong, in order of likelihood:**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 36 64
+
+   * - Symptom
+     - Cause and fix
+   * - Axes run 0–476 and 0–201
+     - The three geometry fields were left blank; dX = dY = 1. Re-import.
+   * - Map is a thin sliver
+     - ``Swap XY`` is ticked. Untick, re-import.
+   * - Nothing found in the directory
+     - They opened ``RM01/`` rather than ``data/LA-ICP-MS/``.
+   * - dY reads 6.59 or 6.61
+     - They typed ``23.6`` or ``23.7``. Harmless — do not stop for it.
+   * - Import appears to do nothing
+     - Check the sample selector; it may have worked and not switched.
+
+**Finish the block with a save, and spend thirty seconds on why.** *Save Project*, to
+the Desktop, their own name. Two reasons, both worth saying out loud because neither is
+visible:
+
+* **It arms the autosave.** LaME autosaves every ten minutes, but an untitled project
+  goes to a scratch location and stays untitled. Once it has a name, autosave writes
+  back to it. From this point on, the worst case for anybody in the room is losing ten
+  minutes.
+* **It creates the project folder** that the notes file, ``figures/`` and ``data/`` all
+  live in. Block 11 needs it to exist.
+
+This is also what makes level 1 of `Fallbacks`_ available for the rest of the day, so it
+is thirty seconds that buys back every later recovery.
+
+**Hard stop at 14:37.** Anyone not loaded gets ``RM01.lame.csv`` and the triage sheet.
+Do not debug an individual machine here — the whole room is waiting and the fallback
+costs them nothing for the rest of the afternoon.
+
+.. Figure placeholder PFIG-2  [presenter slide]
+   WHAT: The three import numbers, large, on one slide: Spot size 16, Sweep 0.279,
+   Speed 23.66, with an arrow to "dX 16 / dY 6.6 — check before importing".
+   WHY: Leave it on screen for the whole block. It is the only thing they need to read.
+
+
+Block 2 — Field maps (14:37, 8 min)
 ===================================
 
-*Handout section 1.*
+*Handout §2.*
 
-**Transition.** "Before anything else, let us all get to the same screen."
+**Say:** read the sample before analysing it. Ten minutes of stepping through elements
+now saves an hour of plotting the wrong things later.
 
-**Click path.** Home toolbar page → **Open Project** → ``Desktop/LaME-workshop/`` →
-``00-open.lame_project.json``.
+* Step the colour field through ``Mn55``, ``Ca43``, ``Fe57``, ``Mg24``, then ``Y89``.
+* **Log scaling on Y89** is the moment to dwell on. Switch it linear and back. "Three
+  orders of magnitude on a linear ramp is one colour."
 
-**Say while it loads.** Why a project and not the CSV: a project carries the sample, the
-field selection and the window state together. That makes it a reliable starting point —
-and, more usefully today, a reliable *recovery* point. Point at the whiteboard.
+**Hazard:** do not touch ``gradient map``, directly below ``field map`` on the
+Preprocess page.
 
-**The payoff to name out loud.** One action produced both a map and a histogram. That
-pairing is the Preprocess page's doing, and it is the cheapest useful thing in the app.
+**Cut if behind:** step through three elements instead of six (−3). Keep the log-scaling
+moment — it is the one thing in this block nobody works out for themselves.
 
-**Then spend the gradient-map warning, once.** While everyone is looking at the Plot
-box: the entry one line below ``field map`` does nothing in this build. Then move
-everyone to **Field Viewer** and say you are not coming back to this page. Every
-subsequent block runs on pages whose plot lists contain no unfinished entries.
 
-**Planted question.** *"Why did we not just open the CSV?"* — Because then all 25 of you
-would be in slightly different default states and no checkpoint photograph would match.
-Also because you will need Open Project for catch-up in about forty minutes, so you may
-as well learn it now.
+Block 3 — Correlations (14:45, 6 min)
+=====================================
 
-**If X then Y.**
+*Handout §3.*
 
-* *Project will not open / sample not found* → their folder is not on the Desktop, or
-  they moved files out of it. Relative paths. Have them re-unzip.
-* *Window is tiny or off-screen* → their display is smaller than the authoring machine.
-  Resize manually; note it on the triage sheet.
-* *Nothing in the canvas* → check the Control Toolbox is on Preprocess and a sample is
-  selected in the pinned combobox.
+* ``correlation``. Pearson, then Spearman. Point at the REE block: "those twelve
+  elements are telling you one thing, not twelve."
 
-**Checkpoint 0.** Title bar ``LaME - 00-open``, Preprocess page, RM02 field map plus
-histogram. Update the whiteboard to ``0``.
+**This block justifies the next one.** Say so explicitly: the correlation matrix is why
+you select analytes rather than clustering on everything, and why PCA helps after
+coffee.
 
+**Hazard:** mention from the handout that the correlation matrix ignores filters — say
+it *now*, before anyone has a filter, so it does not later look like a discovery.
 
-Block 3 — Fields (09:18, 22 min)
-================================
+**Cut if behind:** the Spearman comparison (−4).
 
-*Handout section 2.*
 
-**Transition.** "LaME will not plot an analyte you have not asked for. That selection is
-the first real control you have, and it reaches further than you would expect."
+Block 4 — Analytes and ratios (14:51, 9 min)
+============================================
 
-**Click path.** Pinned **Analytes** → diagonal cells for Mn55, Y89, Sm147, Eu153,
-Gd157, Ca43, Fe57, Mg24 → the off-diagonal Y89 × Mn55 cell → **Done**. Then the **Ref.**
-row → ``CI chondrite [AG89]``. Then Analysis page → **Calculator** → saved formula
-``Eu*`` → **Calculate**.
+*Handout §4.*
 
-**The one thing to labour.** Diagonal versus off-diagonal. Say it, then show it, then
-say it again. It is the least discoverable thing in that dialog. Mention that the
-background colours *are* the correlation matrix — the dialog is already telling them
-which analytes co-vary.
+**The analyte grid is the block's hard part.** Diagonal = analyte, off-diagonal = ratio,
+above versus below the diagonal inverts the ratio. Draw it on the whiteboard rather than
+describing it. Everyone gets the inverted ratio wrong once.
 
-**Order matters here and the handout says so.** Reference **before** Eu\*. The shipped
-formula uses ``_N`` normalised fields, and the default reference is bulk silicate Earth,
-not a chondrite. If someone computes Eu\* first they get a number that looks fine and is
-normalised to the wrong thing — the worst kind of wrong.
+* The eight analytes from the handout, then ``Y89 / Mn55``, then ``Mg24 / Fe57``.
+* Note aloud that the grid's background colours are the correlation matrix they just
+  looked at. It lands well and costs ten seconds.
+* Map the ``Mg24 / Fe57`` ratio. "A boundary neither element shows on its own."
 
-**Planted question.** *"Why is Eu\* a formula rather than a button?"* — Because the
-interpolation you want depends on which neighbours you trust. Sm–Gd is conventional, but
-it is a choice, and making it explicit in a formula you can read is better than burying
-it.
+**Save again** at the end — it overwrites block 1's save with no dialog. Then say the
+rule that makes the rest of the afternoon survivable: *if your screen stops matching
+mine, reopen your own save rather than debugging.*
 
-**If X then Y.**
+**Cut if behind:** the second ratio (−4). This block is the one that runs into coffee,
+so finishing it is less important than starting it — the ratio map can wait until 15:15.
 
-* *"could not evaluate"* → they typed a conditional, or opened the Calculator
-  documentation and copied the ``case()`` example. That syntax does not exist in any
-  version. Point them at the limitations table.
-* *Eu\* map looks like a raw element map* → reference not set. Set it, recalculate.
-* *Field not in the Calculator's field list* → not selected in the Analytes dialog.
 
-**What to cut.** The ratio step (−4 min). Eu\* is the one that matters; it is the first
-moment LaME does something they could not do in a spreadsheet.
+Coffee (15:00, 15 min)
+======================
 
-**Checkpoint 1.** ``Eu*`` under the Plot Tree's Calculated branch, smooth low-contrast
-map. Then have everyone **Save Project** under their own name. Whiteboard ``1``.
+**Fixed at 15:00. Catered. It cannot slide.**
 
+An hour in is early for a break, and in a three-hour session you might be tempted to
+push it later. **Do not** — and not only because it is catered. Taking it at 15:00
+leaves a single unbroken 105-minute run from 15:15 to 17:00, and the whole spine of the
+afternoon — PCA, clustering, masking, mineral formulae, notes — needs 100 of those
+minutes with nothing interrupting it. A break at 15:45 would split clustering from
+stoichiometry, which is the one seam in the day you cannot afford to open.
 
-Block 4 — One field (09:40, 18 min)
-===================================
+Use it to fix anyone you noticed struggling, and to let the people who skipped the
+optional data finish copying it.
 
-*Handout section 3.*
+**With 11 people you can actually do this.** Walk all eleven screens in fifteen minutes
+— that is 80 seconds each, which is enough to see whether someone has a ratio map on
+screen or a blank canvas.
 
-**Transition.** "Before comparing elements, read one properly."
 
-**Click path.** Field Viewer → ``histogram`` → X = ``Mn55`` → PDF, **Show KDE** →
-``log-scaling``. Then ``correlation`` → Method ``Pearson``, then ``Spearman`` → **C²**.
+Block 5 — Reference and Eu* (15:15, 9 min)
+==========================================
 
-**The teaching point on log-scaling.** Trace elements are usually closer to log-normal
-than normal. The shape change when they toggle it is the diagnostic, and it determines
-which colour scaling their maps should use for the rest of the day.
+*Handout §5.*
 
-**The teaching point on method.** Pearson assumes linear; Spearman only monotonic. A big
-gap between them means a real but non-linear relationship — which is common in zoned
-minerals and easy to miss if you only ever look at one.
+**The reference first, and say why the order matters:** ``CI chondrite [AG89]`` *before*
+the Calculator, because ``Eu*`` uses ``_N`` normalised fields. If they calculate first
+they get a number computed against bulk silicate Earth and nothing warns them.
 
-**Say once, now, because it will bite later.** The correlation matrix **ignores filters**.
-So does the ternary map. When they filter in forty minutes and the correlation does not
-move, that is why. Pre-empting this here costs ten seconds and saves a confused question
-at 11:00.
+* Calculator → saved formula ``Eu*`` → **Calculate** → plot from the ``Calculated``
+  field type.
+* Show the formula and the ``{FieldType.Field}`` syntax. One sentence. Resist the
+  temptation to teach the Calculator properly; there is no time and it is in the docs.
 
-**If X then Y.**
+**Hazard:** ``case()`` and ``otw()`` on the keypad. Do not click them. If asked, the
+message is *"could not evaluate conditional statement"* — and tell them the Calculator
+documentation's ``case()`` section describes syntax that has never existed.
 
-* *Histogram empty or one bar* → a constant or near-constant field. Switch field.
-* *Correlation matrix missing analytes* → they were not selected in block 3.
+**Cut if behind:** demonstrate it on the projector rather than hands-on (−6). It is a
+Calculator feature, not a concept they need in their fingers.
 
-**What to cut.** The Spearman/Kendall comparison (−4 min).
 
-
-Block 5 — Two then three fields (09:58, 22 min)
-===============================================
-
-*Handout section 4.*
-
-**Transition.** "Now relationships, and then back onto the map."
-
-**Click path.** Scatter and Heatmaps page → ``scatter``, X = ``Mn55``, Y = ``Y89``,
-Color = ``Ca43`` → ``heatmap``, try *Heatmaps* = ``counts`` then ``median`` → back to
-``scatter``, set Z = ``Fe57`` → ``ternary map``, set colours → **Ternary map** button.
-
-**The thing to point out explicitly.** There is no "ternary" entry in the plot-type list.
-A ternary appears when you fill in Z. Nobody discovers this unaided.
-
-**Why heatmap after scatter.** With 78,000 points the scatter is a solid blob.
-Overplotting hides structure; binning reveals it. Make them see the blob first so the
-heatmap has something to fix.
-
-**The ternary map is the money shot of the morning.** Say what it is doing: each pixel
-coloured by its position in the ternary, so three elements land on one map without you
-deciding which matters most. For a zoned garnet the core/rim contrast should be obvious.
-Pause here and let them look at it.
-
-**Planted question.** *"How do I know which three elements to use?"* — Start with the
-major cations that define the end members. For garnet, Mn–Ca–Fe gets you spessartine
-versus grossular versus almandine. Then follow the correlation matrix.
-
-**If X then Y.**
-
-* *Nothing happens on scatter* → X and Y are the same field, or one is blank. Silent
-  no-op by design.
-* *Ternary blank* → two of the three fields are identical.
-* *Ternary map unchanged after picking colours* → they did not press **Ternary map**.
-
-**What to cut.** The heatmap statistic tour (−6 min).
-
-**Checkpoint 2.** Five plots in the tree, ternary map on screen with visible zoning.
-Whiteboard ``2``. **This is the resync point before the break** — if a quarter of the
-room is not here, use the buffer and plan to cut polygons.
-
-
-Block 6 — Regions and filters (10:48, 30 min)
-=============================================
-
-*Handout section 5.* **The highest-risk block of the day. Do not improvise.**
-
-**Transition.** "Everything so far used every pixel. Now we choose which pixels."
-
-.. Figure placeholder PFIG-2  [presenter slide -- the one diagram worth projecting]
-   WHAT: A diagram, not a screenshot. A box labelled "ROI: garnet" containing two
-   stacked rows labelled "filter: Mn55 > x  (and)" and "filter: Ca43 < y". Beside
-   it a second box "ROI: rim" with one filter inside. An arrow from both boxes to a
-   small map thumbnail with grey excluded areas, labelled "roi map".
-   WHY: "Filters live inside ROIs" is the sentence that loses the room. The
-   containment is obvious in a drawing and invisible in the interface, where
-   Filter Settings sits to the LEFT of the ROI table it belongs to.
-   SIZE: half slide, large type.
-
-**Say the structure before anyone clicks.** An ROI is a named saved region; a filter is
-one rule inside it. You select the ROI first, then add filters to it. Say it in that
-order, and show the ROI table *before* the Filter Settings panel, even though Filter
-Settings is on the left and reads first.
-
-**Why this matters.** With zero ROIs, the first **Add filter** silently creates one. The
-blocking dialog — *"Select a single region of interest…"* — only appears on the
-**second** filter. So the natural discovery path teaches the wrong model first and then
-contradicts it. Script it:
-
-**Click path.** Processing page → **Filters** → Masking Toolbox opens on Filters tab →
-in the **ROI table at the bottom**, **Add ROI** → rename to ``garnet`` → **leave it
-selected** → Filter Settings: Field type ``Analyte``, Field ``Mn55``, narrow Min/Max via
-the percentile spin boxes, Operator ``and`` → **Add filter** → add a second on ``Ca43``.
-
-Then: Field Viewer → ``roi map``. **This is the plot that shows what a filter did.** Grey
-is excluded. Use it every time.
-
-**Polygons, if time.** Polygons tab → toggle switch → **Create a new polygon** → click
-around a feature. Mention the *In/out* column.
-
-**Two things not to say.** Do not say "now let us re-cluster inside this polygon" —
-clustering ignores polygons by design. And do not reach for **Crop** or **Full Map**;
-crop is incomplete and the button that would undo it raises an error.
-
-**Planted question.** *"Why are filters inside regions rather than global?"* — Because
-real samples need different rules in different places. One grain's rim and another
-grain's core are different populations, and a global filter cannot express that.
-
-**If X then Y.**
-
-* *"Select a single region of interest…"* → no ROI row selected, or two are. Click one
-  row. This will happen to several people; it is the expected failure, not a bug.
-* *Map did not change after Add filter* → **Use** checkbox unticked, or the ROI mask
-  toggle is off in the Processing toolbar page.
-* *"could not save filter table"* → they pressed **Save filter**. Unavailable in the
-  packaged build. Filters live in the project; that is enough.
-* *Correlation did not change after filtering* → expected. Already flagged in block 4.
-* *Lost in polygon mode* → flip the toggle off. That is the whole fix; do not
-  troubleshoot further.
-* *ROI work collapsed entirely* → **there is no forward-safe checkpoint for this block**
-  (see `Fallbacks`_). Pair them with a neighbour and tell them 11:44 puts the whole room
-  back in sync. Do not hand them ``04-clusters`` now — it starts at block 8 and would
-  skip clustering as well.
-
-**What to cut.** Polygons entirely (−10 min). ROI + filters + ``roi map`` is the part
-that everything downstream depends on.
-
-**Checkpoint 3.** ROI named ``garnet`` with non-zero % Filtered; ``roi map`` showing a
-grey rim. Whiteboard ``3``.
-
-
-Block 7 — Clustering (11:18, 26 min)
-====================================
-
-*Handout section 6.*
-
-**Transition.** "So far you have told LaME what to look at. Now let it propose the
-zones itself."
-
-**Click path.** Clustering page (runs on open) → Method ``k-means``, No. clusters ``4``
-→ ``cluster map`` → **Randomize** the seed two or three times → **Analytes**, add
-``La139``, ``Ce140``, ``Nd146`` → **Done** (auto-recomputes on this page) → Dimensional
-Reduction page, look at ``variance`` → back to Clustering, tick **PCA**, set
-**No. basis** → re-cluster → Masking Toolbox **Clusters** tab, rename, link, **Create
-Region**.
-
-**The seed demonstration is the most valuable thirty seconds in this block.** k-means
-starts from random centres. Zones that survive several seeds are robust; zones that
-reshuffle were never there. Most people have never seen this done and it changes how
-they read a cluster map permanently.
-
-**Order matters: PCA before the checkbox.** If no PCA scores exist, LaME falls back to
-raw analytes silently, and the comparison they are trying to make does not happen. Run
-the Dimensional Reduction page first.
-
-**Two inert controls to steer around.** The **Distance** combobox has no effect in this
-build. And HDBSCAN works, but combined with ``cluster performance`` it silently does
-nothing — HDBSCAN finds its own cluster count, so there is no *k* to sweep.
-
-**Planted question.** *"How do I choose the number of clusters?"* — ``cluster
-performance`` with k-means gives you inertia and silhouette against *k*. But the honest
-answer is that you choose it from the petrology: if you expect core, mantle and rim, try
-three and see whether the map agrees.
-
-**If X then Y.**
-
-* *Clusters did not change after adding analytes* → not on the Clustering page when they
-  pressed Done. Press **Update Plot**.
-* *PCA tick did nothing* → PCA never ran. Visit Dimensional Reduction.
-* *Dimensional Reduction page sluggish* → expected on 78,000 pixels; PCA recomputes on
-  each update there. Say so rather than letting them think it has hung.
-* *``cluster performance`` blank* → HDBSCAN selected.
-
-**What to cut.** Cluster naming and linking (−6 min). But **keep Create Region** — block
-8 needs an ROI.
-
-**Checkpoint 4.** Four named clusters, PCA ticked, at least one cluster turned into an
-ROI. Whiteboard ``4``.
-
-
-Block 8 — Stoichiometry (11:44, 26 min)
-=======================================
-
-*Handout section 7.* **Read the warning below before you start.**
-
-.. warning::
-
-   **Scope before anything else.** The calculation runs pixel by pixel on the interface
-   thread and re-runs on every settings change. Unscoped on RM02 that is 78,228
-   iterations of frozen window — and again each time someone nudges a combobox. Set the
-   scope to one cluster or ROI *first*, tick only that region, and leave **Compare all
-   redox methods** off.
-
-**Transition.** "Composition is one thing. What mineral is it, site by site, is another."
-
-**Click path.** Analysis page → **Stoichiometry** → **Compute scope**: *Filter* = your
-ROI, tick **only** that region → **Settings**: Mineral ``Garnet``, Input basis ``ppm``,
-Redox ``droop_1987``, BDL ``zero``, Compare redox **off** → **Run**. Then ``field map``,
-field type ``Stoichiometry``, field ``Grt_dominant``.
-
-**Then the Si lesson, which is the point of the block.** Look at ``Grt_Z``. It should be
-near 3.0, filled by silicon. On RM02 it is not — RM02 has no Si, so aluminium has filled
-the tetrahedral site following the configuration's fallback order, and the end-member
-percentages are wrong.
-
-.. Figure placeholder PFIG-3  [presenter slide -- prepare in advance, do not build live]
-   WHAT: Side by side. LEFT: RM02's Grt_Z histogram or value readout, centred well
-   away from 3.0, annotated "no Si measured -> Al fills the Z site". RIGHT: TR1-07's
-   Grt_Z, sitting at ~3.0, annotated "Si29 present". Below each, that sample's
-   end-member percentages.
-   WHY: The single most transferable lesson of the day. Building this comparison
-   live costs minutes you will not have at 11:44, and if a run misbehaves the lesson
-   is lost. Have it on a slide and let the live runs confirm it.
-   SIZE: full slide.
-
-**Say this plainly:** the calculation is only as good as the elements you measured, and a
-missing major element does not raise an error. It produces a plausible, incorrect answer.
-That is the single most transferable thing in this workshop.
-
-Then switch to ``TR1-07``, make a quick ROI, run again, and compare ``Grt_Z``. With
-``Si29`` present it sits near 3.0 and the end members mean something.
-
-**Credibility note worth making.** The chemistry here is the most heavily validated code
-in LaME — cross-checked against published recalculation workbooks for garnet, feldspar,
-olivine and pyroxene. What is missing is a background thread in the interface, not
-correctness in the mathematics. Say that; it reframes the slowness accurately.
-
-**Planted question.** *"Could it warn me that Si is missing?"* — It should, and that is
-going on the list. Today it is on you to check the site totals. Which is a reasonable
-habit anyway.
-
-**If X then Y.**
-
-* *Mineral dropdown empty and red* → the config-path fix is not in this build. Abandon
-  hands-on, demo from your machine, and note it.
-* *Frozen window* → they ran unscoped. Wait it out; force-quitting loses their session.
-  Then re-scope. Prevention is the whole point of the warning.
-* *All results blank / "No matching element columns"* → wrong Input basis, or the
-  sample genuinely lacks the elements.
-* *``Grt_dominant`` draws as a colour bar instead of swatches* → note it and move on.
-
-**What to cut.** WOS-02 (−8 min). Two samples is enough for the contrast.
-
-**Checkpoint 5.** Two garnets with ``Grt_*`` fields, a ``Grt_dominant`` swatch map,
-``Grt_Z`` near 3.0 on TR1-07 and clearly not on RM02. Whiteboard ``5``.
-
-
-Block 9 — Pyrite, attendee-driven (12:16, 24 min)
+Block 6 — Ternary and ternary map (15:24, 14 min)
 =================================================
 
-*Handout section 8.* **Protect this block. It is the one they will remember.**
+*Handout §6.*
 
-**Transition.** "Everything you have used so far works on any mineral system. Here is a
-different one, and two real questions. You drive; I will circulate."
+* ``scatter``, Fe–Mn coloured by Ca. Then ``heatmap``, same axes. "95,000 points is a
+  solid block; binning is not a cosmetic choice."
+* Then fill **Z** with ``Mg24``. "There is no ternary plot type. A ternary is a scatter
+  with a Z."
+* Then ``ternary map``. **This is the best plot in LaME** — say that. Three elements,
+  one map, no decision about which matters most.
 
-**Pose the questions, do not answer them.** Does clustering change if you precondition
-with PCA first? And once the pyrite is on its own, what actually separates the
-populations inside it? Sample is ``71A-Py 12`` — 91 lines, 29,666 pixels, roughly 40%
-of it sulfide.
+**Say:** we come back to this one in block 9 with clusters as the colour. Flag it so the
+repetition later reads as payoff rather than as filler.
 
-**Deliberately give fewer steps.** They have done clustering, PCA and biplots once each.
-Doing it again unassisted, on unfamiliar data and with a question attached, is the
-consolidation — the only part of the day that tests whether anything stuck. Resist the
-urge to drive.
+**Hazard:** the ternary map ignores filters and masks, same as correlation. Nobody has
+one yet, which is why this is the moment to say it.
 
-**Prompts, if the room stalls** — in this order, one at a time:
-
-#. "How would you find the pyrite in the first place?" → field map on Fe57 and S34.
-#. "Cluster the whole map first — which clusters are the sulfide?" → k-means, 4 groups,
-   on Fe57/S34/Cu65/Co59/Ni60/As75. Two land on sulfide, two on everything else.
-#. "Now do it again with PCA on. What moved?" → Dimensional Reduction page first, then
-   PCA ticked, No. basis 3.
-#. "How do you keep just the pyrite, without choosing any filter bounds?" → Clusters
-   tab, tick the sulfide clusters, **Create Cluster Mask**.
-#. "Fe against Cu — what are the outliers?" → scatter, X ``Fe57``, Y ``Cu65``,
-   Color = cluster.
-#. "Is Co telling you about the zoning?" → histogram of ``Co59``, log-scaled, per
-   cluster.
-
-**The PCA comparison is the teaching point, so make sure it lands.** Both clusterings
-put the sulfide/matrix boundary in the same place — that boundary is not in doubt. What
-changes is how the pyrite is divided *within* itself, and the cluster proportions along
-with it. Say plainly that neither is the right answer: PCA reweights what counts as
-similar by discarding the directions of least variance, and running it both ways is how
-you find out whether a result depends on that choice.
-
-**Know the answer to the histogram step before they get there.** Co and Ni are close to
-*uniform* through this pyrite — the two sulfide clusters sit almost on top of each other,
-while both sit two to three orders of magnitude above the matrix. Attendees will read
-that as having done it wrong. It is the opposite: a huge contrast between two materials
-says nothing about structure inside either one. What separates their two pyrite clusters
-is **Cu** (roughly tenfold) and **As**, which is exactly what the Fe–Cu biplot shows.
-Have that sentence ready; it turns an apparent dead end into the result.
-
-**Say once.** This map is uncalibrated — counts per second, not ppm. Patterns are fine;
-absolute values and mineral formulae are not. Nobody should run the Stoichiometry dock
-on it.
-
-**Don't send them after gold on this sample.** Au197 is below detection in about
-four-fifths of these pixels. The arsenian-pyrite gold story is a good one, but this is
-not the map for it — Cu and As carry the chalcophile signal here.
-
-**The extension worth saving for the end.** Have someone turn the cluster mask off with
-the **Cluster Mask** toolbar toggle and redraw the Fe–Cu biplot on the whole map. The
-silicate matrix swamps the pyrite entirely. That is the most concrete argument for
-masking anyone will see today, and it lands better as a discovery than as an assertion.
-
-**If X then Y.**
-
-* *Both clusterings look identical* → PCA never ran; they skipped the Dimensional
-  Reduction page, so it silently fell back to raw analytes. Same trap as block 7.
-* *Cluster mask greys out everything* → they ticked the matrix clusters, not the
-  sulfide. Check against the Fe57 map.
-* *Biplot is a blob* → the mask is off, or they are plotting the whole map. That is the
-  lesson; let them find it.
-* *Co histogram looks the same for every cluster* → expected for the two pyrite
-  clusters, and the point. Make sure they also see the matrix clusters, which are
-  dramatically lower.
-* *Cannot find pyrite on the map* → try S34 rather than Fe57; sulfur has less background
-  in silicates.
-
-**What to cut.** Drop the histogram step (−8 min) and keep the PCA comparison and the
-Fe–Cu biplot; the comparison is the part that is genuinely new to them. Do not cut the
-block.
-
-**Checkpoint 6.** Two cluster maps of the same sample with and without PCA, a cluster
-mask restricting the view to the sulfide, an Fe–Cu biplot coloured by cluster, and a
-Co histogram compared across clusters. Whiteboard ``6``.
-
-Block 10 — Notes (12:40, 10 min)
-================================
-
-*Handout section 9.*
-
-**Transition.** "You have results. Now leave with a record of how you got them."
-
-**Click path.** Log page → **Notes** → **Record** (status light goes red) → make any
-plot → Notes toolbar **Insert** page → **Formatted Info** → insert *List analytes used*,
-*Filter table*, *Cluster results*.
-
-**The point to make.** Those blocks pull live session state — the actual analytes, the
-actual filters, the actual clusters. It is the methods paragraph of a paper, assembled
-from what they really did rather than what they remember a month later.
-
-**Frame Capture honestly.** There is a Workflow designer with a block canvas, and a
-Capture toggle. Capture currently records only sample changes as blocks, so describe it
-as a **methods-report generator** — which it does well — rather than as a way to record
-clicks into a re-runnable workflow. Hand-built workflows do run; recording them does not
-yet. Said plainly this is fine. Oversold, it is the thing that costs you trust.
-
-**What to cut.** Formatted Info (−5 min). Keep Record and the automatic figure capture.
+**Cut if behind:** the heatmap statistic tour (−6), then the scatter, going straight from
+the field maps to the ternary (−4).
 
 
-Block 11 — Look-ahead (12:50, 6 min)
+Block 7 — PCA (15:38, 12 min)
+=============================
+
+*Handout §8.*
+
+Four plot types in fourteen minutes. Name each one as you go; they will not remember
+which plot gives what.
+
+* ``variance`` — the scree plot. **Have them write the number down** where it flattens.
+  They need it in block 8 and again if they redo anything.
+* ``basis vectors`` — what the components are made of. "Here is the REE block from block
+  3, quantified."
+* ``dimension score map`` — and this is the one to dwell on. PCA has no idea these
+  numbers came from a map. When PC1's score map comes out looking like growth zoning,
+  that is the data saying the chemistry and the geometry are the same phenomenon.
+
+**Cut if behind:** ``dimension scatter`` (−4). Keep variance and the score maps —
+variance because block 8 needs its number, score maps because they are the block's one
+genuinely surprising moment.
+
+
+Block 8 — Clustering (15:50, 22 min)
 ====================================
 
-Hands down. You drive. Label the block as roadmap before you start.
+*Handout §9. The most transferable skill of the day.*
 
-.. Figure placeholder PFIG-4  [presenter slide -- YOUR data, not distributed]
-   WHAT: One slide from olary2 or AH5C-1. A per-pixel date map on the left; a
-   per-cluster isochron with its Monte Carlo uncertainty envelope on the right.
-   Caption the isotope pair used and the decay constant source.
-   WHY: Block 11's whole credibility. The feature is real and this is the proof,
-   but today's four samples cannot produce it. A result on screen converts "not
-   today" from a shortfall into an invitation.
-   NOTE: unpublished -- slide only. Not in the attendee bundle, not in the handout.
-   SIZE: full slide.
+* ``k-means``, 4 clusters, ``cluster map``.
+* **Randomize the seed three times** and let the room watch. "If your zones survive
+  several seeds they are real. If they reshuffle, they were not there." This is thirty
+  seconds and it is the most important thing you will say about clustering.
+* ``cluster performance`` once, to show there is an objective handle on *k*.
+* ``fuzzy c-means`` next, then ``cluster score map`` — the membership as a continuous
+  field. "k-means had to choose. This shows you how hard the boundary actually is."
+* **Then the PCA comparison, which is the block's real content.** Dimensional Reduction
+  once so scores exist, back to Clustering, tick **PCA**, set the basis count from block
+  6, re-cluster.
 
-**Lu–Hf dating — one slide, no demo.** The implementation is real: decay constants from
-Söderlund et al. 2004, per-pixel date maps, per-cluster isochrons with Monte Carlo
-uncertainty. It needs :sup:`176`\ Lu/:sup:`177`\ Hf and :sup:`176`\ Hf/:sup:`177`\ Hf.
-Today's samples have :sup:`175`\ Lu and at most one Hf isotope, so no sequence of clicks
-produces an isochron. Show your own result from olary2 or AH5C-1, say "bring me a map
-with Hf isotopes and we will run it", and move on. **Do not open the empty dock** — it
-invites a question with no satisfying answer.
+  Say it plainly: PCA before clustering is usually presented as tidying. It is not
+  neutral — it decides what variation the clustering is allowed to see. The honest move
+  is to run it both ways, and it costs two minutes.
 
-.. Figure placeholder PFIG-5  [presenter slide -- reuse from docs/source/_static/screenshots/]
-   WHAT: Two or three Import tool screenshots in sequence: the file list with a raw
-   export loaded, the column-mapping table with analyte names resolved, and the
-   confirmation. Existing docs screenshots are fine here; nothing needs to match
-   attendee screens.
-   WHY: 90 seconds of narration over stills beats a live run that 25 people would
-   then try to repeat on their own exports.
-   SIZE: full slide.
+.. important::
 
-**Import tool — 90 seconds, screenshots.** Handout Appendix B covers it. Offer the
-conversion service: send a raw export, get a ``.lame.csv`` back. That offer is worth more
-to them than a live demo.
+   **The PCA tick box fails silently if no scores exist.** It falls back to raw analytes
+   with no warning. If someone's "PCA clustering" looks identical to their raw
+   clustering, this is why. Say it before they tick the box, not after.
 
-**Blockly — 3 minutes, your machine only.** Show the canvas and a small hand-built
-stack. **Do not touch the plot-correlation block** — it emits a field map in this build.
-Presenter-only because the bundle ships in the packaged build but is absent from a source
-clone, so it works for some of the room and not others.
+**Hazards:** the **Distance** combobox does nothing — do not touch it on the projector,
+it recomputes and returns an identical result and looks like you do not know your own
+application. ``HDBSCAN`` + ``cluster performance`` silently does nothing.
 
-**Profiles — 4 minutes, if time.** Handout Appendix A has full steps. Make the entry
-point explicit: the **Profiles dock**, never the ``profile`` plot type, which draws
-nothing.
+**Cut if behind:** fuzzy c-means and the score map (−8). **Never** cut the PCA
+comparison; it is the block.
 
-**Cut this entire block first if you are behind.** Everything in it is in the handout.
+**This is the longest block of the afternoon and it sits in the middle of a 105-minute
+unbroken run.** If the room looks tired at 16:05, take a three-minute stretch here
+rather than at the start of block 9 — the natural pause is after the seed-randomising,
+before the PCA comparison.
+
+
+Block 9 — Clusters as a filter (16:12, 12 min)
+==============================================
+
+*Handout §10.*
+
+* Clusters tab → **rename them** — ``core``, ``mantle``, ``rim``, ``matrix``. Insist on
+  this. The names propagate into every legend, the Notes report and the stoichiometry
+  scope list, and "cluster 3" in a methods paragraph is worthless.
+* **Create Cluster Mask** on the garnet clusters.
+* **Create Region** on one cluster. Say loudly that block 10 cannot run without this.
+* Then back to the ternary from block 6 with **Color** = ``Cluster``.
+
+**This is the compounding block.** Say so: two plots they already know, now carrying
+grouped information, in three clicks, because the clusters exist. One REE pattern per
+zone is a figure a paper would carry.
+
+**The TEC replot is not in this version of the timetable** — the TEC plot itself moved to
+the overflow. If you did find time for it before coffee, add it back here: one REE
+pattern per cluster is the best figure of the day.
+
+**Cut if behind:** nothing. This block is already the minimum, and block 10 cannot start
+without the region it creates.
+
+
+Block 10 — Stoichiometry (16:24, 20 min)
+========================================
+
+*Handout §11. Never cut this.*
+
+.. important::
+
+   **Scope it first, in front of them, and say why.** The calculation runs pixel by pixel
+   on the interface thread and re-runs on every settings change. Unscoped on 95,676
+   pixels that is minutes of frozen window, several times over. Quote the time you
+   measured at T-90.
+
+* **Compute scope** first: the ROI from block 9, and tick **only** that region.
+* Settings: ``Garnet``, ``ppm``, ``droop_1987``, BDL ``zero``. **Compare all redox
+  methods off** — it triples the work.
+* **Run.** Then ``Grt_dominant`` as a field map, with its swatch legend.
+
+**Then the lesson, which is the point of using RM01 as the primary sample:** look at
+``Grt_Z``. It should be 3.0, filled by Si. RM01 has no Si, so LaME filled the
+tetrahedral site with Al and the end-member percentages are wrong.
+
+Say the general version, slowly, because it is the most useful thing in the workshop:
+**a missing major element does not produce an error. It produces a plausible-looking
+answer that is incorrect.** Site totals are the sanity check, and they are the reason to
+look at ``Grt_Z`` before quoting any end-member proportion.
+
+**Hazard:** if the **Mineral** dropdown is empty and red, the build cannot find its
+mineral configs. You will know this from T-90, not from here. If it happens anyway, this
+block becomes a demonstration on your machine.
+
+Close the loop with TR1-07, from the whiteboard
+-----------------------------------------------
+
+The block cannot end on *"and this answer is wrong"* — that is a cliffhanger, not a
+lesson. The resolution is TR1-07, which has Si, and in this timetable there is no time to
+switch samples and redo the whole sequence.
+
+**So do it in ninety seconds with two numbers you measured last night.** Write RM01's
+``Grt_Z`` beside TR1-07's on the whiteboard, say that the only difference between them is
+that one sample measured silicon, and point at handout §13 for the steps. That is the
+entire payoff, and it does not need a live run.
+
+**Cut if behind:** run the calculation on the projector rather than hands-on (−8). The
+lesson survives a demonstration; the block does not survive being dropped. Never cut the
+two whiteboard numbers — they cost ninety seconds and they are the point of having used
+RM01 all afternoon.
+
+
+Block 11 — Notes (16:44, 13 min)
+================================
+
+*Handout §14. The last hands-on block of the day.*
+
+**Say first, in one sentence:** *"Before we finish, let us write down what we just
+found."* Thirteen minutes is enough for the recorder and four Formatted Info blocks, and
+not much else.
+
+* **Log** → **Notes** opens the reST Editor on a file inside their project — the folder
+  they created by saving in block 1.
+* **Record** on, then make two plots. They are captured automatically into ``figures/``
+  beside the notes file.
+* **Insert → Formatted Info** → *Sample info*, *List analytes used*, *Cluster results*,
+  *Stoichiometry results*.
+
+**Say:** this is the methods paragraph of a paper, assembled from what you actually did
+rather than what you remember doing in six months. And the cluster names you set in
+block 9 are why it reads as prose rather than as ``Cluster 3``.
+
+Point at the handout's reStructuredText appendix rather than teaching the syntax. One
+sentence about it: the notes are plain text you own, and ``reST Editor.app`` on the stick
+opens them without LaME.
+
+.. important::
+
+   **This is the last hands-on block of the day, and it is the one they take home.**
+   Protect its thirteen minutes. If you are behind at 16:44, take the time out of block
+   10's whiteboard close rather than out of this — a methods record they wrote
+   themselves outlasts everything else they did this afternoon.
+
+**Cut if behind:** the hand-written heading and caption (−4), and insert two Formatted
+Info blocks instead of four (−3). Keep *Cluster results* and *Stoichiometry results* —
+they are the two that contain the afternoon's actual findings.
+
+
+Block 12 — Documentation and close (16:57, 3 min)
+=================================================
+
+*Never cut. Three minutes, three things — and start the survey first so it is
+collecting while you talk.*
+
+#. **The context-sensitive help toggle.** Toggle **Help** in the toolbar, click
+   something, land on its documentation page. Almost nobody discovers this
+   independently, and it is the single most useful thing they can take away for working
+   alone. Do it live — it takes fifteen seconds.
+#. **The survey, up on the projector, first.** The QR is in the handout under *Tell us
+   what you thought*, and the image itself is
+   ``docs/source/_static/workshop_survey_qr.png`` if you want it full-screen. Put it up
+   and leave it there for the whole three minutes — responses you collect in the room
+   are worth several times what emailing the link afterwards gets you, because nobody
+   fills in a workshop survey on Friday.
+#. **Help → Report Bug.** What you want: what they were doing, what they expected, what
+   happened. Say that everything in the handout's limitations table is already known, so
+   anything else is genuinely new information.
+
+**Name what you did not reach** — usually §15 pyrite and §16–17 the XRF core — and say
+that those sections are complete, the data is on the stick, and nothing in them depends
+on having been here.
+
+**Close with the offer:** send raw data and get a ``.lame.csv`` back. It is the thing
+most likely to turn an attendee into a user.
+
+
+Overflow blocks — if you are ahead
+==================================
+
+These are **not in the timetable**. A three-hour session with an installation in it does
+not contain them, and the handout tells attendees so in *How to read this handout*.
+
+**Where the time would come from.** The arrival block is the only slack in the afternoon.
+If all eleven machines are running by 14:10 you have five minutes; if people arrive
+pre-installed because you emailed the installer the night before, you have closer to
+twelve.
+
+**Spend it in this order:**
+
+#. **The TEC plot (§7), 8 minutes.** Top of the list, and the cheapest. It is the REE
+   diagram petrologists actually publish, the Eu notch ties back to the Eu\* they
+   calculated in block 5, and it gives block 9 a second plot to recolour by cluster. If
+   you recover any time at all, spend it here.
+#. **TR1-07 live (§13), 8 minutes.** Turns block 10's whiteboard close into a real
+   demonstration.
+#. **The workflow designer (§12), 4 minutes.** A look-ahead, nothing more.
+#. **Pyrite (§15), 16 minutes.** Needs more time than this afternoon will ever recover,
+   but it is the best block in the handout for working through alone — it is already
+   written as *"your turn"* with fewer numbered steps.
+#. **The XRF core scan (§16–17).** Entirely self-contained. Say its name in block 12 and
+   leave it with them.
+
+**Do not add material that is not in the handout.** Attendees cannot take notes on what
+they cannot read later, and with three hours the handout is already doing most of the
+teaching.
+
+
+Overflow — TEC and radar (8 min)
+================================
+
+*Handout §7. Eight minutes. The first thing to add back if you recover time.*
+
+* n-Dimensional page, ``TEC``, ``REE`` preset.
+* Check the **Ref.** row still reads ``CI chondrite [AG89]`` — the plot is normalised, so
+  the reference is doing real work.
+* Point at the Eu notch and connect it back to the Eu\* from block 5.
+* ``radar`` for ten seconds, so they know it exists and that it is the same data.
+
+**If you get this far, also add the TEC replot to block 9** — **Color** field type
+``Cluster`` gives one chondrite-normalised REE pattern per zone, on one plot, in three
+clicks. It is the best single figure the afternoon can produce.
+
+
+Overflow — Workflow designer (4 min)
+====================================
+
+*Handout §12. Demonstration only.*
+
+Open the workflow you built at T-45. Do not build one live.
+
+**Say:** this is the afternoon's analysis as a diagram you can save, share and re-run on
+the next sample. The block vocabulary is the Control Toolbox vocabulary, so the diagram
+reads as a record of the method.
+
+**Then be straight about the state of it:** constructing works, running is not reliable
+enough to put twenty people through, and **Capture** currently records only sample
+changes. Point at the handout's limitations row rather than elaborating.
+
+**Not in the timetable.** Four minutes, no hands-on, nothing downstream depends on it.
+
+
+Overflow — TR1-07, live (8 min)
+===============================
+
+*Handout §13. Not in the timetable — block 10 closes the Si loop from the whiteboard
+instead. This is what you do if you have eight minutes to do it properly.*
+
+Switch sample on your machine and narrate four steps at pace: select analytes → cluster →
+cluster mask and region → stoichiometry scoped to it.
+
+**And now ``Grt_Z`` is near 3.0**, because TR1-07 has Si. **Put the two numbers side by
+side on the whiteboard.** That contrast is the whole garnet thread of the afternoon, and
+it is the resolution of the "this answer is wrong" that block 10 ended on. Do not skip it
+— without it the stoichiometry block closes on a failure.
+
+Flag the trap even though they are not doing it themselves: **the isotope names are
+different.** ``Fe56``, ``Ti47``, ``Cr52``, not RM01's ``Fe57``, ``Ti49``, ``Cr53``.
+Field selections do not carry across samples. Everyone hits this the first time they try
+it alone, so it is worth thirty seconds now.
+
+**Do not start WOS-02.** It is in the handout as optional and it will not happen.
+
+**Cut if behind:** skip the demonstration entirely and just put the two ``Grt_Z`` numbers
+on the whiteboard with one sentence (−5). The lesson survives; the clicking does not
+matter.
+
+
+Overflow — Pyrite (16 min)
+==========================
+
+*Handout §15. Attendee-driven.*
+
+**Set up and get out of the way.** Two sentences, then let them work:
+
+* Uncalibrated — CPS, not ppm. Maps, filters, clusters, biplots all fine. Mineral
+  formulae and normalisation are not.
+* The question: *does PCA preconditioning change the clustering, and is the pyrite
+  uniform inside itself?*
+
+**Walk the room.** Do not present. This is the block where they discover they can drive
+it themselves, and narration from the front undermines that.
+
+**Two things to have ready when asked:**
+
+* The Fe–Cu biplot is the interesting one. Fe is the framework and barely varies; Cu
+  does not substitute into pyrite, so where it appears it is something else — an
+  inclusion, an overprint, a later generation.
+* **Co and Ni do not separate the two pyrite clusters.** Several people will read this
+  as having done it wrong. It is a real result: a few hundred thousand counts inside the
+  sulfide against a few thousand outside, and essentially no difference between the two
+  sulfide groups. The groups differ in ``Cu65`` and ``As75``. Have that answer ready —
+  it is the best teaching moment in the block.
+
+**Stop on your deadline, whatever state the room is in.** Do not let this block eat the
+close; it is the one block whose value does not depend on finishing.
+
+**Cut if behind:** set one question instead of two (−6). Drop the "is it uniform
+inside" half and keep the PCA comparison.
+
+
+Overflow — XRF core scan (9 min)
+================================
+
+*Handout §16–17. Demonstration only, and only if the time exists.*
+
+Nine minutes, on your machine, no hands-on. Say that up front and say why: the handout
+is complete, the data is on the stick, and they can work through it afterwards. If you
+arrive here with twenty minutes rather than nine, make it hands-on instead — the import
+is the part worth doing with their own hands.
+
+**Four beats, roughly two minutes each:**
+
+#. **The import.** ``XRF`` / ``image``, ``data/XRF/core 7/``, spot size 1. Five rows,
+   26 PNGs each. "One image per element — the scanner's software exports pictures, and
+   LaME reads brightness as relative intensity."
+#. **What you have, and do not have.** Intensity, not concentration. And **each channel
+   was scaled independently** before it became an 8-bit PNG, so Fe-here against
+   Fe-there is valid and Fe against Ca is not.
+#. **The Rh moment.** Show the mean intensities: ``Re`` and ``Rh`` are the two
+   *brightest* channels in the scan, brighter than Fe in a rock. "That is not rhenium —
+   those are tube anode materials, and what you are seeing is the X-ray source scattered
+   off the sample." It is the best thirty seconds in the block. Check what your own
+   instrument's tube is made of before interpreting any of them.
+#. **The cluster map against the core photograph.** Cluster ``row1`` on the channels
+   that carry signal, then put ``core7_Video Mosaic.png`` beside it. Chemistry
+   recovering structure that is independently visible in a photograph is the most
+   persuasive thing in Part IV.
+
+**Mention in one sentence, do not demonstrate:** ROIs, polygons and crop are three more
+ways to restrict a map, all covered in the handout, and crop is the one that makes a
+long core strip manageable.
+
+**Cut to 4 minutes if needed:** import one row, show the cluster map against the
+photograph, stop. Beats 2 and 3 become one sentence each.
 
 
 Do not do these on the projector
@@ -758,10 +1009,6 @@ Do not do these on the projector
      - A noise-reduction warning, or silence with the old plot still up
    * - Calculator ``case()`` / ``otw()``
      - *"could not evaluate conditional statement. Check syntax."*
-   * - **Crop**
-     - Incomplete; leaves no way back
-   * - **Full Map**
-     - Dialog appears, then an ``AttributeError`` and nothing happens
    * - Cluster **Distance** combobox
      - Recomputes, identical result. Looks like you do not know your own app
    * - HDBSCAN + ``cluster performance``
@@ -778,54 +1025,58 @@ Do not do these on the projector
      - Empty dropdowns, nothing behind them
    * - Correlation or ternary map after filtering
      - No change, and you have just implied filtering is broken
+   * - Running a workflow
+     - Unreliable. Build one, do not run one
+   * - Data types other than LA-ICP-MS and XRF/image
+     - Metadata table fills, then *"Not implemented"*
+
+**Crop and Full Map are off this list.** They were broken in the previous build and are
+fixed in this one — crop applies on a double-click inside the box or on Enter, and Full
+Map restores the whole sample. The XRF overflow block mentions crop deliberately.
+Rehearse it once tonight anyway.
 
 
 Fallbacks
 =========
 
+**There are no checkpoint project files this time.** The previous version of this
+workshop shipped four ``.lame_project.json`` files; this one does not, because the data
+layout changed and stale project files are worse than none. Recovery has three levels
+instead:
+
 .. list-table::
    :header-rows: 1
-   :widths: 14 30 14 42
+   :widths: 10 34 56
 
-   * - Ckpt
-     - File
-     - Resumes
-     - Recovers
-   * - 0
-     - ``00-open.lame_project.json``
-     - block 2
-     - RM02 loaded, nothing else
+   * - Level
+     - Route
+     - Covers
+   * - 1
+     - **Their own last save**, or the autosave. §1 ends with a save and every later
+       section begins with one.
+     - Anything after block 2. By far the most common case.
    * - 2
-     - ``02-plots.lame_project.json``
-     - block 5
-     - Fields, ratio, Eu\*
-   * - 4
-     - ``04-clusters.lame_project.json``
-     - block 8
-     - ROI and clusters, restored without recomputing
-   * - 6
-     - ``06-pyrite.lame_project.json``
-     - block 9
-     - Pyrite sample loaded
-
-Three keystrokes: **File → Open Project**, pick the file, done.
+     - **The converted ``.lame.csv``** beside each directory we import.
+     - A failed import — block 2, or the XRF overflow block. See gate one in the
+       pre-flight.
+   * - 3
+     - **A two-click rebuild.** Most later blocks need *a* cluster or *an* ROI, not a
+       particular one.
+     - Blocks 8–12, where re-clustering from scratch takes under a minute.
 
 .. caution::
 
-   **Know the gap before the day.** The four files resume at blocks 2, 5, 8 and 9. There
-   is nothing that resumes at block 6 or 7, so an attendee whose ROI or clustering work
-   collapses cannot be caught up until 11:44 — handing them ``04-clusters`` earlier skips
-   both blocks. If you find an hour before the workshop, author a fifth file after the
-   filters block (``03-filters``, resuming at block 7) and add it to the handout's
-   catch-up table. It covers the two riskiest blocks of the day and is the single highest-value
-   piece of remaining prep.
+   **Know the gap.** Level 1 does not exist until the save at the end of block 2,
+   because until then there is nothing saved and autosave has nowhere of its own to
+   write. For those eighteen minutes your only fallback is ``RM01.lame.csv``, which is
+   why gate one is where it is in the pre-flight checklist.
 
 .. important::
 
-   **Never debug a lost attendee during contact time.** Hand them the checkpoint, write
-   the symptom on the triage sheet, move on. One person's problem costs twenty-four
-   people their attention. This is the rule that makes a hands-on workshop survivable,
-   and it is the hardest one to keep.
+   **Never debug a lost attendee during contact time.** Hand them the fallback, write
+   the symptom on the triage sheet, move on. One person's problem costs everyone else
+   their attention. This is the rule that makes a hands-on workshop survivable, and it
+   is the hardest one to keep.
 
 
 Triage sheet
@@ -869,23 +1120,38 @@ After the workshop
 * The handout PDF, in case they annotated a paper copy.
 * Their own saved projects if anything was lost.
 * A link to file issues, and an explicit invitation to send raw data for conversion.
+* **The survey link**, to whoever did not scan it in the room. One reminder, same day —
+  after that the response rate does not move.
+* **A note naming the sections you did not reach**, and saying that they are complete and
+  the data is on the stick. In a three-hour session that is usually §7, §12, §13 and
+  §15–17. This is the difference between an unfinished workshop and a handout with
+  homework in it.
+* **A pointer to §15, pyrite, as the place to start.** It is written as an exercise
+  rather than a walkthrough, so it is the section that works best unsupervised.
 
 **File as issues**, from the triage sheet:
 
 * Every symptom that is not already in the handout's limitations table.
+* **Every import failure, with the directory and the numbers they typed.** Block 2 is
+  the first unsupervised use of the new import path by people who did not write it, and
+  that is information you cannot get any other way.
 * Install failures by OS and chip. Intel Mac demand in particular — there is no build
   for it, and the count from today is the evidence for whether that matters.
 
 **Fix list this workshop will have earned:**
 
-* Mineral-config paths anchored to ``BASEDIR`` rather than the working directory.
+* Make the dX/dY columns editable, or let a user enter pixel spacing directly. Working
+  backwards from spot size, sweep and speed to a known pixel pitch is the wrong way
+  round for anyone importing data they did not acquire themselves.
+* Warn on import when the derived pixel spacing is 1 — it means the geometry fields were
+  left blank, which is the single most likely import mistake and it is silent.
 * Stoichiometry off the interface thread, with a progress indicator.
-* A warning when a mineral's site-defining element is absent from the data — the RM02
+* A warning when a mineral's site-defining element is absent from the data — the RM01
   lesson, turned into something the software says itself.
 * Remove or implement ``gradient map``, ``profile`` and ``polygon`` plot types; they are
   selectable and do nothing.
 * Correct the Calculator documentation's ``case()`` section.
 * Make the cluster **Distance** combobox work or remove it.
-* Keep the Qt runtime pinned. ``requirements.txt`` left ``PyQt6`` unpinned, so the build
-  silently picked up the one Qt patch release in years that corrupts image rendering on
-  macOS. A GUI toolkit is not a dependency to float.
+* Make clustering respect polygons, or say why it does not in the interface rather than
+  only in the documentation.
+* Keep the Qt runtime pinned. A GUI toolkit is not a dependency to float.

@@ -1,4 +1,4 @@
-src.common.Calculator
+﻿src.common.Calculator
 =====================
 
 .. automodule:: src.common.Calculator
@@ -8,7 +8,9 @@ src.common.Calculator
 
    .. autosummary::
    
+      apply_outside_braces
       calc_error
+      parenthesize_boolean_operands
    
    .. rubric:: Classes
 

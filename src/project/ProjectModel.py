@@ -36,6 +36,31 @@ from typing import Optional
 PROJECT_FORMAT_VERSION = 1
 UNTITLED_PROJECT_NAME = "Untitled Project"
 
+#: Manifest file suffix. Lives here, with the model, because the name a
+#: project carries is derived from it (`project_name_for`);
+#: `ProjectManager` re-exports it for the UI code that filters on it.
+PROJECT_FILE_SUFFIX = '.lame_project.json'
+
+
+def project_name_for(manifest_path):
+    """The project name a manifest file implies.
+
+    ``Path.stem`` is not enough: the suffix is a double extension, so the
+    stem of ``Foo.lame_project.json`` is ``Foo.lame_project``.
+
+    Parameters
+    ----------
+    manifest_path : str or Path
+
+    Returns
+    -------
+    str
+    """
+    name = Path(manifest_path).name
+    if name.endswith(PROJECT_FILE_SUFFIX):
+        return name[: -len(PROJECT_FILE_SUFFIX)]
+    return Path(manifest_path).stem
+
 
 # ---------------------------------------------------------------------------
 # Tier 1 -- calibration (sample-inherent, shared across any project)
@@ -250,6 +275,15 @@ class SampleProcessingState:
     #: 'selected_clusters': [int]}}`` -- cluster ids are ints in memory and
     #: str keys in JSON.
     cluster_groups: dict = field(default_factory=dict)
+    #: The sample's map-annotation layer -- text labels and distance
+    #: measurements, in stage coordinates, shown on every map of the sample.
+    #: Stored verbatim; `SampleObj.add_map_annotation` defines the shape and
+    #: already keeps it JSON-ready.
+    annotations: list = field(default_factory=list)
+    #: ``{plot_key: [record]}`` for plots with their own axes (scatter,
+    #: histogram, ternary), whose annotations cannot be shared between
+    #: plots. Keys come from `src.tree.PlotRegistry.plot_key`.
+    plot_annotations: dict = field(default_factory=dict)
 
 
 def _processing_state_to_dict(state):
@@ -268,6 +302,8 @@ def _processing_state_to_dict(state):
             }
             for method, groups in state.cluster_groups.items()
         },
+        'annotations': state.annotations,
+        'plot_annotations': state.plot_annotations,
     }
 
 
@@ -287,6 +323,8 @@ def _processing_state_from_dict(d):
             }
             for method, groups in d.get('cluster_groups', {}).items()
         },
+        annotations=d.get('annotations', []),
+        plot_annotations=d.get('plot_annotations', {}),
     )
 
 
@@ -380,6 +418,13 @@ class ProjectSampleEntry:
     sample_path: Path
     calibration: Optional[SampleCalibration] = None
     processing: SampleProcessingState = field(default_factory=SampleProcessingState)
+    #: `compute_source_hash` of the file at the moment it was read into
+    #: memory, set by `LameIO.initialize_sample_object`. Describes what is
+    #: loaded *now*, so it is session state and is not written to the
+    #: manifest -- after a restart nothing is loaded and there is nothing
+    #: to compare. `ProjectManager.add_samples` uses it to notice that a
+    #: re-imported file has changed under a sample already in memory.
+    source_hash: Optional[str] = None
 
 
 @dataclass
@@ -447,6 +492,17 @@ def save_project(project, manifest_path, update_project_state=True):
     # side. Resolving both ends the same way keeps them consistent.
     base_dir = manifest_path.resolve().parent
 
+    if update_project_state:
+        # A project is named after its file. Nothing else ever sets `name`
+        # -- there is no rename UI, and `new_project` only ever assigns the
+        # untitled placeholder -- so without this a project saved as
+        # "MyGarnets.lame" kept the name "Untitled Project": the window
+        # title stayed wrong even after the unsaved-changes marker cleared,
+        # and the wrong name was written into the manifest, so it came back
+        # wrong on reload too. Set before the payload is built, so the file
+        # records the name the project now has.
+        project.name = project_name_for(manifest_path)
+
     samples = {}
     for sample_id, entry in project.samples.items():
         samples[sample_id] = {
@@ -505,7 +561,10 @@ def load_project(manifest_path):
         dock_layout = base64.b64decode(payload['dock_layout'])
 
     return Project(
-        name=payload.get('name', UNTITLED_PROJECT_NAME),
+        # The file is the authority on the name, not the payload: a project
+        # renamed on disk should open under the name the user gave it. The
+        # two agree for anything `save_project` wrote.
+        name=project_name_for(manifest_path) or payload.get('name', UNTITLED_PROJECT_NAME),
         samples=samples,
         workflow_refs=[_to_absolute(p, base_dir) for p in payload.get('workflow_refs', [])],
         dock_layout=dock_layout,

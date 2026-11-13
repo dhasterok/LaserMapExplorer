@@ -26,6 +26,7 @@ from src.plotting.scalebar import scalebar
 from global_geochemistry.plotting.ternary import ternary
 from src.control.Logger import LoggerConfig, log_call, log
 from src.data.cluster_groups import cluster_groups
+from src.tree.PlotRegistry import plot_key
 
 def create_plot(parent, data, app_data, style_data):
     """Creates a plot without UI dependencies.
@@ -120,7 +121,16 @@ def create_plot(parent, data, app_data, style_data):
         log(f"Error in create_plot: {e}", prefix="Error")
         traceback.print_exc()
         return None, None
-        
+
+    # Plots with their own axes keep their annotations to themselves, under
+    # a key derived from the finished plot_info -- which is only complete
+    # here, after the plot function has named itself. Maps were given their
+    # sample at construction and are left alone: their layer is shared, so
+    # it must be drawn before the figure is first shown, not bolted on
+    # afterwards.
+    if isinstance(canvas, MplCanvas) and plot_info and not canvas.is_annotatable():
+        canvas.attach_plot_annotations(data, plot_key(plot_info))
+
     return canvas, plot_info
 
 @log_call(logger_key='Plot')
@@ -178,7 +188,11 @@ def plot_map_mpl(parent, data, app_data, style_data, field_type, field, add_hist
     - Stores the plotted data in the parent for potential export.
     """
     # create plot canvas
-    canvas = MplCanvas(parent=parent, map_flag=True)
+    # `sample_obj` is what gives a canvas the sample's map-annotation
+    # layer: this plot is drawn in stage coordinates, so labels and
+    # distance measurements made on any other map of the sample belong
+    # here too (see MplCanvas's MAP ANNOTATION LAYER section).
+    canvas = MplCanvas(parent=parent, map_flag=True, sample_obj=data)
 
     # get data for current map
     #scale = data.processed.get_attribute(field, 'norm')
@@ -2125,7 +2139,9 @@ def plot_ternary_map(parent, data, app_data, style_data):
         app_data.plot_type = 'ternary map'
         style_data.set_style_widgets('ternary map')
 
-    canvas = MplCanvas(sub=121, parent=parent)
+    # A ternary *map*: the left subplot is in stage coordinates like any
+    # other map, so it carries the sample's shared annotation layer.
+    canvas = MplCanvas(sub=121, parent=parent, sample_obj=data)
 
     afield = app_data.x_field
     bfield = app_data.y_field
@@ -2471,7 +2487,11 @@ def plot_score_map(parent,data, app_data, style_data):
     field_data : pd.Series
         The data series corresponding to the selected field for the score map.
     """
-    canvas = MplCanvas(parent=parent)
+    # `sample_obj` is what gives a canvas the sample's map-annotation
+    # layer: this plot is drawn in stage coordinates, so labels and
+    # distance measurements made on any other map of the sample belong
+    # here too (see MplCanvas's MAP ANNOTATION LAYER section).
+    canvas = MplCanvas(parent=parent, sample_obj=data)
     plot_type = style_data.plot_type
     field_type = app_data.c_field_type
     #field = app_data.c_field
@@ -3113,7 +3133,11 @@ def plot_cluster_map(parent, data, app_data, style_data):
     plot_data : pd.Series
         Series containing the cluster labels for each data point.
     """
-    canvas = MplCanvas(parent=parent)
+    # `sample_obj` is what gives a canvas the sample's map-annotation
+    # layer: this plot is drawn in stage coordinates, so labels and
+    # distance measurements made on any other map of the sample belong
+    # here too (see MplCanvas's MAP ANNOTATION LAYER section).
+    canvas = MplCanvas(parent=parent, sample_obj=data)
 
     plot_type = style_data.plot_type
     method = app_data.cluster_method
@@ -3245,7 +3269,11 @@ def plot_roi_map(parent, data, app_data, style_data):
     plot_data : pd.Series
         Series containing the raw ROI labels for each data point.
     """
-    canvas = MplCanvas(parent=parent)
+    # `sample_obj` is what gives a canvas the sample's map-annotation
+    # layer: this plot is drawn in stage coordinates, so labels and
+    # distance measurements made on any other map of the sample belong
+    # here too (see MplCanvas's MAP ANNOTATION LAYER section).
+    canvas = MplCanvas(parent=parent, sample_obj=data)
 
     id_to_index = {r['id']: i for i, r in enumerate(data.roi_stack)}
     groups = data.processed['ROI'].map(id_to_index).values.astype(float)

@@ -156,7 +156,7 @@ class MplCanvas(FigureCanvas):
     distanceChanged = pyqtSignal()  # distance
     annotationsUpdated = pyqtSignal(list)  # list of annotations
 
-    def __init__(self, fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False, plot_id=None, sample_obj=None):
+    def __init__(self, fig=None, sub=111, parent=None, width=5, height=4, proj=None, ui=None, map_flag=False, sample_obj=None, plot_key=None):
         #create MPLCanvas with existing figure (required when loading saved projects)
         if fig:
             self.fig = fig
@@ -181,8 +181,23 @@ class MplCanvas(FigureCanvas):
         self.ui = parent
         
         # Registry integration (for persistence across canvas recreation)
-        self.plot_id = plot_id
+        # A canvas drawn in the sample's stage coordinates is given the
+        # sample, and that is what makes it carry the map-annotation layer
+        # (see `_load_annotations`). Plots with their own axes --
+        # scatter, histogram, ternary diagram -- are not given one, because
+        # an annotation placed at a concentration pair means nothing on a
+        # map and vice versa.
+        # A canvas drawn in stage coordinates is given `sample_obj` alone
+        # and carries the shared map layer. A plot with its own axes is
+        # given `sample_obj` *and* a `plot_key`, and keeps its annotations
+        # in that plot's own list -- they cannot be shared, since a point
+        # placed at a pair of concentrations has no position anywhere else.
         self.sample_obj = sample_obj
+        self.plot_key = plot_key
+        self._annotation_slot = None
+        #: Fingerprint of the records last drawn, so a change elsewhere in
+        #: the sample does not make this canvas redraw for nothing.
+        self._drawn_annotations = None
 
         # indicates whether the data are map form (x, y, value) or simply (x, y)
         self.map_flag = map_flag
@@ -234,9 +249,12 @@ class MplCanvas(FigureCanvas):
         
         self.mpl_toolbar = NavigationToolbar(self)
         
-        # Load existing annotations from registry if available
-        if self.sample_obj and self.plot_id:
-            self._load_annotations_from_registry()
+        if self.sample_obj is not None:
+            self._load_annotations()
+            # Redraw when the layer changes anywhere else -- another canvas,
+            # or the annotations table in the Info dock.
+            self._annotation_slot = self._on_map_annotations_changed
+            self.sample_obj.mapAnnotationsChanged.connect(self._annotation_slot)
 
     @property
     def plot_name(self):
@@ -387,6 +405,30 @@ class MplCanvas(FigureCanvas):
         self.mpl_disconnect(self.distance_cid_move)
         self.distance_cid_press = None
         self.distance_cid_move = None
+        # A half-finished measurement does not survive the tool being
+        # switched off -- otherwise the next click after switching back on
+        # is read as the *second* click of the abandoned one, and measures
+        # from wherever the user happened to start before. Finished
+        # measurements (saved_line/saved_dtext) are kept.
+        self._clear_pending_measurement()
+        self.draw()
+
+    def _clear_pending_measurement(self):
+        """Forget a measurement in progress: its start point and rubber band.
+
+        Leaves completed measurements alone. Does not redraw -- callers that
+        need the canvas repainted do it themselves, so a click that goes
+        straight on to draw a permanent line does not paint twice.
+        """
+        self.first_point = None
+        for artist in ('line', 'dtext'):
+            obj = getattr(self, artist, None)
+            if obj is not None:
+                try:
+                    obj.remove()
+                except ValueError:
+                    pass
+                setattr(self, artist, None)
 
     def enterEvent(self, event):
         # Set cursor to cross when the mouse enters the window and a tool is active
@@ -538,39 +580,40 @@ class MplCanvas(FigureCanvas):
         self.draw()
 
         new = {
-            'Type': 'Text',
+            # lower case, matching the stored records and the checks in
+            # `redraw_annotations`/`_draw_annotation`; it used to be 'Text'
+            # here and 'line' in the distance path, so the text branch of
+            # `redraw_annotations` never matched.
+            'Type': 'text',
             'X1': x,
             'Y1': y,
             'Text': txt,
             'Color': overlay_color,
             'Size': font_size,
             'Visible': True,
-            'object': annotation_obj
+            'object': annotation_obj,
+            'text_object': None,
         }
         self.annotations.append(new)
-        # Store in registry for persistence
-        self._store_annotation_in_registry(new)
-        self.annotationsUpdated.emit(copy.deepcopy(self.annotations))
+        # Join the sample's map layer, so this label shows on every map of
+        # the sample. On a canvas with its own axes it stays here.
+        self._store_map_annotation(new)
+        self.annotationsUpdated.emit(self.annotation_records())
 
     def redraw_annotations(self):
-        for ann in self.annotations:
-            if not ann.get('Visible', True):
-                continue
+        """Re-draw this canvas's annotations.
 
-            if ann['Type'] == "text":
-                self.axes.text(ann['X1'], ann['Y1'], ann['Text'],
-                            color=ann['Color'], fontsize=ann['Size'])
-            elif ann['Type'] == 'line':
-                # Ensure line width is valid
-                line_width = ann.get('Line Width', 1.0)
-                if line_width is None or line_width <= 0:
-                    line_width = 1.0
-                    
-                self.axes.plot([ann['X1'], ann['X2']], [ann['Y1'], ann['Y2']],
-                            color=ann['Color'], linewidth=line_width)
-                txt = ann['Text']
-                self.axes.text(txt['X1'], txt['Y1'], txt['Text'], ha=txt['HAlign'], va=txt['VAlign'], fontdict=txt['FontDict'], c=ann['Color'])
-
+        Called before the figure is popped into its own window. It used to
+        add a *second* set of artists on top of the ones already on the
+        axes, and read fields that no longer exist in this format
+        (``'Line Width'``, and ``'Text'`` as a placement dict), so a
+        popped-out figure with a distance measurement on it raised.
+        Rebuilding from the sample's layer clears the old artists first, so
+        it is idempotent; a canvas with no layer behind it already has its
+        artists drawn and needs nothing.
+        """
+        if self.is_annotatable():
+            self._load_annotations()
         self.draw_idle()
 
     def calculate_distance(self,p1,p2):
@@ -635,7 +678,7 @@ class MplCanvas(FigureCanvas):
 
         return p
  
-    def plot_text(self, p1, p2):
+    def plot_text(self, p1, p2, label=None):
         """Adds distance to plot and updates distance label
 
         Updates distance in ``MainWindow.labelInfoDistance`` and adds distance
@@ -645,6 +688,12 @@ class MplCanvas(FigureCanvas):
         ----------
         p1, p2 : tuple
             Endpoints of line.
+        label : str, optional
+            Text to draw instead of the distance computed here. Used when
+            redrawing a stored annotation, whose label was measured once on
+            the map it was made on; recomputing it would re-derive the same
+            number from `dx`/`dy` that this particular figure happens to
+            carry, which is not necessarily the same.
 
         Returns
         -------
@@ -662,13 +711,16 @@ class MplCanvas(FigureCanvas):
             
         style = self.ui.style_data
 
-        # compute distance
-        self.distance = self.calculate_distance(p1, p2)
+        if label is None:
+            # compute distance
+            self.distance = self.calculate_distance(p1, p2)
 
-        units = self.distance_units or ''
+            units = self.distance_units or ''
 
-        # Update distance label in widget 
-        distance_text = f"{self.distance:.4g} {units}"
+            # Update distance label in widget
+            distance_text = f"{self.distance:.4g} {units}"
+        else:
+            distance_text = label
 
         # Update distance label on map
         if self.map_flag:
@@ -734,53 +786,64 @@ class MplCanvas(FigureCanvas):
                 self.first_point = (event.xdata, event.ydata)
                 self.distance = 0
             else:
-                # Second click
+                # Second click. The measurement is finished the moment the
+                # two endpoints are known, so the state is cleared here --
+                # before the bookkeeping below -- rather than at the end.
+                # It used to be reset last, and the dict built in between
+                # read `self.ui.style.font_size`: `MainWindow` has no
+                # `style`, so that resolved to `QWidget.style`, the method,
+                # and raised AttributeError. Matplotlib callbacks swallow
+                # exceptions into stderr, so the user saw no error -- just a
+                # first_point left pointing at the start of the very first
+                # measurement, which every later click then measured from.
+                # Turning the tool off did not help either; see
+                # `disable_distance_mode`.
+                first_point = self.first_point
                 second_point = (event.xdata, event.ydata)
+                self._clear_pending_measurement()
 
                 # Plot permanent line and text
-                line_obj = self.plot_line(self.first_point, second_point)
-                text_obj, text_dict = self.plot_text(self.first_point, second_point)
+                line_obj = self.plot_line(first_point, second_point)
+                text_obj, text_dict = self.plot_text(first_point, second_point)
 
-                # Save to your existing lists if needed
-                if line_obj is not None:
-                    self.saved_line.append(line_obj)
-                if text_obj is not None:
-                    self.saved_dtext.append(text_obj)
+                # saved_line/saved_dtext are only for a canvas with no
+                # annotation layer behind it. On a map, storing the
+                # measurement re-draws the layer and these very artists are
+                # replaced, so keeping them here would leave the lists full
+                # of artists already taken off the axes -- and the code that
+                # empties them calls .remove() on each.
+                if not self.is_annotatable():
+                    if line_obj is not None:
+                        self.saved_line.append(line_obj)
+                    if text_obj is not None:
+                        self.saved_dtext.append(text_obj)
 
                 new = {
                     "Type": "line",
-                    'X1': self.first_point[0],
-                    'Y1': self.first_point[1],
+                    'X1': first_point[0],
+                    'Y1': first_point[1],
                     'X2': second_point[0],
                     'Y2': second_point[1],
                     'Text': text_dict,
-                    'Label': text_obj.get_text(),
+                    'Label': text_obj.get_text() if text_obj is not None else '',
                     'Color': self.ui.style_data.line_color,
-                    'Size': self.ui.style.font_size,
+                    'Size': self.ui.style_data.font_size,
                     'Width': self.ui.style_data.line_width,
                     'Visible': True,
                     'object': line_obj,
                     'text_object': text_obj
                 }
                 self.annotations.append(new)
-                # Store in registry for persistence
-                self._store_annotation_in_registry(new)
-                self.notify_observers("annotations", copy.deepcopy(self.annotations))
-
-                # Reset first_point so next click starts a new line
-                self.first_point = None
-                if self.line:
-                    try:
-                        self.line.remove()
-                    except ValueError:
-                        pass
-                    self.line = None
-                if self.dtext:
-                    try:
-                        self.dtext.remove()
-                    except ValueError:
-                        pass
-                    self.dtext = None
+                # A distance is a fact about the sample, not about whichever
+                # element was displayed, so it joins the sample's map layer
+                # and appears on every map of it.
+                self._store_map_annotation(new)
+                # `notify_observers` was called here, but MplCanvas does not
+                # inherit Observable and nothing registers for "annotations"
+                # -- so this raised too, immediately after the font_size line
+                # above. The sibling text path (`textOnClick`) emits the Qt
+                # signal declared for exactly this, so do the same.
+                self.annotationsUpdated.emit(self.annotation_records())
                 self.distance = None
 
         self.draw()
@@ -826,178 +889,346 @@ class MplCanvas(FigureCanvas):
         If ``MainWindow.toolButtonDistance`` is not checked, then ``MainWindow.labelInfoDistance`` is 
         also reset.
         """        
-        self.first_point = None
-        if self.line:
-            try:
-                self.line.remove()
-            except ValueError:
-                pass
-            self.line = None
-        if self.dtext:
-            try:
-                self.dtext.remove()
-            except ValueError:
-                pass
-            self.dtext = None
+        self._clear_pending_measurement()
         self.draw()
         if self.active_tool != 'distance':
             self.distance = None
 
     # ==========================================
-    # REGISTRY INTEGRATION METHODS (HYBRID APPROACH)
+    # MAP ANNOTATION LAYER
     # ==========================================
-    
-    def _load_annotations_from_registry(self):
-        """Load annotations from registry and recreate them in the annotations list."""
-        if not self.sample_obj or not self.plot_id:
+    # Annotations on a map belong to the sample, not to the plot that
+    # happened to be on screen when they were made -- every map of a sample
+    # shares the same stage axes, so a label or a measurement is as true of
+    # one element map as of the next. They behave like the other per-sample
+    # layers (masks, polygons, ROIs): always present, each entry switched
+    # off individually in the Info dock's annotations table when a
+    # particular figure should not carry it.
+    #
+    # `self.annotations` is this canvas's working copy: the stored record
+    # plus the matplotlib artists drawing it, which belong to this figure
+    # alone. `sample_obj.map_annotations` holds the records themselves.
+
+    def is_annotatable(self):
+        """Whether annotations made here are stored rather than lost.
+
+        Returns
+        -------
+        bool
+            False only for a canvas with no sample behind it at all.
+        """
+        # getattr, not plain attribute access: `__init__` returns early for
+        # a canvas built with no parent, leaving none of this set.
+        return getattr(self, 'sample_obj', None) is not None
+
+    def attach_plot_annotations(self, sample_obj, key):
+        """Give a non-map canvas its own annotation list and draw it.
+
+        Called once the plot has finished naming itself (see
+        `src.plotting.LamePlot.create_plot`), which is the first point at
+        which a stable `plot_key` can be derived. A map canvas is given its
+        sample at construction instead, because its layer is shared and has
+        to be on the axes before the figure is first shown.
+
+        Parameters
+        ----------
+        sample_obj : SampleObj
+        key : str
+            From `src.tree.PlotRegistry.plot_key`.
+        """
+        if sample_obj is None or not key:
             return
-            
+        self.sample_obj = sample_obj
+        self.plot_key = key
+        self._load_annotations()
+        if self._annotation_slot is None:
+            self._annotation_slot = self._on_map_annotations_changed
+            self.sample_obj.mapAnnotationsChanged.connect(self._annotation_slot)
+
+    def annotation_scope(self):
+        """Which bucket this canvas's annotations live in.
+
+        Returns
+        -------
+        str
+            ``'map'`` when they are shared across every map of the sample,
+            ``'plot'`` when they belong to this plot alone, or ``'none'``
+            when there is nowhere to store them.
+        """
+        if not self.is_annotatable():
+            return 'none'
+        return 'plot' if getattr(self, 'plot_key', None) else 'map'
+
+    def annotation_records(self):
+        """This canvas's annotations without their matplotlib artists.
+
+        What `annotationsUpdated` carries. The artists belong to this
+        figure and cannot be deep-copied or handed to anyone else, so they
+        are dropped rather than shipped to listeners.
+
+        Returns
+        -------
+        list of dict
+        """
+        return [{k: v for k, v in ann.items()
+                 if k not in ('object', 'text_object')}
+                for ann in self.annotations]
+
+    def disconnect_sample_signals(self):
+        """Stop listening to the sample's annotation layer.
+
+        Drops only this canvas's own slot -- a bare ``disconnect()`` would
+        take every other canvas and the annotations table with it.
+        """
+        if self.sample_obj is not None and self._annotation_slot is not None:
+            try:
+                self.sample_obj.mapAnnotationsChanged.disconnect(self._annotation_slot)
+            except (RuntimeError, TypeError):
+                pass
+            self._annotation_slot = None
+
+    def _on_map_annotations_changed(self):
+        """Re-draw after the stored annotations changed somewhere else.
+
+        One signal covers both buckets, so this fires on every canvas of
+        the sample whenever *any* annotation changes -- including map
+        canvases when a scatter plot's own annotation is added, and
+        canvases that have been replaced in the layout but are still held
+        by the plot registry. Redrawing those is wasted work at best; at
+        worst a canvas that has been detached has no usable size, and
+        matplotlib fails to rasterise the label on it
+        ("FT_Render_Glyph ... raster overflow"). Comparing what this
+        canvas last drew against what it should be drawing skips all of
+        that.
+        """
         try:
-            registry_annotations = self.sample_obj.get_annotations(self.plot_id)
-            
-            for reg_ann in registry_annotations:
-                # Convert registry format to canvas format
-                canvas_ann = self._registry_to_canvas_format(reg_ann)
-                if canvas_ann:
-                    # Recreate matplotlib object
-                    mpl_obj = self._recreate_matplotlib_object(canvas_ann)
-                    canvas_ann['object'] = mpl_obj
-                    self.annotations.append(canvas_ann)
-                    
-        except Exception as e:
-            log(f"Error loading annotations from registry: {e}", prefix="Error")
-    
-    def _registry_to_canvas_format(self, registry_ann):
-        """Convert registry annotation format to canvas annotation format."""
-        try:
-            if registry_ann['type'] == 'text':
-                return {
-                    'Type': 'text',
-                    'X1': registry_ann['position'][0],
-                    'Y1': registry_ann['position'][1],
-                    'Text': registry_ann['text'],
-                    'Color': registry_ann['style']['color'],
-                    'Size': registry_ann['style'].get('font_size', 12),
-                    'Visible': registry_ann.get('visible', True),
-                    'registry_id': registry_ann['id']  # Keep reference to registry
-                }
-            elif registry_ann['type'] == 'line':
-                positions = registry_ann['position']
-                return {
-                    'Type': 'line',
-                    'X1': positions[0][0],
-                    'Y1': positions[0][1], 
-                    'X2': positions[-1][0],
-                    'Y2': positions[-1][1],
-                    'Text': registry_ann.get('text', ''),
-                    'Color': registry_ann['style']['color'],
-                    'Width': registry_ann['style'].get('line_width', 2),
-                    'Visible': registry_ann.get('visible', True),
-                    'registry_id': registry_ann['id'],
-                    'positions': positions  # Store all positions for multi-point lines
-                }
-        except KeyError as e:
-            log(f"Missing key in registry annotation: {e}", prefix="Error")
-            return None
-    
-    def _recreate_matplotlib_object(self, canvas_ann):
-        """Recreate matplotlib object from canvas annotation."""
-        try:
-            if canvas_ann['Type'] == 'text':
-                return self.axes.text(
-                    canvas_ann['X1'], canvas_ann['Y1'], canvas_ann['Text'],
-                    color=canvas_ann['Color'],
-                    fontsize=canvas_ann['Size'],
-                    visible=canvas_ann['Visible']
-                )
-            elif canvas_ann['Type'] == 'line':
-                if 'positions' in canvas_ann:
-                    # Multi-point line
-                    positions = canvas_ann['positions']
-                    x_coords, y_coords = zip(*positions)
-                else:
-                    # Simple two-point line
-                    x_coords = [canvas_ann['X1'], canvas_ann['X2']]
-                    y_coords = [canvas_ann['Y1'], canvas_ann['Y2']]
-                
-                line_obj = self.axes.plot(
-                    x_coords, y_coords,
-                    color=canvas_ann['Color'],
-                    linewidth=canvas_ann.get('Width', 2),
-                    visible=canvas_ann['Visible']
-                )[0]
-                
-                # Add text if present
-                if canvas_ann.get('Text'):
-                    mid_x = sum(x_coords) / len(x_coords)
-                    mid_y = sum(y_coords) / len(y_coords)
-                    text_obj = self.axes.text(
-                        mid_x, mid_y, canvas_ann['Text'],
-                        color=canvas_ann['Color'],
-                        fontsize=canvas_ann.get('Size', 12),
-                        ha='center', va='center',
-                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8),
-                        visible=canvas_ann['Visible']
-                    )
-                    return [line_obj, text_obj]  # Return both objects
-                
-                return line_obj
-                
-        except Exception as e:
-            log(f"Error recreating matplotlib object: {e}", prefix="Error")
-            return None
-    
-    def _store_annotation_in_registry(self, canvas_annotation):
-        """Store a canvas annotation in the registry for persistence."""
-        if not self.sample_obj or not self.plot_id:
+            if self._annotation_fingerprint() == self._drawn_annotations:
+                return
+            self._load_annotations()
+            self.draw_idle()
+        except RuntimeError:
+            # Canvas already destroyed by Qt; nothing to redraw.
+            pass
+
+    def _annotation_fingerprint(self):
+        """What this canvas should currently be drawing, as a comparable."""
+        return repr(self.stored_annotations())
+
+    def stored_annotations(self):
+        """The records this canvas should be drawing.
+
+        Returns
+        -------
+        list of dict
+        """
+        if self.sample_obj is None:
+            return []
+        if self.annotation_scope() == 'plot':
+            return self.sample_obj.get_plot_annotations(self.plot_key)
+        return self.sample_obj.get_map_annotations()
+
+    def _load_annotations(self):
+        """Rebuild this canvas's annotations from whichever bucket it uses.
+
+        Removes the artists drawn for the previous state first, so this is
+        safe to call repeatedly -- it is both the initial draw and the
+        refresh after any change.
+        """
+        if self.sample_obj is None:
             return
-            
+        self._drawn_annotations = self._annotation_fingerprint()
+        self._remove_annotation_artists()
+        self.annotations = []
+        for record in self.stored_annotations():
+            canvas_ann = self._record_to_canvas(record)
+            if canvas_ann is None:
+                continue
+            self._draw_annotation(canvas_ann)
+            self.annotations.append(canvas_ann)
+
+    def _remove_annotation_artists(self):
+        """Take this canvas's annotation artists off the axes."""
+        for ann in self.annotations:
+            for key in ('object', 'text_object'):
+                artist = ann.get(key)
+                if artist is None:
+                    continue
+                try:
+                    artist.remove()
+                except (ValueError, AttributeError):
+                    pass
+                ann[key] = None
+
+    def _store_map_annotation(self, canvas_ann):
+        """Commit a newly drawn annotation to the sample's layer.
+
+        Parameters
+        ----------
+        canvas_ann : dict
+            A canvas-format record, as ``textOnClick``/``distanceOnClick``
+            build it. Its ``'annotation_id'`` is filled in on return.
+
+        Returns
+        -------
+        bool
+            Whether it was stored -- False on a canvas with its own axes,
+            where the annotation stays local to the figure.
+        """
+        if not self.is_annotatable():
+            return False
+        record = self._canvas_to_record(canvas_ann)
+        if record is None:
+            return False
+        if self.annotation_scope() == 'plot':
+            stored = self.sample_obj.add_plot_annotation(self.plot_key, record)
+        else:
+            stored = self.sample_obj.add_map_annotation(record)
+        canvas_ann['annotation_id'] = stored['id']
+        return True
+
+    def update_stored_annotation(self, annotation_id, updates):
+        """Change a stored annotation, whichever bucket it is in.
+
+        The single entry point for the annotations dock, so it does not
+        have to know whether this canvas is a map or a plot of its own.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        if not self.is_annotatable():
+            return False
+        if self.annotation_scope() == 'plot':
+            return self.sample_obj.update_plot_annotation(
+                self.plot_key, annotation_id, updates)
+        return self.sample_obj.update_map_annotation(annotation_id, updates)
+
+    def remove_stored_annotation(self, annotation_id):
+        """Delete a stored annotation, whichever bucket it is in.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        if not self.is_annotatable():
+            return False
+        if self.annotation_scope() == 'plot':
+            return self.sample_obj.remove_plot_annotation(
+                self.plot_key, annotation_id)
+        return self.sample_obj.remove_map_annotation(annotation_id)
+
+    # --- the two record shapes -----------------------------------------
+
+    def _canvas_to_record(self, canvas_ann):
+        """Canvas-format annotation -> the sample layer's JSON-ready record.
+
+        Returns
+        -------
+        dict or None
+        """
         try:
-            # Convert canvas format to registry format
-            registry_ann = self._canvas_to_registry_format(canvas_annotation)
-            if registry_ann:
-                self.sample_obj.add_annotation(self.plot_id, registry_ann)
-                # Store registry ID back in canvas annotation for updates
-                canvas_annotation['registry_id'] = registry_ann.get('id')
-                
-        except Exception as e:
-            log(f"Error storing annotation in registry: {e}", prefix="Error")
-    
-    def _canvas_to_registry_format(self, canvas_ann):
-        """Convert canvas annotation format to registry format."""
-        try:
-            if canvas_ann['Type'].lower() == 'text':
+            kind = canvas_ann['Type'].lower()
+            if kind == 'text':
                 return {
                     'type': 'text',
                     'text': canvas_ann['Text'],
-                    'position': (canvas_ann['X1'], canvas_ann['Y1']),
+                    'position': [[float(canvas_ann['X1']), float(canvas_ann['Y1'])]],
                     'style': {
                         'color': canvas_ann['Color'],
-                        'font_size': canvas_ann.get('Size', 12),
-                        'font_family': 'Arial'  # Default
+                        'font_size': float(canvas_ann.get('Size', 12)),
                     },
-                    'visible': canvas_ann.get('Visible', True)
+                    'visible': bool(canvas_ann.get('Visible', True)),
                 }
-            elif canvas_ann['Type'].lower() == 'line':
-                if 'positions' in canvas_ann:
-                    positions = canvas_ann['positions']
-                else:
-                    positions = [(canvas_ann['X1'], canvas_ann['Y1']), 
-                               (canvas_ann['X2'], canvas_ann['Y2'])]
-                
+            if kind == 'line':
+                label = canvas_ann.get('Text', '')
+                if isinstance(label, dict):
+                    # distanceOnClick puts plot_text's placement dict here;
+                    # only the string belongs in the record, since the
+                    # offsets are recomputed per figure from its own limits.
+                    label = label.get('Text', '')
                 return {
                     'type': 'line',
-                    'text': canvas_ann.get('Text', ''),
-                    'position': positions,
+                    'text': label,
+                    'position': [[float(canvas_ann['X1']), float(canvas_ann['Y1'])],
+                                 [float(canvas_ann['X2']), float(canvas_ann['Y2'])]],
                     'style': {
                         'color': canvas_ann['Color'],
-                        'line_width': canvas_ann.get('Width', 2)
+                        'font_size': float(canvas_ann.get('Size', 12)),
+                        'line_width': float(canvas_ann.get('Width', 1.0) or 1.0),
                     },
-                    'visible': canvas_ann.get('Visible', True)
+                    'visible': bool(canvas_ann.get('Visible', True)),
                 }
-        except KeyError as e:
-            log(f"Missing key in canvas annotation: {e}", prefix="Error")
-            return None
+        except (KeyError, TypeError, ValueError) as e:
+            log(f"Could not store annotation: {e}", prefix="Error")
+        return None
+
+    def _record_to_canvas(self, record):
+        """The sample layer's record -> this canvas's working format.
+
+        Returns
+        -------
+        dict or None
+        """
+        try:
+            style = record.get('style', {})
+            position = record['position']
+            common = {
+                'Text': record.get('text', ''),
+                'Color': style.get('color', '#1f77b4'),
+                'Size': style.get('font_size', 12),
+                'Visible': record.get('visible', True),
+                'annotation_id': record['id'],
+                'object': None,
+                'text_object': None,
+            }
+            if record['type'] == 'text':
+                return {**common, 'Type': 'text',
+                        'X1': position[0][0], 'Y1': position[0][1]}
+            if record['type'] == 'line':
+                return {**common, 'Type': 'line',
+                        'X1': position[0][0], 'Y1': position[0][1],
+                        'X2': position[-1][0], 'Y2': position[-1][1],
+                        'Width': style.get('line_width', 1.0)}
+        except (KeyError, IndexError, TypeError) as e:
+            log(f"Could not read annotation: {e}", prefix="Error")
+        return None
+
+    def _draw_annotation(self, canvas_ann):
+        """Draw one annotation on these axes, filling in its artists.
+
+        A hidden annotation is still drawn, as an invisible artist, so
+        switching it back on in the table costs only a repaint.
+        """
+        visible = bool(canvas_ann.get('Visible', True))
+        try:
+            if canvas_ann['Type'] == 'text':
+                canvas_ann['object'] = self.axes.text(
+                    canvas_ann['X1'], canvas_ann['Y1'], canvas_ann['Text'],
+                    color=canvas_ann['Color'], fontsize=canvas_ann['Size'],
+                    visible=visible,
+                )
+            elif canvas_ann['Type'] == 'line':
+                p1 = (canvas_ann['X1'], canvas_ann['Y1'])
+                p2 = (canvas_ann['X2'], canvas_ann['Y2'])
+                line_obj = self.plot_line(p1, p2)
+                line_obj.set_visible(visible)
+                canvas_ann['object'] = line_obj
+                if canvas_ann.get('Text'):
+                    # Re-place the label from this figure's own limits
+                    # rather than reusing an offset computed on another.
+                    text_obj, text_dict = self.plot_text(p1, p2, label=canvas_ann['Text'])
+                    if text_obj is not None:
+                        text_obj.set_visible(visible)
+                        canvas_ann['text_object'] = text_obj
+                        canvas_ann['Text Placement'] = text_dict
+        except Exception as e:
+            log(f"Could not draw annotation: {e}", prefix="Error")
+
+    def set_annotation_visible(self, annotation_id, visible):
+        """Show or hide one annotation wherever it is stored."""
+        self.update_stored_annotation(annotation_id, {'visible': bool(visible)})
 
     def closeEvent(self, event):
         """Properly cleanup matplotlib resources to avoid 'wrapped C/C++ object deleted' errors."""

@@ -125,6 +125,22 @@ The *Clustering* tab identifies data subsets with similar multidimensional chara
 
 The interface provides essential controls for cluster number, distance metrics, and initialization parameters, with options to incorporate dimensional reduction through PCA.  Once clusters are computed, they can be used to create masks for subsequent analyses.
 
+Both tabs fit their model to the pixels that currently pass the filters and regions of
+interest, and write results only for those pixels.  Changing what is masked therefore
+leaves a result that describes a different part of the map.  *LaME* does not silently
+refit when that happens -- the earlier fit is often the one you want to keep, since it is
+what the cluster groups, any cluster-defined regions and any figure you have already
+exported were built from.  Instead the tab shows a notice that the result was fitted on a
+different region, and the *Re-run* button refits on the pixels passing the filters as they
+now stand.  Changing *which fields* are selected for analysis is different: that result is
+a fit in a feature space that no longer exists, so it is recomputed without asking.
+
+.. note::
+   Re-running clustering produces new labels, so a cluster mask or a cluster-defined
+   region built from the old ones is re-evaluated against the new clusters -- see
+   :doc:`cluster_dock`.
+
+
 .. figure:: _static/screenshots/LaME_Clustering.png
     :align: center
     :alt: LaME interface: left toolbox, clustering tab

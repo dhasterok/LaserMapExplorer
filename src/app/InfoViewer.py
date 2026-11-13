@@ -257,15 +257,15 @@ class InfoDock(CustomDockWidget, FieldLogicUI):
 # -------------------------------
 class PlotInfoTab():
     """
-    Plot Info Tab UI for displaying plot metadata and managing annotations.
+    Plot Info Tab UI for displaying the current plot's metadata.
 
-    This tab provides a read-only display of the current plot's metadata and a table for managing
-    user-added annotations, including their type, value, and visibility.
+    A read-only view, like its sibling tabs. Annotations were edited here
+    once; they are an editing surface rather than an inspector, so they now
+    have their own dock (`src.plotting.AnnotationDock`).
 
     The tab contains:
-    - A toolbar with actions to select all annotations, toggle visibility, and delete them.
+    - A toolbar with an action to export the metadata to the Notes dock.
     - A read-only QTextEdit for displaying plot metadata.
-    - A QTableWidget for interacting with annotations.
 
     Parameters
     ----------
@@ -295,35 +295,7 @@ class PlotInfoTab():
         self.action_export_plot_info.triggered.connect(self.export_plot_info)
         self.action_export_plot_info.setToolTip("Export plot information to notes")
 
-        self.actionSelectAll = CustomAction(
-            text="Select All",
-            light_icon_unchecked="icon-select-all-64.svg",
-            dark_icon_unchecked="icon-select-all-dark-64.svg",
-            parent=toolbar
-        )
-        self.actionSelectAll.setToolTip("Select all annotations")
-
-        self.actionShowHide = CustomAction(
-            text="Show/Hide",
-            light_icon_unchecked="icon-show-hide-64.svg",
-            light_icon_checked="icon-show-64.svg",
-            parent=toolbar,
-        )
-        self.actionShowHide.setToolTip("Toggle show/hide annotations")
-
-        self.actionRemove = CustomAction(
-            text="Remove",
-            light_icon_unchecked="icon-delete-64.svg",
-            dark_icon_unchecked="icon-delete-dark-64.svg",
-            parent=toolbar
-        )
-        self.actionRemove.setToolTip("Remove selected annotation(s)")
-
         toolbar.addAction(self.action_export_plot_info)
-        toolbar.addSeparator()
-        toolbar.addAction(self.actionSelectAll)
-        toolbar.addAction(self.actionShowHide)
-        toolbar.addAction(self.actionRemove)
 
 
         tab_widgets_layout = QHBoxLayout()
@@ -343,37 +315,15 @@ class PlotInfoTab():
 
         tab_widgets_layout.addLayout(plot_info_layout)
 
-        # annotations display
-        self.annotations_layout = QVBoxLayout()
-
-        self.annotations_label = QLabel(self.plot_info_tab)
-        self.annotations_label.setText("Annotations")
-
-        self.annotations_table = QTableWidget(0, 6, self.plot_info_tab)
-        self.annotations_table.setHorizontalHeaderLabels(["Type", "Text", "Size", "Width", "Color", "Visible"])
-        self.annotations_table.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
-
-        header = self.annotations_table.horizontalHeader()
-        if header is not None:
-            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-            header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
-
-        self.annotations_layout.addWidget(self.annotations_label)
-        self.annotations_layout.addWidget(self.annotations_table)
-
-        tab_widgets_layout.addLayout(self.annotations_layout)
-
+        # Annotations used to be a second panel here. They are an editing
+        # surface, and a destructive one, among read-only inspectors -- see
+        # src/plotting/AnnotationDock.py, which now owns them.
         tab_layout.addLayout(tab_widgets_layout)
 
         self.parent.tabWidgetInfo.addTab(self.plot_info_tab, "Plot Info")
 
         if hasattr(self.parent,"plot_info") and self.parent.plot_info:
             self.update_plot_info_tab(self.parent.plot_info)
-            self.update_annotation_table()
 
     def update_plot_info_tab(self, plot_info, write_info=True, level=0):
         """
@@ -428,197 +378,6 @@ class PlotInfoTab():
             self.plot_info_text_edit.setText(content)
         else:
             return content
-
-    def update_annotation_table(self):
-        """
-        Populate the annotation table with data from the current plot.
-
-        Reads annotation data from the current `MplCanvas` instance in `plot_info['figure']` and
-        populates the QTableWidget. Each row includes:
-
-        - Annotation type (non-editable)
-        - Editable annotation value
-        - A checkbox for visibility control
-
-        If the figure or its annotations are not available, the method returns silently.
-        """
-        if not self.parent.plot_info['figure'] or not isinstance(self.parent.plot_info['figure'], MplCanvas):
-            return
-
-        annotations = self.parent.plot_info['figure'].annotations
-
-        self.annotations_table.blockSignals(True)
-        self.annotations_table.setRowCount(len(annotations))
-        for row, ann in enumerate(annotations):
-            # Type
-            type_item = QTableWidgetItem(ann['Type'])
-            type_item.setFlags(type_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            self.annotations_table.setItem(row, 0, type_item)
-
-            # Text
-            read_only = True
-            if isinstance(ann["Text"],dict):
-                text = ann["Text"]["Text"]
-                font_size = ann["Text"]["FontDict"]["size"]
-                line_width = ann["Width"]
-            else:
-                text = ann["Text"]
-                read_only = False
-                font_size = ann["Size"]
-                line_width = None
-            text_item = QTableWidgetItem(text)
-            if read_only:
-                text_item.setFlags(text_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            self.annotations_table.setItem(row, 1, text_item)
-
-            # Font Size
-            font_size_item = QTableWidgetItem(str(font_size))
-            font_size_item.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
-            self.annotations_table.setItem(row, 2, font_size_item)
-
-            # Line Width
-            line_width_item = QTableWidgetItem(str(line_width))
-            line_width_item.setTextAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignVCenter)
-            self.annotations_table.setItem(row, 3, line_width_item)
-
-            # Color
-            button = create_color_button(color=ann["Color"], callback=self.change_annotation_color, key=row)
-            self.annotations_table.setCellWidget(row, 4, button)
-
-            # Visibility checkbox
-            checkbox = create_checkbox(is_checked=ann["Visible"], callback=self.toggle_annotation, key=row)
-            self.annotations_table.setCellWidget(row, 5, checkbox)
-
-        self.annotations_table.blockSignals(False)
-        self.annotations_table.itemChanged.connect(self.update_annotation_from_table)
-
-    def toggle_annotation(self, state, index):
-        """
-        Callback function to toggle annotation visibility.
-
-        Updates both the internal state and visual visibility of the selected annotation.
-
-        Parameters
-        ----------
-        state : int
-            The checkbox state (0 for unchecked, 2 for checked).
-        index : int
-            The index of the annotation in the annotations list.
-        """
-        canvas = self.parent.plot_info['figure']
-        if index >= len(canvas.annotations):
-            return
-            
-        # Update annotation data
-        annotation_data = canvas.annotations[index]
-        visible = bool(state)
-        annotation_data["Visible"] = visible
-        
-        # Update matplotlib object visibility
-        matplotlib_obj = annotation_data.get('object')
-        if matplotlib_obj:
-            if isinstance(matplotlib_obj, list):
-                # Handle line+text objects
-                for obj in matplotlib_obj:
-                    obj.set_visible(visible)
-            else:
-                matplotlib_obj.set_visible(visible)
-        
-        # Update registry if annotation has registry_id
-        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
-            canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], {'visible': visible})
-        
-        canvas.draw()
-
-    def change_annotation_color(self, color, index):
-        """Update annotation color both in data and matplotlib object."""
-        canvas = self.parent.plot_info['figure']
-        if index >= len(canvas.annotations):
-            return
-            
-        # Update annotation data
-        annotation_data = canvas.annotations[index]
-        annotation_data["Color"] = color
-        
-        # Update matplotlib object color
-        matplotlib_obj = annotation_data.get('object')
-        if matplotlib_obj:
-            if isinstance(matplotlib_obj, list):
-                # Handle line+text objects
-                for obj in matplotlib_obj:
-                    obj.set_color(color)
-            else:
-                matplotlib_obj.set_color(color)
-        
-        # Update registry if annotation has registry_id
-        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
-            updates = {'style': annotation_data.get('style', {})}
-            updates['style']['color'] = color
-            canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], updates)
-        
-        canvas.draw()
-
-    def update_annotation_from_table(self, item):
-        """
-        Handle edits made directly to the annotation table.
-
-        Specifically updates the "Value" of the annotation in the canvas and triggers
-        a redraw of the plot.
-
-        Parameters
-        ----------
-        item : QTableWidgetItem
-            The item in the annotation table that was changed.
-        """
-        # Update the annotation from the table
-        row = item.row()
-        canvas = self.parent.plot_info['figure']
-        if row >= len(canvas.annotations):
-            return  # Safety check
-            
-        annotation_data = canvas.annotations[row]
-        matplotlib_obj = annotation_data.get('object')
-
-        # Update value in annotation data and matplotlib object
-        match item.column():
-            case 1: # text
-                new_text = item.text()
-                annotation_data['Text'] = new_text
-                if matplotlib_obj and hasattr(matplotlib_obj, 'set_text'):
-                    matplotlib_obj.set_text(new_text)
-            case 2: # font size
-                new_size = float(item.text())
-                if annotation_data['Type'].lower() == 'text':
-                    annotation_data['Size'] = new_size
-                    if matplotlib_obj and hasattr(matplotlib_obj, 'set_fontsize'):
-                        matplotlib_obj.set_fontsize(new_size)
-                else:
-                    # For line annotations with text labels
-                    if isinstance(annotation_data.get('Text'), dict):
-                        annotation_data['Text']['FontDict']['size'] = new_size
-            case 3: # line width
-                new_width = float(item.text())
-                annotation_data['Width'] = new_width
-                if matplotlib_obj and hasattr(matplotlib_obj, 'set_linewidth'):
-                    matplotlib_obj.set_linewidth(new_width)
-        
-        # Update registry if annotation has registry_id
-        if hasattr(canvas, 'sample_obj') and canvas.plot_id and 'registry_id' in annotation_data:
-            # Update the annotation in registry via sample object
-            updates = {}
-            if item.column() == 1:
-                updates['text'] = new_text
-            elif item.column() == 2:
-                updates['style'] = annotation_data.get('style', {})
-                updates['style']['font_size'] = new_size
-            elif item.column() == 3:
-                updates['style'] = annotation_data.get('style', {})
-                updates['style']['line_width'] = new_width
-            
-            if updates:
-                canvas.sample_obj.update_annotation(canvas.plot_id, annotation_data['registry_id'], updates)
-        
-        canvas.draw()
 
     def export_plot_info(self):
         if not hasattr(self.parent.ui,"notes_dock") or not self.parent.ui.plot_info:
@@ -1014,6 +773,20 @@ class MetadataTab():
             self.data.processed.column_attributes[col_key][row_key] = item.text()
 
     def on_attribute_batch_changed(self, columns, attribute, values):
+        # `AttributeDataFrame.set_attribute` accepts three shapes and hands
+        # this callback whatever it was given: one column name with one
+        # value, many columns with a list of values, or many columns with a
+        # single value to broadcast. Only the middle one zips -- a single
+        # column is a *str*, so `zip(columns, values)` iterated its
+        # characters against a bool and raised. That is the ordinary path
+        # from the plot tree's 'use' checkboxes
+        # (`PlotTree.on_tree_item_changed`), which raised inside a Qt
+        # callback every time, unseen.
+        if isinstance(columns, str):
+            columns, values = [columns], [values]
+        elif not isinstance(values, (list, tuple)):
+            values = [values] * len(columns)
+
         # Map row keys and column keys to indices
         row_map = {
             self.metadata_table.verticalHeaderItem(i).text(): i

@@ -18,6 +18,7 @@ from src.app.Status import StatusMessageManager
 from src.control.Logger import LoggerConfig, auto_log_methods, log
 from src.project.ProjectModel import (
     load_calibration_sidecar, is_calibration_stale, load_cluster_labels, CLUSTER_LABELS_FILENAME,
+    compute_source_hash,
 )
 # -------------------------------------
 # File I/O related functions
@@ -179,6 +180,12 @@ class LameIO():
                 ref_chem=self.ui.app_data.ref_chem,
                 ui=self.ui,
             )
+
+            if entry is not None:
+                # Remember the file as it was when read, so a later import
+                # of the same sample can tell whether the file on disk has
+                # moved on (see ProjectManager.add_samples).
+                entry.source_hash = compute_source_hash(file_path)
 
             # Tier 2: replay this project's saved filters/masks/computed
             # fields onto the freshly (re)loaded sample. field_calculator is

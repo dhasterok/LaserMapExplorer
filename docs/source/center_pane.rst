@@ -6,7 +6,7 @@ The *Plot Window* serves as the primary area for displaying visual representatio
 Single View
 ===========
 
-Single View mode provides focused examination of individual plots.  This mode is ideal for detailed analysis, allowing users to add annotations and labels to enhance plot informativeness.  It's also the primary mode for creating and editing polygons for data selection, offering precise control over the analysis area.
+Single View mode provides focused examination of individual plots.  This mode is ideal for detailed analysis, allowing users to add annotations and labels to enhance plot informativeness (see :doc:`annotations`).  It's also the primary mode for creating and editing polygons for data selection, offering precise control over the analysis area.
 
 .. figure:: _static/screenshots/LaME_SingleView.png
    :align: center

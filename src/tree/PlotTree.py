@@ -292,6 +292,26 @@ class PlotTree(CustomDockWidget):
         finally:
             self._suppress_item_changed = False
 
+    def remove_sample(self, sample_id):
+        """Drop every branch belonging to `sample_id` from the tree.
+
+        `add_sample` returns early when the sample already has a branch, so
+        a sample re-read from a changed file would otherwise keep the field
+        list it had before -- wrong the moment the new file has different
+        analytes. Removing the branches first makes the next `add_sample`
+        rebuild them.
+
+        Parameters
+        ----------
+        sample_id : str
+        """
+        if not sample_id:
+            return
+        for branch in self.tree.values():
+            item = self.treeView.branch_exists(branch, sample_id)
+            if item is not None:
+                branch.removeRow(item.row())
+
     def add_sample(self, sample_id):
         """Create plot selector tree
 

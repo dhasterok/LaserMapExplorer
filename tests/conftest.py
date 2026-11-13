@@ -183,6 +183,12 @@ class DialogStub:
         #: an action was *blocked* with a guidance dialog rather than silently
         #: doing nothing.
         self.information_calls = []
+        #: Args of every QMessageBox.warning call, for tests that assert the
+        #: user was warned before something destructive happened.
+        self.warning_calls = []
+        #: Args of every QMessageBox.question call, for tests that assert
+        #: what was asked and which button was the default.
+        self.question_calls = []
 
 
 @pytest.fixture
@@ -199,8 +205,16 @@ def dialogs(monkeypatch) -> DialogStub:
         stub.information_calls.append(args)
         return stub.information
 
-    monkeypatch.setattr(QMessageBox, 'question', staticmethod(lambda *a, **k: stub.question))
-    monkeypatch.setattr(QMessageBox, 'warning', staticmethod(lambda *a, **k: stub.warning))
+    def record_question(*args, **kwargs):
+        stub.question_calls.append(args)
+        return stub.question
+
+    monkeypatch.setattr(QMessageBox, 'question', staticmethod(record_question))
+    def record_warning(*args, **kwargs):
+        stub.warning_calls.append(args)
+        return stub.warning
+
+    monkeypatch.setattr(QMessageBox, 'warning', staticmethod(record_warning))
     monkeypatch.setattr(QMessageBox, 'information', staticmethod(record_information))
     monkeypatch.setattr(QMessageBox, 'critical', staticmethod(lambda *a, **k: stub.information))
     monkeypatch.setattr(

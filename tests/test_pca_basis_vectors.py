@@ -41,6 +41,7 @@ class FakeSample:
         self.mask = mask
         self.dim_red_results = {}
         self.added_columns = {}
+        self.analysis_populations = {}
 
     def get_map_data(self, field, field_type='Analyte', norm='linear'):
         return {'array': self.processed[field]}
@@ -61,6 +62,23 @@ class FakeSample:
             raise ValueError("The number of rows in (array) must match the number of `True` values in the mask.")
         self.added_columns[data_type] = list(names)
         self.added_values = values
+
+    # compute_pca records which pixels/fields the scores describe, so the UI
+    # can tell when the mask has moved away from them (see
+    # tests/test_analysis_population_staleness.py). Nothing here reads it
+    # back; it just has to be accepted.
+    def mask_without(self, *components):
+        return np.asarray(self.mask, dtype=bool).copy()
+
+    def analysis_fields(self):
+        return tuple(self.get_processed_data()[1])
+
+    def analysis_population(self, *exclude):
+        return self.mask_without(*exclude), self.analysis_fields()
+
+    def record_analysis_population(self, key, mask, fields):
+        self.analysis_populations[key] = (np.asarray(mask, dtype=bool).copy(),
+                                          tuple(fields))
 
 
 class FakeAppData:

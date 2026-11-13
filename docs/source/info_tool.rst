@@ -11,10 +11,8 @@ Plot Info
 
 Displays the properties, including styling, of the current plot.
 
-Annotation Editor
------------------
-
-Edit or delete annotations.
+Annotations were edited here once.  They are an editing surface rather than
+something to read, so they now have their own panel — see :doc:`annotations`.
 
 Metadata Tab
 ============

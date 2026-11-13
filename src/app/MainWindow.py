@@ -42,6 +42,7 @@ from src.data.Regression import RegressionDock
 from src.common.geochronology import GeochronDock
 from src.common.diffusion import DiffusionDock
 from src.stoichiometry.dock import StoichiometryDock
+from src.plotting.AnnotationDock import AnnotationDock
 from src.project.ProjectFilesDock import ProjectFilesDock
 from siesta.reSTNotes import NotesDock
 from src.common.Browser import Browser
@@ -1532,6 +1533,26 @@ class MainWindow(QMainWindow):
         if self.plot_flag:
             self.scheduler.schedule_update()
 
+    def refresh_analysis_stale_indicators(self):
+        """Refresh the "fitted on a different region" notices.
+
+        Clustering and dimensional reduction fit only the unmasked pixels,
+        and a mask change deliberately does not invalidate their results
+        (see ``SampleObj.analysis_mask_changed``) -- so the notices are the
+        only thing telling the user that what is on screen no longer
+        describes the region displayed. Called from ``update_SV``, which
+        every mask change reaches via ``schedule_update``, so the notice
+        appears as soon as an ROI is toggled, deleted or deselected rather
+        than waiting for the user to open the relevant page.
+        """
+        dock = getattr(self, 'control_dock', None)
+        if dock is None or self.app_data.sample_id == '':
+            return
+        for page_name in ('clustering', 'dimreduction'):
+            page = getattr(dock, page_name, None)
+            if page is not None:
+                page.update_stale_indicator()
+
     def update_SV(self):
         """Updates current plot (not saved to plot selector)
 
@@ -1541,6 +1562,8 @@ class MainWindow(QMainWindow):
         save : bool, optional
             save plot to plot selector, Defaults to False.
         """
+        self.refresh_analysis_stale_indicators()
+
         # UI-specific validation checks
         if self.app_data.sample_id == '' or self.style_data.plot_type in [None, '', 'none', 'None'] or not self.check_valid_fields():
             return
@@ -1626,8 +1649,7 @@ class MainWindow(QMainWindow):
                     
                 case 'variance' | 'basis vectors' | 'dimension scatter' | 'dimension heatmap' | 'dimension score map':
                     # Handle PCA computation (UI-specific)
-                    if self.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
-                        self.control_dock.dimreduction.compute_dim_red(data, self.app_data)
+                    self.control_dock.dimreduction.compute_dim_red_if_needed()
                     canvas, self.plot_info = create_plot(self, data, self.app_data, self.style_data)
                     
                 case 'cluster map' | 'cluster score map':
@@ -1657,6 +1679,11 @@ class MainWindow(QMainWindow):
                 self.mpl_canvas = canvas
 
             # Add plot info to info_dock (UI-specific)
+            # The annotations table is a view onto *this* plot's annotations,
+            # so it has to follow the plot.
+            if hasattr(self, "annotation_dock"):
+                self.annotation_dock.update_annotation_table()
+
             if hasattr(self,"info_dock") and hasattr(self, 'plot_info') and self.plot_info:
                 self.info_dock.plot_info_tab.update_plot_info_tab(self.plot_info)
 
@@ -2013,6 +2040,25 @@ class MainWindow(QMainWindow):
             self.lame_action.Stoichiometry.setChecked(True)
         else:
             self.toggle_dock_visibility(dock=self.stoichiometry_dock, button=self.lame_action.Stoichiometry)
+
+    def open_annotation_dock(self):
+        """Opens/closes the Annotations dock
+
+        Opens the Annotations dock, creates on first instance. On later
+        calls, toggles its visibility (and the action's checked state)
+        rather than always showing it, so the same action opens and closes
+        the dock.
+        """
+        if not hasattr(self, 'annotation_dock'):
+            self.annotation_dock = AnnotationDock(self)
+
+            if self.annotation_dock not in self.help_mapping:
+                self.help_mapping[self.annotation_dock] = 'info_tool'
+
+            self.annotation_dock.show()
+            self.lame_action.Annotations.setChecked(True)
+        else:
+            self.toggle_dock_visibility(dock=self.annotation_dock, button=self.lame_action.Annotations)
 
     def open_project_files_dock(self):
         """Opens/closes the Project Files dock

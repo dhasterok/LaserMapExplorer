@@ -35,6 +35,7 @@ class FakeSample:
         self.mask = mask
         self.cluster_results = {}
         self.silhouette_scores = {}
+        self.analysis_populations = {}
 
     def mask_without(self, *components):
         # no polygon/cluster/ROI components here: the mask is the mask
@@ -55,6 +56,20 @@ class FakeSample:
         if name not in self.processed.columns:
             self.processed[name] = np.nan
         self.processed.loc[mask, name] = values
+
+    # compute_clusters records which pixels/fields the labels describe, so
+    # the UI can tell when the mask has moved away from them (see
+    # tests/test_analysis_population_staleness.py). Nothing here reads it
+    # back; it just has to be accepted.
+    def analysis_fields(self):
+        return tuple(self.get_processed_data()[1])
+
+    def analysis_population(self, *exclude):
+        return self.mask_without(*exclude), self.analysis_fields()
+
+    def record_analysis_population(self, key, mask, fields):
+        self.analysis_populations[key] = (np.asarray(mask, dtype=bool).copy(),
+                                          tuple(fields))
 
 
 class FakeAppData:

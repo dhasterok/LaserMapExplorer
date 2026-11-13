@@ -202,6 +202,24 @@ class Clustering():
                 labels[labels == -1] = 99
                 data.add_columns('Cluster', method, labels, mask)
 
+        # Record which pixels and fields these labels describe, so the UI can
+        # tell later that the mask has moved away from them (see
+        # SampleObj.analysis_mask_changed). Only the single-run path
+        # writes a Cluster column; the max_clusters sweep produces
+        # performance curves, not labels, and must not claim one.
+        if max_clusters is None:
+            data.record_analysis_population('cluster', *self.cluster_population(data))
+
+    def cluster_population(self, data):
+        """``(mask, fields)`` clustering is (or was) fitted on.
+
+        Polygons are excluded to match the mask `compute_clusters` uses --
+        see `SampleObj.mask_without`. One definition, used both to record
+        the population after a run and to test the stored result against
+        the current one, so the two can never drift apart.
+        """
+        return data.analysis_population('polygon')
+
     def _clr_feature_matrix(self, data):
         """Builds a linear-scale (undisplayed-norm) Analyte/Ratio feature
         matrix and clr-transforms it, for clustering methods (HDBSCAN) that
@@ -265,6 +283,13 @@ class ClusterPage(CustomPage, Clustering):
     -------
     """
     clusteringComputed = pyqtSignal(dict)
+
+    #: Shown in the Clustering page when the stored labels were fitted on a
+    #: region other than the one now displayed -- see
+    #: `SampleObj.analysis_mask_changed`. Deliberately says what to do about
+    #: it, since the result on screen is not wrong, just not current.
+    _STALE_NOTICE = ("\u26a0 These clusters were fitted on a different region. "
+                     "Re-run to fit the filters now applied.")
 
     def __init__(self, dock, page_index=None):
         super().__init__(obj_name="ClusteringPage", parent=dock)
@@ -390,6 +415,34 @@ class ClusterPage(CustomPage, Clustering):
         self.spinBoxPCANumBasis.setObjectName("spinBoxPCANumBasis")
         self.cluster_form_layout.addRow("No. basis", self.spinBoxPCANumBasis)
 
+        # Re-run is always available, not only when the results are stale:
+        # it is also the way to refit after anything this page does not
+        # watch, and the way to deliberately re-fit the region now shown.
+        self.cluster_run_layout = QHBoxLayout()
+        self.cluster_run_layout.setObjectName("cluster_run_layout")
+        self.toolButtonClusterRerun = CustomToolButton(
+            text="Re-run",
+            light_icon_unchecked="icon-run-64.svg",
+            parent=self.groupBoxClustering,
+        )
+        self.toolButtonClusterRerun.setObjectName("toolButtonClusterRerun")
+        self.toolButtonClusterRerun.setToolTip(
+            "Refit clusters on the pixels currently passing the filters/ROIs.\n"
+            "Note that a cluster mask built from the existing labels will be\n"
+            "re-evaluated against the new ones."
+        )
+        self.cluster_run_layout.addWidget(self.toolButtonClusterRerun)
+        self.cluster_run_layout.addStretch(1)
+        self.cluster_form_layout.addRow("Re-run", self.cluster_run_layout)
+
+        self.labelClusterStale = QLabel(parent=self.groupBoxClustering)
+        self.labelClusterStale.setObjectName("labelClusterStale")
+        self.labelClusterStale.setFont(default_font())
+        self.labelClusterStale.setWordWrap(True)
+        self.labelClusterStale.setText(self._STALE_NOTICE)
+        self.labelClusterStale.setVisible(False)
+        self.cluster_form_layout.addRow(self.labelClusterStale)
+
         self.addWidget(self.groupBoxClustering)
         cluster_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.addItem(cluster_spacer)
@@ -444,6 +497,9 @@ class ClusterPage(CustomPage, Clustering):
         self.spinBoxPCANumBasis.setValue(self.dock.ui.app_data.num_basis_for_precondition)
         self.spinBoxPCANumBasis.valueChanged.connect(lambda _: self.update_num_basis_for_precondition())
 
+        self.toolButtonClusterRerun.clicked.connect(
+            lambda _: self.compute_clusters_update_groups(force=True))
+
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.dock.ui.app_data.clusterMethodChanged.connect(lambda method: self.update_cluster_method(method))
@@ -469,6 +525,7 @@ class ClusterPage(CustomPage, Clustering):
         self.toolButtonRandomSeed.clicked.connect(lambda: log("toolButtonRandomSeed", prefix="UI"))
         self.checkBoxWithPCA.checkStateChanged.connect(lambda: log(f"checkBoxWithPCA value=[{self.checkBoxWithPCA.isChecked()}]", prefix="UI"))
         self.spinBoxPCANumBasis.valueChanged.connect(lambda: log(f"spinBoxPCANumBasis value=[{self.spinBoxPCANumBasis.value()}]", prefix="UI"))
+        self.toolButtonClusterRerun.clicked.connect(lambda: log("toolButtonClusterRerun", prefix="UI"))
 
     def toggle_cluster_widgets(self):
         """Toggle visibility of cluster widgets based on the current clustering method.
@@ -776,7 +833,36 @@ class ClusterPage(CustomPage, Clustering):
         if self.dock.toolbox.currentIndex() == self.dock.ui.control_dock.tab_dict['cluster']:
             self.dock.ui.schedule_update()
 
-    def compute_clusters_update_groups(self):
+    def cluster_results_stale(self):
+        """Whether the stored labels describe a region other than the one shown.
+
+        Returns
+        -------
+        bool
+            False when there are no labels yet, or when nothing is known
+            about the region they were fitted on (see
+            `SampleObj.analysis_mask_changed`).
+        """
+        data = self.dock.ui.app_data.current_data
+        method = self.dock.ui.app_data.cluster_method
+        if data is None or method not in data.processed.columns:
+            return False
+        mask, _fields = self.cluster_population(data)
+        return data.analysis_mask_changed('cluster', mask)
+
+    def update_stale_indicator(self):
+        """Show or hide the stale notice. Safe to call on every plot refresh.
+
+        Returns
+        -------
+        bool
+            Whether the results are currently stale.
+        """
+        stale = self.cluster_results_stale()
+        self.labelClusterStale.setVisible(stale)
+        return stale
+
+    def compute_clusters_update_groups(self, force=False):
         """
         Computes clusters and updates cluster groups.
 
@@ -784,12 +870,32 @@ class ClusterPage(CustomPage, Clustering):
         1. Checks if clustering needs to be updated based on the application data flags.
         2. Invokes the clustering computation if necessary.
         3. Applies updated cluster colors and refreshes the cluster tab in the Mask Dock.
+        4. Updates the stale notice either way.
+
+        Parameters
+        ----------
+        force : bool, optional
+            Recompute regardless of the flags -- the Re-run button. Needed
+            because a mask change deliberately does *not* invalidate the
+            stored labels (`SampleObj.analysis_mask_changed`), so without
+            this there would be no way to refit the region now displayed.
+
+        Notes
+        -----
+        A changed *field set* does recompute without being asked: those
+        labels are a fit in a feature space the user has since changed, so
+        there is nothing to preserve. Only a changed mask is left to the
+        user.
         """
         data = self.dock.ui.app_data.current_data
         method = self.dock.ui.app_data.cluster_method
-        if self.dock.ui.app_data.update_cluster_flag or \
+        if data is None:
+            return
+        _mask, fields = self.cluster_population(data)
+        if force or self.dock.ui.app_data.update_cluster_flag or \
                 (method not in data.processed.columns) or \
-                data.processed[method].empty:
+                data.processed[method].empty or \
+                data.analysis_fields_changed('cluster', fields):
             # compute clusters
             self.dock.ui.statusbar.showMessage('Computing clusters')
             self.compute_clusters(data, self.dock.ui.app_data, max_clusters = None)
@@ -810,6 +916,8 @@ class ClusterPage(CustomPage, Clustering):
                 'sample_id': getattr(self.dock.ui.app_data, 'sample_id', None),
             })
 
+        self.update_stale_indicator()
+
 
 @auto_log_methods(logger_key="Analysis")
 class DimensionalReduction():
@@ -822,6 +930,14 @@ class DimensionalReduction():
         match app_data.dim_red_method:
             case 'PCA: Principal component analysis':
                 self.compute_pca(data, app_data)
+
+    def dim_red_population(self, data):
+        """``(mask, fields)`` dimensional reduction is (or was) fitted on.
+
+        Unlike clustering, this keeps every mask component, including
+        polygons -- `compute_pca` reads ``data.mask`` itself.
+        """
+        return data.analysis_population()
     
     def compute_pca(self,data, app_data):
         #print('compute_pca')
@@ -863,7 +979,12 @@ class DimensionalReduction():
         # Add PCA scores to DataFrame for easier plotting -- one row per
         # unmasked pixel, placed back into the masked rows (the rest stay NaN).
         data.add_columns('PCA score',pca_scores.columns,pca_scores.values,mask)
-        
+
+        # Which pixels and fields these scores describe -- same purpose as
+        # the equivalent call in Clustering.compute_clusters. PCA does honour
+        # the polygon mask (it reads data.mask), so no component is excluded.
+        data.record_analysis_population('dim_red', *self.dim_red_population(data))
+
         # update_pca_flag to prevent PCA running during when app_data.dim_red_y is being set
         app_data.update_pca_flag = False
         #update min and max of PCA spinboxes
@@ -901,6 +1022,10 @@ class DimensionalReduction():
 @auto_log_methods(logger_key="Analysis")
 class DimensionalReductionPage(CustomPage, DimensionalReduction):
     dimRedComputed = pyqtSignal(dict)
+
+    #: Counterpart of `ClusterPage._STALE_NOTICE`, for the same reason.
+    _STALE_NOTICE = ("\u26a0 These scores were fitted on a different region. "
+                     "Re-run to fit the filters now applied.")
 
     def __init__(self, dock, page_index=None):
         super().__init__(obj_name="MultidimensionalPage", parent=dock)
@@ -941,6 +1066,28 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
         self.spinBoxPCY.setObjectName("spinBoxPCY")
         self.multidim_form_layout.addRow("PC Y", self.spinBoxPCY)
 
+        self.dim_red_run_layout = QHBoxLayout()
+        self.dim_red_run_layout.setObjectName("dim_red_run_layout")
+        self.toolButtonDimRedRerun = CustomToolButton(
+            text="Re-run",
+            light_icon_unchecked="icon-run-64.svg",
+            parent=self.groupBoxMultidim,
+        )
+        self.toolButtonDimRedRerun.setObjectName("toolButtonDimRedRerun")
+        self.toolButtonDimRedRerun.setToolTip(
+            "Refit on the pixels currently passing the filters/ROIs")
+        self.dim_red_run_layout.addWidget(self.toolButtonDimRedRerun)
+        self.dim_red_run_layout.addStretch(1)
+        self.multidim_form_layout.addRow("Re-run", self.dim_red_run_layout)
+
+        self.labelDimRedStale = QLabel(parent=self.groupBoxMultidim)
+        self.labelDimRedStale.setObjectName("labelDimRedStale")
+        self.labelDimRedStale.setFont(default_font())
+        self.labelDimRedStale.setWordWrap(True)
+        self.labelDimRedStale.setText(self._STALE_NOTICE)
+        self.labelDimRedStale.setVisible(False)
+        self.multidim_form_layout.addRow(self.labelDimRedStale)
+
         self.addWidget(self.groupBoxMultidim)
         field_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         self.addItem(field_spacer)
@@ -967,6 +1114,9 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
         self.spinBoxPCX.valueChanged.connect(lambda: setattr(self.dock.ui.app_data, "dim_red_x",self.spinBoxPCX.value()))
         self.spinBoxPCY.valueChanged.connect(lambda: setattr(self.dock.ui.app_data, "dim_red_y",self.spinBoxPCY.value()))
 
+        self.toolButtonDimRedRerun.clicked.connect(
+            lambda _: self.compute_dim_red_if_needed(force=True))
+
     def connect_observer(self):
         """Connects properties to observer functions."""
         self.dock.ui.app_data.dimRedMethodChanged.connect(lambda method: self.update_dim_red_method_combobox(method))
@@ -978,6 +1128,64 @@ class DimensionalReductionPage(CustomPage, DimensionalReduction):
         self.comboBoxDimRedTechnique.currentTextChanged.connect(lambda: log(f"comboBoxDimRedTechnique, value=[{self.comboBoxDimRedTechnique.currentText()}]",prefix="UI"))
         self.spinBoxPCX.valueChanged.connect(lambda: log(f"spinBoxPCX value=[{self.spinBoxPCX.value()}]", prefix="UI"))
         self.spinBoxPCY.valueChanged.connect(lambda: log(f"spinBoxPCY value=[{self.spinBoxPCY.value()}]", prefix="UI"))
+        self.toolButtonDimRedRerun.clicked.connect(lambda: log("toolButtonDimRedRerun", prefix="UI"))
+
+    def dim_red_results_stale(self):
+        """Whether the stored scores describe a region other than the one shown.
+
+        Returns
+        -------
+        bool
+            False when no scores exist yet, or when nothing is known about
+            the region they were fitted on.
+        """
+        data = self.dock.ui.app_data.current_data
+        if data is None or not data.processed.match_attribute('data_type', 'PCA score'):
+            return False
+        mask, _fields = self.dim_red_population(data)
+        return data.analysis_mask_changed('dim_red', mask)
+
+    def update_stale_indicator(self):
+        """Show or hide the stale notice. Safe to call on every plot refresh.
+
+        Returns
+        -------
+        bool
+            Whether the results are currently stale.
+        """
+        stale = self.dim_red_results_stale()
+        self.labelDimRedStale.setVisible(stale)
+        return stale
+
+    def compute_dim_red_if_needed(self, force=False):
+        """Run dimensional reduction when it is needed, and refresh the notice.
+
+        The single gate for the UI, replacing the condition that used to be
+        written out at each call site. Those tested
+        ``match_attribute('data_type', 'pca score')`` -- lowercase, which
+        matches nothing, since the attribute is written as ``'PCA score'``
+        -- so the test was always true and a full PCA was refitted on every
+        single refresh of a dimensional-reduction plot. With the case fixed
+        the scores are reused, and a mask change is reported as stale rather
+        than silently refitted, matching
+        `ClusterPage.compute_clusters_update_groups`.
+
+        Parameters
+        ----------
+        force : bool, optional
+            Recompute regardless -- the Re-run button.
+        """
+        data = self.dock.ui.app_data.current_data
+        app_data = self.dock.ui.app_data
+        if data is None:
+            return
+        _mask, fields = self.dim_red_population(data)
+        if force or app_data.update_pca_flag \
+                or not data.processed.match_attribute('data_type', 'PCA score') \
+                or data.analysis_fields_changed('dim_red', fields):
+            self.compute_dim_red(data, app_data)
+
+        self.update_stale_indicator()
 
     def update_dim_red_method_combobox(self, new_method):
         self.comboBoxDimRedTechnique.setCurrentText(new_method)

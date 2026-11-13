@@ -44,6 +44,7 @@ There are two ways to use *LaME*, either as a precompiled executable (eventually
     geochronology
     diffusion
     cluster_dock
+    annotations
     notes
     logging_tool
     info_tool

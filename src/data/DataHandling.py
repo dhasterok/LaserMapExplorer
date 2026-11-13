@@ -1,4 +1,5 @@
 import re, os, copy, json
+import hashlib
 import uuid
 from datetime import datetime
 from typing import Optional, Union, Any, Dict, List
@@ -257,14 +258,9 @@ class SampleObj(QObject):
 
     Signals
     -------
-    annotationAdded : (str, dict)
-        Emitted when an annotation is added to a plot.
-    annotationUpdated : (str, str, dict)
-        Emitted when an annotation is updated.
-    annotationRemoved : (str, str)
-        Emitted when an annotation is removed from a plot.
-    annotationVisibilityChanged : (str, str, bool)
-        Emitted when the visibility of an annotation is changed.
+    mapAnnotationsChanged : ()
+        Emitted whenever the sample's map-annotation layer changes --
+        added, edited, hidden or removed.
     pixelDimensionChanged : (str, float)
         Emitted when the pixel dimension (dx or dy) is changed.
     imageResolutionChanged : (str, int)
@@ -284,11 +280,11 @@ class SampleObj(QObject):
     currentFieldUpdated : (str)
         Emitted when the current field is updated.
     """
-    # PyQt signals for annotation management
-    annotationAdded = pyqtSignal(str, dict)  # plot_id, annotation_data
-    annotationUpdated = pyqtSignal(str, str, dict)  # plot_id, annotation_id, updates
-    annotationRemoved = pyqtSignal(str, str)  # plot_id, annotation_id
-    annotationVisibilityChanged = pyqtSignal(str, str, bool)  # plot_id, annotation_id, visible
+    # One signal for the whole layer rather than add/update/remove/visibility:
+    # every consumer (the canvas redraw, the annotations table) rebuilds from
+    # `map_annotations` anyway, and a single notification cannot leave them
+    # disagreeing about which change they each saw.
+    mapAnnotationsChanged = pyqtSignal()
 
     pixelDimensionChanged = pyqtSignal(str, float)  # axis, new_value
     imageResolutionChanged = pyqtSignal(str, int)  # axis, new_value
@@ -312,7 +308,21 @@ class SampleObj(QObject):
         self.logger_key = 'Data'
         
         # Plot annotations storage
-        self.plot_annotations = {}  # plot_id -> list[annotation_data]
+        # Map annotations are a layer of the *sample*, like masks, polygons
+        # and ROIs -- not a property of one plot. Every map of a sample is
+        # drawn in the same stage coordinates (µm), so a label or a distance
+        # placed at (x, y) means the same thing on all of them, and a
+        # measurement across a grain is a fact about the sample rather than
+        # about whichever element happened to be displayed. Individual
+        # entries are switched off in the annotations table when a
+        # particular map should not carry them.
+        self.map_annotations = []  # list[annotation record]; see add_map_annotation
+
+        # Annotations on plots that have their own axes -- scatter,
+        # histogram, ternary -- cannot be shared: a point placed at a pair
+        # of concentrations has no position on a map, or on a different
+        # pair. They are kept per plot, keyed by `PlotRegistry.plot_key`.
+        self.plot_annotations = {}  # {plot_key: list[annotation record]}
 
         self.sample_id = sample_id
         self.file_path = file_path
@@ -1018,6 +1028,15 @@ class SampleObj(QObject):
 
         self.recompute_mask()
 
+        # Fingerprint of the pixels and fields each multivariate analysis was
+        # last *fitted* on, keyed by analysis ('cluster', 'dim_red'). Written
+        # by the analysis itself (see Clustering.compute_clusters,
+        # DimensionalReduction.compute_pca) and compared against the current
+        # population by `analysis_mask_changed` / `analysis_fields_changed`,
+        # which is how the UI knows a result no longer describes the region
+        # now displayed.
+        self._analysis_populations = {}
+
         # Regions of interest: an ordered stack of named, colored, filter-defined
         # groups (see `add_roi`). Each entry remembers the filter definition that
         # created it (not just a frozen pixel mask), so it can be recalled for
@@ -1584,6 +1603,8 @@ class SampleObj(QObject):
             rois=[_roi_to_dict(entry) for entry in self.roi_stack],
             selected_rois=[int(i) for i in self.selected_rois],
             cluster_groups=copy.deepcopy(self.cluster_entries),
+            annotations=copy.deepcopy(self.map_annotations),
+            plot_annotations=copy.deepcopy(self.plot_annotations),
         )
 
     def apply_processing_state(self, state, ref_chem=None, field_calculator=None):
@@ -1661,6 +1682,13 @@ class SampleObj(QObject):
         # Last, so filter-defined regions can reference replayed computed
         # fields, and cluster-defined ones the labels the caller restored from
         # the project's clusters sidecar before calling this.
+        # The map-annotation layer is stored verbatim, so replaying it is a
+        # straight restore -- no geometry to re-evaluate, unlike ROIs below.
+        if getattr(state, 'annotations', None) or getattr(state, 'plot_annotations', None):
+            self.map_annotations = copy.deepcopy(getattr(state, 'annotations', []) or [])
+            self.plot_annotations = copy.deepcopy(getattr(state, 'plot_annotations', {}) or {})
+            self.mapAnnotationsChanged.emit()
+
         if state.rois:
             self.roi_stack = [_roi_from_dict(d) for d in state.rois]
             self.selected_rois = [int(i) for i in state.selected_rois]
@@ -1762,6 +1790,171 @@ class SampleObj(QObject):
         if 'roi' not in components and self.roi_mask_enabled:
             mask &= self.roi_selection_mask
         return mask
+
+    # ------------------------------------------------------------------
+    # Which pixels/fields an analysis was fitted on
+    # ------------------------------------------------------------------
+    # Clustering and dimensional reduction fit a model to the *unmasked*
+    # pixels and write their results into `processed` for those rows only,
+    # leaving the rest NaN. Nothing about the stored result records which
+    # region that was, so once the mask moves -- an ROI switched off,
+    # deleted or deselected, a different filter, a new crop -- the column on
+    # screen describes a region that is no longer the one being displayed.
+    #
+    # The mask and the field set are tracked separately because they call
+    # for opposite responses:
+    #
+    # * A changed **field set** makes the stored result meaningless -- it is
+    #   a fit in a feature space that is gone -- so the analysis recomputes.
+    # * A changed **mask** leaves a result that is still a valid fit, just
+    #   of a different region, and there are good reasons to keep it (it is
+    #   the fit the cluster groups, cluster-defined ROIs and any exported
+    #   figure were built from). So this is reported as stale and the user
+    #   re-runs when they want to.
+    #
+    # Recomputing on a mask change could not be the default in any case: a
+    # cluster mask is *derived* from the cluster labels and is itself part
+    # of the clustering mask (see `mask_without`), so re-fitting on every
+    # mask change would move the labels out from under the mask that
+    # defined them.
+
+    def analysis_fields(self):
+        """The field names an analysis matrix would be built from right now.
+
+        Mirrors `get_processed_data`'s column selection -- `use` and
+        `use_normalized` across Analyte and Ratio -- without building the
+        arrays, so it is cheap enough to call on every plot refresh.
+
+        Returns
+        -------
+        tuple of str
+            Field names, in `get_processed_data`'s order.
+        """
+        fields = []
+        for field_type in ('Analyte', 'Ratio'):
+            fields += self.processed.match_attributes({'data_type': field_type, 'use': True})
+            fields += [f'{field} (normalized)' for field in
+                       self.processed.match_attributes({'data_type': field_type,
+                                                        'use_normalized': True})]
+        return tuple(fields)
+
+    def analysis_population(self, *exclude):
+        """``(mask, fields)`` an analysis run right now would be fitted on.
+
+        Parameters
+        ----------
+        *exclude : str
+            Mask components to leave out, as `mask_without` takes them.
+            Clustering passes ``'polygon'``, matching the mask
+            `Clustering.compute_clusters` actually uses.
+
+        Returns
+        -------
+        tuple
+            ``(numpy.ndarray, tuple of str)`` -- the combined mask and the
+            analysis field names, ready to pass to
+            `record_analysis_population`, `analysis_mask_changed` or
+            `analysis_fields_changed`.
+
+        Notes
+        -----
+        Deliberately built from `mask_without` rather than read from
+        ``self.mask``, which `get_processed_data` narrows in place with its
+        own all-fields-present check. That narrowing is a function of the
+        field set, which is tracked separately, and reading it back would
+        make the answer depend on whether an analysis had happened to run
+        since the last `recompute_mask`.
+        """
+        return self.mask_without(*exclude), self.analysis_fields()
+
+    def _mask_fingerprint(self, mask):
+        """Hash of a boolean mask, as a hex string.
+
+        An ordinary method rather than a staticmethod: ``auto_log_methods``
+        rewraps the class's callables and does not preserve the descriptor.
+        """
+        return hashlib.blake2b(np.ascontiguousarray(mask, dtype=bool).tobytes(),
+                               digest_size=16).hexdigest()
+
+    def record_analysis_population(self, key, mask, fields):
+        """Record what `key`'s analysis was just fitted on.
+
+        Called by the analysis after it writes its results, with the same
+        ``(mask, fields)`` that `analysis_population` returns -- not the
+        mask the analysis used internally, which also carries
+        `get_processed_data`'s NaN narrowing and so would never compare
+        equal later.
+
+        Parameters
+        ----------
+        key : str
+            Analysis identifier, ``'cluster'`` or ``'dim_red'``.
+        mask : numpy.ndarray
+            Boolean per-pixel mask the analysis was fitted on.
+        fields : sequence of str
+            Analysis field names.
+        """
+        self._analysis_populations[key] = {
+            'mask': self._mask_fingerprint(mask),
+            'fields': tuple(fields),
+        }
+
+    def analysis_mask_changed(self, key, mask):
+        """Whether `key`'s stored result was fitted on a different region.
+
+        This is the staleness test the UI reports: the result is still a
+        valid fit, of a region other than the one now displayed.
+
+        Parameters
+        ----------
+        key : str
+            Analysis identifier, ``'cluster'`` or ``'dim_red'``.
+        mask : numpy.ndarray
+            The mask to compare against, from `analysis_population`.
+
+        Returns
+        -------
+        bool
+            True only when a population *was* recorded and its mask differs
+            from the one given.
+
+        Notes
+        -----
+        No record means "not known to be stale", not "stale". A project
+        reloaded from disk restores cluster labels without replaying the
+        run that produced them, and crying stale over every such result
+        would train the user to ignore the indicator. Callers that need a
+        result to exist at all check for the column itself.
+        """
+        recorded = self._analysis_populations.get(key)
+        if recorded is None:
+            return False
+        return recorded['mask'] != self._mask_fingerprint(mask)
+
+    def analysis_fields_changed(self, key, fields):
+        """Whether `key`'s stored result was fitted on different fields.
+
+        Unlike `analysis_mask_changed`, this is not a staleness report but a
+        reason to recompute: the stored result describes a feature space the
+        user has since changed, so there is nothing worth keeping.
+
+        Parameters
+        ----------
+        key : str
+            Analysis identifier, ``'cluster'`` or ``'dim_red'``.
+        fields : sequence of str
+            The field names to compare against, from `analysis_population`.
+
+        Returns
+        -------
+        bool
+            True only when a population *was* recorded and its field set
+            differs from the one given.
+        """
+        recorded = self._analysis_populations.get(key)
+        if recorded is None:
+            return False
+        return recorded['fields'] != tuple(fields)
 
     def _compute_filter_mask(self, filter_df):
         """Evaluate a filter table (min/max/operator rows) into a boolean mask.
@@ -3347,138 +3540,199 @@ class SampleObj(QObject):
     # ANNOTATION MANAGEMENT METHODS
     # ==========================================
     
-    def add_annotation(self, plot_id, annotation_data):
-        """
-        Add annotation to a specific plot.
-        
+    # ------------------------------------------------------------------
+    # Map annotations
+    # ------------------------------------------------------------------
+    # One flat, sample-wide list. A record is plain JSON-ready data so the
+    # project can persist it verbatim (see `export_processing_state`):
+    #
+    #   {'id':       str,
+    #    'type':     'text' | 'line',
+    #    'position': [[x, y]] for text, [[x1, y1], [x2, y2]] for a line,
+    #    'text':     str,                       -- the label drawn
+    #    'style':    {'color': str, 'font_size': float, 'line_width': float},
+    #    'visible':  bool,
+    #    'created_at': str, 'modified_at': str} -- ISO-8601
+    #
+    # Positions are stage coordinates in µm, the axes every map of this
+    # sample shares. Matplotlib artists are *not* stored here; each canvas
+    # draws its own from these records and throws them away with itself.
+
+    def add_map_annotation(self, annotation_data):
+        """Add an annotation to this sample's map layer.
+
         Parameters
         ----------
-        plot_id : str
-            Unique plot identifier
         annotation_data : dict
-            Annotation data containing type, position, style, etc.
-        """
-        if plot_id not in self.plot_annotations:
-            self.plot_annotations[plot_id] = []
-        
-        # Add unique ID if not present
-        if 'id' not in annotation_data:
-            annotation_data['id'] = self._generate_annotation_id()
-            
-        # Add timestamps
-        annotation_data['created_at'] = datetime.now()
-        annotation_data['modified_at'] = datetime.now()
-        
-        self.plot_annotations[plot_id].append(annotation_data)
-        
-        # Emit signal
-        self.annotationAdded.emit(plot_id, annotation_data)
-    
-    def get_annotations(self, plot_id):
-        """
-        Get all annotations for a plot.
-        
-        Parameters
-        ----------
-        plot_id : str
-            Plot identifier
-            
+            A record as described above. An ``id`` is assigned if absent,
+            and the timestamps are set here.
+
         Returns
         -------
-        list
-            List of annotation dictionaries
+        dict
+            The stored record -- the same object, so the caller can keep
+            its ``id``.
         """
-        return self.plot_annotations.get(plot_id, [])
-    
-    def update_annotation(self, plot_id, annotation_id, updates):
+        annotation_data.setdefault('id', self._generate_annotation_id())
+        annotation_data.setdefault('visible', True)
+        now = datetime.now().isoformat(timespec='seconds')
+        annotation_data.setdefault('created_at', now)
+        annotation_data['modified_at'] = now
+
+        self.map_annotations.append(annotation_data)
+        self.mapAnnotationsChanged.emit()
+        return annotation_data
+
+    def get_map_annotations(self):
+        """Every annotation in this sample's map layer, in creation order.
+
+        Returns
+        -------
+        list of dict
+            The live list -- callers that mutate records should go through
+            `update_map_annotation` so the change is announced.
         """
-        Update specific annotation properties.
-        
-        Parameters
-        ----------
-        plot_id : str
-            Plot identifier
-        annotation_id : str
-            Annotation identifier
-        updates : dict
-            Dictionary of properties to update
-        """
-        if plot_id in self.plot_annotations:
-            for annotation in self.plot_annotations[plot_id]:
-                if annotation['id'] == annotation_id:
-                    annotation.update(updates)
-                    annotation['modified_at'] = datetime.now()
-                    
-                    # Emit specific signal based on what was updated
-                    if 'visible' in updates:
-                        self.annotationVisibilityChanged.emit(
-                            plot_id, annotation_id, updates['visible']
-                        )
-                    
-                    self.annotationUpdated.emit(plot_id, annotation_id, updates)
-                    break
-    
-    def remove_annotation(self, plot_id, annotation_id):
-        """
-        Remove annotation by ID.
-        
-        Parameters
-        ----------
-        plot_id : str
-            Plot identifier
-        annotation_id : str
-            Annotation identifier
-        """
-        if plot_id in self.plot_annotations:
-            original_count = len(self.plot_annotations[plot_id])
-            self.plot_annotations[plot_id] = [
-                ann for ann in self.plot_annotations[plot_id] 
-                if ann['id'] != annotation_id
-            ]
-            
-            # Only emit if annotation was actually removed
-            if len(self.plot_annotations[plot_id]) < original_count:
-                self.annotationRemoved.emit(plot_id, annotation_id)
-    
-    def clear_annotations_for_plot(self, plot_id):
-        """
-        Clear all annotations for a specific plot.
-        
-        Parameters
-        ----------
-        plot_id : str
-            Plot identifier
-        """
-        if plot_id in self.plot_annotations:
-            annotation_ids = [ann['id'] for ann in self.plot_annotations[plot_id]]
-            self.plot_annotations[plot_id] = []
-            
-            # Emit removal signal for each annotation
-            for annotation_id in annotation_ids:
-                self.annotationRemoved.emit(plot_id, annotation_id)
-    
-    def get_annotation_by_id(self, plot_id, annotation_id):
-        """
-        Get specific annotation by ID.
-        
-        Parameters
-        ----------
-        plot_id : str
-            Plot identifier
-        annotation_id : str
-            Annotation identifier
-            
+        return self.map_annotations
+
+    def get_map_annotation(self, annotation_id):
+        """One annotation by id, or None.
+
         Returns
         -------
         dict or None
-            Annotation data or None if not found
         """
-        if plot_id in self.plot_annotations:
-            for annotation in self.plot_annotations[plot_id]:
-                if annotation['id'] == annotation_id:
-                    return annotation
-        return None
-    
+        return next((a for a in self.map_annotations if a['id'] == annotation_id), None)
+
+    def update_map_annotation(self, annotation_id, updates):
+        """Change an annotation's text, style or visibility.
+
+        Parameters
+        ----------
+        annotation_id : str
+        updates : dict
+            Keys to merge into the record.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        annotation = self.get_map_annotation(annotation_id)
+        if annotation is None:
+            return False
+        annotation.update(updates)
+        annotation['modified_at'] = datetime.now().isoformat(timespec='seconds')
+        self.mapAnnotationsChanged.emit()
+        return True
+
+    def remove_map_annotation(self, annotation_id):
+        """Delete one annotation from the layer.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        remaining = [a for a in self.map_annotations if a['id'] != annotation_id]
+        if len(remaining) == len(self.map_annotations):
+            return False
+        self.map_annotations = remaining
+        self.mapAnnotationsChanged.emit()
+        return True
+
+    def clear_map_annotations(self):
+        """Delete every annotation in the layer."""
+        if not self.map_annotations:
+            return
+        self.map_annotations = []
+        self.mapAnnotationsChanged.emit()
+
+    # --- the same, per plot -------------------------------------------
+    # Same record shape, same signal; only the bucket differs. Kept as
+    # separate methods rather than a `key=None` parameter so a caller
+    # cannot silently put a scatter annotation into the shared map layer
+    # by passing the wrong thing.
+
+    def add_plot_annotation(self, plot_key, annotation_data):
+        """Add an annotation to one plot's own list.
+
+        Parameters
+        ----------
+        plot_key : str
+            From `src.tree.PlotRegistry.plot_key`.
+        annotation_data : dict
+            A record as described above.
+
+        Returns
+        -------
+        dict
+            The stored record.
+        """
+        annotation_data.setdefault('id', self._generate_annotation_id())
+        annotation_data.setdefault('visible', True)
+        now = datetime.now().isoformat(timespec='seconds')
+        annotation_data.setdefault('created_at', now)
+        annotation_data['modified_at'] = now
+
+        self.plot_annotations.setdefault(plot_key, []).append(annotation_data)
+        self.mapAnnotationsChanged.emit()
+        return annotation_data
+
+    def get_plot_annotations(self, plot_key):
+        """One plot's annotations, in creation order.
+
+        Returns
+        -------
+        list of dict
+            Empty if that plot has none; no entry is created for it.
+        """
+        return self.plot_annotations.get(plot_key, [])
+
+    def get_plot_annotation(self, plot_key, annotation_id):
+        """One annotation of one plot by id, or None."""
+        return next((a for a in self.get_plot_annotations(plot_key)
+                     if a['id'] == annotation_id), None)
+
+    def update_plot_annotation(self, plot_key, annotation_id, updates):
+        """Change one plot annotation's text, position, style or visibility.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        annotation = self.get_plot_annotation(plot_key, annotation_id)
+        if annotation is None:
+            return False
+        annotation.update(updates)
+        annotation['modified_at'] = datetime.now().isoformat(timespec='seconds')
+        self.mapAnnotationsChanged.emit()
+        return True
+
+    def remove_plot_annotation(self, plot_key, annotation_id):
+        """Delete one annotation from one plot.
+
+        Returns
+        -------
+        bool
+            Whether a matching annotation was found.
+        """
+        existing = self.plot_annotations.get(plot_key)
+        if not existing:
+            return False
+        remaining = [a for a in existing if a['id'] != annotation_id]
+        if len(remaining) == len(existing):
+            return False
+        # Drop the key with its last annotation, so an empty list is never
+        # saved and `plot_annotations` stays a record of plots that
+        # actually have some.
+        if remaining:
+            self.plot_annotations[plot_key] = remaining
+        else:
+            del self.plot_annotations[plot_key]
+        self.mapAnnotationsChanged.emit()
+        return True
+
     def _generate_annotation_id(self):
         """Generate unique annotation ID."""
         return str(uuid.uuid4())[:8]  # Short unique ID

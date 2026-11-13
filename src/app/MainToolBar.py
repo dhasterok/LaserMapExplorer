@@ -29,6 +29,19 @@ class MainActions(QObject):
         self.AddSampleDirectory.setToolTip("Add all samples in a directory to the current project")
         self.AddSampleDirectory.setShortcut("Ctrl+O")
 
+        # File menu only -- deliberately not on any toolbar. Removing a
+        # sample throws away everything derived from it, which is not
+        # something to put one stray click away.
+        self.RemoveSample = CustomAction(
+            text="Remove Sample",
+            light_icon_unchecked="icon-delete-64.svg",
+            dark_icon_unchecked="icon-delete-dark-64.svg",
+            parent=self.ui,
+        )
+        self.RemoveSample.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.RemoveSample.setObjectName("actionRemoveSample")
+        self.RemoveSample.setToolTip("Remove the current sample, and everything derived from it, from the project")
+
         self.NewProject = CustomAction(
             text="New\nProject",
             light_icon_unchecked="icon-add-list-64.svg",
@@ -689,6 +702,17 @@ class MainActions(QObject):
         self.Stoichiometry.setObjectName("actionStoichiometry")
         self.Stoichiometry.setToolTip("Open the stoichiometric mineral formula calculator")
 
+        self.Annotations = CustomAction(
+            text="Annotations",
+            light_icon_unchecked="icon-annotate-64.svg",
+            dark_icon_unchecked="icon-annotate-dark-64.svg",
+            parent=self.ui,
+        )
+        self.Annotations.setCheckable(True)
+        self.Annotations.setMenuRole(QAction.MenuRole.TextHeuristicRole)
+        self.Annotations.setObjectName("actionAnnotations")
+        self.Annotations.setToolTip("Open the annotations dock to edit labels and distance measurements")
+
         self.ProjectFiles = CustomAction(
             text="Project\nFiles",
             light_icon_unchecked="icon-bullet-list-64.svg",
@@ -707,6 +731,7 @@ class MainActions(QObject):
         self.OpenProject.triggered.connect(lambda: self.ui.project_manager.open_project())
         self.AddSampleFiles.triggered.connect(lambda: self.ui.project_manager.add_sample_files_dialog())
         self.AddSampleDirectory.triggered.connect(lambda: self.ui.project_manager.add_sample_directory_dialog())
+        self.RemoveSample.triggered.connect(lambda: self.ui.project_manager.remove_current_sample())
         self.SaveProject.triggered.connect(lambda: self.ui.project_manager.save_project())
         self.SaveProjectAs.triggered.connect(lambda: self.ui.project_manager.save_project_as())
         self.CloseProject.triggered.connect(lambda: self.ui.project_manager.close_project())
@@ -748,7 +773,9 @@ class MainActions(QObject):
         self.Diffusion.triggered.connect(self.ui.open_diffusion_dock)
 
         self.Stoichiometry.setChecked(False)
+        self.Annotations.setChecked(False)
         self.Stoichiometry.triggered.connect(self.ui.open_stoichiometry_dock)
+        self.Annotations.triggered.connect(self.ui.open_annotation_dock)
 
         self.ProjectFiles.setChecked(False)
         self.ProjectFiles.triggered.connect(self.ui.open_project_files_dock)
@@ -803,6 +830,7 @@ class MainActions(QObject):
         self.NewProject.triggered.connect(lambda: log("lame_action.NewProject", prefix="UI"))
         self.AddSampleFiles.triggered.connect(lambda: log("lame_action.AddSampleFiles", prefix="UI"))
         self.AddSampleDirectory.triggered.connect(lambda: log("lame_action.AddSampleDirectory", prefix="UI"))
+        self.RemoveSample.triggered.connect(lambda: log("lame_action.RemoveSample", prefix="UI"))
         self.OpenProject.triggered.connect(lambda: log("lame_action.OpenProject", prefix="UI"))
         self.SaveProject.triggered.connect(lambda: log("lame_action.SaveProject", prefix="UI"))
         self.SaveProjectAs.triggered.connect(lambda: log("lame_action.SaveProjectAs", prefix="UI"))
@@ -956,6 +984,7 @@ class MainMenubar(QMenuBar):
 
         self.menuFile.addAction(lame_action.AddSampleFiles)
         self.menuFile.addAction(lame_action.AddSampleDirectory)
+        self.menuFile.addAction(lame_action.RemoveSample)
         self.menuFile.addSeparator()
         self.menuFile.addAction(lame_action.SaveProject)
         self.menuFile.addAction(lame_action.SaveProjectAs)
@@ -1037,6 +1066,7 @@ class MainMenubar(QMenuBar):
         self.menuTools.addAction(lame_action.ProjectFiles)
         self.menuTools.addSeparator()
         self.menuTools.addAction(lame_action.Info)
+        self.menuTools.addAction(lame_action.Annotations)
         self.menuTools.addAction(lame_action.Logger)
         self.menuTools.addAction(lame_action.Calculator)
         self.menuTools.addAction(lame_action.Notes)
@@ -1213,6 +1243,7 @@ class MainToolbar(QToolBar):
         toolbar.addAction(lame_action.Ternary)
         toolbar.addAction(lame_action.TEC)
         toolbar.addAction(lame_action.Radar)
+        toolbar.addAction(lame_action.Annotations)
         return toolbar
 
     def _build_processing_page(self, lame_action):

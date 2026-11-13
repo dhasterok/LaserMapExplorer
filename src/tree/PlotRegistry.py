@@ -16,6 +16,33 @@ from src.control.Logger import auto_log_methods, log
 
 
 @auto_log_methods(logger_key='Registry')
+def plot_key(plot_metadata: Dict[str, Any]) -> str:
+    """A stable identity for a plot, from the metadata every plot carries.
+
+    ``sample:plot_type:plot_name:field_type:field`` -- the same components
+    `PlotRegistry._generate_plot_id` builds from, without the ``_1``/``_2``
+    suffix it adds to avoid collisions with already-registered plots. That
+    suffix is what makes the plot *id* unusable as a lookup key: it depends
+    on registration order, so the same plot can be given a different id in
+    a later session.
+
+    Computed from the metadata rather than read from
+    ``plot_info['plot_id']``, which only exists for plots saved to the tree
+    (`PlotTree` is the one caller of `PlotRegistry.register_plot`).
+
+    Parameters
+    ----------
+    plot_metadata : dict
+        A ``plot_info``-shaped dict.
+
+    Returns
+    -------
+    str
+    """
+    return ':'.join(str(plot_metadata.get(k, '')) for k in
+                    ('sample_id', 'plot_type', 'plot_name', 'field_type', 'field'))
+
+
 class PlotRegistry(QObject):
     """
     Central registry for plot metadata and canvas management.
@@ -213,13 +240,13 @@ class PlotRegistry(QObject):
             if not canvas or not hasattr(canvas, '__class__'):
                 return
                 
-            # Disconnect from sample signals safely
-            if hasattr(canvas, 'sample_obj') and canvas.sample_obj:
+            # Disconnect from sample signals safely. The canvas does this
+            # itself so it can drop *its own* slot: a bare
+            # `signal.disconnect()` here would take every other listener
+            # with it -- the other open canvases and the annotations table.
+            if hasattr(canvas, 'disconnect_sample_signals'):
                 try:
-                    canvas.sample_obj.annotationAdded.disconnect()
-                    canvas.sample_obj.annotationUpdated.disconnect()
-                    canvas.sample_obj.annotationRemoved.disconnect()
-                    canvas.sample_obj.annotationVisibilityChanged.disconnect()
+                    canvas.disconnect_sample_signals()
                 except (RuntimeError, TypeError):
                     # Signal already disconnected or object deleted
                     pass
@@ -251,17 +278,15 @@ class PlotRegistry(QObject):
             log(f"Error during canvas cleanup: {e}", "WARNING")
     
     def _generate_plot_id(self, plot_metadata: Dict[str, Any]) -> str:
-        """Generate unique, deterministic plot ID."""
-        components = [
-            plot_metadata.get('sample_id', ''),
-            plot_metadata.get('plot_type', ''),
-            plot_metadata.get('plot_name', ''),
-            plot_metadata.get('field_type', ''),
-            plot_metadata.get('field', '')
-        ]
-        
-        base_id = ':'.join(str(c) for c in components)
-        
+        """Generate a unique plot ID.
+
+        Unique, but *not* stable: the suffix below depends on what else is
+        registered at the time. Anything that needs to find the same plot
+        again later -- the per-plot annotations, for instance -- keys off
+        `plot_key` instead.
+        """
+        base_id = plot_key(plot_metadata)
+
         # Ensure uniqueness by checking existing IDs
         plot_id = base_id
         counter = 1

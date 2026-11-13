@@ -35,11 +35,16 @@ from src.project.ProjectModel import (
     Project, ProjectSampleEntry,
     new_project as _new_untitled_project,
     save_project as _save_project_file,
+    PROJECT_FILE_SUFFIX as _PROJECT_FILE_SUFFIX,
+    project_name_for,
     load_project as _load_project_file,
     CLUSTER_LABELS_FILENAME, save_cluster_labels,
+    SampleProcessingState, compute_source_hash,
 )
 
-PROJECT_FILE_SUFFIX = '.lame_project.json'
+# Defined with the model (the project's name is derived from it) and
+# re-exported here, where the UI code already imports it from.
+PROJECT_FILE_SUFFIX = _PROJECT_FILE_SUFFIX
 RECENT_PROJECTS_KEY = 'recent_projects'
 MAX_RECENT_PROJECTS = 10
 
@@ -68,12 +73,7 @@ def _project_dir_for_manifest(manifest_path):
     `projects/Foo.lame_project.json` -> `projects/Foo/`, sitting alongside
     the manifest rather than nested inside a same-named folder.
     """
-    name = manifest_path.name
-    if name.endswith(PROJECT_FILE_SUFFIX):
-        name = name[: -len(PROJECT_FILE_SUFFIX)]
-    else:
-        name = manifest_path.stem
-    return manifest_path.parent / name
+    return manifest_path.parent / project_name_for(manifest_path)
 
 
 @auto_log_methods(logger_key='Project')
@@ -582,22 +582,218 @@ class ProjectManager(QObject):
             return []
 
         added_ids = []
+        changed = []
         for file_path in file_list:
             file_path = file_path.resolve()
             sample_id = file_path.stem.replace('.lame', '')
-            if sample_id in self.current_project.samples:
+            entry = self.current_project.samples.get(sample_id)
+            if entry is not None:
+                # Already in the project. Re-importing a sample used to do
+                # nothing at all -- the entry was skipped here and the
+                # loaded SampleObj was cached in ui.data for the life of
+                # the session, so the only way to pick up a re-imported
+                # file was to restart. Update the entry (the file may have
+                # moved) and, if it is loaded and the file has since
+                # changed, offer to re-read it.
+                entry.sample_path = file_path
+                if (entry.source_hash is not None
+                        and entry.source_hash != compute_source_hash(file_path)):
+                    changed.append(sample_id)
                 continue
             self.current_project.samples[sample_id] = ProjectSampleEntry(sample_path=file_path)
             added_ids.append(sample_id)
 
+        # Before the early return below: a re-import normally adds nothing
+        # new, which is exactly the case this has to handle.
+        if changed:
+            self.reload_changed_samples(changed)
+
         if not added_ids:
-            self.status_manager.show_message("Selected sample(s) already in project.")
+            if not changed:
+                self.status_manager.show_message("Selected sample(s) already in project.")
             return []
 
         self._sync_app_data_from_project()
         self.mark_dirty('samples added')
         self.status_manager.show_message(f"Added {len(added_ids)} sample(s) to project.")
         return added_ids
+
+    def reload_changed_samples(self, sample_ids):
+        """Re-read samples whose file has changed since it was loaded.
+
+        Everything derived from the old data is discarded: filters, ROIs,
+        cluster labels, dimensional-reduction scores, calculated fields and
+        annotations. That is deliberate rather than conservative -- a
+        re-import can change the map's dimensions, so a stored pixel mask
+        or an annotation's coordinates may no longer mean what they did,
+        and any figure already made from the old data is wrong. Replaying
+        them would carry that error forward quietly.
+
+        The user is told what will be lost and can decline, in which case
+        the sample stays as it is in memory and the file on disk is simply
+        not read.
+
+        Parameters
+        ----------
+        sample_ids : list of str
+            Samples whose file no longer matches what was loaded.
+
+        Returns
+        -------
+        list of str
+            The samples actually reloaded.
+        """
+        if not sample_ids:
+            return []
+
+        listed = '\n'.join(f"  \u2022 {sample_id}" for sample_id in sorted(sample_ids))
+        response = QMessageBox.warning(
+            self.ui,
+            "Re-import changed data",
+            f"These samples have been re-imported and the data on disk has "
+            f"changed:\n\n{listed}\n\n"
+            "Loading the new data discards everything derived from the old "
+            "data for these samples \u2014 filters, regions of interest, "
+            "clusters, dimensional reduction, calculated fields and "
+            "annotations. Plots already made from the old data will be "
+            "wrong and should be remade.\n\n"
+            "Load the new data?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if response != QMessageBox.StandardButton.Yes:
+            self.status_manager.show_message("Kept the data already loaded.")
+            return []
+
+        reloaded = [sid for sid in sample_ids if self._discard_loaded_sample(sid)]
+        if reloaded:
+            # Re-reading happens lazily, on next selection -- except for the
+            # sample on screen, which has to be put back now.
+            if self.ui.app_data.sample_id in reloaded:
+                self.ui.change_sample()
+            self.mark_dirty('samples reloaded')
+            self.status_manager.show_message(f"Reloaded {len(reloaded)} sample(s).")
+        return reloaded
+
+    def _discard_loaded_sample(self, sample_id):
+        """Forget everything held in memory for `sample_id`.
+
+        The next time it is selected, `LameIO.initialize_sample_object`
+        reads it from disk again, because that is gated on the sample being
+        absent from ``ui.data``.
+
+        Returns
+        -------
+        bool
+            Whether the sample was loaded in the first place.
+        """
+        entry = self.current_project.samples.get(sample_id)
+        if entry is not None:
+            # A clean reload: the saved processing state describes data that
+            # no longer exists, and the calibration sidecar is re-read (and
+            # re-checked for staleness) along with the sample.
+            entry.processing = SampleProcessingState()
+            entry.calibration = None
+            entry.source_hash = None
+
+        was_loaded = sample_id in self.ui.data
+        self.ui.data.pop(sample_id, None)
+
+        # Cached figures were drawn from the old data.
+        registry = getattr(self.ui, 'plot_registry', None)
+        if registry is not None:
+            registry.remove_plots_for_sample(sample_id)
+
+        # The tree's field list belongs to the old data too, and
+        # `PlotTree.add_sample` leaves an existing branch alone.
+        tree = getattr(self.ui, 'plot_tree', None)
+        if tree is not None:
+            tree.remove_sample(sample_id)
+
+        return was_loaded
+
+    def remove_current_sample(self):
+        """Remove the sample on screen from the project, after confirming.
+
+        The File menu's "Remove Sample" action. Nothing is deleted from
+        disk -- the sample's own ``.lame.csv`` is the user's file and is
+        left where it is; this removes it from the *project*.
+
+        Returns
+        -------
+        bool
+            Whether a sample was removed.
+        """
+        sample_id = self.ui.app_data.sample_id
+        if self.current_project is None or not sample_id:
+            self.status_manager.show_message("No sample to remove.")
+            return False
+
+        response = QMessageBox.question(
+            self.ui,
+            "Remove Sample",
+            f"Remove sample '{sample_id}' from this project?\n\n"
+            "Everything derived from it is removed with it \u2014 filters, "
+            "regions of interest, clusters, dimensional reduction, "
+            "calculated fields, annotations, profiles, polygons and any "
+            "plots made from it.\n\n"
+            "The sample's data file is not deleted.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            # Default No: this is reached from a menu, where the click that
+            # opens it and the click that confirms it are a few pixels
+            # apart, and the action cannot be undone.
+            QMessageBox.StandardButton.No,
+        )
+        if response != QMessageBox.StandardButton.Yes:
+            return False
+
+        return self.remove_sample(sample_id)
+
+    def remove_sample(self, sample_id):
+        """Remove `sample_id` and everything derived from it, without asking.
+
+        The unconditional half of `remove_current_sample`, so a caller that
+        has already confirmed (or has no user to ask) can reuse it.
+
+        Parameters
+        ----------
+        sample_id : str
+
+        Returns
+        -------
+        bool
+            False if the project has no such sample.
+        """
+        if self.current_project is None or sample_id not in self.current_project.samples:
+            return False
+
+        # Drops the loaded SampleObj, its cached figures and its branch of
+        # the plot tree; the entry is deleted below, so the processing
+        # state it resets goes with it.
+        self._discard_loaded_sample(sample_id)
+        del self.current_project.samples[sample_id]
+
+        # Profiles and polygons are held per sample by their own managers,
+        # outside the SampleObj, so they have to be dropped separately --
+        # close_project clears them wholesale, which is too broad here.
+        if hasattr(self.ui, 'profile_dock'):
+            self.ui.profile_dock.profiling.profiles.pop(sample_id, None)
+        if hasattr(self.ui, 'mask_dock'):
+            polygons = self.ui.mask_dock.polygon_tab.polygon_manager
+            polygons.polygons.pop(sample_id, None)
+            polygons.loaded_samples.discard(sample_id)
+
+        remaining = list(self.current_project.samples)
+        # The removed sample is still the selection until something else is
+        # chosen; pick its neighbour, or clear out if it was the last one.
+        if self.ui.app_data.sample_id == sample_id:
+            self.ui.app_data.sample_id = remaining[0] if remaining else ''
+        self._sync_app_data_from_project()
+        self.ui.change_sample()
+
+        self.mark_dirty('sample removed')
+        self.status_manager.show_message(f"Removed sample: {sample_id}")
+        return True
 
     def locate_missing_sample(self, sample_id, new_path):
         """Update a project sample entry's path after the user relocates a
@@ -829,6 +1025,12 @@ class ProjectManager(QObject):
         ui = self.ui
         sample_ids = list(self.current_project.samples.keys())
         if not sample_ids:
+            # Reached when the last sample is removed, not only on a project
+            # that never had any -- leaving the old list in place would keep
+            # the removed sample in the sample selector.
+            ui.app_data.csv_files = []
+            if ui.app_data.sample_list:
+                ui.app_data.sample_list = []
             return
 
         first_path = self.current_project.samples[sample_ids[0]].sample_path

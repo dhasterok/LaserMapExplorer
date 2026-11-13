@@ -562,8 +562,7 @@ class ControlDock(CustomDockWidget):
             plot_clusters(self,data,self.ui.app_data,self.ui.style_data)
         # run dim red before changing plot_type if user selects dim red tab
         if tab_id == self.tab_dict['dim_red'] :
-            if self.ui.app_data.update_pca_flag or not data.processed.match_attribute('data_type','pca score'):
-                self.dimreduction.compute_dim_red(data, self.ui.app_data)
+            self.dimreduction.compute_dim_red_if_needed()
         # update the plot type comboBox options
         self.update_plot_type_combobox_options()
         self.ui.style_data.plot_type = self.field_control_settings[tab_id].plot_list[self.field_control_settings[tab_id].saved_index]

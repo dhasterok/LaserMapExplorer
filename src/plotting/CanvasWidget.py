@@ -260,6 +260,14 @@ class CanvasWidget(QWidget):
         # Clean up existing matplotlib toolbar first
         if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
             try:
+                # Same invariant as in clear_layout: the canvas this toolbar
+                # was built for must not be left pointing at a toolbar that
+                # has been closed, or its next draw() runs through a dead
+                # one. The old canvas often survives this call -- the plot
+                # registry caches it for when the user comes back to the plot.
+                detached_from = getattr(self.mpl_toolbar, 'canvas', None)
+                if getattr(detached_from, 'toolbar', None) is self.mpl_toolbar:
+                    detached_from.toolbar = None
                 self.mpl_toolbar.setParent(None)
                 self.mpl_toolbar.close()
                 del self.mpl_toolbar
@@ -516,8 +524,20 @@ class CanvasWidget(QWidget):
 
                     if hasattr(self, 'mpl_toolbar') and self.mpl_toolbar is not None:
                         try:
+                            detached_from = getattr(self.mpl_toolbar, 'canvas', None)
                             self.mpl_toolbar.setParent(None)  # remove from the Qt layout
                             self.mpl_toolbar.canvas = None
+                            # A toolbar and its canvas reference each other, and
+                            # matplotlib's draw() assumes it: FigureCanvasAgg.draw
+                            # takes the toolbar branch whenever `canvas.toolbar` is
+                            # set, and that branch calls `toolbar.canvas.set_cursor`.
+                            # Nulling only this side left any canvas still pointing
+                            # here -- a cached one kept by the registry above, say --
+                            # raising AttributeError on its next draw, inside a Qt
+                            # callback where nothing reports it. Clear the other side
+                            # too, so draw() takes its nullcontext branch instead.
+                            if getattr(detached_from, 'toolbar', None) is self.mpl_toolbar:
+                                detached_from.toolbar = None
                         except RuntimeError:
                             # underlying Qt object already deleted (e.g. by a prior update_canvas cleanup)
                             pass
